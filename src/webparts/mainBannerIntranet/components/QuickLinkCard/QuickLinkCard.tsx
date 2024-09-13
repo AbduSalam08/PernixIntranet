@@ -1,19 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from "react";
+import { useState } from "react";
 import styles from "./QuickLinkCard.module.scss";
 
 const QuickLinkCard = (value: any): JSX.Element => {
-  console.log("value: ", value);
-  console.log(value?.idx / 2 === 0);
+  const [hover, setHover] = useState(false); // State to track hover status
+  const isOddCard: boolean = (value?.idx + 1) % 2 === 1;
+
   return (
-    <div className={styles.quickLinkCard} key={value?.idx}>
-      <img src={value?.item?.img} alt={value?.item?.text} />
+    <div
+      className={`${styles.quickLinkCard} ${
+        isOddCard ? styles.quickLinkCardGreen : styles.quickLinkCardOrange
+      }`}
+      key={value?.idx}
+      onMouseEnter={() => setHover(true)} // Set hover state to true on mouse enter
+      onMouseLeave={() => setHover(false)} // Set hover state to false on mouse leave
+    >
+      <img
+        src={hover ? value?.item?.hoverImg : value?.item?.img}
+        alt={value?.item?.text}
+      />
       <span
         style={{
-          color:
-            (value?.idx + 1) % 2 === 1
-              ? "var(--primary-pernix-green)"
-              : "var(--primary-orange)",
+          color: isOddCard
+            ? "var(--primary-pernix-green)"
+            : "var(--primary-orange)",
         }}
       >
         {value?.item?.text}
