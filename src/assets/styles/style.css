@@ -35,7 +35,12 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
 #sp-appBar {
   display: none !important;
 }
-
+.fui-DialogSurface__backdrop {
+  display: none !important;
+}
+.fui-DialogSurface {
+  display: none !important;
+}
 /* reset width in deloyment */
 .CanvasComponent .CanvasZone {
   max-width: 100% !important;

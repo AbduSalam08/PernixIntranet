@@ -2,19 +2,30 @@
   width: 100%;
   height: calc(100% - 20px);
   min-height: 550px;
-  padding: 75px 0 0 65px;
+  padding: 75px 20px 0 20px; // Adjusted padding for better responsiveness
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   flex-direction: column;
   position: relative;
   background-color: #f0f0f0;
+
+  @media (max-width: 768px) {
+    padding: 50px 10px 0;
+    min-height: 450px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 30px 5px 0;
+    min-height: 350px;
+  }
 }
+
 .imgWrapper {
   position: absolute;
   width: 100%;
-  top: 0%;
-  left: 0%;
+  top: 0;
+  left: 0;
   height: calc(100% - 60px);
   display: flex;
   align-items: flex-start;
@@ -23,7 +34,12 @@
   background: url("../../../assets/images/svg/PernixBannerImage.svg") no-repeat;
   background-size: cover;
   background-position: center;
+
+  @media (max-width: 768px) {
+    background-position: top center;
+  }
 }
+
 .welcomeText {
   display: flex;
   align-items: flex-start;
@@ -36,23 +52,70 @@
   width: 65%;
   max-width: 750px;
   z-index: 2;
+  margin-left: 55px;
+
   h1 {
     font-size: 30px;
     font-family: "osBold", sans-serif;
     color: var(--white);
     border-bottom: 3px solid var(--primary-orange);
   }
+
   p {
     font-size: 20px;
     font-family: "osMedium", sans-serif;
     color: var(--white);
   }
+
+  @media (max-width: 768px) {
+    width: 85%;
+    margin-left: 0;
+
+    h1 {
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 95%;
+    margin-left: 0;
+
+    h1 {
+      font-size: 20px;
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
 }
+
 .quickLinks {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 35px;
+  gap: 20px;
+  flex-wrap: nowrap; // Prevents wrapping to ensure horizontal scrolling
   z-index: 2;
+  overflow-x: auto; // Enables horizontal scrolling when content overflows
+  padding: 10px 0;
+  max-width: calc(100vw - 10px);
+
+  @media (max-width: 768px) {
+    gap: 15px;
+    justify-content: flex-start;
+    scroll-behavior: smooth; // Adds smooth scrolling for a better experience
+  }
+
+  @media (max-width: 480px) {
+    gap: 10px;
+    justify-content: flex-start;
+    scroll-behavior: smooth;
+    padding: 10px 0; // Add padding to the scroll area
+  }
 }

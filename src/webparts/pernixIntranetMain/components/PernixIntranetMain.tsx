@@ -2,7 +2,6 @@ import * as React from "react";
 import styles from "./PernixIntranetMain.module.scss";
 import type { IPernixIntranetMainProps } from "./IPernixIntranetMainProps";
 import { escape } from "@microsoft/sp-lodash-subset";
-
 export default class PernixIntranetMain extends React.Component<
   IPernixIntranetMainProps,
   {}
