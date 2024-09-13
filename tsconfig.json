@@ -1,11 +1,12 @@
 {
   "extends": "./node_modules/@microsoft/rush-stack-compiler-4.7/includes/tsconfig-web.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
@@ -14,22 +15,19 @@
     "inlineSources": false,
     "noImplicitAny": true,
 
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@microsoft"
-    ],
-    "types": [
-      "webpack-env"
-    ],
+    "typeRoots": ["./node_modules/@types", "./node_modules/@microsoft"],
+    "types": ["webpack-env"],
     "lib": [
       "es5",
       "dom",
+      "ES2021",
       "es2015.collection",
-      "es2015.promise"
+      "es2015.promise",
+      "es2017.object",
+      "ES2016",
+      "ES2019",
+      "es6"
     ]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/components", "custom.d.ts"]
 }
