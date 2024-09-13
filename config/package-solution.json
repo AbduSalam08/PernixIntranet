@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "pernix-intranet-client-side-solution",
+    "id": "c7cfda49-2e8b-4404-85bd-6e1ce44b6e06",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "pernix-intranet description"
+      },
+      "longDescription": {
+        "default": "pernix-intranet description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "pernix-intranet Feature",
+        "description": "The feature that activates elements of the pernix-intranet solution.",
+        "id": "a1f8906f-b773-4c88-aba6-7475525d776d",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/pernix-intranet.sppkg"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "pernix-intranet-main-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pernixIntranetMain/PernixIntranetMainWebPart.js",
+          "manifest": "./src/webparts/pernixIntranetMain/PernixIntranetMainWebPart.manifest.json"
+        }
+      ]
+    },
+    "news-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newsIntranet/NewsIntranetWebPart.js",
+          "manifest": "./src/webparts/newsIntranet/NewsIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "calendar-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/calendarIntranet/CalendarIntranetWebPart.js",
+          "manifest": "./src/webparts/calendarIntranet/CalendarIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "document-repository-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentRepositoryIntranet/DocumentRepositoryIntranetWebPart.js",
+          "manifest": "./src/webparts/documentRepositoryIntranet/DocumentRepositoryIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "shout-outs-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/shoutOutsIntranet/ShoutOutsIntranetWebPart.js",
+          "manifest": "./src/webparts/shoutOutsIntranet/ShoutOutsIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "questions-ceo-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/questionsCeoIntranet/QuestionsCeoIntranetWebPart.js",
+          "manifest": "./src/webparts/questionsCeoIntranet/QuestionsCeoIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "poll-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pollIntranet/PollIntranetWebPart.js",
+          "manifest": "./src/webparts/pollIntranet/PollIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "new-hires-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newHiresIntranet/NewHiresIntranetWebPart.js",
+          "manifest": "./src/webparts/newHiresIntranet/NewHiresIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "feed-back-form-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/feedBackFormIntranet/FeedBackFormIntranetWebPart.js",
+          "manifest": "./src/webparts/feedBackFormIntranet/FeedBackFormIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "birthday-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/birthdayIntranet/BirthdayIntranetWebPart.js",
+          "manifest": "./src/webparts/birthdayIntranet/BirthdayIntranetWebPart.manifest.json"
+        }
+      ]
+    },
+    "main-banner-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/mainBannerIntranet/MainBannerIntranetWebPart.js",
+          "manifest": "./src/webparts/mainBannerIntranet/MainBannerIntranetWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "PernixIntranetMainWebPartStrings": "lib/webparts/pernixIntranetMain/loc/{locale}.js",
+    "NewsIntranetWebPartStrings": "lib/webparts/newsIntranet/loc/{locale}.js",
+    "CalendarIntranetWebPartStrings": "lib/webparts/calendarIntranet/loc/{locale}.js",
+    "DocumentRepositoryIntranetWebPartStrings": "lib/webparts/documentRepositoryIntranet/loc/{locale}.js",
+    "ShoutOutsIntranetWebPartStrings": "lib/webparts/shoutOutsIntranet/loc/{locale}.js",
+    "QuestionsCeoIntranetWebPartStrings": "lib/webparts/questionsCeoIntranet/loc/{locale}.js",
+    "PollIntranetWebPartStrings": "lib/webparts/pollIntranet/loc/{locale}.js",
+    "NewHiresIntranetWebPartStrings": "lib/webparts/newHiresIntranet/loc/{locale}.js",
+    "FeedBackFormIntranetWebPartStrings": "lib/webparts/feedBackFormIntranet/loc/{locale}.js",
+    "BirthdayIntranetWebPartStrings": "lib/webparts/birthdayIntranet/loc/{locale}.js",
+    "MainBannerIntranetWebPartStrings": "lib/webparts/mainBannerIntranet/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+  }
+}
