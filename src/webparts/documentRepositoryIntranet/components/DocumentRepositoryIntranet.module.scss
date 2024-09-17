@@ -1,34 +1,51 @@
-@import '~@fluentui/react/dist/sass/References.scss';
-
-.documentRepositoryIntranet {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
-  }
-}
-
-.welcome {
-  text-align: center;
-}
-
-.welcomeImage {
+.docRepoContainer {
   width: 100%;
-  max-width: 420px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  box-shadow: 0px -1px 4px #b6b6b650;
+  padding: 25px;
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
-
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
+.folderCard {
+  // border: 1px solid #eee;
+  cursor: pointer;
+  box-shadow: 0px 0px 4px #b6b6b650;
+  width: 160px;
+  height: 125px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 6px;
+  padding: 10px;
+  transition: all 0.2s;
+  &:hover {
+    background-color: #eeeeee80;
+    transition: all 0.2s;
+    box-shadow: 0px 0px 1px #b6b6b650;
   }
+  img {
+    width: 60px;
+    height: 60px;
+  }
+  span {
+    text-align: center;
+    font-family: "osRegular", sans-serif;
+    font-size: 14px;
+    line-height: 18px;
+  }
+}
+.docCarousel {
+  width: 100%;
+  padding: 15px 0;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  // display: flex;
+  // align-items: center;
+  // justify-content: flex-start;
+  // gap: 20px;
 }

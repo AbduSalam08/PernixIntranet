@@ -1,0 +1,209 @@
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contentWrapper {
+  padding: 0px 45px;
+  @extend .flexCenter;
+  flex-direction: column;
+  gap: 20px;
+}
+.popupWrapper {
+  border-radius: 10px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 45px rgba(0, 0, 0, 15%) !important;
+}
+.popupHeader,
+.AlertPopupHeader,
+.popupHeaderWithoutCloseIcon {
+  @extend .flexCenter;
+  width: 100%;
+  margin: 28px 36px;
+  margin-bottom: 25px;
+  font-family: "interSemiBold", sans-serif;
+  font-size: 20px;
+}
+.popupHeaderWithoutCloseIcon {
+  margin: 28px 0px;
+}
+.popupFooter,
+.popupFooterConfirmation,
+.AlertPopupFooter {
+  @extend .flexCenter;
+  width: 100%;
+  // margin: 25px 0;
+  gap: 20px;
+  // margin-top: 15px;
+}
+.popupFooterConfirmation {
+  margin: 10px 0;
+  margin-bottom: 20px;
+}
+.contentContainer {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 6px;
+  // overflow-y: auto;
+  // max-height: 66vh;
+}
+.promoteContentContainer {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 6px;
+  // overflow-y: auto;
+  // max-height: 60vh;
+}
+
+// alertpopup styles
+.AlertPopupWrapper {
+  @extend .flexCenter;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px;
+  background-color: #f7f7f7;
+}
+.AlertPopupHeader {
+  margin: 0 0;
+  @extend .flexCenter;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 20px;
+  font-family: "osSemibold", sans-serif;
+  color: var(--primary-pernix-green);
+  border-bottom: 2px solid var(--primary-pernix-green);
+  width: auto;
+  padding-bottom: 10px;
+}
+.AlertPopupFooter {
+  margin: 0;
+}
+
+.messageWrapper {
+  animation: slideAndFade 0.3s both ease;
+  @extend .flexCenter;
+  padding: 20px;
+  gap: 20px;
+  flex-direction: column;
+  .messageFooter {
+    @extend .flexCenter;
+    flex-direction: column;
+    gap: 5px;
+    .errorText {
+      // font-size: 16px;
+      // font-family: "osMedium", sans-serif;
+      // color: #900101;
+      // background-color: #ff000020;
+      // padding: 10px;
+      // border-radius: 5px;
+      // border-left: 2px solid #900101;
+      // border-right: 2px solid #900101;
+      @extend .flexCenter;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+      text-align: center;
+      p {
+        font-size: 18px;
+        color: #900101;
+        font-family: "osSemiBold", sans-serif;
+        line-height: 24px;
+      }
+      span {
+        font-size: 13px;
+        font-family: "osMedium", sans-serif;
+        color: #555;
+        background-color: #adadad20;
+        padding: 5px 10px;
+        border-radius: 4px;
+        line-height: 18px;
+      }
+    }
+    .successText {
+      // font-size: 16px;
+      // font-family: "osMedium", sans-serif;
+      // color: var(--primary-pernix-green);
+      // background-color: #2d4b5120;
+      // padding: 10px;
+      // border-radius: 5px;
+      @extend .flexCenter;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+      text-align: center;
+      p {
+        font-size: 18px;
+        color: var(--primary-pernix-green);
+        font-family: "osSemiBold", sans-serif;
+        line-height: 24px;
+      }
+      span {
+        font-size: 13px;
+        font-family: "osMedium", sans-serif;
+        color: #555;
+        line-height: 18px;
+        background-color: #adadad20;
+        padding: 5px 10px;
+        border-radius: 4px;
+      }
+      // border-left: 2px solid var(--primary-pernix-green);
+      // border-right: 2px solid var(--primary-pernix-green);
+    }
+  }
+  .msgfooterActions {
+    @extend .flexCenter;
+    gap: 10px;
+  }
+}
+.StatusImgWrapper {
+  width: 86px;
+  height: 86px;
+}
+@keyframes slideAndFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.alertBoxContent {
+  @extend .flexCenter;
+  flex-direction: column;
+  gap: 20px;
+}
+.AlertPopupSecondaryText {
+  font-size: 14px;
+  color: #555555ac;
+  line-height: 20px;
+  text-align: center;
+  font-family: "interMedium", sans-serif !important;
+}
+.confirmTitleText {
+  font-size: 18px;
+  font-family: "interMedium", sans-serif !important;
+  color: #000;
+  margin: 10px 0;
+  line-height: 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+.loaderElement {
+  animation: slideAndFade 0.3s both ease;
+  min-height: 100px;
+  @extend .flexCenter;
+  gap: 15px;
+  .loaderText {
+    font-size: 14px;
+    color: #adadad;
+  }
+}

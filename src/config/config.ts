@@ -16,6 +16,8 @@ const LISTNAMES = {
 
 const LIBNAMES = {};
 
-const GROUPS = {};
+const GROUPS = {
+  PERNIX_ADMIN: "PERNIX_ADMIN",
+};
 
 export { CONFIG, LISTNAMES, LIBNAMES, GROUPS };

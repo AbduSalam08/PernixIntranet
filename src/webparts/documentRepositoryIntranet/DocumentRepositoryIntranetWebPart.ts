@@ -12,6 +12,9 @@ import * as strings from "DocumentRepositoryIntranetWebPartStrings";
 import DocumentRepositoryIntranet from "./components/DocumentRepositoryIntranet";
 import { IDocumentRepositoryIntranetProps } from "./components/IDocumentRepositoryIntranetProps";
 
+require("../../assets/styles/style.css");
+require("./assets/styles/style.css");
+
 export interface IDocumentRepositoryIntranetWebPartProps {
   description: string;
 }

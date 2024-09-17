@@ -1,8 +1,19 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import styles from "./MainBannerIntranet.module.scss";
 import QuickLinkCard from "./QuickLinkCard/QuickLinkCard";
+import { getDailyQuote } from "../../../services/mainBannerIntranet/mainBannerIntranet";
+import { useDispatch, useSelector } from "react-redux";
+import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+import { RoleAuth } from "../../../services/CommonServices";
+import {
+  setBannerImage,
+  setMotivationalQuotesData,
+} from "../../../redux/features/MotivationalQuotesSlice";
+import { Skeleton } from "primereact/skeleton"; // Import PrimeReact Skeleton
 // hover images - default
 const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
 const EmployeeDirectory = require("../../../assets/images/svg/quickLinks/exployeeDirectory.svg");
@@ -17,8 +28,26 @@ const HelpDeskWhite = require("../../../assets/images/svg/quickLinks/helpdeskWhi
 const PTOWhite = require("../../../assets/images/svg/quickLinks/ptoWhite.svg");
 const ApprovalsWhite = require("../../../assets/images/svg/quickLinks/approvalsWhite.svg");
 const ProjectTemplateWhite = require("../../../assets/images/svg/quickLinks/projectTemplateWhite.svg");
+const PernixBannerImage = require("../assets/PernixBannerImage.svg");
 
-const MainBannerIntranet = (): JSX.Element => {
+const MainBannerIntranet = (props: any): JSX.Element => {
+  console.log("props: ", props);
+
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  const MainContext: any = useSelector(
+    (state: any) => state?.MainSPContext?.value
+  );
+  console.log("MainContext: ", MainContext);
+  const currentUserDetails: any = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
+  );
+  const QuotesData: any = useSelector(
+    (state: any) => state?.MotivationalQuotes
+  );
+
+  const dispatch = useDispatch();
+
   const quickLinks = [
     {
       img: OrganizationalChart,
@@ -52,21 +81,77 @@ const MainBannerIntranet = (): JSX.Element => {
     },
   ];
 
+  useEffect(() => {
+    dispatch(setMainSPContext(props?.context));
+    getDailyQuote().then((value: any) => {
+      console.log("value: ", value);
+      dispatch(setMotivationalQuotesData(value?.quotesData));
+      dispatch(setBannerImage(value?.bannerImage));
+      setLoading(false); // Set loading to false once data is retrieved
+    });
+    RoleAuth(props?.context?._pageContext?._user, dispatch);
+  }, [dispatch, props?.context]);
+
   return (
-    <div className={styles.container}>
-      <div className={styles.imgWrapper} />
+    <div
+      className={styles.container}
+      style={{
+        backgroundColor: loading ? "#fff" : "var(--body-bgcolor)",
+      }}
+    >
+      {loading ? (
+        <Skeleton
+          shape="rectangle"
+          className={styles.imgWrapperSkeleton}
+          width="calc(100% - 120px)"
+          height="calc(100% - 60px)"
+        />
+      ) : (
+        <img
+          className={styles.imgWrapper}
+          src={
+            QuotesData?.bannerImage ? QuotesData.bannerImage : PernixBannerImage
+          }
+          alt="Banner"
+          style={{
+            objectFit: "cover",
+            width: "100%",
+          }}
+        />
+      )}
+
       <div className={styles.welcomeText}>
-        <h1>Welcome Emily !</h1>
-        <p>
-          Don't judge each day by the harvest you reap but by the seeds that you
-          plant.
-        </p>
+        {loading ? (
+          <>
+            <Skeleton width="50%" height="2rem" />
+            <Skeleton width="70%" height="1.5rem" />
+          </>
+        ) : (
+          <>
+            <h1>Welcome {currentUserDetails?.userName} !</h1>
+            <p>{QuotesData?.value?.Quote}</p>
+          </>
+        )}
       </div>
 
-      <div className={styles.quickLinks}>
-        {quickLinks?.map((item: any, idx: number) => (
-          <QuickLinkCard item={item} idx={idx} key={idx} />
-        ))}
+      <div className={loading ? styles.quickLinksLoading : styles.quickLinks}>
+        {loading
+          ? Array(6)
+              .fill(null)
+              .map((_, idx) => (
+                <Skeleton
+                  key={idx}
+                  shape="rectangle"
+                  height="100px"
+                  width="160px"
+                  style={{
+                    backgroundColor: "#00000070",
+                  }}
+                />
+              ))
+          : quickLinks?.map((item: any, idx: number) => (
+              <QuickLinkCard item={item} idx={idx} key={idx} />
+            ))}
       </div>
     </div>
   );

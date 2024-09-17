@@ -1,0 +1,24 @@
+.p-carousel-items-content {
+  padding: 10px !important;
+}
+/* .p-carousel-items-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+} */
+.p-carousel-indicators {
+  margin-top: 10px;
+}
+.p-carousel-indicator {
+  margin: 0 2px;
+}
+.p-carousel .p-carousel-indicators .p-carousel-indicator button {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background: #adadad60;
+}
+.p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
+  background: var(--primary-pernix-green);
+}

@@ -1,12 +1,12 @@
 /* webpart styles reset  */
 /* webpart styles reset  */
-.ms-CommandBarItem-link {
+/* .ms-CommandBarItem-link {
   position: absolute;
   top: 500px;
   left: 6px;
   transform: translate(-53px, 100px);
   z-index: 9999;
-}
+} */
 .CanvasComponent.LCS .CanvasZone:not(.CanvasZone--fullWidth) .ControlZone {
   padding: 0 !important;
 }
@@ -32,9 +32,12 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
   margin: 0 !important;
   margin-top: 33px !important;
 }
-#sp-appBar {
-  display: none !important;
+.CanvasZone-SectionContainer {
+  background-color: var(--body-bgcolor) !important;
 }
+/* #sp-appBar {
+  display: none !important;
+} */
 .fui-DialogSurface__backdrop {
   display: none !important;
 }
@@ -47,7 +50,7 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
   padding: 0px !important;
 }
 
-#spCommandBar {
+/* #spCommandBar {
   display: none !important;
 }
 
@@ -57,7 +60,7 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
 
 #spSiteHeader {
   display: none !important;
-}
+} */
 
 #workbenchPageContent {
   width: 100% !important;

@@ -16,7 +16,7 @@ const MainSPContext = createSlice({
   initialState: mainData,
   reducers: {
     setMainSPContext: (state, action) => {
-      state.value = action.payload;
+      state.value = action?.payload;
     },
     setCurrentUserDetails: (state, payload) => {
       state.currentUserDetails = payload.payload;

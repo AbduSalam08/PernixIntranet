@@ -1,0 +1,128 @@
+// DefaultButton
+.DefaultButtonWrapper {
+  padding: 6px 24px !important;
+  border-radius: 4px !important;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  height: 34px !important;
+  font-size: 15px !important;
+  font-family: "interMedium", sans-serif !important;
+}
+.primaryGreen {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--primary-pernix-green) !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.secondary {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--btn-secondary-violet-bg) !important;
+  border-radius: 4px !important;
+  color: var(--btn-blue-text) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.lightGreyVariant {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--a4-grey30) !important;
+  border-radius: 4px !important;
+  color: var(--bg-ash) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+  border: 1px solid #a4a4a430 !important;
+}
+.darkGreyVariant {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--a4-grey) !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.greyOutlined {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--primary-violet) !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.primaryDarkGreen {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--primaryDark-green) !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.secondaryRed {
+  @extend .DefaultButtonWrapper;
+  background-color: #bb3a3a35 !important;
+  border-radius: 4px !important;
+  color: #640303 !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.primaryRed {
+  @extend .DefaultButtonWrapper;
+  background-color: red !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.primaryBlue {
+  @extend .DefaultButtonWrapper;
+  background-color: #1068a8 !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.secondaryGreen {
+  @extend .DefaultButtonWrapper;
+  background-color: #2d4b5130 !important;
+  border-radius: 4px !important;
+  color: var(--primary-pernix-green) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.actionBtn {
+  background-color: transparent !important;
+  border-radius: 4px;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer;
+  img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain !important;
+    padding: 0 !important;
+    margin: 0 !important
+   ;
+  }
+}
+.disabledBtn {
+  // @extend .DefaultButtonWrapper;
+  opacity: 0.6 !important;
+}
+.onlyIconBtn {
+  min-width: 0px !important;
+  padding: 5px 8px !important;
+}
