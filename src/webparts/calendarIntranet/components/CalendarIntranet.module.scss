@@ -1,34 +1,74 @@
-@import '~@fluentui/react/dist/sass/References.scss';
-
-.calendarIntranet {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
+.calenderContainer {
+  .header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+    img {
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+    }
   }
-}
 
-.welcome {
-  text-align: center;
-}
+  .container {
+    display: flex;
+    // flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
 
-.welcomeImage {
-  width: 100%;
-  max-width: 420px;
-}
+    .calenderSection {
+      width: 50%;
+      .mycalender {
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px !important;
+      }
+    }
+    .eventSection {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+      padding: 10px 5px;
+      border-right: 4px solid #0b4d53;
+      border-radius: 4px;
+      margin-bottom: 16px;
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+      .date {
+        width: 78px;
+        border-right: 2px solid #ffeee2;
+        text-align: center;
+        p {
+          margin: 0;
+          font-size: 17px;
+          font-weight: 600;
+          color: #e0803d;
+        }
+      }
+      .event {
+        width: calc(100% - 78px);
+        p {
+          margin: 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: #0b4d53;
+        }
+      }
+    }
+  }
 
-    &:hover {
+  .footer {
+    display: flex;
+    justify-content: end;
+    margin: 20px 0px 10px 0px;
+    p {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 1px;
+      font-weight: 500;
+      color: #e0803d;
       text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
+      text-decoration-color: #e0803d;
     }
   }
 }
