@@ -12,6 +12,7 @@ import * as strings from "NewsIntranetWebPartStrings";
 import NewsIntranet from "./components/NewsIntranet";
 import { INewsIntranetProps } from "./components/INewsIntranetProps";
 require("../../assets/styles/style.css");
+require("../../components/common/CustomInputFields/customStyle.css");
 
 export interface INewsIntranetWebPartProps {
   description: string;

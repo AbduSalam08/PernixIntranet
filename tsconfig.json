@@ -29,5 +29,12 @@
       "es6"
     ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/components", "custom.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/components",
+    "custom.d.ts"
+  ]
 }

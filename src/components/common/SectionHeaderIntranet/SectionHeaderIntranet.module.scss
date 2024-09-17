@@ -1,0 +1,24 @@
+.sectionHeaderWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  p {
+    padding-left: 10px;
+    font-size: 18px;
+    // border-left: 2px solid var(--primary-orange);
+    font-family: "osSemiBold", sans-serif;
+    color: var(--primary-pernix-green);
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      height: 30px;
+      width: 3px;
+      background-color: var(--primary-orange);
+    }
+  }
+}

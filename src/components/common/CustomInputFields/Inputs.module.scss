@@ -1,0 +1,349 @@
+.inputMainWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.flexColStart {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 1px;
+}
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.p_pickerInputWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.p_pickerInputWrapper > div:first-child {
+  width: 100%;
+}
+
+.inputWrapperWithLabel,
+.p_pickerInputWrapperWithLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  width: 100%;
+  font-family: "interRegular", sans-serif;
+  .inputLabel {
+    font-size: 16px;
+    width: 100%;
+    font-family: "interMedium", sans-serif;
+    color: #414141;
+  }
+}
+
+.inputLabel {
+  font-size: 16px;
+  width: 100%;
+  font-family: "interMedium", sans-serif;
+  color: #414141;
+}
+
+.sendBtn {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 50%;
+  background-color: #fff;
+  // margin-right: 10px;
+  img {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.input {
+  border: 1px solid #adadad50 !important;
+  border-radius: 4px !important;
+  padding: 0 10px !important;
+  outline: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #fff;
+  min-width: 265px;
+  width: 100%;
+
+  input {
+    font-size: 14px;
+    font-family: "interMedium", sans-serif !important;
+    border: 0;
+    outline: 0;
+    height: 100%;
+    width: 100%;
+    padding-left: 10px;
+    color: #414141 !important;
+  }
+
+  span {
+    // position: relative !important;
+    top: 10px !important;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    color: #8e8e8e !important;
+  }
+}
+
+.customInputXL {
+  @extend .input;
+  height: 43px;
+  width: 100%;
+}
+
+.customInputMD {
+  @extend .input;
+  height: 34px;
+  width: 100%;
+  font-size: 14px;
+}
+
+.customInputSM {
+  @extend .input;
+  height: 30px;
+  width: 100%;
+  font-size: 14px;
+}
+
+// dropdown input
+.dropdowninput {
+  border: 1px solid #adadad50 !important;
+  border-radius: 4px !important;
+  color: #414141 !important;
+  // padding: 0 10px !important;
+  font-size: 16px !important;
+  outline: 0 !important;
+  background-color: #fff;
+}
+
+.treeSelect {
+  min-width: 265px;
+  width: 100%;
+  // max-width: 276px;
+  border: 1px solid var(--ad-grey-50);
+}
+
+.customDropDownInputXL {
+  @extend .dropdowninput;
+  height: 43px !important;
+}
+
+.customDropDownInputMD {
+  @extend .dropdowninput;
+  height: 34px !important;
+  font-size: 14px !important;
+}
+
+.customDropDownInputSM {
+  @extend .dropdowninput;
+  height: 30px !important;
+  font-size: 14px !important;
+}
+
+.placeHolder {
+  color: #8e8e8e !important;
+  font-family: "interMedium", sans-serif !important;
+}
+
+.errorMsg {
+  margin-top: 5px;
+  // margin-bottom: 16px;
+  color: red;
+  font-family: "osMedium", sans-serif;
+  font-size: 13px;
+  text-align: left;
+  // text-transform: lowercase;
+  animation: slideAndFade 0.17s both ease !important;
+}
+
+.emptyMsg {
+  padding: 13px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: red;
+  font-family: "interMedium", sans-serif;
+  font-size: 14px;
+  text-align: left;
+  // text-transform: lowercase;
+  animation: slideAndFade 0.17s both ease !important;
+}
+
+.errorInput {
+  border: 1px solid #ff8585 !important;
+}
+
+@keyframes slideAndFade {
+  0% {
+    opacity: 0;
+    margin-top: -10px;
+    /* Start off-screen */
+  }
+
+  100% {
+    opacity: 1;
+    margin-top: 5px;
+    /* Slide down */
+  }
+}
+
+.disabledInput {
+  opacity: 0.6 !important;
+}
+
+.pathSearchFilter {
+  margin: 10px !important;
+}
+
+.mandatoryField::after {
+  content: "*";
+  color: red;
+  margin-left: 5px;
+}
+
+// .readOnly {
+//   // border: none !important;
+// }
+
+.noBorderInput {
+  border: none !important;
+}
+.hideErrMSg {
+  display: none !important;
+}
+
+// mutiple persona style
+
+.personaSection {
+  position: relative;
+  display: flex;
+  // gap: 10px;
+  align-items: center;
+}
+// date picker styles
+.d_input_container {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.diabledField {
+  opacity: 0.6 !important;
+}
+
+.d_datepicker_wrapper {
+  width: 200px;
+  // border: 0.13rem solid #97979770;
+  background-color: transparent;
+  border-radius: 3px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  height: 30px;
+  // border-radius: 0.6rem;
+}
+
+.d_datepicker {
+  width: 100%;
+  // border: 0.13rem solid #97979770;
+  background-color: transparent;
+  border-radius: 3px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  border-radius: 4px;
+  height: 30px !important;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  height: 30px !important;
+  // margin-bottom: 1rem;
+}
+
+.disabledField {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.datepickerWrapper {
+  position: relative;
+}
+
+.datepicker {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.error {
+  border-color: red;
+}
+
+.errorMessage {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+.topinputMainWrapper {
+  margin-bottom: 10px;
+  .topLabel {
+    flex-direction: column;
+    gap: 10px;
+
+    p {
+      font-family: "interRegular", sans-serif !important;
+      font-size: 14px;
+    }
+    input {
+      font-family: "interRegular", sans-serif !important;
+      font-size: 12px;
+    }
+  }
+}
+.secWidth {
+  width: 306px;
+}
+
+.peoplePickerButton {
+  cursor: pointer;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  img {
+    width: 17.5px;
+    height: 17.5px;
+  }
+}
+
+.flotingLabel {
+  font-size: 16px;
+  color: #a4a4a4;
+  font-family: "osRegular", sans-serif;
+  margin-top: -8px;
+  margin-left: 5px;
+}

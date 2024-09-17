@@ -1,20 +1,143 @@
+// .newsCard {
+//   width: 100%;
+//   display: flex;
+//   align-items: stretch;
+//   justify-content: space-between;
+//   gap: 16px;
+//   padding: 5px;
+//   background-color: #fff;
+//   border-radius: 8px;
+//   //   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+//   transition: all 0.1s;
+//   cursor: pointer;
+
+//   &:hover {
+//     background-color: #eeeeee50;
+//     // transform: scale(1.005);
+//     transition: all 0.1s;
+//     font-family: "osRegular", sans-serif !important;
+//   }
+// }
+
+// .newsThumbNail {
+//   min-width: 234px;
+//   max-width: 234px;
+//   height: 105px;
+//   border-radius: 6px;
+//   object-fit: cover;
+// }
+
+// .rhsTexts {
+//   flex: 1;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 8px;
+//   // padding: 10px 0;
+//   padding-bottom: 0;
+//   h2 {
+//     font-size: 16px;
+//     font-weight: 600;
+//     margin: 0;
+//     color: #333;
+//     font-family: "osSemiBold", sans-serif;
+//     line-height: 20px;
+//     color: #0b4d53;
+//   }
+
+//   span {
+//     // font-size: 14px;
+//     // font-family: "osRegular", sans-serif !important;
+//     // color: #4b4b4b;
+//     // line-height: 18px;
+//     // font-size: 14px;
+//     font-family: osRegular, sans-serif !important;
+//     color: #4b4b4b;
+//     line-height: 18px;
+//     height: 54px; /* Line-height (18px) * 3 for 3 lines */
+//     overflow: hidden;
+//     // max-width: 324px;
+//     text-overflow: ellipsis;
+//     word-break: break-word;
+//     display: -webkit-box;
+//     -webkit-box-orient: vertical;
+//     line-clamp: 3;
+//     -webkit-line-clamp: 3;
+//     white-space: normal; /* Allow text to wrap */
+//   }
+// }
+
+// .rhsActions {
+//   display: flex;
+//   flex-direction: column;
+//   align-items: flex-end;
+//   gap: 10px;
+// }
+
+// .pill {
+//   padding: 4px 8px;
+//   border-radius: 12px;
+//   background-color: #e0e0e0;
+//   font-size: 12px;
+//   color: #333;
+//   text-transform: uppercase;
+// }
+
+// .actionBtns {
+//   display: flex;
+//   gap: 8px;
+
+//   button {
+//     padding: 6px 12px;
+//     border: none;
+//     border-radius: 4px;
+//     background-color: #007bff;
+//     color: #fff;
+//     cursor: pointer;
+//     transition: background-color 0.2s;
+
+//     &:hover {
+//       background-color: #0056b3;
+//     }
+
+//     &:first-of-type {
+//       background-color: #28a745;
+
+//       &:hover {
+//         background-color: #218838;
+//       }
+//     }
+
+//     &:last-of-type {
+//       background-color: #dc3545;
+
+//       &:hover {
+//         background-color: #c82333;
+//       }
+//     }
+//   }
+// }
+
 .newsCard {
   width: 100%;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px;
+  padding: 5px;
   background-color: #fff;
   border-radius: 8px;
-  //   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: all 0.1s;
   cursor: pointer;
 
   &:hover {
     background-color: #eeeeee50;
-    transform: scale(0.995);
-    // box-shadow: 0 0px 4px rgba(0, 0, 0, 0.08);
+    transition: all 0.1s;
+  }
+
+  // Column layout for screens less than 400px
+  @media (max-width: 630px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -24,6 +147,15 @@
   height: 105px;
   border-radius: 6px;
   object-fit: cover;
+
+  // Full width for small screens
+  @media (max-width: 630px) {
+    width: 100%;
+    height: auto;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: 100px;
+  }
 }
 
 .rhsTexts {
@@ -31,20 +163,39 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-bottom: 0;
 
   h2 {
     font-size: 16px;
     font-weight: 600;
     margin: 0;
-    color: #333;
-    font-family: "osSemiBold", sans-serif;
     color: #0b4d53;
+    line-height: 20px;
+
+    @media (max-width: 700px) {
+      font-size: 14px;
+    }
   }
 
   span {
-    font-size: 14px;
-    font-family: "osSemiBold", sans-serif;
+    font-family: osRegular, sans-serif !important;
     color: #4b4b4b;
+    line-height: 18px;
+    height: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    white-space: normal;
+
+    @media (max-width: 700px) {
+      font-size: 12px;
+      line-height: 16px;
+      height: auto; /* Adjust height to auto for better fit */
+    }
   }
 }
 
@@ -53,6 +204,13 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 10px;
+
+  @media (max-width: 630px) {
+    align-items: flex-start;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
 }
 
 .pill {
@@ -62,6 +220,10 @@
   font-size: 12px;
   color: #333;
   text-transform: uppercase;
+
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
 }
 
 .actionBtns {
@@ -95,6 +257,11 @@
       &:hover {
         background-color: #c82333;
       }
+    }
+
+    @media (max-width: 630px) {
+      padding: 4px 8px;
+      font-size: 12px;
     }
   }
 }

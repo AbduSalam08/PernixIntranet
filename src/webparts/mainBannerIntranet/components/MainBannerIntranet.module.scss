@@ -22,16 +22,34 @@
 }
 
 .imgWrapper {
-  position: absolute;
+  position: absolute !important;
   width: 100%;
   top: 0;
   left: 0;
-  height: calc(100% - 60px);
+  height: calc(100% - 60px) !important;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   background-color: #eee;
-  background: url("../assets/PernixBannerImage.svg") no-repeat;
+  // background: url("../assets/PernixBannerImage.svg") no-repeat;
+  background-size: cover;
+  background-position: center;
+
+  @media (max-width: 768px) {
+    background-position: top center;
+  }
+}
+.imgWrapperSkeleton {
+  position: absolute !important;
+  width: calc(100% - 60px);
+  top: 10px;
+  left: 50px;
+  height: calc(100% - 70px) !important;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background-color: #eee;
+  // background: url("../assets/PernixBannerImage.svg") no-repeat
   background-size: cover;
   background-position: center;
 
@@ -104,6 +122,36 @@
   z-index: 2;
   overflow-x: auto; // Enables horizontal scrolling when content overflows
   padding: 10px 0;
+  max-width: calc(100vw - 10px);
+
+  @media (max-width: 768px) {
+    gap: 15px;
+    justify-content: flex-start;
+    scroll-behavior: smooth; // Adds smooth scrolling for a better experience
+  }
+
+  @media (max-width: 480px) {
+    gap: 10px;
+    justify-content: flex-start;
+    scroll-behavior: smooth;
+    padding: 10px 0; // Add padding to the scroll area
+  }
+}
+.quickLinksLoading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #00000070;
+  width: auto;
+  padding: 15px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 10px;
+  gap: 20px;
+  flex-wrap: nowrap;
+  z-index: 2;
+  overflow-x: auto;
   max-width: calc(100vw - 10px);
 
   @media (max-width: 768px) {
