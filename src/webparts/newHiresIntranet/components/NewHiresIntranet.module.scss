@@ -1,43 +1,48 @@
 .newhireContainer {
-  padding: 15px;
-  height: 448px;
+  margin: 20px;
+  padding: 20px;
   box-shadow: 0px -1px 4px 0px #b9b9b940;
+  border-radius: 6px;
+  min-height: 400px;
 
   .contentSection {
     padding: 15px 20px;
+    border-radius: 6px;
+
     box-shadow: 0px -1px 4px 0px #b6b6b640;
     margin-top: 20px;
-    min-height: 280px;
+    // min-height: 280px;
 
     .employeeName {
       color: #0b4d53;
       margin: 5px 0px 10px 0px;
-      font-size: 16px;
-      font-family: "osSemibold" sans-serif;
+      font-size: 17px;
+      font-family: "osSemibold", sans-serif;
     }
     .imgandName {
       display: flex;
       align-items: center;
       gap: 5px;
+      margin: 10px 0px;
       p {
         margin: 0;
         color: #4b4b4b;
         font-size: 14px;
-        font-family: "osRegular" sans-serif;
+        font-family: "osRegular", sans-serif;
       }
     }
     .description {
       margin: 0;
       color: #4b4b4b;
-      font-size: 14px;
-      font-family: "osRegular" sans-serif;
-      line-height: 1.3;
-      margin-bottom: 10px;
+      font-size: 13px;
+      font-family: "osRegular", sans-serif;
+      line-height: 21px;
+      margin-bottom: 20px;
     }
     .imgSection {
       width: 100%;
       height: 140px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
 
       img {
         width: 100%;

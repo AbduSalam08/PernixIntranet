@@ -1,6 +1,6 @@
 .container {
   min-height: 400px;
-  background-color: #ffffff;
+  // background-color: #ffffff;
 
   padding: 20px;
   border-radius: 6px;
@@ -26,12 +26,13 @@
       margin-bottom: 10px;
 
       .image {
-        width: 65px;
-        height: 65px;
+        width: 70px;
+        height: 70px;
         img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          border-radius: 6px;
+          // object-fit: cover;
         }
       }
       .content {
@@ -47,25 +48,29 @@
             .name {
               margin: 0;
               font-size: 16px;
-              font-weight: 600;
+              // font-weight: 600;
               color: #0b4d53;
+              font-family: "osSemibold", sans-serif;
+
+              // font-family: ;
               margin-bottom: 5px;
             }
             .date {
               margin: 0;
               font-size: 14px;
-              font-weight: 400;
+              font-family: "osRegular", sans-serif;
+              // font-weight: 400;
             }
           }
-          .shareicon {
-            width: 20px;
-            height: 20px;
-            img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-          }
+          // .shareicon {
+          //   width: 20px;
+          //   height: 20px;
+          //   img {
+          //     width: 100%;
+          //     height: 100%;
+          //     object-fit: cover;
+          //   }
+          // }
         }
       }
     }

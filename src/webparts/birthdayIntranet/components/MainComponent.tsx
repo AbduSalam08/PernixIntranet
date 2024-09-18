@@ -5,10 +5,12 @@ import styles from "./BirthdayIntranet.module.scss";
 const image1: any = require("../../../assets/images/svg/Birthday/Frame_1010107467.png");
 const image2: any = require("../../../assets/images/svg/Birthday/Frame_1010107468.png");
 const image3: any = require("../../../assets/images/svg/Birthday/Frame_1010107469.png");
-const share: any = require("../../../assets/images/svg/Birthday/send.png");
+// const share: any = require("../../../assets/images/svg/Birthday/send.png");
 import "../../../assets/styles/style.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
+// require("../../../node_modules/primereact/resources/primereact.min.css");
+
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
@@ -45,8 +47,7 @@ const MainComponent = () => {
   ];
   return (
     <div className={styles.container}>
-
-      <SectionHeaderIntranet label={"BirthDay"} />
+      <SectionHeaderIntranet label={"BirthDay"} removeAdd />
 
       {/* <div className={styles.header}>BirthDay</div> */}
 
@@ -67,14 +68,18 @@ const MainComponent = () => {
                   </p>
                 </div>
 
-                <div className={styles.shareicon}>
-                  <img
+                <div>
+                  <i
+                    className="pi pi-send"
+                    style={{ color: "#E0803D", fontSize: "24px" }}
+                  ></i>
+                  {/* <img
                     src={`${share}`}
                     alt=""
                     onClick={() => {
                       setVisible(true);
                     }}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
