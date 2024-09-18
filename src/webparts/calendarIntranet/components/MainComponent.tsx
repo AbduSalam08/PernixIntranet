@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { Calendar } from "@fullcalendar/core";
@@ -12,8 +14,8 @@ import * as moment from "moment";
 import { graph } from "@pnp/graph/presets/all";
 // const plusIcon = require("../../../assets/images/svg/plus.png");
 
-let timeZone: string = "India Standard Time"; //for local time zone
-let headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
+const timeZone: string = "India Standard Time"; //for local time zone
+const headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
 import styles from "./CalendarIntranet.module.scss";
 interface IEvent {
   title: string;
@@ -24,12 +26,12 @@ interface IEvent {
 }
 import { useEffect, useState } from "react";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
-const MainComponent = () => {
+const MainComponent = (): JSX.Element => {
   const [datas, setDatas] = useState<IEvent[]>([]);
 
-  const BindCalender = (data: any) => {
-    let calendarEl: any = document.getElementById("myCalendar");
-    let _Calendar = new Calendar(calendarEl, {
+  const BindCalender = (data: any): any => {
+    const calendarEl: any = document.getElementById("myCalendar");
+    const _Calendar = new Calendar(calendarEl, {
       plugins: [
         interactionPlugin,
         dayGridPlugin,
@@ -102,7 +104,7 @@ const MainComponent = () => {
     _Calendar.updateSize();
     _Calendar.render();
   };
-  const getEvents = () => {
+  const getEvents = (): any => {
     graph.groups
       // .getById("78038f17-b25d-453a-8442-c8bc07465725")
       // .getById("d00c8420-d7d0-499e-a292-f449c438073c")
@@ -110,7 +112,7 @@ const MainComponent = () => {
       .events.configure({ headers })
       .top(999)()
       .then((result: any) => {
-        let arrDatas: IEvent[] = [];
+        const arrDatas: IEvent[] = [];
 
         result.forEach((val: any) => {
           arrDatas.push({
@@ -125,10 +127,10 @@ const MainComponent = () => {
         const now = moment();
         const todaysEvents: any[] = arrDatas.filter(
           (val) =>
-            moment(val.start).format("YYYYMMDD") == now.format("YYYYMMDD")
+            moment(val.start).format("YYYYMMDD") === now.format("YYYYMMDD")
         );
 
-        let filterEvents = todaysEvents.sort(
+        const filterEvents = todaysEvents.sort(
           (a: any, b: any) =>
             moment(a.start).valueOf() - moment(b.start).valueOf()
         );
@@ -160,49 +162,49 @@ const MainComponent = () => {
       });
   };
 
-  // const createOutlookEvent = async () => {
-  //   const startDate = moment().add(1, "days").toISOString(); // Event start time
-  //   const endDate = moment().add(1, "days").add(1, "hours").toISOString(); // Event end time
+  const createOutlookEvent = async (): Promise<any> => {
+    const startDate = moment().add(1, "days").toISOString(); // Event start time
+    const endDate = moment().add(1, "days").add(1, "hours").toISOString(); // Event end time
 
-  //   const event: any = {
-  //     subject: "PnP SPFx Event1",
-  //     body: {
-  //       contentType: "HTML",
-  //       content: "This is a sample event created using PnP JS in SPFx.",
-  //     },
-  //     start: {
-  //       dateTime: startDate,
-  //       timeZone: "UTC",
-  //     },
-  //     end: {
-  //       dateTime: endDate,
-  //       timeZone: "UTC",
-  //     },
-  //     location: {
-  //       displayName: "Online Meeting",
-  //     },
-  //     attendees: [
-  //       {
-  //         emailAddress: {
-  //           address: "attendee@example.com",
-  //           name: "Attendee Name",
-  //         },
-  //         type: "required",
-  //       },
-  //     ],
-  //   };
+    const event: any = {
+      subject: "PnP SPFx Event1",
+      body: {
+        contentType: "HTML",
+        content: "This is a sample event created using PnP JS in SPFx.",
+      },
+      start: {
+        dateTime: startDate,
+        timeZone: "UTC",
+      },
+      end: {
+        dateTime: endDate,
+        timeZone: "UTC",
+      },
+      location: {
+        displayName: "Online Meeting",
+      },
+      attendees: [
+        {
+          emailAddress: {
+            address: "attendee@example.com",
+            name: "Attendee Name",
+          },
+          type: "required",
+        },
+      ],
+    };
 
-  //   try {
-  //     await graph.groups
-  //       .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
-  //       .calendar.events.add(event);
-  //     alert("Event created successfully");
-  //     console.log("Event created successfully");
-  //     getEvents();
-  //   } catch (error) {
-  //     console.error("Error creating event", error);
-  //   }
-  // };
+    try {
+      await graph.groups
+        .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
+        .calendar.events.add(event);
+      alert("Event created successfully");
+      console.log("Event created successfully");
+      getEvents();
+    } catch (error) {
+      console.error("Error creating event", error);
+    }
+  };
 
   useEffect(() => {
     getEvents();
