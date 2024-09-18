@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import resetPopupController, {
   togglePopupVisibility,
@@ -10,45 +11,28 @@ import styles from "./NewsIntranet.module.scss";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
-// import CustomTextArea from "../../../components/common/CustomInputFields/CustomTextArea";
-import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
-const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
+import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
+import {
+  addNews,
+  getAllNewsData,
+} from "../../../services/newsIntranet/newsInranet";
+import { resetFormData, validateField } from "../../../utils/commonUtils";
+import { useDispatch, useSelector } from "react-redux";
+import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import ViewAll from "../../../components/common/ViewAll/ViewAll";
+// const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
-const NewsIntranet = (): JSX.Element => {
-  // const [newData, setNewsData] = useState({
-  //   newsTitle: {
-  //     value: "",
-  //     isValid: false,
-  //   },
-  //   startDate: {
-  //     value: "",
-  //     isValid: false,
-  //   },
-  //   endDate: {
-  //     value: "",
-  //     isValid: false,
-  //   },
-  //   status: {
-  //     value: "",
-  //     isValid: false,
-  //   },
-  //   thumbnail: {
-  //     value: "",
-  //     isValid: false,
-  //   },
-  //   description: {
-  //     value: "",
-  //     isValid: false,
-  //   },
-  // });
-
+const NewsIntranet = (props: any): JSX.Element => {
+  const dispatch = useDispatch();
   // popup properties
   const initialPopupController = [
     {
       open: false,
       popupTitle: "Add News",
-      popupWidth: "450px",
+      popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
       popupData: "",
@@ -72,51 +56,198 @@ const NewsIntranet = (): JSX.Element => {
     initialPopupController
   );
 
+  const newsIntranetData: any = useSelector((state: any) => {
+    return state.NewsIntranetData.value;
+  });
+
+  const [formData, setFormData] = useState<any>({
+    Title: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid title",
+      validationRule: { required: true, type: "string" },
+    },
+    StartDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "date" },
+    },
+    EndDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "date" },
+    },
+    Status: {
+      value: "",
+      isValid: true,
+      errorMsg: "Status is required",
+      validationRule: { required: true, type: "string" },
+    },
+    thumbnail: {
+      value: null,
+      isValid: true,
+      errorMsg: "Invalid file",
+      validationRule: { required: true, type: "file" },
+    },
+    Description: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+  });
+
+  const handleInputChange = (
+    field: string,
+    value: any,
+    isValid: boolean,
+    errorMsg: string = ""
+  ): void => {
+    setFormData((prevData: any) => ({
+      ...prevData,
+      [field]: {
+        ...prevData[field],
+        value: value,
+        isValid,
+        errorMsg: isValid ? "" : errorMsg,
+      },
+    }));
+  };
+
+  const handleSubmit = async (): Promise<any> => {
+    let hasErrors = false;
+
+    // Validate each field and update the state with error messages
+    const updatedFormData = Object.keys(formData).reduce((acc, key) => {
+      const fieldData = formData[key];
+      const { isValid, errorMsg } = validateField(
+        key,
+        fieldData.value,
+        fieldData?.validationRule
+      );
+
+      if (!isValid) {
+        hasErrors = true;
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          ...fieldData,
+          isValid,
+          errorMsg,
+        },
+      };
+    }, {} as typeof formData);
+
+    setFormData(updatedFormData);
+    if (!hasErrors) {
+      await addNews(formData, setPopupController, 0);
+    } else {
+      console.log("Form contains errors");
+    }
+  };
+
   const popupInputs: any[] = [
     [
-      <CustomInput
-        value={""}
-        key={1}
-        autoFocus
-        placeholder="Enter title"
-        isValid={false}
-        errorMsg="Invalid title"
-      />,
-      <CustomDateInput
-        key={2}
-        value={""}
-        label="Start date"
-        error={true}
-        errorMsg="Invalid input"
-      />,
-      <CustomDateInput
-        key={2}
-        value={""}
-        label="End date"
-        error={true}
-        errorMsg="Invalid input"
-      />,
-      <CustomDropDown
-        errorMsg={"Status is required"}
-        value={""}
-        isValid={false}
-        placeholder="Status"
-        key={3}
-      />,
-      <FloatingLabelTextarea
-        key={4}
-        value={""}
-        // onChange={(newValue) => setValue(newValue)}
-        placeholder="Your description here"
-        // size="MD"
-        rows={5}
-        // isValid={hasError}
-        errorMsg="This field is required"
-        withLabel={false}
-        // labelText="Description"
-        disabled={false}
-        mandatory={true}
-      />,
+      <div className={styles.addNewsGrid} key={1}>
+        <CustomInput
+          value={formData.Title.value}
+          placeholder="Enter title"
+          isValid={formData.Title.isValid}
+          errorMsg={formData.Title.errorMsg}
+          onChange={(e) => {
+            const value = e;
+            const { isValid, errorMsg } = validateField(
+              "Title",
+              value,
+              formData.Title.validationRule
+            );
+            handleInputChange("Title", value, isValid, errorMsg);
+          }}
+        />
+
+        <CustomDateInput
+          value={formData.StartDate.value}
+          label="Start date"
+          error={!formData.StartDate.isValid}
+          errorMsg={formData.StartDate.errorMsg}
+          onChange={(date: any) => {
+            const { isValid, errorMsg } = validateField(
+              "StartDate",
+              date,
+              formData.StartDate.validationRule
+            );
+            handleInputChange("StartDate", date, isValid, errorMsg);
+          }}
+        />
+
+        <CustomDateInput
+          value={formData.EndDate.value}
+          label="End date"
+          error={!formData.EndDate.isValid}
+          errorMsg={formData.EndDate.errorMsg}
+          onChange={(date: any) => {
+            const { isValid, errorMsg } = validateField("EndDate", date, {
+              required: true,
+              type: "date",
+            });
+            handleInputChange("EndDate", date, isValid, errorMsg);
+          }}
+        />
+
+        <CustomDropDown
+          value={formData.Status.value}
+          options={["Active", "In Active"]}
+          placeholder="Status"
+          isValid={formData.Status.isValid}
+          errorMsg={formData.Status.errorMsg}
+          onChange={(value) => {
+            const { isValid, errorMsg } = validateField(
+              "Status",
+              value,
+              formData.Status.validationRule
+            );
+            handleInputChange("Status", value, isValid, errorMsg);
+          }}
+        />
+
+        <CustomFileUpload
+          accept="image/png,image/svg"
+          value={formData.thumbnail.value?.name || "Thumbnail"}
+          onFileSelect={(file) => {
+            console.log("file: ", file);
+            const { isValid, errorMsg } = validateField(
+              "thumbnail",
+              file ? file.name : "",
+              formData.StartDate.thumbnail
+            );
+            handleInputChange("thumbnail", file, isValid, errorMsg);
+          }}
+          placeholder="Thumbnail"
+          isValid={formData.thumbnail.isValid}
+          errMsg={formData.thumbnail.errorMsg}
+        />
+
+        <FloatingLabelTextarea
+          value={formData.Description.value}
+          placeholder="Description"
+          rows={5}
+          isValid={formData.Description.isValid}
+          errorMsg={formData.Description.errorMsg}
+          onChange={(e: any) => {
+            const value = e;
+            const { isValid, errorMsg } = validateField(
+              "Description",
+              value,
+              formData.Description.validationRule
+            );
+            handleInputChange("Description", value, isValid, errorMsg);
+          }}
+        />
+      </div>,
     ],
   ];
 
@@ -130,70 +261,72 @@ const NewsIntranet = (): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: () => {
-          togglePopupVisibility(setPopupController, 0, "close");
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
         },
       },
       {
         text: "Submit",
         btnType: "primaryGreen",
-        disabled: false,
         endIcon: false,
         startIcon: false,
+        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          console.log("clicked");
+          await handleSubmit();
         },
       },
     ],
   ];
 
-  const newsItems = [
-    {
-      imageUrl: PernixBannerImage, // Replace with your image URL
-      title:
-        "Beyond Dashboard: The Future of Analytics and Business Intelligence",
-      description:
-        "Explore the next generation of analytics tools that go beyond traditional dashboards to provide deeper insights and predictive capabilities.",
-      status: "Active",
-    },
-    {
-      imageUrl: PernixBannerImage, // Replace with your image URL
-      title: "The Rise of AI: Transforming the Business Landscape",
-      description:
-        "Artificial Intelligence is no longer just a buzzword; it's reshaping industries and driving new business models.",
-      status: "Upcoming",
-    },
-    {
-      imageUrl: PernixBannerImage, // Replace with your image URL
-      title: "Data Privacy in the Digital Age: Challenges and Solutions",
-      description:
-        "As data breaches become more common, understanding how to protect personal and business data is critical for success.",
-      status: "Archived",
-    },
-  ];
+  useEffect(() => {
+    getAllNewsData(dispatch);
+  }, []);
 
   return (
     <div className={styles.newsContainer}>
       <SectionHeaderIntranet
         label={"News"}
         headerAction={() => {
-          togglePopupVisibility(setPopupController, 0, "open");
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "open"
+          );
+          resetFormData(formData, setFormData);
         }}
       />
+
       <div className={styles.newsContainerWrapper}>
-        {newsItems?.map((item: any, idx: number) => {
-          return (
-            <NewsCard
-              title={item?.title}
-              imageUrl={item.imageUrl}
-              key={idx}
-              description={item?.description}
-              noActions={true}
-              noStatus={true}
-            />
-          );
-        })}
+        {newsIntranetData?.isLoading ? (
+          <CircularSpinner />
+        ) : newsIntranetData?.error ? (
+          <div className="errorWrapper">
+            <img src={errorGrey} alt="Error" />
+            <span className="disabledText">{newsIntranetData?.error}</span>
+          </div>
+        ) : (
+          newsIntranetData?.data
+            ?.slice(-3)
+            .map((item: any, idx: number) => (
+              <NewsCard
+                title={item?.title}
+                imageUrl={item?.imageUrl}
+                key={idx}
+                description={item?.description}
+                noActions={true}
+                noStatus={true}
+              />
+            ))
+        )}
       </div>
+
+      <ViewAll />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -206,9 +339,15 @@ const NewsIntranet = (): JSX.Element => {
             });
           }}
           PopupType={popupData.popupType}
-          onHide={() =>
-            togglePopupVisibility(setPopupController, index, "close")
-          }
+          onHide={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              index,
+              "close"
+            );
+            resetFormData(formData, setFormData);
+          }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle
           }

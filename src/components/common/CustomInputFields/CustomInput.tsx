@@ -179,7 +179,7 @@ const CustomInput: React.FC<Props> = ({
                   ) : undefined,
                 disableUnderline: noBorderInput,
               }}
-              error={Boolean(true)}
+              error={Boolean(!isValid)}
               // helperText={!hideErrMsg && isValid && !noErrorMsg ? errorMsg : ""}
               // helperText={"Error input"}
               variant="filled"

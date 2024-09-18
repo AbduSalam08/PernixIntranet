@@ -7,6 +7,13 @@
   box-shadow: 0px -1px 4px #b6b6b650;
   padding: 25px;
 }
+.addDocGrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
 
 .folderCard {
   // border: 1px solid #eee;
@@ -40,12 +47,45 @@
 }
 .docCarousel {
   width: 100%;
-  padding: 15px 0;
+  padding: 15px;
   max-width: 1600px;
   margin-left: auto;
   margin-right: auto;
-  // display: flex;
-  // align-items: center;
-  // justify-content: flex-start;
-  // gap: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow-x: auto;
+  gap: 30px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #999 transparent;
+
+  // Responsive styles
+  @media (max-width: 1200px) {
+    max-width: 1200px;
+    gap: 20px;
+
+    .folderCard {
+      flex: 0 0 160px; // Show around 2 items on medium screens (40% width each)
+    }
+  }
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    gap: 20px;
+    padding: 10px;
+
+    .folderCard {
+      flex: 0 0 140px; // Show around 2 items on medium screens (40% width each)
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 5px;
+    gap: 20px;
+
+    .folderCard {
+      flex: 0 0 140px; // Show around 1 item on small screens (70% width each)
+    }
+  }
 }

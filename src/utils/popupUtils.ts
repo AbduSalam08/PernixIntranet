@@ -1,23 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const togglePopupVisibility = (
   setPopupController: any,
-  index: number,
-  action: "open" | "close",
+  controllerData?: any,
+  index?: any,
+  action?: "open" | "close" | any,
   popupTitle?: any,
   popupData?: any
 ): void => {
+  // Immediately toggle the popup visibility
   setPopupController((prev: any) =>
     prev.map((popup: any, popupIndex: any) =>
       popupIndex === index
         ? {
-            ...popup,
+            ...controllerData,
+            popupWidth: popup?.popupWidth,
             open: action === "open" ? true : false,
             popupTitle: popupTitle || popup.popupTitle,
             popupData: popupData || "",
           }
-        : { ...popup }
+        : { ...controllerData }
     )
   );
+
+  // Add a 2-second timeout to update isLoading state
+  setTimeout(() => {
+    setPopupController((prev: any) =>
+      prev.map((popup: any, popupIndex: any) =>
+        popupIndex === index
+          ? {
+              ...popup,
+              popupWidth: controllerData?.popupWidth,
+              isLoading: {
+                inprogress: false,
+                error: false,
+                success: false,
+              },
+            }
+          : popup
+      )
+    );
+  }, 1000); // 2-second delay for isLoading
 };
 
 interface PopupController {

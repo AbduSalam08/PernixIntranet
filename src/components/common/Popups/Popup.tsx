@@ -127,7 +127,7 @@ const Popup = ({
           </span>
         </div>
       ) : isLoading?.error ? (
-        <div className={styles.messageWrapper}>
+        <div className={`${styles.messageWrapper}`}>
           <div className={styles.StatusImgWrapper}>
             <img src={errorImg} alt="Error" />
           </div>
@@ -153,7 +153,7 @@ const Popup = ({
           </div>
         </div>
       ) : isLoading?.success ? (
-        <div className={styles.messageWrapper}>
+        <div className={`${styles.messageWrapper}`}>
           <div className={styles.StatusImgWrapper}>
             <img src={successImg} alt="Completed" />
           </div>

@@ -4,6 +4,7 @@ import * as React from "react";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { styled } from "@mui/joy/styles";
 import Textarea from "@mui/joy/Textarea";
+import styles from "./Inputs.module.scss";
 
 const StyledTextarea = styled(TextareaAutosize)({
   resize: "none",
@@ -17,11 +18,11 @@ const StyledTextarea = styled(TextareaAutosize)({
   alignSelf: "stretch",
   color: "inherit",
   backgroundColor: "transparent",
-  fontFamily: "inherit",
-  fontSize: "inherit",
   fontStyle: "inherit",
   fontWeight: "inherit",
   lineHeight: "inherit",
+  fontFamily: "osMedium, sans-serif",
+  fontSize: "15px",
   "&::placeholder": {
     opacity: 0,
     display: "none",
@@ -124,6 +125,11 @@ export default function FloatingLabelTextarea({
       style={{
         position: "relative",
         width: textAreaWidth ? textAreaWidth : "100%",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+        gap: "2px",
+        flexDirection: "column",
       }}
     >
       <Textarea
@@ -142,14 +148,13 @@ export default function FloatingLabelTextarea({
           paddingTop: "20px", // for the floating label
           width: textAreaWidth ? textAreaWidth : "100%",
           height: rows ? `${rows * 20}px` : "auto",
-          fontSize: size === "SM" ? "12px" : size === "XL" ? "18px" : "14px",
+          fontSize: "15px",
+          fontFamily: "osMedium, sans-serif",
           // border: noBorderInput ? "none" : "1px solid #e5e5e5",
         }}
         className={inputClassName}
       />
-      {isValid && (
-        <span style={{ color: "#ff8585", fontSize: "12px" }}>{errorMsg}</span>
-      )}
+      {!isValid && <span className={styles.errorMsg}>{errorMsg}</span>}
     </div>
   );
 }

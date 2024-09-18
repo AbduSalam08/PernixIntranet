@@ -10,7 +10,7 @@ import "./Style.css";
 import * as moment from "moment";
 
 import { graph } from "@pnp/graph/presets/all";
-const plusIcon = require("../../../assets/images/svg/plus.png");
+// const plusIcon = require("../../../assets/images/svg/plus.png");
 
 let timeZone: string = "India Standard Time"; //for local time zone
 let headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
@@ -23,6 +23,7 @@ interface IEvent {
   isAllDay: boolean;
 }
 import { useEffect, useState } from "react";
+import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 const MainComponent = () => {
   const [datas, setDatas] = useState<IEvent[]>([]);
 
@@ -209,11 +210,17 @@ const MainComponent = () => {
   return (
     <div className={styles.calenderContainer}>
       <div className={styles.header}>
-        <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} />
+        <SectionHeaderIntranet
+          label="Calendar"
+          headerAction={async () => {
+            await createOutlookEvent();
+          }}
+        />
+        {/* <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} /> */}
       </div>
       <div className={styles.container}>
         <div className={styles.calenderSection}>
-          <div id="myCalendar" className={styles.mycalender}></div>
+          <div id="myCalendar" className={styles.mycalender} />
         </div>
         <div className={styles.calenderSection}>
           {datas.slice(0, 4).map((val: IEvent, index: number) => (
