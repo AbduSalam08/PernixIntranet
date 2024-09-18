@@ -160,49 +160,49 @@ const MainComponent = () => {
       });
   };
 
-  const createOutlookEvent = async () => {
-    const startDate = moment().add(1, "days").toISOString(); // Event start time
-    const endDate = moment().add(1, "days").add(1, "hours").toISOString(); // Event end time
+  // const createOutlookEvent = async () => {
+  //   const startDate = moment().add(1, "days").toISOString(); // Event start time
+  //   const endDate = moment().add(1, "days").add(1, "hours").toISOString(); // Event end time
 
-    const event: any = {
-      subject: "PnP SPFx Event1",
-      body: {
-        contentType: "HTML",
-        content: "This is a sample event created using PnP JS in SPFx.",
-      },
-      start: {
-        dateTime: startDate,
-        timeZone: "UTC",
-      },
-      end: {
-        dateTime: endDate,
-        timeZone: "UTC",
-      },
-      location: {
-        displayName: "Online Meeting",
-      },
-      attendees: [
-        {
-          emailAddress: {
-            address: "attendee@example.com",
-            name: "Attendee Name",
-          },
-          type: "required",
-        },
-      ],
-    };
+  //   const event: any = {
+  //     subject: "PnP SPFx Event1",
+  //     body: {
+  //       contentType: "HTML",
+  //       content: "This is a sample event created using PnP JS in SPFx.",
+  //     },
+  //     start: {
+  //       dateTime: startDate,
+  //       timeZone: "UTC",
+  //     },
+  //     end: {
+  //       dateTime: endDate,
+  //       timeZone: "UTC",
+  //     },
+  //     location: {
+  //       displayName: "Online Meeting",
+  //     },
+  //     attendees: [
+  //       {
+  //         emailAddress: {
+  //           address: "attendee@example.com",
+  //           name: "Attendee Name",
+  //         },
+  //         type: "required",
+  //       },
+  //     ],
+  //   };
 
-    try {
-      await graph.groups
-        .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
-        .calendar.events.add(event);
-      alert("Event created successfully");
-      console.log("Event created successfully");
-      getEvents();
-    } catch (error) {
-      console.error("Error creating event", error);
-    }
-  };
+  //   try {
+  //     await graph.groups
+  //       .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
+  //       .calendar.events.add(event);
+  //     alert("Event created successfully");
+  //     console.log("Event created successfully");
+  //     getEvents();
+  //   } catch (error) {
+  //     console.error("Error creating event", error);
+  //   }
+  // };
 
   useEffect(() => {
     getEvents();
