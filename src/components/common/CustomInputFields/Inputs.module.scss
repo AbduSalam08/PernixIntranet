@@ -345,5 +345,77 @@
   color: #a4a4a4;
   font-family: "osRegular", sans-serif;
   margin-top: -8px;
-  margin-left: 5px;
+  margin-left: 2px;
+}
+
+// file upload styles
+
+.fileUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .inputWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border: none;
+    padding: 6px;
+    height: 50px;
+    border-radius: 4px;
+    width: 100%;
+    position: relative;
+  }
+
+  .input {
+    opacity: 0;
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .placeholder {
+    flex-grow: 1;
+    padding: 0 8px;
+    color: #a4a4a4;
+    font-family: "osRegular", sans-serif !important;
+    max-width: 150px;
+    overflow: hidden;
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    height: 18px;
+    overflow: hidden;
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .clearBtn {
+    background: none;
+    border: none;
+    color: #ff0000;
+    cursor: pointer;
+    padding: 4px;
+    font-family: "osRegular", sans-serif !important;
+  }
+
+  .error {
+    color: #ff0000;
+    margin-top: 4px;
+    font-size: 12px;
+    font-family: "osRegular", sans-serif !important;
+  }
+
+  .acceptedInfo {
+    color: #999;
+    margin-top: 4px;
+    font-size: 12px;
+    font-family: "osRegular", sans-serif !important;
+  }
 }

@@ -5,26 +5,33 @@ import styles from "./SectionHeaderIntranet.module.scss";
 interface Props {
   label: string;
   headerAction?: () => any | void;
+  removeAdd?: boolean;
 }
-const SectionHeaderIntranet = ({ label, headerAction }: Props): JSX.Element => {
+const SectionHeaderIntranet = ({
+  label,
+  headerAction,
+  removeAdd = false,
+}: Props): JSX.Element => {
   return (
     <div className={styles.sectionHeaderWrapper}>
       <p>{label}</p>
-      <DefaultButton
-        onlyIcon={true}
-        btnType="primaryGreen"
-        size="medium"
-        onClick={headerAction}
-        text={
-          <Add
-            sx={{
-              width: "20px",
-              fontSize: "24px",
-              color: "#fff",
-            }}
-          />
-        }
-      />
+      {!removeAdd && (
+        <DefaultButton
+          onlyIcon={true}
+          btnType="primaryGreen"
+          size="medium"
+          onClick={headerAction}
+          text={
+            <Add
+              sx={{
+                width: "20px",
+                fontSize: "24px",
+                color: "#fff",
+              }}
+            />
+          }
+        />
+      )}
     </div>
   );
 };

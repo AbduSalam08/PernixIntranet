@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import styles from "./BirthdayIntranet.module.scss";
-const image1: any = require("../../../assets/images/svg/Birthday/Frame 1010107467.png");
-const image2: any = require("../../../assets/images/svg/Birthday/Frame 1010107468.png");
-const image3: any = require("../../../assets/images/svg/Birthday/Frame 1010107469.png");
+const image1: any = require("../../../assets/images/svg/Birthday/Frame_1010107467.png");
+const image2: any = require("../../../assets/images/svg/Birthday/Frame_1010107468.png");
+const image3: any = require("../../../assets/images/svg/Birthday/Frame_1010107469.png");
 const share: any = require("../../../assets/images/svg/Birthday/send.png");
 import "../../../assets/styles/style.css";
 import "primereact/resources/themes/saga-blue/theme.css";
@@ -44,6 +45,7 @@ const MainComponent = () => {
   ];
   return (
     <div className={styles.container}>
+
       <SectionHeaderIntranet label={"BirthDay"} />
 
       {/* <div className={styles.header}>BirthDay</div> */}

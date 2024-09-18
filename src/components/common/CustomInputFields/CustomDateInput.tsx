@@ -11,7 +11,7 @@ interface DDateInputProps {
   fromDate?: string;
   disablePast?: boolean;
   disableFuture?: boolean;
-  value: string;
+  value: any;
   onChange?: any;
   error?: boolean;
   readOnly?: boolean;
@@ -46,26 +46,22 @@ const DDateInput: React.FC<DDateInputProps> = ({
   maxWidth,
   minWidth,
 }) => {
-  const getFormattedDate = (date: any | null): any => {
-    if (date) {
-      return dayjs(date).format("DD/MM/YYYY");
-    }
-    return "";
-  };
-
   const handleChange = useCallback(
     (e: any) => {
-      const formattedDate = getFormattedDate(e.value);
-      onChange(formattedDate);
+      onChange(e.value);
     },
     [onChange]
   );
 
-  const defaultValue = value ? dayjs(value, "DD/MM/YYYY").toDate() : null;
+  // const defaultValue = value ? dayjs(value, "DD/MM/YYYY")?.toDate() : null;
+
+  // Calculate minDate and maxDate based on props
+  const today = dayjs().toDate();
+  const minDate = disablePast ? today : undefined;
+  const maxDate = disableFuture ? today : undefined;
 
   return (
     <div
-      // className={styles.inputMainWrapper}
       className={`${styles.inputMainWrapper} ${
         topLabel ? styles.topinputMainWrapper : ""
       }`}
@@ -97,20 +93,19 @@ const DDateInput: React.FC<DDateInputProps> = ({
         {!readOnly ? (
           <FloatLabel>
             <Calendar
-              value={defaultValue}
+              value={value}
               onChange={(data: any) => {
                 handleChange(data);
               }}
               disabled={disabledInput}
-              //   minDate={fromDate ? dayjs(fromDate).toDate() : undefined}
+              minDate={minDate}
+              maxDate={maxDate}
               showIcon
-              variant="filled"
               monthNavigator
               yearNavigator
               yearRange="2000:2100"
               dateFormat="dd/mm/yy"
-              showTime={false}
-              placeholder={!defaultValue ? placeHolder : ""}
+              placeholder={!value ? placeHolder : ""}
               className={`${styles.d_datepicker}`}
               style={{ width: "100%" }}
             />

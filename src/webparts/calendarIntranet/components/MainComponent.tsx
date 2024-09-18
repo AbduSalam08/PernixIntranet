@@ -209,14 +209,18 @@ const MainComponent = () => {
   }, []);
   return (
     <div className={styles.calenderContainer}>
-      <SectionHeaderIntranet label={"Calender"} />
-
-      {/* <div className={styles.header}>
-        <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} />
-      </div> */}
+      <div className={styles.header}>
+        <SectionHeaderIntranet
+          label="Calendar"
+          headerAction={async () => {
+            await createOutlookEvent();
+          }}
+        />
+        {/* <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} /> */}
+      </div>
       <div className={styles.container}>
         <div className={styles.calenderSection}>
-          <div id="myCalendar" className={styles.mycalender}></div>
+          <div id="myCalendar" className={styles.mycalender} />
         </div>
         <div className={styles.calenderSection}>
           {datas.slice(0, 4).map((val: IEvent, index: number) => (

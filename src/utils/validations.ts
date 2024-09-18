@@ -16,11 +16,18 @@ import * as dayjs from "dayjs";
  * @returns true if the value is not empty or within the specified length, false otherwise.
  */
 const emptyCheck = (value: string | any, isLength?: boolean): boolean => {
-  if (!isLength) {
-    return value?.trim() !== "" && value?.length <= 255;
-  } else {
-    return value?.trim() !== "";
+  // Ensure the value is a string, or handle it accordingly if it's not
+  if (typeof value !== "string") {
+    return false;
   }
+
+  // If isLength is not true, check if the trimmed value is non-empty and within the length limit
+  if (!isLength) {
+    return value.trim() !== "" && value.trim().length <= 255;
+  }
+
+  // If isLength is true, only check for non-empty trimmed string
+  return value.trim() !== "";
 };
 
 /**

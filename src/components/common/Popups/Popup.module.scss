@@ -4,14 +4,17 @@
   justify-content: center;
 }
 .contentWrapper {
-  padding: 0px 45px;
+  padding: 0px 10px;
   @extend .flexCenter;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
 }
 .popupWrapper {
   border-radius: 10px !important;
   overflow: hidden;
+  transition: all 0.2s !important;
+  background-color: #fff !important;
   box-shadow: 0 4px 45px rgba(0, 0, 0, 15%) !important;
 }
 .popupHeader,
@@ -27,6 +30,11 @@
 .popupHeaderWithoutCloseIcon {
   margin: 28px 0px;
 }
+.popupFooter {
+  width: 100%;
+  @extend .flexCenter;
+  justify-content: flex-end;
+}
 .popupFooter,
 .popupFooterConfirmation,
 .AlertPopupFooter {
@@ -41,6 +49,7 @@
   margin-bottom: 20px;
 }
 .contentContainer {
+  width: 100%;
   display: flex;
   align-items: stretch;
   justify-content: space-between;
@@ -85,87 +94,6 @@
 .AlertPopupFooter {
   margin: 0;
 }
-
-.messageWrapper {
-  animation: slideAndFade 0.3s both ease;
-  @extend .flexCenter;
-  padding: 20px;
-  gap: 20px;
-  flex-direction: column;
-  .messageFooter {
-    @extend .flexCenter;
-    flex-direction: column;
-    gap: 5px;
-    .errorText {
-      // font-size: 16px;
-      // font-family: "osMedium", sans-serif;
-      // color: #900101;
-      // background-color: #ff000020;
-      // padding: 10px;
-      // border-radius: 5px;
-      // border-left: 2px solid #900101;
-      // border-right: 2px solid #900101;
-      @extend .flexCenter;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 10px;
-      text-align: center;
-      p {
-        font-size: 18px;
-        color: #900101;
-        font-family: "osSemiBold", sans-serif;
-        line-height: 24px;
-      }
-      span {
-        font-size: 13px;
-        font-family: "osMedium", sans-serif;
-        color: #555;
-        background-color: #adadad20;
-        padding: 5px 10px;
-        border-radius: 4px;
-        line-height: 18px;
-      }
-    }
-    .successText {
-      // font-size: 16px;
-      // font-family: "osMedium", sans-serif;
-      // color: var(--primary-pernix-green);
-      // background-color: #2d4b5120;
-      // padding: 10px;
-      // border-radius: 5px;
-      @extend .flexCenter;
-      flex-direction: column;
-      gap: 5px;
-      margin-bottom: 10px;
-      text-align: center;
-      p {
-        font-size: 18px;
-        color: var(--primary-pernix-green);
-        font-family: "osSemiBold", sans-serif;
-        line-height: 24px;
-      }
-      span {
-        font-size: 13px;
-        font-family: "osMedium", sans-serif;
-        color: #555;
-        line-height: 18px;
-        background-color: #adadad20;
-        padding: 5px 10px;
-        border-radius: 4px;
-      }
-      // border-left: 2px solid var(--primary-pernix-green);
-      // border-right: 2px solid var(--primary-pernix-green);
-    }
-  }
-  .msgfooterActions {
-    @extend .flexCenter;
-    gap: 10px;
-  }
-}
-.StatusImgWrapper {
-  width: 86px;
-  height: 86px;
-}
 @keyframes slideAndFade {
   0% {
     opacity: 0;
@@ -176,10 +104,127 @@
     transform: scale(1);
   }
 }
+.messageWrapper {
+  @extend .flexCenter;
+  padding: 20px;
+  gap: 20px;
+  flex-direction: column;
+
+  // Image animation with delay
+  .StatusImgWrapper {
+    animation: fadeIn 0.15s ease forwards;
+    animation-delay: 0.15s;
+    opacity: 0; // Start hidden
+  }
+
+  // Message Footer with delayed appearance
+  .messageFooter {
+    animation: fadeIn 0.25s ease forwards;
+    animation-delay: 0.25s; // Appears after the image
+    opacity: 0;
+    @extend .flexCenter;
+    flex-direction: column;
+    gap: 5px;
+
+    // Error Text Animation
+    .errorText {
+      animation: fadeInUp 0.35s ease forwards;
+      animation-delay: 0.35s; // Slight delay after footer
+      opacity: 0;
+      @extend .flexCenter;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+      text-align: center;
+
+      p {
+        font-size: 18px;
+        color: #900101;
+        font-family: "osSemiBold", sans-serif;
+        line-height: 24px;
+      }
+
+      span {
+        font-size: 13px;
+        font-family: "osMedium", sans-serif;
+        color: #555;
+        background-color: #adadad20;
+        padding: 5px 10px;
+        border-radius: 4px;
+        line-height: 18px;
+      }
+    }
+
+    // Success Text Animation
+    .successText {
+      animation: fadeInUp 0.45s ease forwards;
+      animation-delay: 0.45s; // Slight delay after footer
+      opacity: 0;
+      @extend .flexCenter;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+      text-align: center;
+
+      p {
+        font-size: 18px;
+        color: var(--primary-pernix-green);
+        font-family: "osSemiBold", sans-serif;
+        line-height: 24px;
+      }
+
+      span {
+        font-size: 13px;
+        font-family: "osMedium", sans-serif;
+        color: #555;
+        line-height: 18px;
+        background-color: #adadad20;
+        padding: 5px 10px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  // Footer actions
+  .msgfooterActions {
+    animation: fadeInUp 0.55s ease forwards;
+    animation-delay: 0.55s; // Delays footer actions
+    opacity: 0;
+    @extend .flexCenter;
+    gap: 10px;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.StatusImgWrapper {
+  width: 86px;
+  height: 86px;
+}
+
 .alertBoxContent {
   @extend .flexCenter;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  animation: slideAndFade 0.3s both ease;
 }
 .AlertPopupSecondaryText {
   font-size: 14px;
@@ -198,7 +243,8 @@
   text-align: center;
 }
 .loaderElement {
-  animation: slideAndFade 0.3s both ease;
+  animation: slideAndFade 0.15s both ease;
+  animation-delay: 0.1s;
   min-height: 100px;
   @extend .flexCenter;
   gap: 15px;
