@@ -1,15 +1,19 @@
 .container {
-  background-color: #ffff;
-  // height: 250px;
-  padding: 10px;
+  min-height: 400px;
+  background-color: #ffffff;
 
-  .header {
-    border-left: 3px solid #e0803d;
-    font-size: 16px;
-    font-weight: 600;
-    padding-left: 10px;
-    padding: 10px;
-  }
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0px -1px 4px #b6b6b650;
+  margin: 20px;
+
+  // .header {
+  //   border-left: 3px solid #e0803d;
+  //   font-size: 16px;
+  //   font-weight: 600;
+  //   padding-left: 10px;
+  //   padding: 10px;
+  // }
   .contentSection {
     padding: 15px 20px;
     box-shadow: 0px -1px 4px 0px #b6b6b640;

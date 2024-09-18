@@ -1,111 +1,139 @@
-import * as React from "react";
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
+import { Carousel } from "primereact/carousel";
 import styles from "./ShoutOutsIntranet.module.scss";
-import type { IShoutOutsIntranetProps } from "./IShoutOutsIntranetProps";
-import { escape } from "@microsoft/sp-lodash-subset";
+import { Avatar } from "primereact/avatar";
+import "../../../assets/styles/style.css";
+import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 
-export default class ShoutOutsIntranet extends React.Component<
-  IShoutOutsIntranetProps,
-  {}
-> {
-  public render(): React.ReactElement<IShoutOutsIntranetProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName,
-    } = this.props;
+const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
 
-    return (
-      <section
-        className={`${styles.shoutOutsIntranet} ${
-          hasTeamsContext ? styles.teams : ""
-        }`}
-      >
-        <div className={styles.welcome}>
-          <img
-            alt=""
-            src={
-              isDarkTheme
-                ? require("../assets/welcome-dark.png")
-                : require("../assets/welcome-light.png")
-            }
-            className={styles.welcomeImage}
-          />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>
-            Web part property value: <strong>{escape(description)}</strong>
-          </div>
-        </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for
-            Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest
-            way to extend Microsoft 365 with automatic Single Sign On, automatic
-            hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li>
-              <a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">
-                SharePoint Framework Overview
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://aka.ms/spfx-yeoman-graph"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Use Microsoft Graph in your solution
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://aka.ms/spfx-yeoman-teams"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Build for Microsoft Teams using SharePoint Framework
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://aka.ms/spfx-yeoman-viva"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Build for Microsoft Viva Connections using SharePoint Framework
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://aka.ms/spfx-yeoman-store"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Publish SharePoint Framework applications to the marketplace
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://aka.ms/spfx-yeoman-api"
-                target="_blank"
-                rel="noreferrer"
-              >
-                SharePoint Framework API reference
-              </a>
-            </li>
-            <li>
-              <a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">
-                Microsoft 365 Developer Community
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-    );
+const ShoutOutsIntranet = (props: any): JSX.Element => {
+  const responsiveOptions = [
+    {
+      breakpoint: "1400px",
+      numVisible: 2,
+      numScroll: 1,
+    },
+    {
+      breakpoint: "1199px",
+      numVisible: 3,
+      numScroll: 1,
+    },
+    {
+      breakpoint: "767px",
+      numVisible: 2,
+      numScroll: 1,
+    },
+    {
+      breakpoint: "575px",
+      numVisible: 1,
+      numScroll: 1,
+    },
+  ];
+  interface IShoutOut {
+    senderName: string;
+    receiverName: string;
+    message: string;
+    senderImage: string;
+    receiverImage: string;
   }
-}
+  const products: IShoutOut[] = [
+    {
+      senderName: "Yaroslav Pentsarsky",
+      receiverName: "Sabina Satgareeva",
+      message:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elitLorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      senderImage: "maasi@mydomain28.onmicrosoft.com",
+      receiverImage: "maasi@mydomain28.onmicrosoft.com",
+    },
+    {
+      senderName: "Yaroslav Pentsarsky",
+      receiverName: "Sabina Satgareeva",
+      message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      senderImage: "Venkat@mydomain28.onmicrosoft.com",
+
+      receiverImage: "Venkat@mydomain28.onmicrosoft.com",
+    },
+    {
+      senderName: "Yaroslav Pentsarsky",
+      receiverName: "Sabina Satgareeva",
+      message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      senderImage: "Venkat@mydomain28.onmicrosoft.com",
+
+      receiverImage: "Venkat@mydomain28.onmicrosoft.com",
+    },
+    {
+      senderName: "Yaroslav Pentsarsky",
+      receiverName: "Sabina Satgareeva",
+      message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      senderImage: "Venkat@mydomain28.onmicrosoft.com",
+
+      receiverImage: "Venkat@mydomain28.onmicrosoft.com",
+    },
+  ];
+
+  const productTemplate = (val: any): any => {
+    return (
+      // <div></div>
+      <div className={styles.Container}>
+        <p className={styles.shoutOutHeader}>
+          <span className={styles.sender}>{val?.senderName}</span>{" "}
+          <span className={styles.recogonized}>recognized </span>
+          <span className={styles.receiver}>{val?.receiverName}</span>
+        </p>
+
+        <div className={styles.iconSection}>
+          <Avatar
+            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.senderImage}`}
+            // size="small"
+            shape="circle"
+            style={{
+              width: "40px !important",
+              height: "40px !important",
+            }}
+            data-pr-tooltip={val.receiverName}
+          />
+          <img src={`${img}`} alt="" className={styles.img} />
+          <i className="pi pi-caret-right" style={{ fontSize: "20px" }}></i>
+          <Avatar
+            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.senderImage}`}
+            // size="large"
+            shape="circle"
+            // style={{
+            //   width: "20px !important",
+            //   height: "20px !important",
+            // }}
+            data-pr-tooltip={val.receiverName}
+          />
+        </div>
+
+        <p className={styles.message}>{val.message}</p>
+      </div>
+    );
+  };
+  return (
+    <div className={`Shoutout ${styles.ShoutoutContainer}`}>
+      <SectionHeaderIntranet label={"Shout-outs"} />
+
+      <div className={styles.carousel}>
+        <Carousel
+          value={products}
+          numScroll={1}
+          numVisible={1}
+          showIndicators={true}
+          showNavigators={false}
+          autoplayInterval={products.length > 1 ? 3000 : 8.64e7}
+          circular
+          responsiveOptions={responsiveOptions}
+          itemTemplate={productTemplate}
+        />
+      </div>
+    </div>
+  );
+};
+export default ShoutOutsIntranet;
