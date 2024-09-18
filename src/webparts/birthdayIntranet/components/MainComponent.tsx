@@ -5,13 +5,14 @@ const image1: any = require("../../../assets/images/svg/Birthday/Frame 101010746
 const image2: any = require("../../../assets/images/svg/Birthday/Frame 1010107468.png");
 const image3: any = require("../../../assets/images/svg/Birthday/Frame 1010107469.png");
 const share: any = require("../../../assets/images/svg/Birthday/send.png");
-// import "../../../assets/styles/style.css";
+import "../../../assets/styles/style.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
 import { useState } from "react";
+import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 interface IBirthday {
   name: string;
   birthday: string;
@@ -43,7 +44,9 @@ const MainComponent = () => {
   ];
   return (
     <div className={styles.container}>
-      <div className={styles.header}>BirthDay</div>
+      <SectionHeaderIntranet label={"BirthDay"} />
+
+      {/* <div className={styles.header}>BirthDay</div> */}
 
       <div className={styles.contentSection}>
         {birthdays.map((val: any, index: number) => (
