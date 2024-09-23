@@ -26,7 +26,7 @@ export const resetFormData = (
 
 type ValidationRule = {
   required?: boolean;
-  type?: "string" | "date" | "file";
+  type?: "string" | "date" | "file" | "array";
   customErrorMessage?: string;
 };
 
@@ -38,7 +38,10 @@ export const validateField = (
   const { required = false, type, customErrorMessage } = rules;
 
   // Check for required fields
-  if (required && (type === "date" ? !value : !emptyCheck(value))) {
+  if (
+    required &&
+    (type === "date" || type === "array" ? !value : !emptyCheck(value))
+  ) {
     return {
       isValid: false,
       errorMsg: customErrorMessage || `${field} is required`,
@@ -56,6 +59,9 @@ export const validateField = (
 
   if (type === "file" && !value) {
     return { isValid: false, errorMsg: "Invalid file" };
+  }
+  if (type === "array" && !value) {
+    return { isValid: false, errorMsg: "Invalid data" };
   }
 
   return { isValid: true, errorMsg: "" };

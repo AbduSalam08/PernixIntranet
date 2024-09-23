@@ -24,6 +24,7 @@ const CustomFileUpload: React.FC<FileUploadProps> = ({
   console.log("selectedFile: ", selectedFile);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>(value);
+  const [isFocused, setIsFocused] = useState(false); // New state for input focus
 
   // Create a ref to reset the input field programmatically
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -68,7 +69,7 @@ const CustomFileUpload: React.FC<FileUploadProps> = ({
     setError(null);
     setFileName(""); // Clear the file name
     onFileSelect?.(null);
-
+    setIsFocused(false);
     // Reset the file input programmatically
     if (fileInputRef.current) {
       fileInputRef.current.value = ""; // Clear the input value
@@ -77,17 +78,22 @@ const CustomFileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className={styles.fileUpload}>
-      <div className={styles.inputWrapper}>
+      <div
+        className={`${styles.inputWrapper} ${
+          fileName || isFocused ? styles.filled : ""
+        }`} // Add 'filled' class when file is selected or input is focused
+      >
         <input
           type="file"
           accept={accept}
           onChange={handleFileChange}
           className={styles.input}
           ref={fileInputRef} // Attach the ref to the input
+          onFocus={() => setIsFocused(true)} // Set focus state
+          onBlur={() => setIsFocused(false)} // Reset focus state
         />
-        <div className={styles.placeholder} title={fileName || placeholder}>
-          {fileName || placeholder}
-        </div>
+        <label className={styles.placeholder}>{placeholder}</label>
+        <div className={styles.fileName}>{fileName}</div>
         {fileName && value !== null && (
           <button
             type="button"
@@ -99,9 +105,9 @@ const CustomFileUpload: React.FC<FileUploadProps> = ({
         )}
       </div>
       {error ? (
-        <div className={styles.errorMsg}>{error}</div>
+        <div className={styles.error}>{error}</div>
       ) : !isValid ? (
-        <div className={styles.errorMsg}>{errMsg}</div>
+        <div className={styles.error}>{errMsg}</div>
       ) : (
         <div className={styles.acceptedInfo}>
           Accepted files: {accept.replace(/,/g, ", ")}
