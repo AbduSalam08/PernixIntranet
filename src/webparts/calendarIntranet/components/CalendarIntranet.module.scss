@@ -3,7 +3,7 @@
   border-radius: 6px;
   box-shadow: 0px -1px 4px #b6b6b650;
   margin: 20px;
-  min-height: 400px;
+  height: 448px;
 
   padding: 20px;
   .header {
@@ -77,5 +77,33 @@
       text-decoration: underline;
       text-decoration-color: #e0803d;
     }
+  }
+}
+
+.addNewsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Four equal-width columns */
+  gap: 16px; /* Space between grid items */
+}
+
+/* Make the grid responsive */
+@media (max-width: 1200px) {
+  .addNewsGrid {
+    grid-template-columns: repeat(
+      3,
+      1fr
+    ); /* Three columns for medium screens */
+  }
+}
+
+@media (max-width: 900px) {
+  .addNewsGrid {
+    grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
+  }
+}
+
+@media (max-width: 600px) {
+  .addNewsGrid {
+    grid-template-columns: 1fr; /* Single column for very small screens */
   }
 }

@@ -9,13 +9,14 @@ const image3: any = require("../../../assets/images/svg/Birthday/Frame_101010746
 import "../../../assets/styles/style.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
+
 // require("../../../node_modules/primereact/resources/primereact.min.css");
 
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 
-import { useState } from "react";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
+import { useState } from "react";
 interface IBirthday {
   name: string;
   birthday: string;
@@ -44,7 +45,14 @@ const MainComponent = () => {
       isToday: false,
       imageUrl: image3,
     },
+    {
+      name: "Jane Doe",
+      birthday: "May 1, 2024",
+      isToday: false,
+      imageUrl: image3,
+    },
   ];
+
   return (
     <div className={styles.container}>
       <SectionHeaderIntranet label={"BirthDay"} removeAdd />
