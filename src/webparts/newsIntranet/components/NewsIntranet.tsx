@@ -216,7 +216,7 @@ const NewsIntranet = (props: any): JSX.Element => {
 
         <CustomFileUpload
           accept="image/png,image/svg"
-          value={formData.thumbnail.value?.name || "Thumbnail"}
+          value={formData.thumbnail.value?.name}
           onFileSelect={(file) => {
             console.log("file: ", file);
             const { isValid, errorMsg } = validateField(

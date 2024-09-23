@@ -17,12 +17,13 @@ import { graph } from "@pnp/graph/presets/all";
 import { store } from "../../redux/store/store";
 import { Provider } from "react-redux";
 require("../../../node_modules/primereact/resources/primereact.min.css");
-// require("../../assets/styles/style.css");
-export interface IShoutOutsIntranetWebPartProps {
+require("../../assets/styles/style.css");
+require("../../components/common/CustomInputFields/customStyle.css");
+interface IShoutOutsIntranetWebParProps {
   description: string;
 }
 
-export default class ShoutOutsIntranetWebPart extends BaseClientSideWebPart<IShoutOutsIntranetWebPartProps> {
+export default class ShoutOutsIntranetWebPart extends BaseClientSideWebPart<IShoutOutsIntranetWebParProps> {
   // private _isDarkTheme: boolean = false;
   // private _environmentMessage: string = "";
 
