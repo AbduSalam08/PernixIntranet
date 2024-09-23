@@ -3,11 +3,12 @@
   padding: 20px;
   box-shadow: 0px -1px 4px 0px #b9b9b940;
   border-radius: 6px;
-  min-height: 400px;
+  height: 460px;
 
   .contentSection {
     padding: 15px 20px;
     border-radius: 6px;
+    height: 350px;
 
     box-shadow: 0px -1px 4px 0px #b6b6b640;
     margin-top: 20px;
@@ -36,6 +37,16 @@
       color: #4b4b4b;
       font-size: 13px;
       font-family: "osRegular", sans-serif;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      // max-height: calc(1em * 4);
+      // line-height: 1em;
       line-height: 21px;
       margin-bottom: 20px;
     }
