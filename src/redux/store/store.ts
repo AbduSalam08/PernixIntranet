@@ -4,8 +4,10 @@ import MotivationalQuotesSlice from "../features/MotivationalQuotesSlice";
 import NewsIntranetSlice from "../features/NewsIntranetSlice";
 import CalenderIntranetSlice from "../features/CalenderIntranetSlice";
 import QuestionCEOIntranetSlice from "../features/QuestionCEOIntranetSlice";
-
+import NewHiresIntranet from "../features/NewHiresIntranet";
 import ShoutOutsSlice from "../features/ShoutOutsSlice";
+import PollIntranetSlice from "../features/PollIntranetSlice";
+import FeedbackIntranetSlice from "../features/FeedbackIntranetSlice";
 
 const store = configureStore({
   reducer: {
@@ -15,6 +17,9 @@ const store = configureStore({
     CalenderIntranetData: CalenderIntranetSlice,
     QuestionCEOIntranetData: QuestionCEOIntranetSlice,
     ShoutOutsData: ShoutOutsSlice,
+    PollIntranetData: PollIntranetSlice,
+    FeedbackIntranetData: FeedbackIntranetSlice,
+    NewHiresData: NewHiresIntranet,
   },
 });
 

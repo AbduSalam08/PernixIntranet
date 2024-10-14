@@ -564,6 +564,10 @@ const CalendarIntranet = (): JSX.Element => {
               "close"
             );
             resetFormData(formData, setFormData);
+
+            if (popupData?.isLoading?.success) {
+              getEvents(dispatch);
+            }
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle
