@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import { Avatar } from "primereact/avatar";
@@ -26,72 +27,13 @@ const QuestionsCeoIntranet = (): JSX.Element => {
   });
 
   console.log(QuestionCEOIntranetData, "QuestionCEOIntranetData");
-  // interface IQuestion {
-  //   title: string;
-  //   content: string;
-  //   date: string;
-  //   avatarUrl: string;
-  //   replies: IReply[];
-  // }
-
-  // interface IReply {
-  //   content: string;
-  //   date: string;
-  //   avatarUrl: string;
-  // }
-
-  // const questions: IQuestion[] = [
-  //   {
-  //     title: "The future of analytics and business intelligence",
-  //     content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  //     date: "23/08/2024",
-  //     avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-  //     replies: [
-  //       {
-  //         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  //         date: "26/08/2024",
-  //         avatarUrl: "https://randomuser.me/api/portraits/men/34.jpg",
-  //       },
-  //     ],
-  //   },
-
-  //   {
-  //     title: "The future of analytics and business intelligence",
-  //     content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  //     date: "23/08/2024",
-  //     avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-  //     replies: [
-  //       {
-  //         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  //         date: "26/08/2024",
-  //         avatarUrl: "https://randomuser.me/api/portraits/men/34.jpg",
-  //       },
-  //     ],
-  //   },
-
-  //   {
-  //     title: "The future of analytics and business intelligence",
-  //     content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  //     date: "23/08/2024",
-  //     avatarUrl: "Venkat@mydomain28.onmicrosoft.com",
-  //     replies: [
-  //       {
-  //         content:
-  //           "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-  //         date: "26/08/2024",
-  //         avatarUrl: "Venkat@mydomain28.onmicrosoft.com",
-  //       },
-  //     ],
-  //   },
-  //   // Add more questions here
-  // ];
 
   // const dispatch = useDispatch();
   // popup properties
   const initialPopupController = [
     {
       open: false,
-      popupTitle: "Add Question of CEO",
+      popupTitle: "New question to CEO",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -183,11 +125,11 @@ const QuestionsCeoIntranet = (): JSX.Element => {
 
   const popupInputs: any[] = [
     [
-      <div className={styles.addNewsGrid} key={1}>
+      <div key={1}>
         <FloatingLabelTextarea
           value={formData.Description.value}
           size="XL"
-          placeholder="Description"
+          placeholder="Enter question"
           rows={5}
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
@@ -241,7 +183,7 @@ const QuestionsCeoIntranet = (): JSX.Element => {
     getQuestionCeo(dispatch);
   }, [dispatch]);
 
-  const productTemplate = (val: any) => {
+  const productTemplate = (val: any): JSX.Element => {
     return (
       <div>
         <div className={styles.questions}>
@@ -261,7 +203,7 @@ const QuestionsCeoIntranet = (): JSX.Element => {
           <p className={styles.ques}>{val.title}</p>
         </div>
         <p className={styles.date}>
-          <i className="pi pi-clock" style={{ fontSize: "1rem" }}></i>
+          <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
           {val.date}
         </p>
 
@@ -272,14 +214,12 @@ const QuestionsCeoIntranet = (): JSX.Element => {
                 className="qustionceo"
                 image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies[0]?.avatarUrl}`}
                 shape="circle"
-
-                // data-pr-tooltip={val.receiverName}
               />
             </div>
             <p className={styles.answer}>{val.replies[0]?.content}</p>
           </div>
           <p className={styles.date}>
-            <i className="pi pi-clock" style={{ fontSize: "1rem" }}></i>
+            <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
             {val.replies[0]?.date}
           </p>
         </div>

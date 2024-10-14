@@ -12,19 +12,168 @@ import "primereact/resources/primereact.min.css";
 
 // require("../../../node_modules/primereact/resources/primereact.min.css");
 
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
+import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useState } from "react";
+import resetPopupController, {
+  togglePopupVisibility,
+} from "../../../utils/popupUtils";
+import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
+import Popup from "../../../components/common/Popups/Popup";
+// images
+const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
+
 interface IBirthday {
   name: string;
   birthday: string;
   isToday: boolean;
   imageUrl: string;
 }
-const MainComponent = () => {
-  const [visible, setVisible] = useState(false);
+const MainComponent = (): JSX.Element => {
+  // popup properties
+  const initialPopupController = [
+    {
+      open: false,
+      popupTitle: "Send the wish",
+      popupWidth: "800px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "News added successfully!",
+        error: "Something went wrong!",
+        successDescription: "The new news 'ABC' has been added successfully.",
+        errorDescription:
+          "An error occured while adding news, please try again later.",
+        inprogress: "Adding new news, please wait...",
+      },
+    },
+  ];
+
+  const [popupController, setPopupController] = useState(
+    initialPopupController
+  );
+
+  const [formData, setFormData] = useState<any>({
+    Message: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+  });
+
+  const handleInputChange = (
+    field: string,
+    value: any,
+    isValid: boolean,
+    errorMsg: string = ""
+  ): void => {
+    setFormData((prevData: any) => ({
+      ...prevData,
+      [field]: {
+        ...prevData[field],
+        value: value,
+        isValid,
+        errorMsg: isValid ? "" : errorMsg,
+      },
+    }));
+  };
+
+  const handleSubmit = async (): Promise<any> => {
+    let hasErrors = false;
+
+    // Validate each field and update the state with error messages
+    const updatedFormData = Object.keys(formData).reduce((acc, key) => {
+      const fieldData = formData[key];
+      const { isValid, errorMsg } = validateField(
+        key,
+        fieldData.value,
+        fieldData?.validationRule
+      );
+
+      if (!isValid) {
+        hasErrors = true;
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          ...fieldData,
+          isValid,
+          errorMsg,
+        },
+      };
+    }, {} as typeof formData);
+
+    setFormData(updatedFormData);
+    if (!hasErrors) {
+      // await addNews(formData, setPopupController, 0);
+    } else {
+      console.log("Form contains errors");
+    }
+  };
+
+  const popupInputs: any[] = [
+    [
+      <div className={styles.messageBox} key={1}>
+        <img src={wishImg} alt="wishImg" />
+        <FloatingLabelTextarea
+          value={formData.Description.value}
+          placeholder="Message"
+          rows={5}
+          isValid={formData.Message.isValid}
+          errorMsg={formData.Message.errorMsg}
+          onChange={(e: any) => {
+            const value = e;
+            const { isValid, errorMsg } = validateField(
+              "Message",
+              value,
+              formData.Message.validationRule
+            );
+            handleInputChange("Message", value, isValid, errorMsg);
+          }}
+        />
+      </div>,
+    ],
+  ];
+
+  const popupActions: any[] = [
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit();
+        },
+      },
+    ],
+  ];
 
   const birthdays: IBirthday[] = [
     {
@@ -57,8 +206,6 @@ const MainComponent = () => {
     <div className={styles.container}>
       <SectionHeaderIntranet label={"BirthDay"} removeAdd />
 
-      {/* <div className={styles.header}>BirthDay</div> */}
-
       <div className={styles.contentSection}>
         {birthdays.map((val: any, index: number) => (
           <div key={index} className={styles.contentMain}>
@@ -76,54 +223,72 @@ const MainComponent = () => {
                   </p>
                 </div>
 
-                <div>
-                  <i
-                    className="pi pi-send"
-                    style={{ color: "#E0803D", fontSize: "24px" }}
-                  ></i>
-                  {/* <img
+                {val?.isToday && (
+                  <div
+                    onClick={() => {
+                      togglePopupVisibility(
+                        setPopupController,
+                        initialPopupController[0],
+                        0,
+                        "open"
+                      );
+                      resetFormData(formData, setFormData);
+                    }}
+                  >
+                    <i
+                      className="pi pi-send"
+                      style={{ color: "#E0803D", fontSize: "24px" }}
+                    />
+                    {/* <img
                     src={`${share}`}
                     alt=""
                     onClick={() => {
                       setVisible(true);
                     }}
                   /> */}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <Dialog
-        showHeader={false}
-        visible={visible}
-        style={{ width: "50vw" }}
-        className={styles.birthDialog}
-        onHide={() => {
-          if (!visible) return;
-          setVisible(false);
-        }}
-        closable={false}
-      >
-        <p> send Wish</p>
-        <div className={styles.content}>
-          <p className="m-0">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-          </p>
-        </div>
-
-        <div className={styles.buttonSection}>
-          <Button label="Primary" outlined className={styles.teams} />
-          <Button label="Primary" outlined className={styles.outlook} />
-        </div>
-      </Dialog>
+      {popupController?.map((popupData: any, index: number) => (
+        <Popup
+          key={index}
+          isLoading={popupData?.isLoading}
+          messages={popupData?.messages}
+          resetPopup={() => {
+            setPopupController((prev: any): any => {
+              resetPopupController(prev, index, true);
+            });
+          }}
+          PopupType={popupData.popupType}
+          onHide={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              index,
+              "close"
+            );
+            resetFormData(formData, setFormData);
+          }}
+          popupTitle={
+            popupData.popupType !== "confimation" && popupData.popupTitle
+          }
+          popupActions={popupActions[index]}
+          visibility={popupData.open}
+          content={popupInputs[index]}
+          popupWidth={popupData.popupWidth}
+          defaultCloseBtn={popupData.defaultCloseBtn || false}
+          confirmationTitle={
+            popupData.popupType !== "custom" ? popupData.popupTitle : ""
+          }
+          popupHeight={index === 0 ? true : false}
+          noActionBtn={true}
+        />
+      ))}
     </div>
   );
 };
