@@ -69,9 +69,9 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
   right: 0 !important;
 }
 
-#workbenchPageContent > div > div > div {
+/* #workbenchPageContent > div > div > div {
   padding: 0px !important;
-}
+} */
 
 .ControlZone {
   margin: 0px !important;
@@ -199,7 +199,7 @@ audio,
 video {
   margin: 0;
   padding: 0;
-  border: 0;
+  /* border: 0; */
   /* font-size: 100%; */
   font: inherit;
   /* vertical-align: baseline; */
@@ -466,4 +466,17 @@ body {
 }
 .ms-BasePicker-text::after {
   display: none !important;
+}
+
+/* inputtextarea */
+
+.p-inputtext:enabled:focus {
+  box-shadow: unset !important;
+  border-color: unset !important;
+  border: 0 !important;
+}
+.p-inputtext {
+  background: #f8f8f8 !important;
+  border: 0 !important;
+  padding: 10px !important;
 }

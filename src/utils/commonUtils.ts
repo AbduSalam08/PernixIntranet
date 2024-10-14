@@ -24,6 +24,40 @@ export const resetFormData = (
   setData(resetData);
 };
 
+export const resetOptionsData = (
+  initialOptions: any[],
+  setOptions: (options: any[]) => void
+): void => {
+  const resetOptions = initialOptions.map((option: any) => ({
+    ...option,
+    Title: "", // Reset the Title field to an empty string
+    value: "", // Reset the value field to an empty string
+    Percentage: 0, // Reset the Percentage to its initial state
+    isValid: true, // Reset validation status
+    errorMsg: option.errorMsg || "", // Keep the original error messages if needed
+  }));
+
+  // Update the state with the reset options
+  setOptions(resetOptions);
+};
+
+export const resetSelectedItem = (
+  initialData: { [key: string]: any },
+  setSelectedOption: (data: { [key: string]: any }) => void
+): void => {
+  const resetData = Object.keys(initialData).reduce(
+    (acc: { [key: string]: any }, key: string) => {
+      const field = initialData[key];
+      acc[key] = field !== null && typeof field === "string" ? "" : null;
+      return acc;
+    },
+    {}
+  );
+
+  // Update state with the reset data
+  setSelectedOption(resetData);
+};
+
 type ValidationRule = {
   required?: boolean;
   type?: "string" | "date" | "file" | "array";
