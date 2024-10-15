@@ -1,5 +1,5 @@
 /* eslint-disable no-debugger */
-import { LISTNAMES } from "../../config/config";
+import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setShoutOutsData } from "../../redux/features/ShoutOutsSlice";
 
@@ -14,7 +14,7 @@ export const getAllShoutOutsData = async (dispatch: any): Promise<any> => {
   try {
     // Fetch news data
     const response: any = await SpServices.SPReadItems({
-      Listname: LISTNAMES.Intranet_ShoutOuts,
+      Listname: CONFIG.ListNames.Intranet_ShoutOuts,
       Select:
         "*, SendTowards/ID, SendTowards/Title, SendTowards/EMail, Author/ID, Author/Title, Author/EMail",
       Expand: "SendTowards, Author",
@@ -98,7 +98,7 @@ export const addShoutOut = async (
 
     // Add item to the SharePoint list
     await SpServices.SPAddItem({
-      Listname: LISTNAMES.Intranet_ShoutOuts,
+      Listname: CONFIG.ListNames.Intranet_ShoutOuts,
       RequestJSON: payload,
     });
 

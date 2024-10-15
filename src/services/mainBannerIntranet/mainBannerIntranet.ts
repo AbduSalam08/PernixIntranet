@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LISTNAMES } from "../../config/config";
+import { CONFIG } from "../../config/config";
 import { getLastQuoteBasedOnDate } from "../../utils/mainBannerIntranet";
 // import SpServices from "../SPServices/SpServices";
 import { sp } from "@pnp/sp";
@@ -16,7 +16,7 @@ const getAttachmentsForItem = async (itemId: number): Promise<string[]> => {
   try {
     // Fetch attachments for the given item ID
     const attachments = await sp.web.lists
-      .getByTitle(LISTNAMES.Intranet_MotivationalQuotes)
+      .getByTitle(CONFIG.ListNames.Intranet_MotivationalQuotes)
       .items.getById(itemId)
       .attachmentFiles.get();
 
@@ -33,7 +33,7 @@ export const getDailyQuote = async (): Promise<any> => {
   try {
     // Fetch items from the list
     const res = await sp.web.lists
-      .getByTitle(LISTNAMES.Intranet_MotivationalQuotes)
+      .getByTitle(CONFIG.ListNames.Intranet_MotivationalQuotes)
       .items.select("*")
       .get();
 
