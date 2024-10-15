@@ -133,7 +133,7 @@ const CustomMultiplePeoplePicker: React.FC<Props> = ({
 
         <PeoplePicker
           context={mainContext}
-          webAbsoluteUrl={CONFIG.webURL}
+          webAbsoluteUrl={CONFIG.TenantDetail.webURL}
           //   titleText="Select People"
           personSelectionLimit={personSelectionLimit}
           showtooltip={false}

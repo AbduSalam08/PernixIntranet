@@ -71,7 +71,7 @@ const CustomPeoplePicker: React.FC<any> = ({
         </label>
         <PeoplePicker
           context={mainContext}
-          webAbsoluteUrl={CONFIG.webURL}
+          webAbsoluteUrl={CONFIG.TenantDetail.webURL}
           personSelectionLimit={personSelectionLimit}
           showtooltip={false}
           ensureUser={true}

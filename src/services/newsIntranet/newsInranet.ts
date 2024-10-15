@@ -1,6 +1,6 @@
 /* eslint-disable no-debugger */
 import dayjs from "dayjs";
-import { LISTNAMES } from "../../config/config";
+import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setNewsIntranetData } from "../../redux/features/NewsIntranetSlice";
 
@@ -15,7 +15,7 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
   try {
     // Fetch news data
     const response = await SpServices.SPReadItems({
-      Listname: LISTNAMES.Intranet_News,
+      Listname: CONFIG.ListNames.Intranet_News,
     });
     console.log("response: ", response);
 
@@ -23,7 +23,7 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
     const attachmentPromises = response?.map(async (item: any) => {
       // Fetch attachments for the current news item
       const attachments = await SpServices.SPGetAttachments({
-        Listname: LISTNAMES.Intranet_News,
+        Listname: CONFIG.ListNames.Intranet_News,
         ID: item.ID,
       });
 
@@ -98,14 +98,14 @@ export const addNews = async (
 
     // Add item to the SharePoint list
     const addItem: any = await SpServices.SPAddItem({
-      Listname: LISTNAMES.Intranet_News,
+      Listname: CONFIG.ListNames.Intranet_News,
       RequestJSON: payload,
     });
 
     // Handle thumbnail attachment only if it exists
     if (formData?.thumbnail?.value) {
       await SpServices.SPAddAttachment({
-        ListName: LISTNAMES.Intranet_News,
+        ListName: CONFIG.ListNames.Intranet_News,
         ListID: addItem?.data?.ID,
         FileName: formData.thumbnail.value?.name,
         Attachments: formData.thumbnail.value,

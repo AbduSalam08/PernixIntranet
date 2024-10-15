@@ -1,23 +1,42 @@
-const CONFIG = {
-  webURL: "https://mydomain28.sharepoint.com/sites/PernixIntranet",
-  tenantURL: "https://mydomain28.sharepoint.com",
-  // webURL: "https://chandrudemo.sharepoint.com/sites/ReadifyEM",
-  // tenantURL: "https://chandrudemo.sharepoint.com",
-};
+import {
+  IListName,
+  IRoleDetails,
+  ISPGroupName,
+  ITenantDetail,
+} from "../interface/interface";
 
-const LISTNAMES = {
-  Intranet_DocumentRepository: "Intranet_DocumentRepository",
-  Intranet_MotivationalQuotes: "Intranet_MotivationalQuotes",
-  Intranet_NewHires: "Intranet_NewHires",
-  Intranet_News: "Intranet_News",
-  Intranet_QuestionToCEO: "Intranet_QuestionToCEO",
-  Intranet_ShoutOuts: "Intranet_ShoutOuts",
-};
+export namespace CONFIG {
+  export const TenantDetail: ITenantDetail = {
+    webURL: `${window.location.origin}/sites/PernixIntranet`,
+    tenantURL: `${window.location.origin}`,
+  };
 
-const LIBNAMES = {};
+  export const ListNames: IListName = {
+    Intranet_DocumentRepository: "Intranet_DocumentRepository",
+    Intranet_MotivationalQuotes: "Intranet_MotivationalQuotes",
+    Intranet_NewHires: "Intranet_NewHires",
+    Intranet_News: "Intranet_News",
+    Intranet_QuestionToCEO: "Intranet_QuestionToCEO",
+    Intranet_ShoutOuts: "Intranet_ShoutOuts",
+  };
 
-const GROUPS = {
-  PERNIX_ADMIN: "PERNIX_ADMIN",
-};
+  export const SPGroupName: ISPGroupName = {
+    Birthdays_Admin: "Birthdays_Admin",
+    Calendar_Admin: "Calendar_Admin",
+    Documentrepository_Admin: "Documentrepository_Admin",
+    Footer_Admin: "Footer_Admin",
+    Header_Admin: "Header_Admin",
+    Mainbanner_Admin: "Mainbanner_Admin",
+    Newhire_Admin: "Newhire_Admin",
+    News_Admin: "News_Admin",
+    Pernix_Admin: "Pernix_Admin",
+    Poll_Admin: "Poll_Admin",
+    QuestionCEO_Admin: "QuestionCEO_Admin",
+    Shoutouts_Admin: "Shoutouts_Admin",
+  };
 
-export { CONFIG, LISTNAMES, LIBNAMES, GROUPS };
+  export const RoleDetails: IRoleDetails = {
+    SuperAdmin: "Super Admin",
+    User: "User",
+  };
+}

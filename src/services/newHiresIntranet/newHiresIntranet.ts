@@ -1,5 +1,5 @@
 /* eslint-disable no-debugger */
-import { LISTNAMES } from "../../config/config";
+import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setNewHiresData } from "../../redux/features/NewHiresIntranet";
 
@@ -14,7 +14,7 @@ export const getAllNewHiresData = async (dispatch: any): Promise<any> => {
   try {
     // Fetch news data
     const response: any = await SpServices.SPReadItems({
-      Listname: LISTNAMES.Intranet_NewHires,
+      Listname: CONFIG.ListNames.Intranet_NewHires,
       Select: "*, Author/EMail, Author/Title, Author/ID",
       Expand: "Author",
     });
@@ -102,7 +102,7 @@ export const addNewHire = async (
 
     // Add item to the SharePoint list
     await SpServices.SPAddItem({
-      Listname: LISTNAMES.Intranet_NewHires,
+      Listname: CONFIG.ListNames.Intranet_NewHires,
       RequestJSON: payload,
     });
 

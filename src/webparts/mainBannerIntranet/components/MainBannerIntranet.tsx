@@ -14,6 +14,8 @@ import {
   setMotivationalQuotesData,
 } from "../../../redux/features/MotivationalQuotesSlice";
 import { Skeleton } from "primereact/skeleton"; // Import PrimeReact Skeleton
+import { CONFIG } from "../../../config/config";
+
 // hover images - default
 const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
 const EmployeeDirectory = require("../../../assets/images/svg/quickLinks/exployeeDirectory.svg");
@@ -21,6 +23,7 @@ const HelpDesk = require("../../../assets/images/svg/quickLinks/helpdesk.svg");
 const PTO = require("../../../assets/images/svg/quickLinks/pto.svg");
 const Approvals = require("../../../assets/images/svg/quickLinks/approvals.svg");
 const ProjectTemplate = require("../../../assets/images/svg/quickLinks/projectTemplate.svg");
+
 // hover images - white
 const OrganizationalChartWhite = require("../../../assets/images/svg/quickLinks/orgChartWhite.svg");
 const EmployeeDirectoryWhite = require("../../../assets/images/svg/quickLinks/exployeeDirectoryWhite.svg");
@@ -31,14 +34,12 @@ const ProjectTemplateWhite = require("../../../assets/images/svg/quickLinks/proj
 const PernixBannerImage = require("../assets/PernixBannerImage.svg");
 
 const MainBannerIntranet = (props: any): JSX.Element => {
-  console.log("props: ", props);
+  /* State creations */
+  const [loading, setLoading] = useState<boolean>(true); // Add loading state
 
-  const [loading, setLoading] = useState(true); // Add loading state
-
-  const MainContext: any = useSelector(
-    (state: any) => state?.MainSPContext?.value
-  );
-  console.log("MainContext: ", MainContext);
+  // const MainContext: any = useSelector(
+  //   (state: any) => state?.MainSPContext?.value
+  // );
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
@@ -81,15 +82,23 @@ const MainBannerIntranet = (props: any): JSX.Element => {
     },
   ];
 
-  useEffect(() => {
+  const onLoadingFUN = async (): Promise<void> => {
     dispatch(setMainSPContext(props?.context));
-    getDailyQuote().then((value: any) => {
-      console.log("value: ", value);
+    await RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      CONFIG.SPGroupName.Mainbanner_Admin,
+      dispatch
+    );
+    await getDailyQuote().then((value: any) => {
       dispatch(setMotivationalQuotesData(value?.quotesData));
       dispatch(setBannerImage(value?.bannerImage));
       setLoading(false); // Set loading to false once data is retrieved
     });
-    RoleAuth(props?.context?._pageContext?._user, dispatch);
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    onLoadingFUN();
   }, [dispatch, props?.context]);
 
   return (
@@ -120,7 +129,12 @@ const MainBannerIntranet = (props: any): JSX.Element => {
         />
       )}
 
-      <div className={styles.welcomeText}>
+      <div
+        className={styles.welcomeText}
+        onClick={(_) => {
+          console.log("currentUserDetails: ", currentUserDetails);
+        }}
+      >
         {loading ? (
           <>
             <Skeleton width="50%" height="2rem" />
