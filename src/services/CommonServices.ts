@@ -1,55 +1,70 @@
 /* eslint-disable no-unused-expressions */
 import { sp } from "@pnp/sp";
-import { GROUPS } from "../config/config";
 import { setCurrentUserDetails } from "../redux/features/MainSPContextSlice";
+import { CONFIG } from "../config/config";
+import { IUserDetails } from "../interface/interface";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const RoleAuth = async (
-  currentUser: any,
+  superAdmin: string,
+  groupAdmin: string,
   dispatch?: any
 ): Promise<any> => {
-  let currentUserDetails: any;
-  let currentUserID: any;
-  await sp.web.currentUser
-    .get()
-    ?.then((res: any) => {
-      currentUserID = res?.Id;
-    })
-    .catch((err: any) => {
-      console.log("Error : ", err);
-    });
+  let currentUserDetails: IUserDetails;
+  let currentUserID: number | null = null;
+  let currentUserEmail: string = "";
+  let currentUserName: string = "";
+  let _isAdmin: boolean = false;
 
-  await sp.web.siteGroups
-    // .getByName("ReadifyEM_Admin")
-    .getByName(GROUPS.PERNIX_ADMIN)
-    .users.get()
-    .then((res: any) => {
-      const defineUserIsAdmin: any[] = res?.filter((item: any) => {
-        // return currentUser?.Email === item?.UserPrincipalName;
-        return currentUser?.email === item?.Email;
-      });
+  try {
+    const currentUser: any = await sp.web.currentUser.get();
 
-      // setting the current user details
-      if (defineUserIsAdmin?.length === 0) {
-        currentUserDetails = {
-          userName: currentUser?.displayName,
-          email: currentUser?.email,
-          role: "User",
-          id: defineUserIsAdmin[0]?.id || currentUserID,
-        };
-      } else {
-        currentUserDetails = {
-          userName: defineUserIsAdmin[0]?.Title,
-          // email: defineUserIsAdmin[0]?.UserPrincipalName,
-          email: defineUserIsAdmin[0]?.Email,
-          role: "Admin",
-          id: defineUserIsAdmin[0]?.id || currentUserID,
-        };
-      }
+    currentUserID = currentUser?.Id || null;
+    currentUserEmail = currentUser?.Email.toLowerCase() || "";
+    currentUserName = currentUser?.Title || "";
+  } catch (err) {
+    console.log("Error getting current user: ", err);
+  }
 
-      dispatch && dispatch(setCurrentUserDetails(currentUserDetails));
-    })
-    .catch((err: any) => {
-      console.log("Error : ", err);
-    });
+  try {
+    const superAdminUsers: any = await sp.web.siteGroups
+      .getByName(superAdmin)
+      .users.get();
+
+    const isSuperAdmin: boolean =
+      superAdminUsers?.some(
+        (item: any) => item.Email.toLowerCase() === currentUserEmail
+      ) || false;
+
+    if (isSuperAdmin) {
+      currentUserDetails = {
+        userName: superAdminUsers[0]?.Title,
+        email: superAdminUsers[0]?.Email,
+        role: CONFIG.RoleDetails.SuperAdmin,
+        id: superAdminUsers[0]?.Id || currentUserID,
+      };
+
+      _isAdmin = isSuperAdmin;
+    } else {
+      const groupAdminUsers: any = await sp.web.siteGroups
+        .getByName(groupAdmin)
+        .users.get();
+
+      _isAdmin =
+        groupAdminUsers?.some(
+          (val: any) => val.Email.toLowerCase() === currentUserEmail
+        ) || false;
+
+      currentUserDetails = {
+        userName: currentUserName,
+        email: currentUserEmail,
+        role: _isAdmin ? groupAdmin : CONFIG.RoleDetails.User,
+        id: currentUserID,
+      };
+    }
+
+    dispatch && dispatch(setCurrentUserDetails(currentUserDetails));
+  } catch (err) {
+    console.log("Error fetching user roles: ", err);
+  }
 };

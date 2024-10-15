@@ -22,6 +22,8 @@ import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
+import { CONFIG } from "../../../config/config";
+import { RoleAuth } from "../../../services/CommonServices";
 // const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -55,11 +57,6 @@ const NewsIntranet = (props: any): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-
-  const newsIntranetData: any = useSelector((state: any) => {
-    return state.NewsIntranetData.value;
-  });
-
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -98,6 +95,14 @@ const NewsIntranet = (props: any): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
   });
+
+  const newsIntranetData: any = useSelector((state: any) => {
+    return state.NewsIntranetData.value;
+  });
+  const currentUserDetails: any = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
+  );
+  console.log("News_Admin currentUserDetails: ", currentUserDetails);
 
   const handleInputChange = (
     field: string,
@@ -284,6 +289,11 @@ const NewsIntranet = (props: any): JSX.Element => {
   ];
 
   useEffect(() => {
+    RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      CONFIG.SPGroupName.News_Admin,
+      dispatch
+    );
     getAllNewsData(dispatch);
   }, []);
 
