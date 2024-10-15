@@ -89,6 +89,14 @@
           "manifest": "./src/webparts/mainBannerIntranet/MainBannerIntranetWebPart.manifest.json"
         }
       ]
+    },
+    "news-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newsPage/NewsPageWebPart.js",
+          "manifest": "./src/webparts/newsPage/NewsPageWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -104,6 +112,7 @@
     "FeedBackFormIntranetWebPartStrings": "lib/webparts/feedBackFormIntranet/loc/{locale}.js",
     "BirthdayIntranetWebPartStrings": "lib/webparts/birthdayIntranet/loc/{locale}.js",
     "MainBannerIntranetWebPartStrings": "lib/webparts/mainBannerIntranet/loc/{locale}.js",
-    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "NewsPageWebPartStrings": "lib/webparts/newsPage/loc/{locale}.js"
   }
 }
