@@ -89,6 +89,14 @@
           "manifest": "./src/webparts/mainBannerIntranet/MainBannerIntranetWebPart.manifest.json"
         }
       ]
+    },
+    "help-desk-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/helpDesk/HelpDeskWebPart.js",
+          "manifest": "./src/webparts/helpDesk/HelpDeskWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -104,6 +112,7 @@
     "FeedBackFormIntranetWebPartStrings": "lib/webparts/feedBackFormIntranet/loc/{locale}.js",
     "BirthdayIntranetWebPartStrings": "lib/webparts/birthdayIntranet/loc/{locale}.js",
     "MainBannerIntranetWebPartStrings": "lib/webparts/mainBannerIntranet/loc/{locale}.js",
-    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "HelpDeskWebPartStrings": "lib/webparts/helpDesk/loc/{locale}.js"
   }
 }
