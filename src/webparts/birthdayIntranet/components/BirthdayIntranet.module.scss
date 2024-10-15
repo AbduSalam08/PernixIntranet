@@ -114,3 +114,57 @@
   width: 100%;
   gap: 20px;
 }
+.sendWish {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  span {
+    margin-left: auto;
+    font-size: 18px;
+    font-family: "osBold", sans-serif;
+  }
+  button {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    margin-left: auto;
+    background-color: transparent;
+  }
+}
+.actionBtns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  button {
+    font-size: 14px;
+    font-family: "osSemiBold", sans-serif;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 6px;
+    outline: none;
+    border: none;
+    background-color: transparent;
+    img {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.teams {
+      border: 1px solid #7b83eb;
+      color: #7b83eb;
+    }
+
+    &.outlook {
+      border: 1px solid #117ad6;
+      color: #117ad6;
+    }
+  }
+}

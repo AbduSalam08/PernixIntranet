@@ -90,6 +90,14 @@
         }
       ]
     },
+    "help-desk-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/helpDesk/HelpDeskWebPart.js",
+          "manifest": "./src/webparts/helpDesk/HelpDeskWebPart.manifest.json"
+        }
+      ]
+    },
     "news-page-web-part": {
       "components": [
         {

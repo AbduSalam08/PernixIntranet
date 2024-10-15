@@ -57,7 +57,8 @@ const StyledLabel = styled("label")(({ theme }) => ({
 // Inner textarea component to handle floating label behavior
 const InnerTextarea = React.forwardRef<
   HTMLTextAreaElement,
-  React.JSX.IntrinsicElements["textarea"]
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>
+  // React.JSX.IntrinsicElements["textarea"]
 >(function InnerTextarea(props, ref) {
   return (
     <React.Fragment>
@@ -93,6 +94,7 @@ interface Props {
   readOnly?: boolean;
   mandatory?: boolean;
   textAreaWidth?: string | number;
+  customBorderColor?: string;
   noBorderInput?: boolean;
   topLabel?: boolean;
 }
@@ -118,6 +120,7 @@ export default function FloatingLabelTextarea({
   textAreaWidth,
   rows = 5,
   topLabel,
+  customBorderColor,
 }: Props): JSX.Element {
   return (
     <div
@@ -144,7 +147,9 @@ export default function FloatingLabelTextarea({
         slotProps={{ textarea: { placeholder } }}
         sx={{
           borderRadius: "6px",
-          border: isValid ? "1px solid #ff8585" : "1px solid #e5e5e5",
+          border: !isValid
+            ? "1.5px solid #ff8585 !important"
+            : `1.5px solid ${customBorderColor || "#e5e5e5"} !important`,
           paddingTop: "20px", // for the floating label
           width: textAreaWidth ? textAreaWidth : "100%",
           height: rows ? `${rows * 20}px` : "auto",

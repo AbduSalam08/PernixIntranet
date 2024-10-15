@@ -24,6 +24,7 @@ interface Props {
   popupHeight?: boolean;
   secondaryText?: string;
   noActionBtn?: boolean;
+  popupCustomBgColor?: string;
 }
 
 interface loadingProps {
@@ -43,6 +44,7 @@ interface PopupActionBtn {
 }
 
 const Popup = ({
+  popupCustomBgColor,
   PopupType,
   popupActions,
   popupTitle,
@@ -174,7 +176,12 @@ const Popup = ({
           </div>
         </div>
       ) : (
-        <div className={styles.AlertPopupWrapper}>
+        <div
+          className={styles.AlertPopupWrapper}
+          style={{
+            backgroundColor: popupCustomBgColor,
+          }}
+        >
           <div className={styles.alertBoxContent}>
             {popupTitle && (
               <div className={`${styles.AlertPopupHeader}`}>

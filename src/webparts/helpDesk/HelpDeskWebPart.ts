@@ -6,11 +6,10 @@ import {
   PropertyPaneTextField,
 } from "@microsoft/sp-property-pane";
 import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
-// import { IReadonl  yTheme } from "@microsoft/sp-component-base";
+// import { IReadonlyTheme } from "@microsoft/sp-component-base";
 
-import * as strings from "BirthdayIntranetWebPartStrings";
-import BirthdayIntranet from "./components/BirthdayIntranet";
-// import { IBirthdayIntranetProps } from "./components/IBirthdayIntranetProps";
+import * as strings from "HelpDeskWebPartStrings";
+import HelpDesk from "./components/HelpDesk";
 import { SPComponentLoader } from "@microsoft/sp-loader";
 import { sp } from "@pnp/sp/presets/all";
 import { graph } from "@pnp/graph/presets/all";
@@ -20,11 +19,11 @@ require("../../assets/styles/style.css");
 require("../../components/common/CustomInputFields/customStyle.css");
 require("../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css");
 
-export interface IBirthdayIntranetWebPartProps {
+export interface IHelpDeskWebPartProps {
   description: string;
 }
 
-export default class BirthdayIntranetWebPart extends BaseClientSideWebPart<IBirthdayIntranetWebPartProps> {
+export default class HelpDeskWebPart extends BaseClientSideWebPart<IHelpDeskWebPartProps> {
   // private _isDarkTheme: boolean = false;
   // private _environmentMessage: string = "";
 
@@ -32,7 +31,7 @@ export default class BirthdayIntranetWebPart extends BaseClientSideWebPart<IBirt
     const element: React.ReactElement = React.createElement(
       Provider, // Wrap everything in Redux's Provider
       { store: store }, // Pass the store to the Provider
-      React.createElement(BirthdayIntranet, {
+      React.createElement(HelpDesk, {
         context: this.context,
       })
     );

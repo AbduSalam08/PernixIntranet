@@ -163,7 +163,6 @@ export const createOutlookEvent = async (
 };
 
 //get events
-
 export const getEvents = async (dispatch: any): Promise<void> => {
   try {
     // Set loading state before fetching events
