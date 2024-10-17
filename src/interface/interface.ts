@@ -25,6 +25,7 @@ export interface ISPGroupName {
   Poll_Admin: string;
   QuestionCEO_Admin: string;
   Shoutouts_Admin: string;
+  HelpDesk_Ticket_Managers: string;
 }
 
 export interface IRoleDetails {
@@ -37,4 +38,18 @@ export interface IUserDetails {
   email: string;
   role: string;
   id: number | null;
+}
+
+export interface IAttachDetails {
+  fileName: string;
+  content: any;
+  serverRelativeUrl: string;
+}
+
+export interface IQuoteDatas {
+  ID: number | null;
+  Quote: string;
+  StartDate: Date | null;
+  EndDate: Date | null;
+  Attachments: string;
 }

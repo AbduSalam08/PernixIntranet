@@ -33,10 +33,15 @@ export namespace CONFIG {
     Poll_Admin: "Poll_Admin",
     QuestionCEO_Admin: "QuestionCEO_Admin",
     Shoutouts_Admin: "Shoutouts_Admin",
+    HelpDesk_Ticket_Managers: "HelpDesk_Ticket_Managers",
   };
 
   export const RoleDetails: IRoleDetails = {
     SuperAdmin: "Super Admin",
     User: "User",
   };
+
+  export const TabsName: string[] = ["Current", "Upcoming", "Previous"];
+
+  export const DateFormat: string = "MM/DD/YYYY";
 }

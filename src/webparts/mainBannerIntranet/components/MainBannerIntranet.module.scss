@@ -167,3 +167,11 @@
     padding: 10px 0; // Add padding to the scroll area
   }
 }
+
+.btnAlign {
+  width: 100%;
+  justify-content: end;
+  position: absolute;
+  top: 12px;
+  right: 18px;
+}
