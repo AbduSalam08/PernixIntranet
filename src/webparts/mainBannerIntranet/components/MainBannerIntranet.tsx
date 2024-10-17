@@ -15,6 +15,9 @@ import {
 } from "../../../redux/features/MotivationalQuotesSlice";
 import { Skeleton } from "primereact/skeleton"; // Import PrimeReact Skeleton
 import { CONFIG } from "../../../config/config";
+import { Add } from "@mui/icons-material";
+import DefaultButton from "../../../components/common/Buttons/DefaultButton";
+import { IQuoteDatas, IUserDetails } from "../../../interface/interface";
 
 // hover images - default
 const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
@@ -40,7 +43,7 @@ const MainBannerIntranet = (props: any): JSX.Element => {
   // const MainContext: any = useSelector(
   //   (state: any) => state?.MainSPContext?.value
   // );
-  const currentUserDetails: any = useSelector(
+  const currentUserDetails: IUserDetails = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
   const QuotesData: any = useSelector(
@@ -89,9 +92,9 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       CONFIG.SPGroupName.Mainbanner_Admin,
       dispatch
     );
-    await getDailyQuote().then((value: any) => {
-      dispatch(setMotivationalQuotesData(value?.quotesData));
-      dispatch(setBannerImage(value?.bannerImage));
+    await getDailyQuote().then((value: IQuoteDatas[]) => {
+      dispatch(setMotivationalQuotesData(value?.[0]?.Quote || ""));
+      dispatch(setBannerImage(value?.[0]?.Attachments || ""));
       setLoading(false); // Set loading to false once data is retrieved
     });
   };
@@ -118,9 +121,7 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       ) : (
         <img
           className={styles.imgWrapper}
-          src={
-            QuotesData?.bannerImage ? QuotesData.bannerImage : PernixBannerImage
-          }
+          src={QuotesData?.bannerImage || PernixBannerImage}
           alt="Banner"
           style={{
             objectFit: "cover",
@@ -128,6 +129,32 @@ const MainBannerIntranet = (props: any): JSX.Element => {
           }}
         />
       )}
+
+      <div
+        className={styles.btnAlign}
+        style={{
+          display:
+            currentUserDetails.role === CONFIG.RoleDetails.User
+              ? "none"
+              : "flex",
+        }}
+      >
+        <DefaultButton
+          onlyIcon={true}
+          btnType="primaryGreen"
+          size="medium"
+          // onClick={(_) => {}}
+          text={
+            <Add
+              sx={{
+                width: "20px",
+                fontSize: "24px",
+                color: "#fff",
+              }}
+            />
+          }
+        />
+      </div>
 
       <div
         className={styles.welcomeText}
@@ -143,7 +170,7 @@ const MainBannerIntranet = (props: any): JSX.Element => {
         ) : (
           <>
             <h1>Welcome {currentUserDetails?.userName} !</h1>
-            <p>{QuotesData?.value?.Quote}</p>
+            <p>{QuotesData?.value || ""}</p>
           </>
         )}
       </div>
