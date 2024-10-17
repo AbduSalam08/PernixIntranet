@@ -1,0 +1,83 @@
+.leftBarWrapper {
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #cfcfcf80;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  padding: 20px;
+}
+
+.navItem {
+  font-size: 16px;
+  font-family: "osSemiBold", sans-serif;
+  padding: 0px;
+  width: 100%;
+}
+
+.navLink {
+  transition: all 0.1s !important;
+  text-decoration: none;
+  color: #0b4d53;
+  //   border-left: 3px solid transparent; // Default transparent
+  background-color: transparent; // Default background
+  border-radius: 7px;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  &:hover {
+    color: #555;
+    cursor: pointer;
+  }
+}
+
+.activeNavLink {
+  transition: all 0.1s !important;
+  border-left: 3px solid #0b4d53; // Active border color
+  background-color: #e6f7f9; // Active background color
+  color: #0b4d53 !important; // Active text color
+}
+
+.subNav {
+  width: 100%;
+  margin-left: 15px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.subNavItem {
+  width: calc(100% - 15px);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: "osSemiBold", sans-serif;
+  padding: 10px;
+  border-radius: 4px;
+  color: #666666;
+  &:hover {
+    color: #000;
+  }
+}
+.parentInActive {
+  margin-left: -10px;
+  opacity: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: all 0.2s !important;
+}
+.parentActive {
+  transition: all 0.2s !important;
+  margin-left: 5px;
+  color: #0b4d53;
+  opacity: 1;
+}

@@ -1,0 +1,32 @@
+.errorElementWrapper {
+  width: 100%;
+  //   margin-top: 57px;
+  height: calc(100vh - 110px);
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    img {
+      height: 92px;
+      width: 92px;
+      object-fit: contain;
+    }
+    p {
+      font-size: 24px;
+      color: #000;
+      font-family: "osSemiBold";
+    }
+    span {
+      font-size: 16px;
+      color: #adadad;
+      text-align: center;
+      font-family: "osRegular";
+    }
+  }
+}

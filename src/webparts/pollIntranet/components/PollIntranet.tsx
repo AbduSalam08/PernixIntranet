@@ -27,7 +27,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Add, Delete } from "@mui/icons-material";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
-const PollIntranet = (props: any) => {
+const PollIntranet = (props: any): JSX.Element => {
   const curUser = props.context._pageContext._user.email;
 
   const dispatch = useDispatch();
@@ -209,7 +209,7 @@ const PollIntranet = (props: any) => {
   };
 
   // Function to handle adding a new option
-  const handleAddOption = () => {
+  const handleAddOption = (): void => {
     const lastOption = options[options.length - 1];
 
     // Add a new option only if the last option has a non-empty value
@@ -230,7 +230,7 @@ const PollIntranet = (props: any) => {
   };
 
   // Function to handle deleting an option
-  const handleDeleteOption = (index: number) => {
+  const handleDeleteOption = (index: number): void => {
     setOptions((prevOptions: any[]) =>
       prevOptions.filter((_, i) => i !== index)
     );
@@ -393,7 +393,7 @@ const PollIntranet = (props: any) => {
     OptionId: number,
     Title: string,
     voteId: number
-  ) => {
+  ): void => {
     setSelectedOption({
       QuestionID: QuestionId,
       Title: Title,
@@ -404,7 +404,7 @@ const PollIntranet = (props: any) => {
     }); // Update the selected option ID
   };
 
-  const handleSubmitVote = async () => {
+  const handleSubmitVote = async (): Promise<any> => {
     let hasErrors = false;
 
     // Check if selectedOption is valid
@@ -490,7 +490,7 @@ const PollIntranet = (props: any) => {
                 <div
                   style={{ width: `${val?.Percentage}%` }}
                   className={styles.backgroundfill}
-                ></div>
+                />
 
                 {/* Content displayed on top of the background */}
                 <div className={styles.contentSection}>
@@ -500,7 +500,7 @@ const PollIntranet = (props: any) => {
                   >
                     <p>{index + 1}.</p>
                     {selectedOption.OptionId === val?.Id && (
-                      <i className="pi pi-check"></i>
+                      <i className="pi pi-check" />
                     )}
                     <p>{val?.Title}</p>
                   </div>
@@ -511,7 +511,7 @@ const PollIntranet = (props: any) => {
           )
         )}
         {!(
-          selectedOption.OptionId == PollIntranetData.data?.[0]?.PreviousOption
+          selectedOption.OptionId === PollIntranetData.data?.[0]?.PreviousOption
         ) && (
           <div className={styles.voteButton}>
             <Button label="vote" onClick={handleSubmitVote} />

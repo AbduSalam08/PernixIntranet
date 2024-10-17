@@ -1,0 +1,16 @@
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  span {
+    font-size: 18px;
+    color: #0b4d53;
+    font-family: "osSemiBold", sans-serif;
+  }
+  img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+}

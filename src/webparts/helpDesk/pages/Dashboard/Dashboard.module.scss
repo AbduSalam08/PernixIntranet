@@ -1,0 +1,54 @@
+.myDashboard {
+  width: 100%;
+  background-color: #fff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 15px;
+  flex-direction: column;
+  border-radius: 10px;
+
+  .myDashboard_header {
+    width: 100%;
+    padding: 10px;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #cfcfcf90;
+  }
+
+  .metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+    width: 100%; /* Ensures the grid takes the full width */
+    padding: 5px; /* Optional: add padding for spacing */
+  }
+
+  .metricCard {
+    background-color: #f9fafc;
+    border-radius: 10px;
+    // box-shadow: 0 0px 5px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 250px; /* Adjust based on the height of the charts */
+  }
+
+  .chart {
+    flex-grow: 1;
+    /* Placeholder for chart component */
+    background: lightgray;
+    border-radius: 10px;
+  }
+
+  .chartDetails {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 16px;
+    color: #0b4d53;
+    font-family: "osSemiBold", sans-serif;
+  }
+}

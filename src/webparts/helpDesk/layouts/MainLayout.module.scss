@@ -1,0 +1,25 @@
+.contentGrid {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 12px;
+  padding: 0 10px;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-height: 70vh;
+}
+.lhsG {
+  width: 20%;
+}
+.rhsG {
+  width: 80%;
+  background-color: #fff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 15px;
+  flex-direction: column;
+  padding: 15px;
+  border: 1px solid #cfcfcf80;
+  border-radius: 10px;
+}
