@@ -1,0 +1,162 @@
+.newsCard {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px;
+  background-color: #fff;
+  border-radius: 8px;
+  transition: all 0.1s;
+  cursor: pointer;
+  border: 1px solid #adadad30;
+  &:hover {
+    border-color: transparent;
+    background-color: #eeeeee50;
+    transition: all 0.1s;
+  }
+
+  // Column layout for screens less than 400px
+  @media (max-width: 630px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.newsThumbNail {
+  min-width: 234px;
+  max-width: 234px;
+  height: 105px;
+  border-radius: 6px;
+  object-fit: cover;
+
+  // Full width for small screens
+  @media (max-width: 630px) {
+    width: 100%;
+    height: auto;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: 100px;
+  }
+}
+
+.rhsTexts {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 0;
+
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    color: #0b4d53;
+    line-height: 20px;
+
+    @media (max-width: 700px) {
+      font-size: 14px;
+    }
+  }
+
+  span {
+    font-family: osRegular, sans-serif !important;
+    color: #4b4b4b;
+    line-height: 18px;
+    font-size: 13px;
+    height: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    white-space: normal;
+
+    @media (max-width: 700px) {
+      font-size: 12px;
+      line-height: 16px;
+      height: auto; /* Adjust height to auto for better fit */
+    }
+  }
+}
+
+.rhsActions {
+  display: flex;
+  // flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  @media (max-width: 630px) {
+    align-items: flex-start;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+}
+
+.activepill {
+  padding: 6px;
+  border-radius: 4px;
+  background-color: #e4fae8;
+  font-size: 12px;
+  color: #1eb949;
+  text-transform: uppercase;
+
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
+}
+.inactivepill {
+  padding: 6px;
+  border-radius: 4px;
+  background-color: #fae4e4;
+  font-size: 12px;
+  color: #fd3737;
+  text-transform: uppercase;
+
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
+}
+
+.actionBtns {
+  display: flex;
+  gap: 8px;
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+
+    &:first-of-type {
+      background-color: #28a745;
+
+      &:hover {
+        background-color: #218838;
+      }
+    }
+
+    &:last-of-type {
+      background-color: #dc3545;
+
+      &:hover {
+        background-color: #c82333;
+      }
+    }
+
+    @media (max-width: 630px) {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
+}

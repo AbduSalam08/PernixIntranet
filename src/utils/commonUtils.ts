@@ -81,7 +81,7 @@ export const validateField = (
       errorMsg: customErrorMessage || `${field} is required`,
     };
   }
-
+  debugger;
   // Additional validations based on type
   if (type === "string" && typeof value !== "string") {
     return { isValid: false, errorMsg: "Invalid string format" };
