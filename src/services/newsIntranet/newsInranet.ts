@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setNewsIntranetData } from "../../redux/features/NewsIntranetSlice";
+import { sp } from "@pnp/sp/presets/all";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -30,13 +31,23 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
       // Process and prepare the item data
       const imageUrl =
         attachments.length > 0 ? attachments[0].ServerRelativeUrl : ""; // Assuming the first attachment is the image
+      const FileName = attachments.length > 0 ? attachments[0].FileName : ""; // Assuming the first attachment is the image
       const title = item.Title;
       const description = item.Description;
+      const Status = item.Status;
+      const StartDate = item.StartDate;
+      const EndDate = item.EndDate;
+      const ID = item.Id || item.ID;
 
       return {
         imageUrl,
         title,
         description,
+        Status,
+        StartDate,
+        EndDate,
+        FileName,
+        ID,
       };
     });
 
@@ -148,6 +159,186 @@ export const addNews = async (
           ...updatedState[index].messages,
           errorDescription:
             "An error occurred while adding news, please try again later.",
+        },
+      };
+      return updatedState;
+    });
+  }
+};
+
+export const editNews = async (
+  formData: any,
+  setLoaderState: any,
+  index: number,
+  itemId: number // Pass the ID of the item to be edited
+): Promise<any> => {
+  debugger;
+  // Start loader for the specific item at the given index
+  setLoaderState((prevState: any) => {
+    const updatedState = [...prevState]; // Create a copy of the array
+    updatedState[index] = {
+      ...updatedState[index],
+      popupWidth: "450px",
+      isLoading: {
+        inprogress: true,
+        error: false,
+        success: false,
+      },
+    };
+    return updatedState;
+  });
+
+  try {
+    // Prepare payload by omitting thumbnail
+    const payload = Object.keys(formData).reduce((acc: any, key: string) => {
+      if (key.toLowerCase() !== "thumbnail") {
+        acc[key] =
+          key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
+            ? dayjs(formData[key].value).toDate() // Convert to Date
+            : formData[key].value;
+      }
+      return acc;
+    }, {});
+
+    // Update the item using PnPJS
+    const item = await sp.web.lists
+      .getByTitle(CONFIG.ListNames.Intranet_News) // Replace with your list name
+      .items.getById(itemId)
+      .update(payload);
+    console.log("item: ", item);
+
+    // If the thumbnail exists, delete the old attachment (if needed) and add the new one
+    if (formData?.thumbnail?.value) {
+      // Delete all attachments if necessary (or you can delete specific ones)
+      const attachments = await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_News)
+        .items.getById(itemId)
+        .attachmentFiles();
+
+      for (const attachment of attachments) {
+        await sp.web.lists
+          .getByTitle(CONFIG.ListNames.Intranet_News)
+          .items.getById(itemId)
+          .attachmentFiles.getByName(attachment.FileName)
+          .delete();
+      }
+
+      // Add the new attachment
+      await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_News)
+        .items.getById(itemId)
+        .attachmentFiles.add(
+          formData.thumbnail.value.name,
+          formData.thumbnail.value
+        );
+    }
+
+    // Success state after item and attachment are updated
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState]; // Copy state array
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: true,
+          error: false,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          successDescription: `The news '${formData.Title.value}' has been updated successfully.`,
+        },
+      };
+      return updatedState;
+    });
+  } catch (error) {
+    console.error("Error while editing news:", error);
+
+    // Handle error state
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState]; // Copy state array
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: false,
+          error: true,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          errorDescription:
+            "An error occurred while updating the news, please try again later.",
+        },
+      };
+      return updatedState;
+    });
+  }
+};
+
+export const deleteNews = async (
+  newsID: number, // The ID of the news item to delete
+  setLoaderState: any,
+  index: number
+): Promise<any> => {
+  // Start loader for the specific item at the given index
+  setLoaderState((prevState: any) => {
+    const updatedState = [...prevState]; // Create a copy of the array
+    updatedState[index] = {
+      ...updatedState[index],
+      popupWidth: "450px",
+      isLoading: {
+        inprogress: true,
+        error: false,
+        success: false,
+      },
+    };
+    return updatedState;
+  });
+
+  try {
+    // Delete item from the SharePoint list
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.Intranet_News,
+      ID: newsID,
+    });
+
+    // Success state after the item is deleted
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState]; // Copy state array
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: true,
+          error: false,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          successDescription: `The news with ID '${newsID}' has been deleted successfully.`,
+        },
+      };
+      return updatedState;
+    });
+  } catch (error) {
+    console.error("Error while deleting news:", error);
+
+    // Handle error state
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState]; // Copy state array
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: false,
+          error: true,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          errorDescription:
+            "An error occurred while deleting news, please try again later.",
         },
       };
       return updatedState;

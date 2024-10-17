@@ -480,3 +480,21 @@ body {
   border: 0 !important;
   padding: 10px !important;
 }
+.p-paginator {
+  border: 0 !important;
+}
+.p-paginator .p-paginator-pages .p-paginator-page {
+  border: 0 !important;
+  border-radius: 50% !important;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+  border: 0 !important;
+}
+
+/* .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background-color: #c4692e !important;
+} */
