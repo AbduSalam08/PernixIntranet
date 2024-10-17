@@ -1,0 +1,60 @@
+.mytickets {
+  width: 100%;
+  background-color: #fff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 15px;
+  flex-direction: column;
+  //   padding: 15px;
+  //   border: 1px solid #cfcfcf80;
+  border-radius: 10px;
+  .mytickets_header {
+    width: 100%;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+.newTicketSlide {
+  display: flex;
+  min-width: 450px;
+  height: 100%;
+  padding: 20px 30px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 20px;
+}
+.inputs {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+}
+.actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: auto;
+}
+.reopenTicket {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  padding: 5px;
+  img {
+    width: 22px;
+    height: 22px;
+  }
+}
