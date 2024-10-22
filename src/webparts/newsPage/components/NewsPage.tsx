@@ -34,31 +34,75 @@ import dayjs from "dayjs";
 import { InputText } from "primereact/inputtext";
 // const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
-let objFilter = {
+
+interface SearchField {
+  selectedDate: Date | null;
+  allSearch: string;
+}
+interface FormField<T> {
+  value: T;
+  isValid: boolean;
+  errorMsg: string;
+  validationRule: {
+    required: boolean;
+    type: string;
+  };
+}
+
+interface FormData {
+  Title: FormField<string>;
+  StartDate: FormField<string>;
+  EndDate: FormField<string>;
+  Status: FormField<string>;
+  thumbnail: FormField<File | null>;
+  Description: FormField<string>;
+}
+interface PopupState {
+  open: boolean;
+  popupTitle: string;
+  popupWidth: string;
+  popupType: string;
+  defaultCloseBtn: boolean;
+  popupData: string;
+  isLoading: {
+    inprogress: boolean;
+    error: boolean;
+    success: boolean;
+  };
+  messages: {
+    success: string;
+    error: string;
+    successDescription: string;
+    errorDescription: string;
+    inprogress: string;
+  };
+}
+let objFilter: SearchField = {
   selectedDate: null,
   allSearch: "",
 };
 const NewsPage = (props: any): JSX.Element => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isfile, setIsile] = useState<boolean>(false);
   const [isDelete, setisDelete] = useState<boolean>(false);
-  const [id, setID] = useState<any>(null);
-  const [searchField, setSearchField] = useState<any>({
+  const [id, setID] = useState<any | null>(null);
+  const [searchField, setSearchField] = useState<SearchField>({
     selectedDate: null,
     allSearch: "",
   });
-  const [first, setFirst] = useState<any>(0);
-  const [rows, setRows] = useState<any>(2);
+  const [first, setFirst] = useState<number>(0);
+  const [rows, setRows] = useState<number>(10);
   const [newsData, setNewsData] = useState<any[]>([]);
 
   const totalRecords = newsData.length;
-
+  // pagination pange change
   const onPageChange = (event: any) => {
     setFirst(event.first);
     setRows(event.rows);
   };
   const dispatch = useDispatch();
   // popup properties
-  const initialPopupController = [
+  const initialPopupController: PopupState[] = [
     {
       open: false,
       popupTitle: "Add News",
@@ -106,7 +150,7 @@ const NewsPage = (props: any): JSX.Element => {
     {
       open: false,
       popupTitle: "Delete news",
-      popupWidth: "400px",
+      popupWidth: "450px",
       popupType: "custom",
       defaultCloseBtn: false,
       popupData: "",
@@ -126,7 +170,7 @@ const NewsPage = (props: any): JSX.Element => {
     },
   ];
 
-  const [popupController, setPopupController] = useState(
+  const [popupController, setPopupController] = useState<PopupState[]>(
     initialPopupController
   );
   const [formData, setFormData] = useState<any>({
@@ -137,7 +181,7 @@ const NewsPage = (props: any): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
     StartDate: {
-      value: "",
+      value: new Date(),
       isValid: true,
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
@@ -200,7 +244,7 @@ const NewsPage = (props: any): JSX.Element => {
 
     // Validate each field and update the state with error messages
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
-      const fieldData = formData[key];
+      const fieldData = formData[key as keyof FormData];
       const { isValid, errorMsg } = validateField(
         key,
         fieldData.value,
@@ -224,13 +268,13 @@ const NewsPage = (props: any): JSX.Element => {
     setFormData(updatedFormData);
     if (!hasErrors) {
       (await isEdit)
-        ? editNews(formData, setPopupController, 1, id)
+        ? editNews(formData, setPopupController, 1, id, isfile)
         : addNews(formData, setPopupController, 0);
     } else {
       console.log("Form contains errors");
     }
   };
-  const popupInputs: any[] = [
+  const popupInputs: any = [
     [
       <div className={styles.addNewsGrid} key={1}>
         <CustomInput
@@ -296,9 +340,7 @@ const NewsPage = (props: any): JSX.Element => {
 
         <CustomFileUpload
           accept="image/png,image/svg"
-          value={
-            isEdit ? formData.thumbnail?.value : formData.thumbnail.value?.name
-          }
+          value={formData?.thumbnail.value?.name}
           onFileSelect={async (file) => {
             console.log("file: ", file);
             const { isValid, errorMsg } = validateField(
@@ -397,9 +439,12 @@ const NewsPage = (props: any): JSX.Element => {
         <CustomFileUpload
           accept="image/png,image/svg"
           value={
-            isEdit ? formData.thumbnail?.value : formData.thumbnail.value?.name
+            !isfile
+              ? formData.thumbnail?.value?.FileName || null
+              : formData.thumbnail.value?.name || null
           }
           onFileSelect={async (file) => {
+            setIsile(true);
             console.log("file: ", file);
             const { isValid, errorMsg } = validateField(
               "thumbnail",
@@ -433,302 +478,11 @@ const NewsPage = (props: any): JSX.Element => {
     ],
 
     [
-      <div className={styles.addNewsGrid} key={1}>
-        <CustomInput
-          value={formData.Title.value}
-          placeholder="Enter title"
-          isValid={formData.Title.isValid}
-          errorMsg={formData.Title.errorMsg}
-          onChange={(e) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Title",
-              value,
-              formData.Title.validationRule
-            );
-            handleInputChange("Title", value, isValid, errorMsg);
-          }}
-        />
-
-        <CustomDateInput
-          value={formData.StartDate.value}
-          label="Start date"
-          error={!formData.StartDate.isValid}
-          errorMsg={formData.StartDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField(
-              "StartDate",
-              date,
-              formData.StartDate.validationRule
-            );
-            handleInputChange("StartDate", date, isValid, errorMsg);
-          }}
-        />
-
-        <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        />
-
-        <CustomDropDown
-          value={formData.Status.value}
-          options={["Active", "In Active"]}
-          placeholder="Status"
-          isValid={formData.Status.isValid}
-          errorMsg={formData.Status.errorMsg}
-          onChange={(value) => {
-            const { isValid, errorMsg } = validateField(
-              "Status",
-              value,
-              formData.Status.validationRule
-            );
-            handleInputChange("Status", value, isValid, errorMsg);
-          }}
-        />
-
-        <CustomFileUpload
-          accept="image/png,image/svg"
-          value={
-            isEdit ? formData.thumbnail?.value : formData.thumbnail.value?.name
-          }
-          onFileSelect={async (file) => {
-            console.log("file: ", file);
-            const { isValid, errorMsg } = validateField(
-              "thumbnail",
-              file ? file.name : "",
-              formData.thumbnail.validationRule
-            );
-            await handleInputChange("thumbnail", file, isValid, errorMsg);
-          }}
-          placeholder="Thumbnail"
-          isValid={formData.thumbnail.isValid}
-          errMsg={formData.thumbnail.errorMsg}
-        />
-
-        <FloatingLabelTextarea
-          value={formData.Description.value}
-          placeholder="Description"
-          rows={5}
-          isValid={formData.Description.isValid}
-          errorMsg={formData.Description.errorMsg}
-          onChange={(e: any) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Description",
-              value,
-              formData.Description.validationRule
-            );
-            handleInputChange("Description", value, isValid, errorMsg);
-          }}
-        />
+      <div key={2}>
+        <p>Are you sure you want to delete this news item?</p>
       </div>,
     ],
-    // [
-    //   <div>
-    //     <p>Are you sure you want to delete this news item?</p>
-    //   </div>,
-    // ],
   ];
-  // const popupInputs: any[] = [
-  //   !isDelete ? (
-  //     [
-  //       <div className={styles.addNewsGrid} key={1}>
-  //         <CustomInput
-  //           value={formData.Title.value}
-  //           placeholder="Enter title"
-  //           isValid={formData.Title.isValid}
-  //           errorMsg={formData.Title.errorMsg}
-  //           onChange={(e) => {
-  //             const value = e;
-  //             const { isValid, errorMsg } = validateField(
-  //               "Title",
-  //               value,
-  //               formData.Title.validationRule
-  //             );
-  //             handleInputChange("Title", value, isValid, errorMsg);
-  //           }}
-  //         />
-
-  //         <CustomDateInput
-  //           value={formData.StartDate.value}
-  //           label="Start date"
-  //           error={!formData.StartDate.isValid}
-  //           errorMsg={formData.StartDate.errorMsg}
-  //           onChange={(date: any) => {
-  //             const { isValid, errorMsg } = validateField(
-  //               "StartDate",
-  //               date,
-  //               formData.StartDate.validationRule
-  //             );
-  //             handleInputChange("StartDate", date, isValid, errorMsg);
-  //           }}
-  //         />
-
-  //         <CustomDateInput
-  //           value={formData.EndDate.value}
-  //           label="End date"
-  //           error={!formData.EndDate.isValid}
-  //           errorMsg={formData.EndDate.errorMsg}
-  //           onChange={(date: any) => {
-  //             const { isValid, errorMsg } = validateField("EndDate", date, {
-  //               required: true,
-  //               type: "date",
-  //             });
-  //             handleInputChange("EndDate", date, isValid, errorMsg);
-  //           }}
-  //         />
-
-  //         <CustomDropDown
-  //           value={formData.Status.value}
-  //           options={["Active", "In Active"]}
-  //           placeholder="Status"
-  //           isValid={formData.Status.isValid}
-  //           errorMsg={formData.Status.errorMsg}
-  //           onChange={(value) => {
-  //             const { isValid, errorMsg } = validateField(
-  //               "Status",
-  //               value,
-  //               formData.Status.validationRule
-  //             );
-  //             handleInputChange("Status", value, isValid, errorMsg);
-  //           }}
-  //         />
-
-  //         <CustomFileUpload
-  //           accept="image/png,image/svg"
-  //           value={
-  //             isEdit
-  //               ? formData.thumbnail?.value
-  //               : formData.thumbnail.value?.name
-  //           }
-  //           onFileSelect={async (file) => {
-  //             console.log("file: ", file);
-  //             const { isValid, errorMsg } = validateField(
-  //               "thumbnail",
-  //               file ? file.name : "",
-  //               formData.thumbnail.validationRule
-  //             );
-  //             await handleInputChange("thumbnail", file, isValid, errorMsg);
-  //           }}
-  //           placeholder="Thumbnail"
-  //           isValid={formData.thumbnail.isValid}
-  //           errMsg={formData.thumbnail.errorMsg}
-  //         />
-
-  //         <FloatingLabelTextarea
-  //           value={formData.Description.value}
-  //           placeholder="Description"
-  //           rows={5}
-  //           isValid={formData.Description.isValid}
-  //           errorMsg={formData.Description.errorMsg}
-  //           onChange={(e: any) => {
-  //             const value = e;
-  //             const { isValid, errorMsg } = validateField(
-  //               "Description",
-  //               value,
-  //               formData.Description.validationRule
-  //             );
-  //             handleInputChange("Description", value, isValid, errorMsg);
-  //           }}
-  //         />
-  //       </div>,
-  //     ]
-  //   ) : (
-  //     <div>
-  //       <p>Are you sure you want to delete this news item?</p>
-  //     </div>
-  //   ),
-  // ];
-
-  // const popupActions: any[] = [
-  //   !isDelete
-  //     ? [
-  //         {
-  //           text: "Cancel",
-  //           btnType: "darkGreyVariant",
-  //           disabled: false,
-  //           endIcon: false,
-  //           startIcon: false,
-  //           size: "large",
-  //           onClick: () => {
-  //             togglePopupVisibility(
-  //               setPopupController,
-  //               initialPopupController[0],
-  //               0,
-  //               "close"
-  //             );
-  //             setIsEdit(false);
-  //             setisDelete(false);
-  //             setID(null);
-  //           },
-  //         },
-  //         {
-  //           text: isEdit ? "Update" : "Submit",
-  //           btnType: "primaryGreen",
-  //           endIcon: false,
-  //           startIcon: false,
-  //           disabled: !Object.keys(formData).every(
-  //             (key) => formData[key].isValid
-  //           ),
-  //           size: "large",
-  //           onClick: async () => {
-  //             await handleSubmit();
-  //             setisDelete(false);
-
-  //             setIsEdit(false);
-  //             setID(null);
-  //           },
-  //         },
-  //       ]
-  //     : [
-  //         {
-  //           text: "Cancel",
-  //           btnType: "darkGreyVariant",
-  //           disabled: false,
-  //           endIcon: false,
-  //           startIcon: false,
-  //           size: "large",
-  //           onClick: () => {
-  //             togglePopupVisibility(
-  //               setPopupController,
-  //               initialPopupController[0],
-  //               0,
-  //               "close"
-  //             );
-  //             setIsEdit(false);
-  //             setisDelete(false);
-  //             setID(null);
-  //           },
-  //         },
-  //         {
-  //           text: "Delete",
-  //           btnType: "primaryGreen",
-  //           endIcon: false,
-  //           startIcon: false,
-  //           // disabled: !Object.keys(formData).every(
-  //           //   (key) => formData[key].isValid
-  //           // ),
-  //           size: "large",
-  //           onClick: async () => {
-  //             // await handleSubmit();
-
-  //             await deleteNews(id, setPopupController, 0);
-  //             setIsEdit(false);
-  //             setID(null);
-  //             setisDelete(false);
-  //           },
-  //         },
-  //       ],
-  // ];
 
   const popupActions: any[] = [
     [
@@ -846,41 +600,48 @@ const NewsPage = (props: any): JSX.Element => {
   ];
 
   const handleEditClick = async (item: any) => {
+    console.log("item: ", item);
+    setIsile(false);
     setID(item.ID);
+    setFormData({
+      Title: {
+        ...formData.Title,
+        isValid: true,
+        value: item.title || "",
+      },
+      StartDate: {
+        ...formData.StartDate,
+        isValid: true,
+        value: new Date(item.StartDate) || null,
+      },
+      EndDate: {
+        ...formData.EndDate,
+        isValid: true,
+        value: new Date(item.EndDate) || null,
+      },
+      Status: {
+        ...formData.Status,
+        isValid: true,
+        value: item.Status || "",
+      },
+      thumbnail: {
+        ...formData.thumbnail,
+        isValid: true,
+        value: item.FileName || null,
+      },
+      Description: {
+        ...formData.Description,
+        isValid: true,
+        value: item.description || "",
+      },
+    });
     setisDelete(false);
-    await togglePopupVisibility(
+    togglePopupVisibility(
       setPopupController,
       initialPopupController[1],
       1,
       "open"
     );
-
-    await setFormData({
-      Title: {
-        ...formData.Title,
-        value: item.title || "", // Set title value from clicked item
-      },
-      StartDate: {
-        ...formData.StartDate,
-        value: new Date(item.StartDate) || null, // Set start date value from clicked item
-      },
-      EndDate: {
-        ...formData.EndDate,
-        value: new Date(item.EndDate) || null, // Set end date value from clicked item
-      },
-      Status: {
-        ...formData.Status,
-        value: item.Status || "", // Set status value from clicked item
-      },
-      thumbnail: {
-        ...formData.thumbnail,
-        value: item.FileName || null, // Set thumbnail value from clicked item
-      },
-      Description: {
-        ...formData.Description,
-        value: item.description || "", // Set description value from clicked item
-      },
-    });
   };
 
   useEffect(() => {
@@ -891,14 +652,6 @@ const NewsPage = (props: any): JSX.Element => {
     );
     getAllNewsData(dispatch);
   }, []);
-  // const handleSearch = (value: any) => {
-  //   let search = newsIntranetData?.data?.filter(
-  //     (val: any) =>
-  //       dayjs(val.StartDate).format("YYYY-MM-DD") ===
-  //       dayjs(value).format("YYYY-MM-DD")
-  //   );
-  //   setNewsData(search);
-  // };
 
   const handleSearch = (val: any) => {
     let filteredResults = [...newsIntranetData.data];
@@ -936,7 +689,7 @@ const NewsPage = (props: any): JSX.Element => {
       selectedDate: null,
       allSearch: "",
     };
-    setNewsData(newsIntranetData?.data); // Reset to the original data
+    setNewsData(newsIntranetData?.data);
   };
 
   const handleDeleteClick = (id: any) => {
@@ -951,21 +704,18 @@ const NewsPage = (props: any): JSX.Element => {
     );
   };
   useEffect(() => {
-    // Fetch news data from the Redux store (or any other API)
     setNewsData(newsIntranetData?.data || []);
   }, [newsIntranetData]);
 
+  const filteredNewsData = !(
+    currentUserDetails.role === CONFIG.RoleDetails.User
+  )
+    ? newsData.filter((item) => item?.Status.toLowerCase() === "active")
+    : newsData;
+
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          margin: "20px",
-          // padding: "20px",
-        }}
-      >
+      <div className={styles.newsHeaderContainer}>
         <div>
           <i
             className="pi pi-arrow-circle-left
@@ -973,13 +723,7 @@ const NewsPage = (props: any): JSX.Element => {
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
           ></i>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <i
-            onClick={handleRefresh}
-            style={{ fontSize: "1.5rem", color: "#E0803D" }}
-            className="pi pi-refresh
- "
-          ></i>
+        <div className={styles.rightSection}>
           <InputText
             value={searchField.allSearch}
             placeholder="Search"
@@ -1008,22 +752,62 @@ const NewsPage = (props: any): JSX.Element => {
             // className={`${styles.d_datepicker}`}
             style={{ width: "200px" }}
           />
+          <div className={styles.refreshBtn}>
+            <i
+              onClick={handleRefresh}
+              className="pi pi-refresh
+ "
+            ></i>
+          </div>
           <div
             style={{
-              display: "flex",
-              alignItems: "Center",
-              gap: "10px",
-              fontSize: "15px",
-              fontWeight: "500",
-              background: "#0B4D53",
-              width: "114px",
-              height: "40px",
-              color: "#ffff",
-              padding: "4px 8px",
-              borderRadius: "4px",
-              cursor: "pointer",
+              display:
+                currentUserDetails.role === CONFIG.RoleDetails.User
+                  ? "none"
+                  : "flex",
             }}
+            className={styles.addNewbtn}
             onClick={() => {
+              resetFormData(formData, setFormData);
+              setFormData({
+                Title: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Invalid title",
+                  validationRule: { required: true, type: "string" },
+                },
+                StartDate: {
+                  value: new Date(),
+                  isValid: true,
+                  errorMsg: "Invalid input",
+                  validationRule: { required: true, type: "date" },
+                },
+                EndDate: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Invalid input",
+                  validationRule: { required: true, type: "date" },
+                },
+                Status: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Status is required",
+                  validationRule: { required: true, type: "string" },
+                },
+                thumbnail: {
+                  value: null,
+                  isValid: true,
+                  errorMsg: "Invalid file",
+                  validationRule: { required: true, type: "file" },
+                },
+                Description: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: true, type: "string" },
+                },
+              });
+
               setisDelete(false);
               setIsEdit(false);
               setID(null);
@@ -1033,7 +817,7 @@ const NewsPage = (props: any): JSX.Element => {
                 0,
                 "open"
               );
-              resetFormData(formData, setFormData);
+              debugger;
             }}
           >
             <i
@@ -1068,8 +852,12 @@ const NewsPage = (props: any): JSX.Element => {
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{newsIntranetData?.error}</span>
             </div>
+          ) : filteredNewsData.length == 0 ? (
+            <div>
+              <p>No News Found!!!</p>
+            </div>
           ) : (
-            newsData
+            filteredNewsData
               ?.slice(first, first + rows)
               .map((item: any, idx: number) => (
                 <NewsCard
@@ -1077,6 +865,7 @@ const NewsPage = (props: any): JSX.Element => {
                   imageUrl={item?.imageUrl}
                   key={idx}
                   status={item?.Status}
+                  currentUserDetails={currentUserDetails}
                   description={item?.description}
                   noActions={false}
                   noStatus={false}
@@ -1102,6 +891,8 @@ const NewsPage = (props: any): JSX.Element => {
             }}
             PopupType={popupData.popupType}
             onHide={() => {
+              setIsEdit(false);
+              setisDelete(false);
               togglePopupVisibility(
                 setPopupController,
                 initialPopupController[index],
@@ -1110,10 +901,10 @@ const NewsPage = (props: any): JSX.Element => {
               );
               debugger;
               if (popupData?.isLoading?.success) {
+                setIsile(false);
                 getAllNewsData(dispatch);
               }
               resetFormData(formData, setFormData);
-              setIsEdit(false);
             }}
             popupTitle={
               popupData.popupType !== "confimation" && popupData.popupTitle
@@ -1133,15 +924,19 @@ const NewsPage = (props: any): JSX.Element => {
       </div>
 
       {/* pagination */}
-      <div className="card">
-        <Paginator
-          first={first}
-          rows={rows}
-          totalRecords={totalRecords}
-          onPageChange={onPageChange}
-          template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink "
-        />
-      </div>
+      {newsData.length > 0 ? (
+        <div className="card">
+          <Paginator
+            first={first}
+            rows={rows}
+            totalRecords={totalRecords}
+            onPageChange={onPageChange}
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink "
+          />
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 };

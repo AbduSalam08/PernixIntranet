@@ -100,7 +100,7 @@ export const createOutlookEvent = async (
 
     // Add the event to the calendar
     await graph.groups
-      .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
+      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
       .calendar.events.add(event);
 
     // Create the updated state
@@ -174,7 +174,7 @@ export const getEvents = async (dispatch: any): Promise<void> => {
 
     // Fetch the events data
     const result = await graph.groups
-      .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
+      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
       .events.configure({ headers })
       .top(999)();
 

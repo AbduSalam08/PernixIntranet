@@ -227,7 +227,7 @@ const NewsIntranet = (props: any): JSX.Element => {
             const { isValid, errorMsg } = validateField(
               "thumbnail",
               file ? file.name : "",
-              formData.StartDate.thumbnail
+              formData.thumbnail.validationRule
             );
             handleInputChange("thumbnail", file, isValid, errorMsg);
           }}
@@ -287,6 +287,12 @@ const NewsIntranet = (props: any): JSX.Element => {
       },
     ],
   ];
+  const handlenavigate = () => {
+    console.log("navigate");
+    window.open(
+      "https://technorucs365.sharepoint.com/sites/PernixIntranet/SitePages/NewsPage.aspx"
+    );
+  };
 
   useEffect(() => {
     RoleAuth(
@@ -336,7 +342,7 @@ const NewsIntranet = (props: any): JSX.Element => {
         )}
       </div>
 
-      <ViewAll />
+      <ViewAll onClick={handlenavigate} />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -356,6 +362,10 @@ const NewsIntranet = (props: any): JSX.Element => {
               index,
               "close"
             );
+
+            if (popupData?.isLoading?.success) {
+              getAllNewsData(dispatch);
+            }
             resetFormData(formData, setFormData);
           }}
           popupTitle={

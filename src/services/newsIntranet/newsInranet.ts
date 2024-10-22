@@ -20,9 +20,7 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
     });
     console.log("response: ", response);
 
-    // Prepare an array to hold promises for fetching attachments
     const attachmentPromises = response?.map(async (item: any) => {
-      // Fetch attachments for the current news item
       const attachments = await SpServices.SPGetAttachments({
         Listname: CONFIG.ListNames.Intranet_News,
         ID: item.ID,
@@ -31,7 +29,7 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
       // Process and prepare the item data
       const imageUrl =
         attachments.length > 0 ? attachments[0].ServerRelativeUrl : ""; // Assuming the first attachment is the image
-      const FileName = attachments.length > 0 ? attachments[0].FileName : ""; // Assuming the first attachment is the image
+      const FileName = attachments.length > 0 ? attachments[0] : ""; // Assuming the first attachment is the image
       const title = item.Title;
       const description = item.Description;
       const Status = item.Status;
@@ -170,12 +168,13 @@ export const editNews = async (
   formData: any,
   setLoaderState: any,
   index: number,
-  itemId: number // Pass the ID of the item to be edited
+  itemId: number,
+  isfile: boolean
 ): Promise<any> => {
   debugger;
   // Start loader for the specific item at the given index
   setLoaderState((prevState: any) => {
-    const updatedState = [...prevState]; // Create a copy of the array
+    const updatedState = [...prevState];
     updatedState[index] = {
       ...updatedState[index],
       popupWidth: "450px",
@@ -194,7 +193,7 @@ export const editNews = async (
       if (key.toLowerCase() !== "thumbnail") {
         acc[key] =
           key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
-            ? dayjs(formData[key].value).toDate() // Convert to Date
+            ? dayjs(formData[key].value).toDate()
             : formData[key].value;
       }
       return acc;
@@ -202,40 +201,38 @@ export const editNews = async (
 
     // Update the item using PnPJS
     const item = await sp.web.lists
-      .getByTitle(CONFIG.ListNames.Intranet_News) // Replace with your list name
+      .getByTitle(CONFIG.ListNames.Intranet_News)
       .items.getById(itemId)
       .update(payload);
     console.log("item: ", item);
 
-    // If the thumbnail exists, delete the old attachment (if needed) and add the new one
-    if (formData?.thumbnail?.value) {
-      // Delete all attachments if necessary (or you can delete specific ones)
-      const attachments = await sp.web.lists
-        .getByTitle(CONFIG.ListNames.Intranet_News)
-        .items.getById(itemId)
-        .attachmentFiles();
+    if (isfile) {
+      if (formData?.thumbnail?.value) {
+        const attachments = await sp.web.lists
+          .getByTitle(CONFIG.ListNames.Intranet_News)
+          .items.getById(itemId)
+          .attachmentFiles();
 
-      for (const attachment of attachments) {
+        for (const attachment of attachments) {
+          await sp.web.lists
+            .getByTitle(CONFIG.ListNames.Intranet_News)
+            .items.getById(itemId)
+            .attachmentFiles.getByName(attachment.FileName)
+            .delete();
+        }
+        debugger;
         await sp.web.lists
           .getByTitle(CONFIG.ListNames.Intranet_News)
           .items.getById(itemId)
-          .attachmentFiles.getByName(attachment.FileName)
-          .delete();
+          .attachmentFiles.add(
+            formData.thumbnail?.value?.name,
+            formData?.thumbnail?.value
+          );
       }
-
-      // Add the new attachment
-      await sp.web.lists
-        .getByTitle(CONFIG.ListNames.Intranet_News)
-        .items.getById(itemId)
-        .attachmentFiles.add(
-          formData.thumbnail.value.name,
-          formData.thumbnail.value
-        );
     }
-
     // Success state after item and attachment are updated
     setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
+      const updatedState = [...prevState];
       updatedState[index] = {
         ...updatedState[index],
         popupWidth: "450px",
@@ -256,7 +253,7 @@ export const editNews = async (
 
     // Handle error state
     setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
+      const updatedState = [...prevState];
       updatedState[index] = {
         ...updatedState[index],
         popupWidth: "450px",
@@ -277,13 +274,13 @@ export const editNews = async (
 };
 
 export const deleteNews = async (
-  newsID: number, // The ID of the news item to delete
+  newsID: number,
   setLoaderState: any,
   index: number
 ): Promise<any> => {
   // Start loader for the specific item at the given index
   setLoaderState((prevState: any) => {
-    const updatedState = [...prevState]; // Create a copy of the array
+    const updatedState = [...prevState];
     updatedState[index] = {
       ...updatedState[index],
       popupWidth: "450px",
@@ -305,7 +302,7 @@ export const deleteNews = async (
 
     // Success state after the item is deleted
     setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
+      const updatedState = [...prevState];
       updatedState[index] = {
         ...updatedState[index],
         popupWidth: "450px",
@@ -326,7 +323,7 @@ export const deleteNews = async (
 
     // Handle error state
     setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
+      const updatedState = [...prevState];
       updatedState[index] = {
         ...updatedState[index],
         popupWidth: "450px",

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-floating-promises*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // import { Calendar } from "@fullcalendar/core";
 // import interactionPlugin from "@fullcalendar/interaction";
