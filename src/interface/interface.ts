@@ -10,6 +10,7 @@ export interface IListName {
   Intranet_News: string;
   Intranet_QuestionToCEO: string;
   Intranet_ShoutOuts: string;
+  HelpDesk_AllTickets: string;
 }
 
 export interface ISPGroupName {
@@ -49,7 +50,54 @@ export interface IAttachDetails {
 export interface IQuoteDatas {
   ID: number | null;
   Quote: string;
+  StartDate: Date | any;
+  EndDate: Date | any;
+  Attachments: string;
+  FileName: string;
+  IsDelete: boolean;
+}
+
+export interface IPaginationData {
+  first: number;
+  rows: number;
+}
+
+export interface IValidationRule {
+  required: boolean;
+  type: "string" | "date" | "file" | "array" | "number" | "boolean";
+}
+
+export interface IFormFields {
+  value: string | number | any;
+  isValid: boolean;
+  errorMsg: string;
+  validationRule: IValidationRule;
+}
+
+export interface IMotivateColumn {
+  ID: string;
+  Quote: string;
+  StartDate: string;
+  EndDate: string;
+  IsDelete: string;
+  Attachments: string;
+}
+
+export interface IMotivateColumnType {
+  ID: number | null;
+  Qutoe: string;
   StartDate: Date | null;
   EndDate: Date | null;
-  Attachments: string;
+}
+
+export interface IPageSearchFields {
+  Search: string;
+  Date: Date | any;
+}
+
+export interface INavigatePage {
+  PernixIntranet: string;
+  MotivationPage: string;
+  HelpDeskPage: string;
+  NewsPage: string;
 }

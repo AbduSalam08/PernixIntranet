@@ -1,5 +1,10 @@
 import {
   IListName,
+  IMotivateColumn,
+  INavigatePage,
+  IPageSearchFields,
+  IPaginationData,
+  IQuoteDatas,
   IRoleDetails,
   ISPGroupName,
   ITenantDetail,
@@ -18,6 +23,7 @@ export namespace CONFIG {
     Intranet_News: "Intranet_News",
     Intranet_QuestionToCEO: "Intranet_QuestionToCEO",
     Intranet_ShoutOuts: "Intranet_ShoutOuts",
+    HelpDesk_AllTickets: "HelpDesk_AllTickets",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -44,4 +50,40 @@ export namespace CONFIG {
   export const TabsName: string[] = ["Current", "Upcoming", "Previous"];
 
   export const DateFormat: string = "MM/DD/YYYY";
+
+  export const PaginationData: IPaginationData = {
+    first: 0,
+    rows: 10,
+  };
+
+  export const MotivateColumn: IMotivateColumn = {
+    ID: "ID",
+    StartDate: "StartDate",
+    EndDate: "EndDate",
+    Quote: "Quote",
+    IsDelete: "IsDelete",
+    Attachments: "Attachments",
+  };
+
+  export const QuoteDatas: IQuoteDatas = {
+    ID: null,
+    StartDate: new Date(),
+    EndDate: null,
+    Quote: "",
+    Attachments: "",
+    FileName: "",
+    IsDelete: false,
+  };
+
+  export const PageSearchFields: IPageSearchFields = {
+    Search: "",
+    Date: null,
+  };
+
+  export const NavigatePage: INavigatePage = {
+    PernixIntranet: "/SitePages/PernixIntranet.aspx",
+    HelpDeskPage: "/SitePages/HelpDeskPage.aspx",
+    MotivationPage: "/SitePages/MotivationPage.aspx",
+    NewsPage: "/SitePages/NewsPage.aspx",
+  };
 }

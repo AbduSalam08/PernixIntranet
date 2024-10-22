@@ -469,23 +469,29 @@ body {
 }
 
 /* inputtextarea */
-
 .p-inputtext:enabled:focus {
   box-shadow: unset !important;
   border-color: unset !important;
   border: 0 !important;
 }
+
 .p-inputtext {
   background: #f8f8f8 !important;
   border: 0 !important;
   padding: 10px !important;
 }
+
+/* paginator styles */
 .p-paginator {
   border: 0 !important;
+  background-color: #f0f0f0 !important;
 }
+
 .p-paginator .p-paginator-pages .p-paginator-page {
   border: 0 !important;
   border-radius: 50% !important;
+  color: #0b4d53 !important;
+  background-color: #f0f0f0 !important;
 }
 
 .p-paginator .p-paginator-first,
@@ -493,8 +499,19 @@ body {
 .p-paginator .p-paginator-next,
 .p-paginator .p-paginator-last {
   border: 0 !important;
+  color: #0b4d53 !important;
+  background-color: #f0f0f0 !important;
 }
 
-/* .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-  background-color: #c4692e !important;
-} */
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background-color: #0b4d53 !important;
+  color: #fff !important;
+}
+
+.canvasjs-chart-canvas {
+  top: 26px !important;
+  /* background-color: #000 !important; */
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}

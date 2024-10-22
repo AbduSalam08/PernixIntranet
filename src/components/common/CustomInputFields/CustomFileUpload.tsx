@@ -94,7 +94,7 @@ const CustomFileUpload: React.FC<FileUploadProps> = ({
         />
         <label className={styles.placeholder}>{placeholder}</label>
         <div className={styles.fileName}>{fileName}</div>
-        {fileName && value !== null && (
+        {/* {fileName && value !== null && (
           <button
             type="button"
             className={styles.clearBtn}
@@ -102,8 +102,17 @@ const CustomFileUpload: React.FC<FileUploadProps> = ({
           >
             Clear
           </button>
-        )}
+        )} */}
       </div>
+      {fileName && value !== null && (
+        <button
+          type="button"
+          className={styles.clearBtn}
+          onClick={handleClear} // Prevent file input from opening
+        >
+          Clear
+        </button>
+      )}
       {error ? (
         <div className={styles.error}>{error}</div>
       ) : !isValid ? (
