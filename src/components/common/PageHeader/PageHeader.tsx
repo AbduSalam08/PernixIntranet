@@ -14,7 +14,7 @@ interface PageHeaderProps {
   noBackBtn?: boolean;
   centered?: boolean;
   underlined?: boolean;
-  headerClick?: () => void;
+  headerClick?: () => any;
 }
 
 interface UserDetails {

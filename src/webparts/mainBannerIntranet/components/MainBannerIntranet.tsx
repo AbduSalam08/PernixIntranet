@@ -67,6 +67,13 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       img: HelpDesk,
       hoverImg: HelpDeskWhite,
       text: "Help desk",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.HelpDeskPage,
+          "_self"
+        );
+      },
     },
     {
       img: PTO,
@@ -191,7 +198,12 @@ const MainBannerIntranet = (props: any): JSX.Element => {
                 />
               ))
           : quickLinks?.map((item: any, idx: number) => (
-              <QuickLinkCard item={item} idx={idx} key={idx} />
+              <QuickLinkCard
+                onClick={item?.onClick}
+                value={item}
+                idx={idx}
+                key={idx}
+              />
             ))}
       </div>
     </div>

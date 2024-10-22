@@ -287,10 +287,10 @@ const NewsIntranet = (props: any): JSX.Element => {
       },
     ],
   ];
-  const handlenavigate = () => {
-    console.log("navigate");
+  const handlenavigate = (): void => {
     window.open(
-      "https://technorucs365.sharepoint.com/sites/PernixIntranet/SitePages/NewsPage.aspx"
+      props.context.pageContext.web.absoluteUrl + CONFIG.NavigatePage.NewsPage,
+      "_self"
     );
   };
 

@@ -35,7 +35,16 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
       <div className={styles.ticketsGrid}>
         {/* Page Header */}
         <div className={styles.ticketHeader}>
-          <PageHeader title="Tickets" />
+          <PageHeader
+            title="Tickets"
+            headerClick={() => {
+              window.open(
+                props.context.pageContext.web.absoluteUrl +
+                  CONFIG.NavigatePage.PernixIntranet,
+                "_self"
+              );
+            }}
+          />
         </div>
 
         {/* Main Routes with Suspense for Lazy Loading */}
