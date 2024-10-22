@@ -25,6 +25,16 @@
     width: 100%; /* Ensures the grid takes the full width */
     padding: 5px; /* Optional: add padding for spacing */
   }
+  .metricsGrid2 {
+    display: grid;
+    grid-template-columns: repeat(1, 100%);
+    grid-gap: 20px;
+    width: 100%; /* Ensures the grid takes the full width */
+    padding: 5px; /* Optional: add padding for spacing */
+    .metricCard {
+      height: 450px;
+    }
+  }
 
   .metricCard {
     background-color: #f9fafc;
@@ -32,12 +42,15 @@
     // box-shadow: 0 0px 5px rgba(0, 0, 0, 0.08);
     padding: 20px;
     display: flex;
+    align-items: stretch;
     flex-direction: column;
     justify-content: space-between;
-    height: 250px; /* Adjust based on the height of the charts */
+    gap: 15px;
+    height: 350px; /* Adjust based on the height of the charts */
   }
 
   .chart {
+    height: 90%;
     flex-grow: 1;
     /* Placeholder for chart component */
     background: lightgray;
@@ -45,10 +58,35 @@
   }
 
   .chartDetails {
-    margin-top: 10px;
+    // margin-top: 10px;
+    margin-right: auto;
     text-align: center;
     font-size: 16px;
     color: #0b4d53;
     font-family: "osSemiBold", sans-serif;
+  }
+}
+
+.infoCards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); // 5-column grid for large screens
+  gap: 20px;
+  padding: 10px 0;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr); // 4-column for medium screens
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, 1fr); // 3-column for smaller screens
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr); // 2-column for small screens
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr; // 1-column for extra small screens
   }
 }

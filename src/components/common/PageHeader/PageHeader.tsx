@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import styles from "./PageHeader.module.scss";
 
@@ -28,7 +28,7 @@ const PageHeader = ({
   underlined = false,
   headerClick,
 }: PageHeaderProps): JSX.Element => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const currentUserDetails = useSelector(
     (state: { MainSPContext: { currentUserDetails: UserDetails } }) =>
@@ -41,11 +41,12 @@ const PageHeader = ({
       : currentUserDetails?.role === "HelpDesk_Ticket_Managers"
       ? "/ticket_manager/dashboard"
       : currentUserDetails?.role;
+  console.log("currentRole: ", currentRole);
 
   // Redirect to the current role path if not centered
-  useEffect(() => {
-    navigate(currentRole);
-  }, [currentRole]);
+  // useEffect(() => {
+  //   navigate(currentRole);
+  // }, [currentRole]);
 
   const handleHeaderClick = (): void => {
     if (!centered && headerClick) {
