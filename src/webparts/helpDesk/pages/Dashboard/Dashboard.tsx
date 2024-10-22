@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import MainChart from "../../../../components/common/Charts/MainChart";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
+import InfoCard from "../../components/InfoCard/InfoCard";
 // images
 // Import SVGs
 const myTickets: any = require("../../assets/images/svg/myTickets.svg");
@@ -242,15 +243,7 @@ const Dashboard = (): JSX.Element => {
 
       <div className={styles.infoCards}>
         {infoCards?.map((item: any, idx: number) => (
-          <div key={idx} className={styles.card}>
-            <div className={styles.cardContent}>
-              <span className={styles.cardName}>{item?.cardName}</span>
-              <span className={styles.cardValue}>{item?.cardValues}</span>
-            </div>
-            <div className={styles.cardImg}>
-              <img src={item.cardImg} alt={`${item.cardName} icon`} />
-            </div>
-          </div>
+          <InfoCard idx={idx} item={item} key={idx} />
         ))}
       </div>
 

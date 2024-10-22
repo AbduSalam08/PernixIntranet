@@ -1,24 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import styles from "./QuickLinkCard.module.scss";
+interface Props {
+  value: any;
+  idx: number;
+  onClick?: () => any;
+}
 
-const QuickLinkCard = (value: any): JSX.Element => {
+const QuickLinkCard = ({ value, onClick, idx }: Props): JSX.Element => {
   const [hover, setHover] = useState(false); // State to track hover status
-  const isOddCard: boolean = (value?.idx + 1) % 2 === 1;
+  const isOddCard: boolean = (idx + 1) % 2 === 1;
 
   return (
     <div
       className={`${styles.quickLinkCard} ${
         isOddCard ? styles.quickLinkCardGreen : styles.quickLinkCardOrange
       }`}
-      key={value?.idx}
+      key={idx}
+      onClick={() => {
+        onClick?.();
+      }}
       onMouseEnter={() => setHover(true)} // Set hover state to true on mouse enter
       onMouseLeave={() => setHover(false)} // Set hover state to false on mouse leave
     >
-      <img
-        src={hover ? value?.item?.hoverImg : value?.item?.img}
-        alt={value?.item?.text}
-      />
+      <img src={hover ? value?.hoverImg : value?.img} alt={value?.text} />
       <span
         style={{
           color: isOddCard
@@ -26,7 +31,7 @@ const QuickLinkCard = (value: any): JSX.Element => {
             : "var(--primary-orange)",
         }}
       >
-        {value?.item?.text}
+        {value?.text}
       </span>
     </div>
   );

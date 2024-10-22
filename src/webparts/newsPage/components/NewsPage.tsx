@@ -1,3 +1,5 @@
+/* eslint-disable no-debugger */
+/* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -36,7 +38,7 @@ import { InputText } from "primereact/inputtext";
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 interface SearchField {
-  selectedDate: Date | null;
+  selectedDate: Date | any;
   allSearch: string;
 }
 interface FormField<T> {
@@ -54,7 +56,7 @@ interface FormData {
   StartDate: FormField<string>;
   EndDate: FormField<string>;
   Status: FormField<string>;
-  thumbnail: FormField<File | null>;
+  thumbnail: FormField<File | any>;
   Description: FormField<string>;
 }
 interface PopupState {
@@ -96,7 +98,7 @@ const NewsPage = (props: any): JSX.Element => {
 
   const totalRecords = newsData.length;
   // pagination pange change
-  const onPageChange = (event: any) => {
+  const onPageChange = (event: any): void => {
     setFirst(event.first);
     setRows(event.rows);
   };
@@ -599,7 +601,7 @@ const NewsPage = (props: any): JSX.Element => {
     ],
   ];
 
-  const handleEditClick = async (item: any) => {
+  const handleEditClick = async (item: any): Promise<any> => {
     console.log("item: ", item);
     setIsile(false);
     setID(item.ID);
@@ -653,7 +655,7 @@ const NewsPage = (props: any): JSX.Element => {
     getAllNewsData(dispatch);
   }, []);
 
-  const handleSearch = (val: any) => {
+  const handleSearch = (val: any): void => {
     let filteredResults = [...newsIntranetData.data];
 
     // Apply common text search for title, status, and description
@@ -680,7 +682,7 @@ const NewsPage = (props: any): JSX.Element => {
     setNewsData(filteredResults);
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     setSearchField({
       allSearch: "",
       selectedDate: null,
@@ -692,7 +694,7 @@ const NewsPage = (props: any): JSX.Element => {
     setNewsData(newsIntranetData?.data);
   };
 
-  const handleDeleteClick = (id: any) => {
+  const handleDeleteClick = (id: any): any => {
     setID(id);
     setIsEdit(false);
     togglePopupVisibility(
@@ -716,12 +718,19 @@ const NewsPage = (props: any): JSX.Element => {
   return (
     <>
       <div className={styles.newsHeaderContainer}>
-        <div>
+        <div
+          onClick={(_) => {
+            window.open(
+              props.context.pageContext.web.absoluteUrl +
+                CONFIG.NavigatePage.PernixIntranet,
+              "_self"
+            );
+          }}
+        >
           <i
-            className="pi pi-arrow-circle-left
-"
+            className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
-          ></i>
+          />
         </div>
         <div className={styles.rightSection}>
           <InputText
@@ -753,11 +762,7 @@ const NewsPage = (props: any): JSX.Element => {
             style={{ width: "200px" }}
           />
           <div className={styles.refreshBtn}>
-            <i
-              onClick={handleRefresh}
-              className="pi pi-refresh
- "
-            ></i>
+            <i onClick={handleRefresh} className="pi pi-refresh" />
           </div>
           <div
             style={{
@@ -823,7 +828,7 @@ const NewsPage = (props: any): JSX.Element => {
             <i
               className="pi pi-plus"
               style={{ fontSize: "1rem", color: "#fff" }}
-            ></i>
+            />
             Add new
           </div>
         </div>
@@ -852,7 +857,7 @@ const NewsPage = (props: any): JSX.Element => {
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{newsIntranetData?.error}</span>
             </div>
-          ) : filteredNewsData.length == 0 ? (
+          ) : filteredNewsData.length === 0 ? (
             <div>
               <p>No News Found!!!</p>
             </div>
