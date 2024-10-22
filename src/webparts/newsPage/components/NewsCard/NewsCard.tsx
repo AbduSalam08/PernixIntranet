@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from "react";
 import styles from "./NewsCard.module.scss";
+import { CONFIG } from "../../../../config/config";
 
 interface NewsCardProps {
   Id?: number;
@@ -11,6 +15,7 @@ interface NewsCardProps {
   onDelete?: () => void;
   noActions?: boolean;
   noStatus?: boolean;
+  currentUserDetails: any;
   item?: any;
   setisDelete?: (isDelete: boolean) => void;
   handleDeleteClick: (id: any) => void;
@@ -33,6 +38,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   handleDeleteClick,
   setIsEdit,
   setisDelete,
+  currentUserDetails,
   item,
   noActionsAndStatus = false,
 }) => {
@@ -52,6 +58,9 @@ const NewsCard: React.FC<NewsCardProps> = ({
     setisDelete && setisDelete(true);
     handleDeleteClick(item.ID);
   };
+
+  const handleView = () => {};
+  console.log(status, "status");
   return (
     <div className={styles.newsCard}>
       <img
@@ -77,26 +86,32 @@ const NewsCard: React.FC<NewsCardProps> = ({
           {!noStatus && (
             <div className={styles.actionBtns}>
               <i
+                onClick={handleView}
                 className="pi pi-eye
 "
                 style={{ color: "#1AB800", fontSize: "1.2rem" }}
               ></i>
-
-              <i
-                onClick={handleEdit}
-                style={{ color: "#007EF2", fontSize: "1.2rem" }}
-                className="pi pi-pen-to-square
-
-"
-              ></i>
-              <i
-                onClick={handleDelete}
-                style={{ color: "red", fontSize: "1.2rem" }}
-                className="pi pi-trash
-
+              {currentUserDetails.role === CONFIG.RoleDetails.User ? (
+                <></>
+              ) : (
+                <>
+                  <i
+                    onClick={handleEdit}
+                    style={{ color: "#007EF2", fontSize: "1.2rem" }}
+                    className="pi pi-pen-to-square
 
 "
-              ></i>
+                  ></i>
+                  <i
+                    onClick={handleDelete}
+                    style={{ color: "red", fontSize: "1.2rem" }}
+                    className="pi pi-trash
+
+
+"
+                  ></i>
+                </>
+              )}
               {/* <button onClick={onEdit}>Edit</button>
               <button onClick={onDelete}>Delete</button> */}
             </div>

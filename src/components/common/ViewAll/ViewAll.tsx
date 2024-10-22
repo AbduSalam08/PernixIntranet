@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const ViewAll = (viewClick?: any): JSX.Element => {
+interface Props {
+  onClick?: () => any;
+}
+const ViewAll = ({ onClick }: Props): JSX.Element => {
   return (
     <div className="viewAllSection">
-      <button onClick={viewClick}>View all</button>
+      <button onClick={onClick}>View all</button>
     </div>
   );
 };

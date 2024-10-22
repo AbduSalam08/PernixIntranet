@@ -9,16 +9,18 @@ export const togglePopupVisibility = (
 ): void => {
   // Immediately toggle the popup visibility
   setPopupController((prev: any) =>
-    prev.map((popup: any, popupIndex: any) =>
-      popupIndex === index
-        ? {
-            ...controllerData,
-            popupWidth: popup?.popupWidth,
-            open: action === "open" ? true : false,
-            popupTitle: popupTitle || popup.popupTitle,
-            popupData: popupData || "",
-          }
-        : { ...controllerData }
+    prev.map(
+      (popup: any, popupIndex: any) =>
+        popupIndex === index
+          ? {
+              ...controllerData,
+              popupWidth: popup?.popupWidth,
+              open: action === "open" ? true : false,
+              popupTitle: popupTitle || popup.popupTitle,
+              popupData: popupData || "",
+            }
+          : { ...popup }
+      // : { ...controllerData }
     )
   );
 

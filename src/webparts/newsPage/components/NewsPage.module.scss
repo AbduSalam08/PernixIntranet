@@ -1,3 +1,43 @@
+.newsHeaderContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+
+  .rightSection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .refreshBtn {
+      padding: 7px;
+      border-radius: 4px;
+      background-color: #0b4d53;
+      cursor: pointer;
+
+      i {
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffff;
+      }
+    }
+    .addNewbtn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      background: #0b4d53;
+      width: 114px;
+      height: 40px;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
+}
+
 .flexCenter {
   display: flex;
   align-items: center;
