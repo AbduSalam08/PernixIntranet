@@ -46,8 +46,10 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
 
             {/* ADMIN ROUTES */}
             <Route path="/admin" Component={MainLayout} />
+            <Route path="/" Component={MainLayout} />
 
             {/* Ticket Manager ROUTES */}
+            <Route index Component={MainLayout} />
             <Route path="/ticket_manager" Component={MainLayout}>
               <Route index Component={Dashboard} />
               <Route path="dashboard" Component={Dashboard} />
