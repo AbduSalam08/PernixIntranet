@@ -1,4 +1,4 @@
-import { emptyCheck } from "./validations";
+// import { emptyCheck } from "./validations";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -60,7 +60,7 @@ export const resetSelectedItem = (
 
 type ValidationRule = {
   required?: boolean;
-  type?: "string" | "date" | "file" | "array";
+  type?: "string" | "date" | "file" | "array" | "number" | "boolean";
   customErrorMessage?: string;
 };
 
@@ -72,30 +72,61 @@ export const validateField = (
   const { required = false, type, customErrorMessage } = rules;
 
   // Check for required fields
-  if (
-    required &&
-    (type === "date" || type === "array" ? !value : !emptyCheck(value))
-  ) {
+  // if (
+  //   required &&
+  //   (type === "date" || type === "array" ? !value : !emptyCheck(value))
+  // ) {
+  //   return {
+  //     isValid: false,
+  //     errorMsg: customErrorMessage || `${field} is required`,
+  //   };
+  // }
+
+  // Additional validations based on type
+  // if (required && type === "string" && typeof value !== "string") {
+  //   return { isValid: false, errorMsg: "Invalid string format" };
+  // }
+
+  if (required && type === "string" && !value) {
     return {
       isValid: false,
       errorMsg: customErrorMessage || `${field} is required`,
     };
   }
-  debugger;
-  // Additional validations based on type
-  if (type === "string" && typeof value !== "string") {
-    return { isValid: false, errorMsg: "Invalid string format" };
+
+  if (required && type === "number" && !value) {
+    return {
+      isValid: false,
+      errorMsg: customErrorMessage || `${field} is required`,
+    };
   }
 
-  if (type === "date" && !value) {
-    return { isValid: false, errorMsg: "Invalid date format" };
+  if (required && type === "boolean" && !value) {
+    return {
+      isValid: false,
+      errorMsg: customErrorMessage || `${field} is required`,
+    };
   }
 
-  if (type === "file" && !value) {
-    return { isValid: false, errorMsg: "Invalid file" };
+  if (required && type === "date" && !value) {
+    return {
+      isValid: false,
+      errorMsg: customErrorMessage || `${field} is required`,
+    };
   }
-  if (type === "array" && !value) {
-    return { isValid: false, errorMsg: "Invalid data" };
+
+  if (required && type === "file" && !value) {
+    return {
+      isValid: false,
+      errorMsg: customErrorMessage || `${field} is required`,
+    };
+  }
+
+  if (required && type === "array" && !value.length) {
+    return {
+      isValid: false,
+      errorMsg: customErrorMessage || `${field} is required`,
+    };
   }
 
   return { isValid: true, errorMsg: "" };

@@ -132,18 +132,18 @@ const MainBannerIntranet = (props: any): JSX.Element => {
 
       <div
         className={styles.btnAlign}
-        style={{
-          display:
-            currentUserDetails.role === CONFIG.RoleDetails.User
-              ? "none"
-              : "flex",
+        onClick={(_) => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.MotivationPage,
+            "_self"
+          );
         }}
       >
         <DefaultButton
           onlyIcon={true}
           btnType="primaryGreen"
           size="medium"
-          // onClick={(_) => {}}
           text={
             <Add
               sx={{
