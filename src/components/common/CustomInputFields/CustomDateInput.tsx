@@ -24,6 +24,9 @@ interface DDateInputProps {
   placeHolder?: string;
   minWidth?: string;
   maxWidth?: string;
+  isDateController?: boolean;
+  minimumDate?: any;
+  maximumDate?: any;
 }
 
 const DDateInput: React.FC<DDateInputProps> = ({
@@ -45,6 +48,9 @@ const DDateInput: React.FC<DDateInputProps> = ({
   size = "100%",
   maxWidth,
   minWidth,
+  isDateController = false,
+  minimumDate = null,
+  maximumDate = null,
 }) => {
   const handleChange = useCallback(
     (e: any) => {
@@ -57,8 +63,16 @@ const DDateInput: React.FC<DDateInputProps> = ({
 
   // Calculate minDate and maxDate based on props
   const today = dayjs().toDate();
-  const minDate = disablePast ? today : undefined;
-  const maxDate = disableFuture ? today : undefined;
+  let minDate: any = undefined;
+  let maxDate: any = undefined;
+
+  if (isDateController) {
+    minDate = minimumDate;
+    maxDate = maximumDate;
+  } else {
+    minDate = disablePast ? today : undefined;
+    maxDate = disableFuture ? today : undefined;
+  }
 
   return (
     <div

@@ -124,6 +124,7 @@ const prepareRecords = async (res: any): Promise<IQuoteDatas[]> => {
             : null,
           Attachments: arrGetAttach?.[0]?.serverRelativeUrl || "",
           FileName: arrGetAttach?.[0]?.fileName || "",
+          Status: val?.Status || "",
           IsDelete: false,
         };
       })
@@ -142,6 +143,13 @@ export const getDailyQuote = async (): Promise<IQuoteDatas[]> => {
       Listname: CONFIG.ListNames.Intranet_MotivationalQuotes,
       Select: "*, AttachmentFiles",
       Expand: "AttachmentFiles",
+      Filter: [
+        {
+          FilterKey: "IsDelete",
+          Operator: "ne",
+          FilterValue: "1",
+        },
+      ],
       Topcount: 5000,
       Orderby: "Created",
       Orderbydecorasc: false,
@@ -152,6 +160,22 @@ export const getDailyQuote = async (): Promise<IQuoteDatas[]> => {
     return [...latestItem];
   } catch (err) {
     console.error("Error fetching daily quote:", err);
+    return [];
+  }
+};
+
+export const getChoiceData = async (): Promise<string[]> => {
+  try {
+    const res: any = await SpServices.SPGetChoices({
+      Listname: CONFIG.ListNames.Intranet_MotivationalQuotes,
+      FieldName: CONFIG.MotivateColumn.Status,
+    });
+
+    const dropData: string[] = res?.Choices || [];
+
+    return [...dropData];
+  } catch (err) {
+    console.log("err: ", err);
     return [];
   }
 };
@@ -202,6 +226,7 @@ export const addMotivated = async (
         : null,
       Attachments: fileRes?.data?.ServerRelativeUrl || "",
       FileName: fileRes?.data?.FileName || "",
+      Status: res?.data?.Status || "",
       IsDelete: false,
     };
 
@@ -333,6 +358,7 @@ export const updateMotivated = async (
         : !isFileEdit && curObject?.FileName && !fileData?.Attachments?.name
         ? ""
         : fileRes?.data?.FileName,
+      Status: formData?.Status || "",
       IsDelete: false,
     };
 

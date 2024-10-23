@@ -12,6 +12,7 @@ import { CONFIG } from "../../../config/config";
 import {
   addMotivated,
   deleteMotivated,
+  getChoiceData,
   getDailyQuote,
   updateMotivated,
 } from "../../../services/mainBannerIntranet/mainBannerIntranet";
@@ -34,8 +35,9 @@ import resetPopupController, {
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import Popup from "../../../components/common/Popups/Popup";
-import { InputText } from "primereact/inputtext";
 import { RoleAuth } from "../../../services/CommonServices";
+import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
 /* Local interfaces */
 interface IMotivateField {
@@ -43,12 +45,14 @@ interface IMotivateField {
   StartDate: IFormFields;
   EndDate: IFormFields;
   Attachments: IFormFields;
+  Status: IFormFields;
 }
 
 /* Global variable creation */
 const PernixBannerImage = require("../assets/PernixBannerImage.svg");
 
 let masterQuotes: IQuoteDatas[] = [];
+let isAdmin: boolean = false;
 
 const MainBannerPage = (props: any): JSX.Element => {
   /* Local variable creation */
@@ -58,6 +62,7 @@ const MainBannerPage = (props: any): JSX.Element => {
   const currentUserDetails: IUserDetails = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
+  isAdmin = currentUserDetails.role === CONFIG.RoleDetails.user ? false : true;
 
   /* popup properties */
   const initialPopupController: any[] = [
@@ -186,6 +191,15 @@ const MainBannerPage = (props: any): JSX.Element => {
         type: "string",
       },
     },
+    Status: {
+      value: "",
+      isValid: true,
+      errorMsg: "Status is required",
+      validationRule: {
+        required: true,
+        type: "string",
+      },
+    },
   };
 
   /* State creation */
@@ -209,6 +223,7 @@ const MainBannerPage = (props: any): JSX.Element => {
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
+  const [statusDrop, setStatusDrop] = useState<string[]>([]);
 
   /* Functions creation */
   const handleInputChange = async (
@@ -241,6 +256,11 @@ const MainBannerPage = (props: any): JSX.Element => {
   const handleSearch = async (masterArray: IQuoteDatas[]): Promise<void> => {
     let temp: IQuoteDatas[] = [...masterArray];
 
+    if (searchField.Status) {
+      temp = temp?.filter(
+        (val: IQuoteDatas) => val.Status === searchField.Status
+      );
+    }
     if (searchField.Search) {
       temp = temp?.filter((val: IQuoteDatas) =>
         val.Quote.toLowerCase().includes(searchField.Search.toLowerCase())
@@ -291,7 +311,14 @@ const MainBannerPage = (props: any): JSX.Element => {
       );
     }
 
+    if (!isAdmin) {
+      tempArray = await Promise.all(
+        tempArray?.filter((val: IQuoteDatas) => val.Status === "Active")
+      );
+    }
+
     searchField.Search = "";
+    searchField.Status = "";
     searchField.Date = null;
     setCommonSearch({ ...searchField });
     setSelectedTab(curTab);
@@ -300,11 +327,17 @@ const MainBannerPage = (props: any): JSX.Element => {
   };
 
   const onLoadingFUN = async (): Promise<void> => {
+    setIsLoading(true);
     await RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      CONFIG.SPGroupName.Mainbanner_Admin,
+      {
+        highPriorityGroups: [CONFIG.SPGroupName.Mainbanner_Admin],
+      },
       dispatch
     );
+    await getChoiceData().then(async (val: string[]) => {
+      setStatusDrop([...val]);
+    });
     await getDailyQuote().then(async (val: IQuoteDatas[]) => {
       masterQuotes = [...val];
       await prepareDatas(CONFIG.TabsName[0]);
@@ -336,6 +369,10 @@ const MainBannerPage = (props: any): JSX.Element => {
         Attachments: {
           ...initialFormData.Attachments,
           value: data?.FileName || "",
+        },
+        Status: {
+          ...initialFormData.Status,
+          value: data?.Status || "",
         },
       });
 
@@ -445,6 +482,7 @@ const MainBannerPage = (props: any): JSX.Element => {
       data[column.StartDate] = formData?.StartDate?.value || null;
       data[column.EndDate] = formData?.EndDate?.value || null;
       data[column.Quote] = formData?.Quote?.value || "";
+      data[column.Status] = formData?.Status?.value || "";
       data[column.IsDelete] = false;
 
       // Attachments json prepared.
@@ -508,9 +546,40 @@ const MainBannerPage = (props: any): JSX.Element => {
             />
           </div>
           <div>
+            <CustomDropDown
+              value={formData.Status.value}
+              options={statusDrop || []}
+              placeholder="Status"
+              isValid={formData.Status.isValid}
+              errorMsg={formData.Status.errorMsg}
+              onChange={(value) => {
+                const { isValid, errorMsg } = validateField(
+                  CONFIG.MotivateColumn.Status,
+                  value,
+                  formData.Status.validationRule
+                );
+                handleInputChange(
+                  CONFIG.MotivateColumn.Status,
+                  value,
+                  isValid,
+                  errorMsg
+                );
+              }}
+            />
+          </div>
+        </div>
+        <div className={styles.thirdRow}>
+          <div>
             <CustomDateInput
               value={formData?.StartDate?.value || null}
               label="Start Date"
+              isDateController={true}
+              minimumDate={new Date()}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
               onChange={(e: any) => {
                 const value = e;
                 const { isValid, errorMsg } = validateField(
@@ -531,6 +600,13 @@ const MainBannerPage = (props: any): JSX.Element => {
             <CustomDateInput
               value={formData.EndDate.value}
               label="End Date"
+              isDateController={true}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
               error={!formData.EndDate.isValid}
               errorMsg={formData.EndDate.errorMsg}
               onChange={(e: any) => {
@@ -606,9 +682,40 @@ const MainBannerPage = (props: any): JSX.Element => {
             />
           </div>
           <div>
+            <CustomDropDown
+              value={formData.Status.value}
+              options={statusDrop || []}
+              placeholder="Status"
+              isValid={formData.Status.isValid}
+              errorMsg={formData.Status.errorMsg}
+              onChange={(value) => {
+                const { isValid, errorMsg } = validateField(
+                  CONFIG.MotivateColumn.Status,
+                  value,
+                  formData.Status.validationRule
+                );
+                handleInputChange(
+                  CONFIG.MotivateColumn.Status,
+                  value,
+                  isValid,
+                  errorMsg
+                );
+              }}
+            />
+          </div>
+        </div>
+        <div className={styles.thirdRow}>
+          <div>
             <CustomDateInput
               value={formData?.StartDate?.value || null}
               label="Start Date"
+              isDateController={true}
+              minimumDate={new Date()}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
               onChange={(e: any) => {
                 const value = e;
                 const { isValid, errorMsg } = validateField(
@@ -629,6 +736,13 @@ const MainBannerPage = (props: any): JSX.Element => {
             <CustomDateInput
               value={formData.EndDate.value}
               label="End Date"
+              isDateController={true}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
               error={!formData.EndDate.isValid}
               errorMsg={formData.EndDate.errorMsg}
               onChange={(e: any) => {
@@ -656,14 +770,32 @@ const MainBannerPage = (props: any): JSX.Element => {
       </div>,
     ],
     [
-      <div key={4}>
-        <div>
-          <img src={curObject?.Attachments || PernixBannerImage} alt="Banner" />
-        </div>
-        <div>{curObject?.Quote || ""}</div>
-        <div>
-          <div>Active</div>
-          <div>{`${curObject?.StartDate} - ${curObject?.EndDate}`}</div>
+      <div key={4} className={styles.viewPopupContainer}>
+        <img
+          src={curObject?.Attachments || PernixBannerImage}
+          alt="Banner"
+          className={styles.viewScreenIMG}
+        />
+        <div className={styles.viewScreenQuote}>{curObject?.Quote || ""}</div>
+        <div className={styles.viewScreenFooter}>
+          <div
+            className={styles.activeLable}
+            style={{
+              backgroundColor:
+                curObject.Status === "Active"
+                  ? "rgb(175, 228, 175)"
+                  : "rgb(243, 183, 183)",
+              color:
+                curObject.Status === "Active"
+                  ? "rgb(58, 156, 58)"
+                  : "rgb(227, 65, 65)",
+            }}
+          >
+            {curObject?.Status || ""}
+          </div>
+          <div
+            className={styles.dateLable}
+          >{`${curObject?.StartDate} - ${curObject?.EndDate}`}</div>
         </div>
       </div>,
     ],
@@ -816,16 +948,34 @@ const MainBannerPage = (props: any): JSX.Element => {
                   }}
                 />
               </div>
-              <div className={styles.backHeader}>Main Banner</div>
+              <div className={styles.backHeader}>Motivation Banner</div>
             </div>
 
             <div className={styles.searchContainer}>
               <div>
-                <InputText
+                <CustomDropDown
+                  noErrorMsg
+                  value={commonSearch?.Status}
+                  options={statusDrop || []}
+                  placeholder="Select Status"
+                  onChange={(e: any) => {
+                    const value: any = e;
+                    searchField.Status = value;
+                    setCommonSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Status: value,
+                    }));
+                    handleSearch([...allQuotes]);
+                  }}
+                />
+              </div>
+              <div>
+                <CustomInput
+                  noErrorMsg
                   value={commonSearch?.Search}
                   placeholder="Search"
                   onChange={(e: any) => {
-                    const value: string = e.target.value.trimStart();
+                    const value: string = e.trimStart();
                     searchField.Search = value;
                     setCommonSearch((prev: IPageSearchFields) => ({
                       ...prev,
@@ -837,7 +987,7 @@ const MainBannerPage = (props: any): JSX.Element => {
               </div>
               <div>
                 <CustomDateInput
-                  placeHolder="Date"
+                  label="Select Date"
                   value={commonSearch?.Date}
                   onChange={(e: any) => {
                     const value: any = e;
@@ -854,6 +1004,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                 className={styles.refreshBTN}
                 onClick={(_) => {
                   searchField.Search = "";
+                  searchField.Status = "";
                   searchField.Date = null;
                   setCommonSearch({ ...searchField });
                   handleSearch([...allQuotes]);
@@ -863,10 +1014,7 @@ const MainBannerPage = (props: any): JSX.Element => {
               </div>
               <div
                 style={{
-                  display:
-                    currentUserDetails.role === CONFIG.RoleDetails.User
-                      ? "none"
-                      : "flex",
+                  display: isAdmin ? "flex" : "none",
                 }}
               >
                 <DefaultButton
@@ -892,7 +1040,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           {/* Tab section */}
           <div className={styles.tabsContainer}>
             {CONFIG.TabsName.map((str: string, i: number) => {
-              return (
+              return isAdmin ? (
                 <div
                   key={i}
                   style={{
@@ -905,16 +1053,33 @@ const MainBannerPage = (props: any): JSX.Element => {
                     prepareDatas(str);
                   }}
                 >
-                  {str} Motivation
+                  {str}
                 </div>
+              ) : i === 0 ? (
+                <div
+                  key={i}
+                  style={{
+                    borderBottom:
+                      selectedTab === str ? "3px solid #e0803d" : "none",
+                  }}
+                  onClick={(_) => {
+                    setIsLoading(true);
+                    setPagination({ ...CONFIG.PaginationData });
+                    prepareDatas(str);
+                  }}
+                >
+                  {str}
+                </div>
+              ) : (
+                ""
               );
             })}
           </div>
 
           {/* Body section */}
-          <div className={styles.bodyContainer}>
-            {showQuotes.length ? (
-              showQuotes
+          {showQuotes.length ? (
+            <div className={styles.bodyContainer}>
+              {showQuotes
                 ?.slice(pagination.first, pagination.first + pagination.rows)
                 ?.map((val: IQuoteDatas, i: number) => {
                   return (
@@ -925,65 +1090,74 @@ const MainBannerPage = (props: any): JSX.Element => {
                         alt="Banner"
                       />
                       <div className={styles.cardBody}>{val?.Quote || ""}</div>
-                      <div className={styles.cardIcon}>
+                      <div className={styles.cardFooter}>
                         <div
-                          onClick={(_) => {
-                            handleSelect({ ...val }, "view");
-                          }}
-                        >
-                          <i
-                            className="pi pi-eye"
-                            style={{
-                              color: "#1ab800",
-                            }}
-                          />
-                        </div>
-                        <div
+                          className={styles.cardStatus}
                           style={{
-                            display:
-                              currentUserDetails.role ===
-                              CONFIG.RoleDetails.User
-                                ? "none"
-                                : "flex",
-                          }}
-                          onClick={(_) => {
-                            handleSelect({ ...val }, "edit");
+                            backgroundColor:
+                              val.Status === "Active"
+                                ? "rgb(175, 228, 175)"
+                                : "rgb(243, 183, 183)",
+                            color:
+                              val.Status === "Active"
+                                ? "rgb(58, 156, 58)"
+                                : "rgb(227, 65, 65)",
                           }}
                         >
-                          <i
-                            className="pi pi-pen-to-square"
-                            style={{
-                              color: "#007ef2",
-                            }}
-                          />
+                          {val?.Status || ""}
                         </div>
-                        <div
-                          style={{
-                            display:
-                              currentUserDetails.role ===
-                              CONFIG.RoleDetails.User
-                                ? "none"
-                                : "flex",
-                          }}
-                          onClick={(_) => {
-                            handleSelect({ ...val }, "delete");
-                          }}
-                        >
-                          <i
-                            className="pi pi-trash"
-                            style={{
-                              color: "#ff1c1c",
+                        <div className={styles.cardIcon}>
+                          <div
+                            onClick={(_) => {
+                              handleSelect({ ...val }, "view");
                             }}
-                          />
+                          >
+                            <i
+                              className="pi pi-eye"
+                              style={{
+                                color: "#1ab800",
+                              }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: isAdmin ? "flex" : "none",
+                            }}
+                            onClick={(_) => {
+                              handleSelect({ ...val }, "edit");
+                            }}
+                          >
+                            <i
+                              className="pi pi-pen-to-square"
+                              style={{
+                                color: "#007ef2",
+                              }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: isAdmin ? "flex" : "none",
+                            }}
+                            onClick={(_) => {
+                              handleSelect({ ...val }, "delete");
+                            }}
+                          >
+                            <i
+                              className="pi pi-trash"
+                              style={{
+                                color: "#ff1c1c",
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                   );
-                })
-            ) : (
-              <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
-            )}
-          </div>
+                })}
+            </div>
+          ) : (
+            <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
+          )}
 
           {/* Pagination section */}
           {showQuotes.length ? (

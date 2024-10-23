@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import {
   IListName,
   IMotivateColumn,
@@ -40,11 +41,12 @@ export namespace CONFIG {
     QuestionCEO_Admin: "QuestionCEO_Admin",
     Shoutouts_Admin: "Shoutouts_Admin",
     HelpDesk_Ticket_Managers: "HelpDesk_Ticket_Managers",
+    HelpDesk_IT_Owners: "HelpDesk_IT_Owners",
   };
 
   export const RoleDetails: IRoleDetails = {
     SuperAdmin: "Super Admin",
-    User: "User",
+    user: "user",
   };
 
   export const TabsName: string[] = ["Current", "Upcoming", "Previous"];
@@ -53,7 +55,7 @@ export namespace CONFIG {
 
   export const PaginationData: IPaginationData = {
     first: 0,
-    rows: 10,
+    rows: 8,
   };
 
   export const MotivateColumn: IMotivateColumn = {
@@ -63,6 +65,7 @@ export namespace CONFIG {
     Quote: "Quote",
     IsDelete: "IsDelete",
     Attachments: "Attachments",
+    Status: "Status",
   };
 
   export const QuoteDatas: IQuoteDatas = {
@@ -72,12 +75,14 @@ export namespace CONFIG {
     Quote: "",
     Attachments: "",
     FileName: "",
+    Status: "",
     IsDelete: false,
   };
 
   export const PageSearchFields: IPageSearchFields = {
     Search: "",
     Date: null,
+    Status: "",
   };
 
   export const NavigatePage: INavigatePage = {
