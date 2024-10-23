@@ -96,12 +96,17 @@ const MainBannerIntranet = (props: any): JSX.Element => {
     dispatch(setMainSPContext(props?.context));
     await RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      CONFIG.SPGroupName.Mainbanner_Admin,
+      {
+        highPriorityGroups: [CONFIG.SPGroupName.Mainbanner_Admin],
+      },
       dispatch
     );
-    await getDailyQuote().then((value: IQuoteDatas[]) => {
-      dispatch(setMotivationalQuotesData(value?.[0]?.Quote || ""));
-      dispatch(setBannerImage(value?.[0]?.Attachments || ""));
+    await getDailyQuote().then(async (value: IQuoteDatas[]) => {
+      let tempJSON: IQuoteDatas[] = await Promise.all(
+        value?.filter((val: IQuoteDatas) => val.Status === "Active") || []
+      );
+      dispatch(setMotivationalQuotesData(tempJSON?.[0]?.Quote || ""));
+      dispatch(setBannerImage(tempJSON?.[0]?.Attachments || ""));
       setLoading(false); // Set loading to false once data is retrieved
     });
   };

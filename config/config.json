@@ -113,6 +113,38 @@
           "manifest": "./src/webparts/mainBannerPage/MainBannerPageWebPart.manifest.json"
         }
       ]
+    },
+    "calendar-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/calendarPage/CalendarPageWebPart.js",
+          "manifest": "./src/webparts/calendarPage/CalendarPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "document-repository-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentRepositoryPage/DocumentRepositoryPageWebPart.js",
+          "manifest": "./src/webparts/documentRepositoryPage/DocumentRepositoryPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "questions-ceo-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/questionsCeoPage/QuestionsCeoPageWebPart.js",
+          "manifest": "./src/webparts/questionsCeoPage/QuestionsCeoPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "poll-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pollPage/PollPageWebPart.js",
+          "manifest": "./src/webparts/pollPage/PollPageWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -131,6 +163,10 @@
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
     "NewsPageWebPartStrings": "lib/webparts/newsPage/loc/{locale}.js",
     "HelpDeskWebPartStrings": "lib/webparts/helpDesk/loc/{locale}.js",
-    "MainBannerPageWebPartStrings": "lib/webparts/mainBannerPage/loc/{locale}.js"
+    "MainBannerPageWebPartStrings": "lib/webparts/mainBannerPage/loc/{locale}.js",
+    "CalendarPageWebPartStrings": "lib/webparts/calendarPage/loc/{locale}.js",
+    "DocumentRepositoryPageWebPartStrings": "lib/webparts/documentRepositoryPage/loc/{locale}.js",
+    "QuestionsCeoPageWebPartStrings": "lib/webparts/questionsCeoPage/loc/{locale}.js",
+    "PollPageWebPartStrings": "lib/webparts/pollPage/loc/{locale}.js"
   }
 }

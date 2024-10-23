@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @rushstack/no-new-null */
 export interface ITenantDetail {
   webURL: string;
   tenantURL: string;
@@ -27,11 +29,12 @@ export interface ISPGroupName {
   QuestionCEO_Admin: string;
   Shoutouts_Admin: string;
   HelpDesk_Ticket_Managers: string;
+  HelpDesk_IT_Owners: string;
 }
 
 export interface IRoleDetails {
   SuperAdmin: string;
-  User: string;
+  user: string;
 }
 
 export interface IUserDetails {
@@ -54,6 +57,7 @@ export interface IQuoteDatas {
   EndDate: Date | any;
   Attachments: string;
   FileName: string;
+  Status: string;
   IsDelete: boolean;
 }
 
@@ -81,6 +85,7 @@ export interface IMotivateColumn {
   EndDate: string;
   IsDelete: string;
   Attachments: string;
+  Status: string;
 }
 
 export interface IMotivateColumnType {
@@ -93,6 +98,7 @@ export interface IMotivateColumnType {
 export interface IPageSearchFields {
   Search: string;
   Date: Date | any;
+  Status: string;
 }
 
 export interface INavigatePage {
