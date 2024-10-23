@@ -1,7 +1,14 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import MainChart from "../../../../components/common/Charts/MainChart";
+import { useEffect } from "react";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
+import {
+  CreatedClosedTickets,
+  TicketBySource,
+  TicketByStatusChart,
+  TicketsByPriority,
+} from "../../components/DashboardCharts/DashboardsCharts";
 import InfoCard from "../../components/InfoCard/InfoCard";
 // images
 // Import SVGs
@@ -10,230 +17,111 @@ const openTickets: any = require("../../assets/images/svg/openTickets.svg");
 const closedTickets: any = require("../../assets/images/svg/closedTickets.svg");
 const ticketsCreatedThisWeek: any = require("../../assets/images/svg/ticketsCreatedThisWeek.svg");
 const ticketsOnHold: any = require("../../assets/images/svg/ticketsOnHold.svg");
-
+// styles
 import styles from "./Dashboard.module.scss";
+import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  filterTicketsByTimePeriod,
+  getTicketsByKeyValue,
+} from "../../../../utils/commonUtils";
+
 const Dashboard = (): JSX.Element => {
-  const ticketByStatus = {
-    labels: ["Open", "Resolved", "Waiting to be Resolved", "Pending", "Closed"],
-    datasets: [
-      {
-        data: [20, 25, 20, 15, 20],
-        backgroundColor: [
-          "#E0803D",
-          "#0B4D53",
-          "#2D9CDB",
-          "#F9C74F",
-          "#5962B8",
-        ],
-      },
-    ],
-  };
+  const dispatch = useDispatch();
 
-  const ticketByStatusOptions = {
-    plugins: {
-      legend: {
-        position: "right",
-        labels: {
-          font: {
-            size: 13, // Font size for the legend labels
-            family: "'osMedium', sans-serif", // Font family
-          },
-          color: "#484848", // Label font color
-          boxWidth: 10, // Width of the color box next to each legend label
-          padding: 20, // Padding around legend labels
-          usePointStyle: true, // Use a circle/point instead of a rectangle
-          pointStyleWidth: 10, // Adjust the size of the point style
-          borderRadius: 5, // Adjust the border radius to make the box rounded
-        },
-      },
-      datalabels: {
-        color: "white",
-        formatter: (value: number, ctx: any) => {
-          const total = ctx.chart.data.datasets[0].data.reduce(
-            (sum: number, val: number) => sum + val,
-            0
-          );
-          const percentage = Math.round((value / total) * 100); // Round the percentage
-          return `${percentage}%`; // Display rounded percentage
-        },
-      },
-    },
-  };
-
-  const ticketBySource = {
-    labels: ["Email", "Portal"],
-    datasets: [
-      {
-        data: [55, 45],
-        backgroundColor: ["#E0803D", "#0B4D53"],
-      },
-    ],
-  };
-
-  const ticketBySourceOptions = {
-    plugins: {
-      legend: {
-        position: "right",
-        labels: {
-          font: {
-            size: 13, // Font size for the legend labels
-            family: "'osMedium', sans-serif", // Font family
-          },
-          color: "#484848", // Label font color
-          boxWidth: 10, // Width of the color box next to each legend label
-          padding: 20, // Padding around legend labels
-          usePointStyle: true, // Use a circle/point instead of a rectangle
-          pointStyleWidth: 10, // Adjust the size of the point style
-          borderRadius: 5, // Adjust the border radius to make the box rounded
-        },
-      },
-      datalabels: {
-        color: "white",
-        formatter: (value: number, ctx: any) => {
-          const total = ctx.chart.data.datasets[0].data.reduce(
-            (sum: number, val: number) => sum + val,
-            0
-          );
-          const percentage = Math.round((value / total) * 100); // Round the percentage
-          return `${percentage}%`; // Display rounded percentage
-        },
-      },
-    },
-  };
-
-  const ticketsByDayOfWeek = {
-    labels: [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ],
-    datasets: [
-      {
-        label: "Created tickets",
-        data: [8, 5, 11, 6, 7, 4, 9],
-        backgroundColor: "#E0803D",
-        borderColor: "#E0803D",
-        fill: false,
-      },
-      {
-        label: "Closed tickets",
-        data: [1, 9, 3, 10, 5, 3, 2],
-        backgroundColor: "#0B4D53",
-        borderColor: "#0B4D53",
-        fill: false,
-      },
-    ],
-  };
-
-  const ticketsByDayOfWeekOptions = {
-    plugins: {
-      legend: {
-        position: "bottom", // Position of the legend
-        labels: {
-          font: {
-            size: 13, // Font size for the legend labels
-            family: "'osMedium', sans-serif", // Font family
-          },
-          color: "#484848", // Label font color
-          boxWidth: 10, // Width of the color box next to each legend label
-          padding: 20, // Padding around legend labels
-          usePointStyle: true, // Use a circle/point instead of a rectangle
-          pointStyle: "circle", // Ensures the point style is a circle
-        },
-      },
-      datalabels: {
-        color: "white",
-        formatter: (value: number, ctx: any) => {
-          return "";
-        },
-      },
-    },
-    elements: {
-      line: {
-        tension: 0.4, // Line smoothing
-      },
-      point: {
-        radius: 3, // Point size
-        hoverRadius: 5, // Hover size for points
-        borderRadius: 5, // Make points rounded
-      },
-    },
-    scales: {
-      x: { title: { display: true, text: "Day" } },
-      y: { title: { display: true, text: "Number of Tickets" } },
-    },
-  };
-
-  const currentTicketStatuses = {
-    labels: ["New", "Unassigned", "Group", "Overdue", "Closed", "Backlog"],
-    datasets: [
-      {
-        label: "Tickets",
-        data: [5, 3, 7, 4, 9, 6],
-        backgroundColor: [
-          "#90BE6D",
-          "#0B4D53",
-          "#E0803D",
-          "#BE6D6D",
-          "#D74FF9",
-          "#4F9DF9",
-        ],
-      },
-    ],
-  };
-
-  const currentTicketStatusesOptions = {
-    plugins: {
-      legend: { display: false, position: "bottom" },
-
-      datalabels: {
-        color: "white",
-        formatter: (value: number, ctx: any) => {
-          return "";
-        },
-      },
-    },
-    barThickness: 60,
-    scales: {
-      x: { title: { display: true, text: "Status" } },
-      y: { title: { display: true, text: "Ticket Count" } },
-    },
-  };
+  const HelpDeskTicktesData: any = useSelector(
+    (state: any) => state.HelpDeskTicktesData.value
+  );
 
   // Info cards array
   const infoCards: any[] = [
     {
       cardName: "My Tickets",
       cardImg: myTickets,
-      cardValues: "42",
+      cardValues: HelpDeskTicktesData?.data?.length || 0,
     },
     {
       cardName: "Open",
       cardImg: openTickets,
-      cardValues: "20",
+      cardValues:
+        getTicketsByKeyValue(HelpDeskTicktesData?.data, "Status", "Open")
+          ?.length || 0,
     },
     {
       cardName: "Closed",
       cardImg: closedTickets,
-      cardValues: "22",
+      cardValues:
+        getTicketsByKeyValue(HelpDeskTicktesData?.data, "Status", "Closed")
+          ?.length || 0,
     },
     {
       cardName: "This week's tickets",
       cardImg: ticketsCreatedThisWeek,
-      cardValues: "6",
+      cardValues:
+        filterTicketsByTimePeriod(HelpDeskTicktesData?.data, "thisWeek")
+          ?.length || 0,
     },
     {
       cardName: "Tickets on hold",
       cardImg: ticketsOnHold,
-      cardValues: "43",
+      cardValues:
+        getTicketsByKeyValue(HelpDeskTicktesData?.data, "Status", "On Hold")
+          ?.length || 0,
     },
   ];
 
-  console.log("infoCards: ", infoCards);
+  const currentUserDetails = useSelector(
+    (state: { MainSPContext: { currentUserDetails: any } }) =>
+      state.MainSPContext.currentUserDetails
+  );
+
+  console.log("currentUserDetails: ", currentUserDetails);
+
+  const currentRoleBasedData: any = (() => {
+    if (
+      currentUserDetails?.role === "Pernix_Admin" ||
+      currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+    ) {
+      return {
+        ...HelpDeskTicktesData,
+        role: "ticket_manager",
+      };
+    } else {
+      const isUser = HelpDeskTicktesData?.data?.some(
+        (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
+      );
+
+      const isItOwner = HelpDeskTicktesData?.data?.some(
+        (item: any) => item?.ITOwner?.EMail === currentUserDetails?.email
+      );
+
+      let role = "undefined";
+
+      if (isUser) {
+        role = "user";
+      }
+      if (isItOwner) {
+        role = "it_owner";
+      }
+
+      return {
+        ...HelpDeskTicktesData,
+        role,
+        data: isUser
+          ? HelpDeskTicktesData?.data?.filter(
+              (item: any) =>
+                item?.EmployeeName?.EMail === currentUserDetails?.email
+            )
+          : HelpDeskTicktesData?.data,
+      };
+    }
+  })();
+
+  console.log("currentRoleBasedData: ", currentRoleBasedData);
+
+  useEffect(() => {
+    getAllTickets(dispatch);
+  }, []);
 
   return (
     <div className={styles.myDashboard}>
@@ -251,44 +139,40 @@ const Dashboard = (): JSX.Element => {
         <div className={styles.metricCard}>
           <div className={styles.chartDetails}>Ticket by status</div>
           <div className={styles.chart}>
-            <MainChart
-              chartType="Pie"
-              height="90%"
-              data={ticketByStatus}
-              options={ticketByStatusOptions}
+            <TicketByStatusChart
+              AllTickets={currentRoleBasedData}
+              Term="This Week"
             />
           </div>
         </div>
         <div className={styles.metricCard}>
           <div className={styles.chartDetails}>Tickets by source</div>
           <div className={styles.chart}>
-            <MainChart
-              height="90%"
-              chartType="Doughnut"
-              data={ticketBySource}
-              options={ticketBySourceOptions}
+            <TicketBySource
+              AllTickets={currentRoleBasedData}
+              Term="This Week"
             />
           </div>
         </div>
       </div>
+
       <div className={styles.metricsGrid2}>
         <div className={styles.metricCard}>
-          <div className={styles.chartDetails}>Tickets by day of week</div>
+          <div className={styles.chartDetails}>Created & Closed Tickets</div>
           <div className={styles.chart}>
-            <MainChart
-              chartType="Line"
-              data={ticketsByDayOfWeek}
-              options={ticketsByDayOfWeekOptions}
+            <CreatedClosedTickets
+              AllTickets={currentRoleBasedData}
+              Term="This Week"
             />
           </div>
         </div>
         <div className={styles.metricCard}>
-          <div className={styles.chartDetails}>Current ticket statuses</div>
+          <div className={styles.chartDetails}>Tickets by Priority</div>
           <div className={styles.chart}>
-            <MainChart
-              chartType="Bar"
-              data={currentTicketStatuses}
-              options={currentTicketStatusesOptions}
+            <TicketsByPriority
+              AllTickets={currentRoleBasedData}
+              Term="This Week"
+              Status="Open"
             />
           </div>
         </div>

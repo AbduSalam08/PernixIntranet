@@ -25,7 +25,10 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      CONFIG.SPGroupName.HelpDesk_Ticket_Managers,
+      {
+        highPriorityGroups: [CONFIG.SPGroupName.HelpDesk_Ticket_Managers],
+        lowPriorityGroups: [CONFIG.SPGroupName.HelpDesk_IT_Owners],
+      },
       dispatch
     );
   }, [dispatch]);
@@ -59,10 +62,58 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
 
             {/* Ticket Manager ROUTES */}
             <Route index Component={MainLayout} />
-            <Route path="/ticket_manager" Component={MainLayout}>
+            <Route path="/helpdesk_manager" Component={MainLayout}>
               <Route index Component={Dashboard} />
               <Route path="dashboard" Component={Dashboard} />
 
+              <Route path="tickets" Component={MyTickets}>
+                <Route index Component={MyTickets} />
+                <Route path="all" Component={MyTickets} />
+                <Route path="status" Component={MyTickets}>
+                  <Route path="open" Component={MyTickets} />
+                  <Route path="closed" Component={MyTickets} />
+                  <Route path="onhold" Component={MyTickets} />
+                </Route>
+              </Route>
+
+              <Route path="all_tickets" Component={MyTickets}>
+                <Route index Component={MyTickets} />
+                <Route path="all" Component={MyTickets} />
+                <Route path="open" Component={MyTickets} />
+                <Route path="handle" Component={MyTickets} />
+                <Route path="recent" Component={MyTickets} />
+              </Route>
+            </Route>
+
+            <Route path="/user" Component={MainLayout}>
+              {/* <Route index Component={Dashboard} /> */}
+              {/* <Route path="dashboard" Component={Dashboard} /> */}
+
+              <Route index Component={MyTickets} />
+              <Route path="tickets" Component={MyTickets}>
+                <Route index Component={MyTickets} />
+                <Route path="all" Component={MyTickets} />
+                <Route path="status" Component={MyTickets}>
+                  <Route path="open" Component={MyTickets} />
+                  <Route path="closed" Component={MyTickets} />
+                  <Route path="onhold" Component={MyTickets} />
+                </Route>
+              </Route>
+
+              <Route path="all_tickets" Component={MyTickets}>
+                <Route index Component={MyTickets} />
+                <Route path="all" Component={MyTickets} />
+                <Route path="open" Component={MyTickets} />
+                <Route path="handle" Component={MyTickets} />
+                <Route path="recent" Component={MyTickets} />
+              </Route>
+            </Route>
+
+            <Route path="/it_owner" Component={MainLayout}>
+              <Route index Component={Dashboard} />
+              <Route path="dashboard" Component={Dashboard} />
+
+              <Route index Component={MyTickets} />
               <Route path="tickets" Component={MyTickets}>
                 <Route index Component={MyTickets} />
                 <Route path="all" Component={MyTickets} />

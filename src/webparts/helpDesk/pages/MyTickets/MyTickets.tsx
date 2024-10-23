@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Drawer } from "@mui/material";
@@ -8,15 +9,19 @@ import PageHeader from "../../../../components/common/PageHeader/PageHeader";
 const reopenTicket: any = require("../../../../assets/images/svg/reopenTicket.svg");
 
 import styles from "./MyTickets.module.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Add } from "@mui/icons-material";
 import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
 import { validateField } from "../../../../utils/commonUtils";
 import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 import CustomFileUpload from "../../../../components/common/CustomInputFields/CustomFileUpload";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 
 const MyTickets = (): JSX.Element => {
+  const dispatch = useDispatch();
+
   const [openNewTicketSlide, setOpenNewTicketSlide] = useState(false);
   const handleView = (row: any): any => {
     alert(`View clicked for row: ${JSON.stringify(row)}`);
@@ -369,6 +374,63 @@ const MyTickets = (): JSX.Element => {
       },
     }));
   };
+
+  const currentUserDetails = useSelector(
+    (state: { MainSPContext: { currentUserDetails: any } }) =>
+      state.MainSPContext.currentUserDetails
+  );
+
+  const HelpDeskTicktesData: any = useSelector(
+    (state: any) => state.HelpDeskTicktesData.value
+  );
+  console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
+
+  const currentRoleBasedData: any = (() => {
+    if (
+      currentUserDetails?.role === "Pernix_Admin" ||
+      currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+    ) {
+      return {
+        ...HelpDeskTicktesData,
+        role: "ticket_manager",
+      };
+    } else {
+      const isUser = HelpDeskTicktesData?.data?.some(
+        (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
+      );
+
+      const isItOwner = HelpDeskTicktesData?.data?.some(
+        (item: any) => item?.ITOwner?.EMail === currentUserDetails?.email
+      );
+
+      let role = "undefined";
+
+      if (isUser) {
+        role = "user";
+      }
+      if (isItOwner) {
+        role = "it_owner";
+      }
+
+      return {
+        ...HelpDeskTicktesData,
+        role,
+        data: isUser
+          ? HelpDeskTicktesData?.data?.filter(
+              (item: any) =>
+                item?.EmployeeName?.EMail === currentUserDetails?.email
+            )
+          : HelpDeskTicktesData?.data,
+      };
+    }
+  })();
+
+  console.log("currentRoleBasedData: ", currentRoleBasedData);
+
+  useEffect(() => {
+    getAllTickets(dispatch);
+  }, []);
+
   return (
     <div className={styles.mytickets}>
       <div className={styles.mytickets_header}>
