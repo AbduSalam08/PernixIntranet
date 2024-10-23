@@ -18,11 +18,13 @@ interface NewsCardProps {
   currentUserDetails: any;
   item?: any;
   setisDelete?: (isDelete: boolean) => void;
+  // setIsview?: (isview: boolean) => void;
   handleDeleteClick: (id: any) => void;
   setIsEdit?: (isEdit: boolean) => void; // Add setIsEdit prop
 
   noActionsAndStatus?: boolean;
   handleEditClick?: (item: any) => void; // Modify this to accept an item
+  handleViewClick?: (item: any) => void; // Modify this to accept an item
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({
@@ -38,29 +40,34 @@ const NewsCard: React.FC<NewsCardProps> = ({
   handleDeleteClick,
   setIsEdit,
   setisDelete,
+  // setIsview,
+  handleViewClick,
   currentUserDetails,
   item,
   noActionsAndStatus = false,
 }) => {
-  const handleEdit = () => {
-    console.log("how many times call this function");
+  const handleEdit = (): void => {
     if (handleEditClick) {
-      setisDelete && setisDelete(false);
+      setisDelete?.(false);
 
-      setIsEdit && setIsEdit(true);
+      setIsEdit?.(true);
       handleEditClick(item); // Pass the item back to the parent
     }
   };
 
-  const handleDelete = () => {
-    setIsEdit && setIsEdit(false);
+  const handleDelete = (): void => {
+    setIsEdit?.(false);
 
-    setisDelete && setisDelete(true);
+    setisDelete?.(true);
     handleDeleteClick(item.ID);
   };
 
-  const handleView = () => {};
-  console.log(status, "status");
+  const handleView = () => {
+    if (handleViewClick) {
+      console.log("clicked");
+      handleViewClick(item);
+    }
+  };
   return (
     <div className={styles.newsCard}>
       <img
@@ -77,7 +84,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
           {!noActions && (
             <div
               className={
-                status == "Active" ? styles.activepill : styles.inactivepill
+                status === "Active" ? styles.activepill : styles.inactivepill
               }
             >
               {status}
@@ -90,8 +97,8 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 className="pi pi-eye
 "
                 style={{ color: "#1AB800", fontSize: "1.2rem" }}
-              ></i>
-              {currentUserDetails.role === CONFIG.RoleDetails.User ? (
+              />
+              {currentUserDetails.role === CONFIG.RoleDetails.user ? (
                 <></>
               ) : (
                 <>
@@ -101,7 +108,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                     className="pi pi-pen-to-square
 
 "
-                  ></i>
+                  />
                   <i
                     onClick={handleDelete}
                     style={{ color: "red", fontSize: "1.2rem" }}
@@ -109,7 +116,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
 
 "
-                  ></i>
+                  />
                 </>
               )}
               {/* <button onClick={onEdit}>Edit</button>
