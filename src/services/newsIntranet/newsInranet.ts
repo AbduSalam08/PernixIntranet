@@ -17,6 +17,15 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
     // Fetch news data
     const response = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_News,
+      Select: "*, Author/EMail,Author/Title",
+      Expand: "Author",
+      Filter: [
+        {
+          FilterKey: "isDelete",
+          Operator: "ne",
+          FilterValue: "1",
+        },
+      ],
     });
     console.log("response: ", response);
 
@@ -36,6 +45,8 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
       const StartDate = item.StartDate;
       const EndDate = item.EndDate;
       const ID = item.Id || item.ID;
+      const Author = item?.Author?.EMail || "";
+      const AuthorName = item?.Author?.Title || "";
 
       return {
         imageUrl,
@@ -45,6 +56,8 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
         StartDate,
         EndDate,
         FileName,
+        Author,
+        AuthorName,
         ID,
       };
     });
@@ -295,9 +308,12 @@ export const deleteNews = async (
 
   try {
     // Delete item from the SharePoint list
-    await SpServices.SPDeleteItem({
+    await SpServices.SPUpdateItem({
       Listname: CONFIG.ListNames.Intranet_News,
       ID: newsID,
+      RequestJSON: {
+        isDelete: true,
+      },
     });
 
     // Success state after the item is deleted

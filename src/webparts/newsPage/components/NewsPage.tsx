@@ -4,11 +4,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
-import { Calendar } from "primereact/calendar";
 import "../../../assets/styles/style.css";
 import NewsCard from "./NewsCard/NewsCard";
 import styles from "./NewsPage.module.scss";
@@ -33,13 +31,15 @@ import CircularSpinner from "../../../components/common/Loaders/CircularSpinner"
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import dayjs from "dayjs";
-import { InputText } from "primereact/inputtext";
+import moment from "moment";
+import { IPaginationData } from "../../../interface/interface";
 // const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 interface SearchField {
   selectedDate: Date | any;
   allSearch: string;
+  Status: string;
 }
 interface FormField<T> {
   value: T;
@@ -82,25 +82,35 @@ interface PopupState {
 let objFilter: SearchField = {
   selectedDate: null,
   allSearch: "",
+  Status: "",
 };
 const NewsPage = (props: any): JSX.Element => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<string>("");
+  const [pagination, setPagination] = useState<IPaginationData>(
+    CONFIG.PaginationData
+  );
+
   const [isfile, setIsile] = useState<boolean>(false);
+  // const[isview,setIsview]=useState<boolean>(false)
   const [isDelete, setisDelete] = useState<boolean>(false);
   const [id, setID] = useState<any | null>(null);
   const [searchField, setSearchField] = useState<SearchField>({
     selectedDate: null,
     allSearch: "",
+    Status: "",
   });
-  const [first, setFirst] = useState<number>(0);
-  const [rows, setRows] = useState<number>(10);
-  const [newsData, setNewsData] = useState<any[]>([]);
 
-  const totalRecords = newsData.length;
+  const [newsData, setNewsData] = useState<any[]>([]);
+  const [shownewsData, setShowNewsData] = useState<any[]>([]);
+
+  const totalRecords = newsData?.length || 0;
   // pagination pange change
   const onPageChange = (event: any): void => {
-    setFirst(event.first);
-    setRows(event.rows);
+    setPagination({
+      first: event?.first || CONFIG.PaginationData.first,
+      rows: event?.rows || CONFIG.PaginationData.rows,
+    });
   };
   const dispatch = useDispatch();
   // popup properties
@@ -170,6 +180,29 @@ const NewsPage = (props: any): JSX.Element => {
         inprogress: "Deleting new news, please wait...",
       },
     },
+
+    {
+      open: false,
+      popupTitle: "",
+      popupWidth: "1200px",
+      popupType: "custom",
+      defaultCloseBtn: true,
+
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "News Deleted successfully!",
+        error: "Something went wrong!",
+        successDescription: "The new news 'ABC' has been Deleted successfully.",
+        errorDescription:
+          "An error occured while Deleting news, please try again later.",
+        inprogress: "Deleting new news, please wait...",
+      },
+    },
   ];
 
   const [popupController, setPopupController] = useState<PopupState[]>(
@@ -211,6 +244,19 @@ const NewsPage = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
+    },
+
+    Author: {
+      value: "",
+      isValid: false,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "string" },
+    },
+    Authorname: {
+      value: "",
+      isValid: false,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "string" },
     },
   });
 
@@ -484,6 +530,98 @@ const NewsPage = (props: any): JSX.Element => {
         <p>Are you sure you want to delete this news item?</p>
       </div>,
     ],
+    [
+      <div key={3}>
+        <div style={{ width: "100%", height: "350px" }}>
+          <img
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            src={formData?.thumbnail?.value}
+            alt=""
+          />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            margin: "20px 0px 10px 0px",
+          }}
+        >
+          <div
+            style={{
+              width: "80%",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "22px",
+                lineHeight: "30px",
+                fontFamily: "osSemibold",
+              }}
+            >
+              {formData?.Title?.value}
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                marginTop: "10px",
+              }}
+            >
+              <img
+                style={{ width: "26px", height: "26px", borderRadius: "50%" }}
+                src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+              />
+              <span>{formData?.Authorname?.value}</span>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              alignItems: "flex-end",
+            }}
+          >
+            <p
+              style={{
+                background: "#daf0da",
+                padding: "6px 15px",
+                color: "green",
+                borderRadius: "4px",
+                fontSize: "14px",
+                fontFamily: "osMedium",
+              }}
+            >
+              {formData?.Status?.value}
+            </p>
+
+            <span style={{ fontSize: "14px", color: "#adadad" }}>
+              {" "}
+              {`${moment(formData?.StartDate?.value).format(
+                "MM/DD/YYYY"
+              )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <p
+            style={{
+              lineHeight: "27px",
+              fontSize: "16px",
+              fontFamily: "osRegular",
+            }}
+          >
+            {formData?.Description?.value}
+          </p>
+        </div>
+      </div>,
+    ],
   ];
 
   const popupActions: any[] = [
@@ -601,6 +739,59 @@ const NewsPage = (props: any): JSX.Element => {
     ],
   ];
 
+  const handleViewClick = (item: any): void => {
+    setFormData({
+      Title: {
+        ...formData.Title,
+        isValid: true,
+        value: item.title || "",
+      },
+      StartDate: {
+        ...formData.StartDate,
+        isValid: true,
+        value: new Date(item.StartDate) || null,
+      },
+      EndDate: {
+        ...formData.EndDate,
+        isValid: true,
+        value: new Date(item.EndDate) || null,
+      },
+      Status: {
+        ...formData.Status,
+        isValid: true,
+        value: item.Status || "",
+      },
+      thumbnail: {
+        ...formData.thumbnail,
+        isValid: true,
+        value: item.imageUrl || null,
+      },
+      Description: {
+        ...formData.Description,
+        isValid: true,
+        value: item.description || "",
+      },
+
+      Author: {
+        ...formData.Author,
+        isValid: true,
+        value: item?.Author || "",
+      },
+      Authorname: {
+        ...formData.Author,
+        isValid: true,
+        value: item?.AuthorName || "",
+      },
+    });
+    setisDelete(false);
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[3],
+      3,
+      "open"
+    );
+  };
+
   const handleEditClick = async (item: any): Promise<any> => {
     console.log("item: ", item);
     setIsile(false);
@@ -649,29 +840,38 @@ const NewsPage = (props: any): JSX.Element => {
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      CONFIG.SPGroupName.News_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
+
       dispatch
     );
     getAllNewsData(dispatch);
   }, []);
 
   const handleSearch = (val: any): void => {
-    let filteredResults = [...newsIntranetData.data];
+    let filteredResults = [...val];
 
     // Apply common text search for title, status, and description
-    if (val.allSearch) {
-      const searchValue = val.allSearch.trim().toLowerCase();
+
+    if (objFilter.Status) {
+      const searchValue = objFilter.Status.trimStart().toLowerCase();
+      filteredResults = filteredResults.filter((item: any) =>
+        item?.Status?.toLowerCase().includes(searchValue)
+      );
+    }
+
+    if (objFilter.allSearch) {
+      const searchValue = objFilter.allSearch.trimStart().toLowerCase();
       filteredResults = filteredResults.filter(
         (item: any) =>
           item?.title?.toLowerCase().includes(searchValue) ||
-          item?.Status?.toLowerCase().includes(searchValue) ||
+          // item?.Status?.toLowerCase().includes(searchValue) ||
           item?.description?.toLowerCase().includes(searchValue)
       );
     }
 
     // Apply date filter if date is selected
-    if (val.selectedDate) {
-      const formattedDate = dayjs(val.selectedDate).format("YYYY-MM-DD");
+    if (objFilter.selectedDate) {
+      const formattedDate = dayjs(objFilter.selectedDate).format("YYYY-MM-DD");
       filteredResults = filteredResults.filter(
         (item: any) =>
           dayjs(item.StartDate).format("YYYY-MM-DD") === formattedDate
@@ -679,19 +879,21 @@ const NewsPage = (props: any): JSX.Element => {
     }
 
     // Update the state with filtered results
-    setNewsData(filteredResults);
+    setNewsData(filteredResults || []);
   };
 
   const handleRefresh = (): void => {
     setSearchField({
       allSearch: "",
       selectedDate: null,
+      Status: "",
     });
     objFilter = {
       selectedDate: null,
       allSearch: "",
+      Status: "",
     };
-    setNewsData(newsIntranetData?.data);
+    setNewsData([...shownewsData]);
   };
 
   const handleDeleteClick = (id: any): any => {
@@ -705,61 +907,132 @@ const NewsPage = (props: any): JSX.Element => {
       "Delete News"
     );
   };
+
+  const prepareNewsData = async (curTab: string): Promise<void> => {
+    let filteredData: any[] = [];
+
+    if (curTab === CONFIG.TabsName[0] && newsIntranetData?.data?.length) {
+      // Current
+      filteredData = newsIntranetData?.data?.filter(
+        (newsItem: any) =>
+          Number(moment().format("YYYYMMDD")) >=
+            Number(moment(newsItem.StartDate).format("YYYYMMDD")) &&
+          Number(moment().format("YYYYMMDD")) <=
+            Number(moment(newsItem.EndDate).format("YYYYMMDD"))
+      );
+    } else if (
+      curTab === CONFIG.TabsName[1] &&
+      newsIntranetData?.data?.length
+    ) {
+      filteredData = newsIntranetData?.data?.filter(
+        (newsItem: any) =>
+          Number(moment().format("YYYYMMDD")) <
+          Number(moment(newsItem.StartDate).format("YYYYMMDD"))
+      );
+    } else if (
+      curTab === CONFIG.TabsName[2] &&
+      newsIntranetData?.data?.length
+    ) {
+      filteredData = newsIntranetData?.data?.filter(
+        (newsItem: any) =>
+          Number(moment().format("YYYYMMDD")) >
+          Number(moment(newsItem.EndDate).format("YYYYMMDD"))
+      );
+    }
+    objFilter.allSearch = "";
+    objFilter.selectedDate = null;
+    objFilter.Status = "";
+    setSearchField({
+      ...searchField,
+      allSearch: "",
+      selectedDate: null,
+      Status: "",
+    });
+
+    setSelectedTab(curTab);
+    setNewsData([...filteredData]);
+    setShowNewsData([...filteredData]);
+    handleSearch([...filteredData]);
+    // await handleSearch({
+    //   allSearch: searchField.allSearch,
+    //   selectedDate: searchField.selectedDate,
+    // });
+  };
   useEffect(() => {
-    setNewsData(newsIntranetData?.data || []);
+    prepareNewsData(CONFIG.TabsName[0]);
   }, [newsIntranetData]);
 
-  const filteredNewsData = !(
-    currentUserDetails.role === CONFIG.RoleDetails.User
-  )
-    ? newsData.filter((item) => item?.Status.toLowerCase() === "active")
-    : newsData;
+  const filteredNewsData =
+    currentUserDetails.role === CONFIG.RoleDetails.user
+      ? newsData?.filter((item) => item?.Status.toLowerCase() === "active")
+      : newsData;
 
   return (
     <>
       <div className={styles.newsHeaderContainer}>
-        <div
-          onClick={(_) => {
-            window.open(
-              props.context.pageContext.web.absoluteUrl +
-                CONFIG.NavigatePage.PernixIntranet,
-              "_self"
-            );
-          }}
-        >
+        <div className={styles.leftSection}>
           <i
+            onClick={() => {
+              window.open(
+                props.context.pageContext.web.absoluteUrl +
+                  CONFIG.NavigatePage.PernixIntranet,
+                "_self"
+              );
+            }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
           />
+          <p>News</p>
         </div>
         <div className={styles.rightSection}>
-          <InputText
+          <CustomDropDown
+            value={searchField.Status}
+            width={"200px"}
+            options={["Active", "In Active"]}
+            placeholder="Status"
+            onChange={(value) => {
+              objFilter.Status = value;
+              setSearchField({ ...searchField, Status: value });
+              handleSearch([...shownewsData]);
+            }}
+          />{" "}
+          <CustomInput
             value={searchField.allSearch}
+            secWidth="180px"
+            labelText="Search"
+            placeholder="Search"
+            onChange={(e) => {
+              const value = e;
+              objFilter.allSearch = value;
+              setSearchField({ ...searchField, allSearch: value });
+              handleSearch([...shownewsData]);
+            }}
+          />
+          {/* <InputText
+            value={searchField.allSearch}
+            style={{ width: "150px" }}
             placeholder="Search"
             onChange={(e) => {
               objFilter.allSearch = e.target.value;
               setSearchField({ ...searchField, allSearch: e.target.value });
-              handleSearch({ ...objFilter });
+              handleSearch([...shownewsData]);
             }}
-          />
-
-          <Calendar
+          /> */}
+          <CustomDateInput
+            label="select Date"
+            placeHolder="Date"
+            minWidth="180px"
+            maxWidth="180px"
             value={searchField.selectedDate ? searchField.selectedDate : null}
-            onChange={(data: any) => {
-              objFilter.selectedDate = data?.value;
-
-              setSearchField({ ...searchField, selectedDate: data?.value });
-
-              handleSearch({ ...objFilter });
+            onChange={(e: any) => {
+              const value: any = e;
+              objFilter.selectedDate = value;
+              setSearchField((prev: any) => ({
+                ...prev,
+                selectedDate: value,
+              }));
+              handleSearch([...shownewsData]);
             }}
-            showIcon
-            monthNavigator
-            yearNavigator
-            yearRange="2000:2100"
-            dateFormat="dd/mm/yy"
-            placeholder={"select date"}
-            // className={`${styles.d_datepicker}`}
-            style={{ width: "200px" }}
           />
           <div className={styles.refreshBtn}>
             <i onClick={handleRefresh} className="pi pi-refresh" />
@@ -767,7 +1040,7 @@ const NewsPage = (props: any): JSX.Element => {
           <div
             style={{
               display:
-                currentUserDetails.role === CONFIG.RoleDetails.User
+                currentUserDetails.role === CONFIG.RoleDetails.user
                   ? "none"
                   : "flex",
             }}
@@ -833,22 +1106,31 @@ const NewsPage = (props: any): JSX.Element => {
           </div>
         </div>
       </div>
-      <div className={styles.newsContainer}>
-        <SectionHeaderIntranet
-          label={"News"}
-          removeAdd
-          headerAction={() => {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              0,
-              "open"
-            );
-            resetFormData(formData, setFormData);
-            setIsEdit(false);
-          }}
-        />
 
+      {/* tabs */}
+      <div className={styles.tabsContainer}>
+        {CONFIG.TabsName.map((str: string, i: number) => {
+          return (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+                prepareNewsData(str);
+
+                //prepareDatas(str);
+              }}
+            >
+              {str}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className={styles.newsContainer}>
         <div className={styles.newsContainerWrapper}>
           {newsIntranetData?.isLoading ? (
             <CircularSpinner />
@@ -863,7 +1145,7 @@ const NewsPage = (props: any): JSX.Element => {
             </div>
           ) : (
             filteredNewsData
-              ?.slice(first, first + rows)
+              ?.slice(pagination.first, pagination.first + pagination.rows)
               .map((item: any, idx: number) => (
                 <NewsCard
                   title={item?.title}
@@ -875,8 +1157,10 @@ const NewsPage = (props: any): JSX.Element => {
                   noActions={false}
                   noStatus={false}
                   setIsEdit={setIsEdit}
+                  // setIsview={setIsview}
                   setisDelete={setisDelete}
                   handleEditClick={handleEditClick}
+                  handleViewClick={handleViewClick}
                   handleDeleteClick={handleDeleteClick}
                   item={item}
                 />
@@ -932,8 +1216,8 @@ const NewsPage = (props: any): JSX.Element => {
       {newsData.length > 0 ? (
         <div className="card">
           <Paginator
-            first={first}
-            rows={rows}
+            first={pagination.first}
+            rows={pagination.rows}
             totalRecords={totalRecords}
             onPageChange={onPageChange}
             template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink "
