@@ -297,7 +297,7 @@ const NewsIntranet = (props: any): JSX.Element => {
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      CONFIG.SPGroupName.News_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
       dispatch
     );
     getAllNewsData(dispatch);

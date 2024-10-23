@@ -30,55 +30,96 @@ const LeftBar: React.FC = (): JSX.Element => {
   );
 
   const currentRole: string =
-    currentUserDetails?.role === "Pernix_Admin"
-      ? "/admin"
-      : currentUserDetails?.role === "HelpDesk_Ticket_Managers"
-      ? "/ticket_manager"
-      : currentUserDetails?.role;
+    currentUserDetails?.role === "Pernix_Admin" ||
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+      ? "/helpdesk_manager"
+      : currentUserDetails?.role === "HelpDesk_IT_Owners"
+      ? "/it_owner"
+      : `/${currentUserDetails?.role}`;
 
-  const navItems: NavItem[] = [
-    {
-      label: "Dashboard",
-      path: `${currentRole}/dashboard`,
-      onClick: () => console.log("Dashboard clicked!"),
-    },
-    {
-      label: "All tickets",
-      path: `${currentRole}/all_tickets`,
-      children: [
-        {
-          label: "Tickets to handle",
-          path: `${currentRole}/all_tickets/handle`,
-        },
-        {
-          label: "My open tickets",
-          path: `${currentRole}/all_tickets/open`,
-        },
-        {
-          label: "My tickets in last 7 days",
-          path: `${currentRole}/all_tickets/recent`,
-        },
-      ],
-    },
-    {
-      label: "Status",
-      path: `${currentRole}/tickets/status`,
-      children: [
-        {
-          label: "Open",
-          path: `${currentRole}/tickets/status/open`,
-        },
-        {
-          label: "On hold",
-          path: `${currentRole}/tickets/status/onhold`,
-        },
-        {
-          label: "Close",
-          path: `${currentRole}/tickets/status/closed`,
-        },
-      ],
-    },
-  ];
+  const navItems: NavItem[] =
+    currentUserDetails?.role !== "user"
+      ? [
+          {
+            label: "Dashboard",
+            path: `${currentRole}/dashboard`,
+            onClick: () => console.log("Dashboard clicked!"),
+          },
+          {
+            label: "All tickets",
+            path: `${currentRole}/all_tickets`,
+            children: [
+              {
+                label: "Tickets to handle",
+                path: `${currentRole}/all_tickets/handle`,
+              },
+              {
+                label: "My open tickets",
+                path: `${currentRole}/all_tickets/open`,
+              },
+              {
+                label: "My tickets in last 7 days",
+                path: `${currentRole}/all_tickets/recent`,
+              },
+            ],
+          },
+          {
+            label: "Status",
+            path: `${currentRole}/tickets/status`,
+            children: [
+              {
+                label: "Open",
+                path: `${currentRole}/tickets/status/open`,
+              },
+              {
+                label: "On hold",
+                path: `${currentRole}/tickets/status/onhold`,
+              },
+              {
+                label: "Close",
+                path: `${currentRole}/tickets/status/closed`,
+              },
+            ],
+          },
+        ]
+      : [
+          {
+            label: "All tickets",
+            path: `${currentRole}/all_tickets`,
+            children: [
+              {
+                label: "Tickets to handle",
+                path: `${currentRole}/all_tickets/handle`,
+              },
+              {
+                label: "My open tickets",
+                path: `${currentRole}/all_tickets/open`,
+              },
+              {
+                label: "My tickets in last 7 days",
+                path: `${currentRole}/all_tickets/recent`,
+              },
+            ],
+          },
+          {
+            label: "Status",
+            path: `${currentRole}/tickets/status`,
+            children: [
+              {
+                label: "Open",
+                path: `${currentRole}/tickets/status/open`,
+              },
+              {
+                label: "On hold",
+                path: `${currentRole}/tickets/status/onhold`,
+              },
+              {
+                label: "Close",
+                path: `${currentRole}/tickets/status/closed`,
+              },
+            ],
+          },
+        ];
 
   const handleNavigation = (item: NavItem): void => {
     const itemOnClick = item.onClick || (() => defaultOnClick(item.label));

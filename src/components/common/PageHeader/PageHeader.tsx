@@ -34,14 +34,14 @@ const PageHeader = ({
     (state: { MainSPContext: { currentUserDetails: UserDetails } }) =>
       state.MainSPContext.currentUserDetails
   );
+  console.log("currentUserDetails: ", currentUserDetails);
 
-  const currentRole: string =
-    currentUserDetails?.role === "Pernix_Admin"
-      ? "/admin"
-      : currentUserDetails?.role === "HelpDesk_Ticket_Managers"
-      ? "/ticket_manager/dashboard"
-      : currentUserDetails?.role;
-  console.log("currentRole: ", currentRole);
+  // const currentRole: string =
+  //   currentUserDetails?.role === "Pernix_Admin"
+  //     ? "/helpdesk_manager/dashboard"
+  //     : currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+  //     ? "/helpdesk_manager/dashboard"
+  //     : currentUserDetails?.role;
 
   // Redirect to the current role path if not centered
   // useEffect(() => {

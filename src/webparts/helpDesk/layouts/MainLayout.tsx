@@ -14,19 +14,24 @@ const MainLayout = (): JSX.Element => {
     (state: { MainSPContext: { currentUserDetails: any } }) =>
       state.MainSPContext.currentUserDetails
   );
+  console.log("currentUserDetails: ", currentUserDetails);
 
   const currentRole: string =
-    currentUserDetails?.role === "Pernix_Admin"
-      ? "/admin"
-      : currentUserDetails?.role === "HelpDesk_Ticket_Managers"
-      ? "/ticket_manager/dashboard"
-      : currentUserDetails?.role;
+    currentUserDetails?.role === "Pernix_Admin" ||
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+      ? "/helpdesk_manager"
+      : currentUserDetails?.role === "HelpDesk_IT_Owners"
+      ? "/it_owner"
+      : `/${currentUserDetails?.role}`;
+
   console.log("currentRole: ", currentRole);
 
   // Redirect to the current role path if not centered
   useEffect(() => {
-    navigate(currentRole);
-  }, [currentRole]);
+    if (currentUserDetails.email !== "") {
+      navigate(currentRole);
+    }
+  }, [currentRole, currentUserDetails]);
 
   return (
     // <div className={styles.ticketsGrid}>
