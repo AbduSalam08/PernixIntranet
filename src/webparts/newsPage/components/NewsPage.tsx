@@ -854,8 +854,8 @@ const NewsPage = (props: any): JSX.Element => {
 
     if (objFilter.Status) {
       const searchValue = objFilter.Status.trimStart().toLowerCase();
-      filteredResults = filteredResults.filter((item: any) =>
-        item?.Status?.toLowerCase().includes(searchValue)
+      filteredResults = filteredResults.filter(
+        (item: any) => item?.Status?.toLowerCase() == searchValue
       );
     }
 

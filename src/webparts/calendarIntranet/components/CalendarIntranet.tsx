@@ -43,10 +43,11 @@ import {
 } from "../../../services/calenderIntranet/calenderIntranet";
 import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import { CONFIG } from "../../../config/config";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
-const CalendarIntranet = (): JSX.Element => {
+const CalendarIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
 
   const calenderIntranetData: any = useSelector((state: any) => {
@@ -94,12 +95,12 @@ const CalendarIntranet = (): JSX.Element => {
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
     },
-    EndDate: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid input",
-      validationRule: { required: true, type: "date" },
-    },
+    // EndDate: {
+    //   value: "",
+    //   isValid: true,
+    //   errorMsg: "Invalid input",
+    //   validationRule: { required: true, type: "date" },
+    // },
     StartTime: {
       value: "",
       isValid: true,
@@ -174,10 +175,11 @@ const CalendarIntranet = (): JSX.Element => {
   };
   const popupInputs: any[] = [
     [
-      <div className={styles.addNewsGrid} key={1}>
+      <div key={1}>
         <CustomInput
           value={formData.Title.value}
           placeholder="Enter title"
+          secWidth="100%"
           isValid={formData.Title.isValid}
           errorMsg={formData.Title.errorMsg}
           onChange={(e) => {
@@ -190,23 +192,30 @@ const CalendarIntranet = (): JSX.Element => {
             handleInputChange("Title", value, isValid, errorMsg);
           }}
         />
-
-        <CustomDateInput
-          value={formData.StartDate.value}
-          label="Start date"
-          error={!formData.StartDate.isValid}
-          errorMsg={formData.StartDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField(
-              "StartDate",
-              date,
-              formData.StartDate.validationRule
-            );
-            handleInputChange("StartDate", date, isValid, errorMsg);
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+            margin: "20px 0px",
           }}
-        />
+        >
+          <CustomDateInput
+            value={formData.StartDate.value}
+            label="Start date"
+            error={!formData.StartDate.isValid}
+            errorMsg={formData.StartDate.errorMsg}
+            onChange={(date: any) => {
+              const { isValid, errorMsg } = validateField(
+                "StartDate",
+                date,
+                formData.StartDate.validationRule
+              );
+              handleInputChange("StartDate", date, isValid, errorMsg);
+            }}
+          />
 
-        <CustomDateInput
+          {/* <CustomDateInput
           value={formData.EndDate.value}
           label="End date"
           error={!formData.EndDate.isValid}
@@ -218,41 +227,42 @@ const CalendarIntranet = (): JSX.Element => {
             });
             handleInputChange("EndDate", date, isValid, errorMsg);
           }}
-        />
+        /> */}
 
-        <CustomInput
-          value={formData.StartTime.value}
-          placeholder="Enter start time"
-          isValid={formData.StartTime.isValid}
-          errorMsg={formData.StartTime.errorMsg}
-          type="number"
-          onChange={(e) => {
-            const value = e.toString();
-            const { isValid, errorMsg } = validateField(
-              "StartTime",
-              value,
-              formData.StartTime.validationRule
-            );
-            handleInputChange("StartTime", value, isValid, errorMsg);
-          }}
-        />
+          <CustomInput
+            value={formData.StartTime.value}
+            placeholder="Enter start time"
+            isValid={formData.StartTime.isValid}
+            errorMsg={formData.StartTime.errorMsg}
+            type="number"
+            onChange={(e) => {
+              const value = e.toString();
+              const { isValid, errorMsg } = validateField(
+                "StartTime",
+                value,
+                formData.StartTime.validationRule
+              );
+              handleInputChange("StartTime", value, isValid, errorMsg);
+            }}
+          />
 
-        <CustomInput
-          value={formData.EndTime.value}
-          placeholder="Enter end time"
-          type="number"
-          isValid={formData.EndTime.isValid}
-          errorMsg={formData.EndTime.errorMsg}
-          onChange={(e) => {
-            const value = e.toString();
-            const { isValid, errorMsg } = validateField(
-              "EndTime",
-              value,
-              formData.EndTime.validationRule
-            );
-            handleInputChange("EndTime", value, isValid, errorMsg);
-          }}
-        />
+          <CustomInput
+            value={formData.EndTime.value}
+            placeholder="Enter end time"
+            type="number"
+            isValid={formData.EndTime.isValid}
+            errorMsg={formData.EndTime.errorMsg}
+            onChange={(e) => {
+              const value = e.toString();
+              const { isValid, errorMsg } = validateField(
+                "EndTime",
+                value,
+                formData.EndTime.validationRule
+              );
+              handleInputChange("EndTime", value, isValid, errorMsg);
+            }}
+          />
+        </div>
 
         <FloatingLabelTextarea
           value={formData.Description.value}
@@ -487,7 +497,7 @@ const CalendarIntranet = (): JSX.Element => {
   // };
 
   useEffect(() => {
-    getEvents(dispatch);
+    getEvents(dispatch, "");
     // BindCalender(calenderIntranetData);
   }, []);
   return (
@@ -542,7 +552,16 @@ const CalendarIntranet = (): JSX.Element => {
         </div>
       </div>
 
-      <div className={styles.footer}>
+      <div
+        className={styles.footer}
+        onClick={(_: any) => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.CalendarPage,
+            "_self"
+          );
+        }}
+      >
         <p>View all</p>
       </div>
 

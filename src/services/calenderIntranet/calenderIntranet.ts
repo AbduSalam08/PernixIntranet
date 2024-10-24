@@ -6,6 +6,7 @@ import { setCalenderIntranetData } from "../../redux/features/CalenderIntranetSl
 /* eslint-disable  @typescript-eslint/no-use-before-define */
 
 interface IEvent {
+  id: number;
   title: string;
   description: string;
   start: string;
@@ -51,20 +52,10 @@ export const createOutlookEvent = async (
 
   try {
     // Combining date and time for start and end
-    const { Title, StartDate, EndDate, StartTime, EndTime, Description } =
-      formData;
+    const { Title, StartDate, StartTime, EndTime, Description } = formData;
     const formattedStartTime = formatTime(StartTime.value); // Format startTime
     const formattedEndTime = formatTime(EndTime.value); // Format endTime
 
-    //console.log("Date format: ", moment(StartDate.value).set("hour", 7)).toString();
-
-    // Combining date and formatted time for start and end
-    // const startDateTime = new Date(
-    //   `${StartDate.value}T${formattedStartTime}`
-    // ).toISOString();
-    // const endDateTime = new Date(
-    //   `${EndDate.value}T${formattedEndTime}`
-    // ).toISOString();
     debugger;
     const event: any = {
       subject: Title.value,
@@ -80,7 +71,7 @@ export const createOutlookEvent = async (
       },
       end: {
         dateTime: new Date(
-          EndDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
+          StartDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
         ),
         timeZone: "UTC",
       },
@@ -163,7 +154,7 @@ export const createOutlookEvent = async (
 };
 
 //get events
-export const getEvents = async (dispatch: any): Promise<void> => {
+export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
   try {
     // Set loading state before fetching events
     dispatch?.(
@@ -177,8 +168,10 @@ export const getEvents = async (dispatch: any): Promise<void> => {
       .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
       .events.configure({ headers })
       .top(999)();
+    console.log(result, "result");
 
     const arrDatas: IEvent[] = result.map((val: any) => ({
+      id: val?.id || null,
       title: val.subject ? val.subject : "",
       description: val.bodyPreview ? val.bodyPreview : "",
       start: val.start ? val.start.dateTime : "",
@@ -186,32 +179,15 @@ export const getEvents = async (dispatch: any): Promise<void> => {
       isAllDay: val.isAllDay,
     }));
 
-    // Filter today's events
-    const now = moment();
-    const todaysEvents = arrDatas.filter(
-      (val) => moment(val.start).format("YYYYMMDD") === now.format("YYYYMMDD")
-    );
-
-    // Sort today's events by start time
-    const filterEvents = todaysEvents.sort(
-      (a: any, b: any) => moment(a.start).valueOf() - moment(b.start).valueOf()
-    );
-    console.log(filterEvents, "filterEvents");
-
-    // Filter upcoming events
-    const upcomingEvents = arrDatas
-      .filter((val) => moment(val.start) >= now)
-      .sort(
-        (a: any, b: any) =>
-          moment(a.start).valueOf() - moment(b.start).valueOf()
-      );
-    console.log(upcomingEvents, "upcomingEvents");
-    BindCalender(arrDatas);
+    console.log(arrDatas, "arrdatas");
+    if (isview == "") {
+      BindCalender(arrDatas);
+    }
     // Combine today's and upcoming events and update the state
     dispatch?.(
       setCalenderIntranetData({
         isLoading: false,
-        data: [...filterEvents, ...upcomingEvents],
+        data: arrDatas,
       })
     );
 
@@ -305,4 +281,188 @@ const BindCalender = (data: any): any => {
 
   _Calendar.updateSize();
   _Calendar.render();
+};
+
+export const updateOutlookEvent = async (
+  eventId: string, // The ID of the event you want to edit
+  formData: any,
+  setLoaderState: any,
+  index: number
+): Promise<any> => {
+  // Start loader for the specific item at the given index
+  setLoaderState((prevState: any) => {
+    const updatedState = [...prevState];
+    updatedState[index] = {
+      ...updatedState[index],
+      popupWidth: "450px",
+      isLoading: {
+        inprogress: true,
+        error: false,
+        success: false,
+      },
+    };
+    return updatedState;
+  });
+
+  try {
+    const { Title, StartDate, StartTime, EndTime, Description } = formData;
+    const formattedStartTime = formatTime(StartTime.value);
+    const formattedEndTime = formatTime(EndTime.value);
+
+    const eventUpdate: any = {
+      subject: Title.value,
+      body: {
+        contentType: "HTML",
+        content: Description.value,
+      },
+      start: {
+        dateTime: new Date(
+          StartDate.value.setHours(parseInt(formattedStartTime.split(":")[0]))
+        ),
+        timeZone: "UTC",
+      },
+      end: {
+        dateTime: new Date(
+          StartDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
+        ),
+        timeZone: "UTC",
+      },
+      location: {
+        displayName: "Online Meeting",
+      },
+    };
+
+    // Update the event
+    await graph.groups
+      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
+      .calendar.events.getById(eventId)
+      .update(eventUpdate);
+
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: true,
+          error: false,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          successDescription: `The event '${Title.value}' has been updated successfully.`,
+        },
+      };
+      return updatedState;
+    });
+
+    return {
+      status: "success",
+      message: "Event updated successfully",
+    };
+  } catch (error) {
+    console.error("Error updating event", error);
+
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: false,
+          error: true,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          errorDescription:
+            "An error occurred while updating the event, please try again later.",
+        },
+      };
+      return updatedState;
+    });
+
+    return {
+      status: "error",
+      message: "Error while updating event",
+    };
+  }
+};
+
+export const deleteOutlookEvent = async (
+  eventId: string,
+  setLoaderState: any,
+  index: number
+): Promise<any> => {
+  // Start loader for the specific item at the given index
+  setLoaderState((prevState: any) => {
+    const updatedState = [...prevState];
+    updatedState[index] = {
+      ...updatedState[index],
+      popupWidth: "450px",
+      isLoading: {
+        inprogress: true,
+        error: false,
+        success: false,
+      },
+    };
+    return updatedState;
+  });
+
+  try {
+    // Delete the event
+    await graph.groups
+      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
+      .calendar.events.getById(eventId)
+      .delete();
+
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: true,
+          error: false,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          successDescription: `The event has been deleted successfully.`,
+        },
+      };
+      return updatedState;
+    });
+
+    return {
+      status: "success",
+      message: "Event deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting event", error);
+
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: false,
+          error: true,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          errorDescription:
+            "An error occurred while deleting the event, please try again later.",
+        },
+      };
+      return updatedState;
+    });
+
+    return {
+      status: "error",
+      message: "Error while deleting event",
+    };
+  }
 };
