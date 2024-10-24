@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
 import {
   CreatedClosedTickets,
@@ -25,6 +25,7 @@ import {
   filterTicketsByTimePeriod,
   getTicketsByKeyValue,
 } from "../../../../utils/commonUtils";
+import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 
 const Dashboard = (): JSX.Element => {
   const dispatch = useDispatch();
@@ -33,49 +34,37 @@ const Dashboard = (): JSX.Element => {
     (state: any) => state.HelpDeskTicktesData.value
   );
 
-  // Info cards array
-  const infoCards: any[] = [
-    {
-      cardName: "My Tickets",
-      cardImg: myTickets,
-      cardValues: HelpDeskTicktesData?.data?.length || 0,
-    },
-    {
-      cardName: "Open",
-      cardImg: openTickets,
-      cardValues:
-        getTicketsByKeyValue(HelpDeskTicktesData?.data, "Status", "Open")
-          ?.length || 0,
-    },
-    {
-      cardName: "Closed",
-      cardImg: closedTickets,
-      cardValues:
-        getTicketsByKeyValue(HelpDeskTicktesData?.data, "Status", "Closed")
-          ?.length || 0,
-    },
-    {
-      cardName: "This week's tickets",
-      cardImg: ticketsCreatedThisWeek,
-      cardValues:
-        filterTicketsByTimePeriod(HelpDeskTicktesData?.data, "thisWeek")
-          ?.length || 0,
-    },
-    {
-      cardName: "Tickets on hold",
-      cardImg: ticketsOnHold,
-      cardValues:
-        getTicketsByKeyValue(HelpDeskTicktesData?.data, "Status", "On Hold")
-          ?.length || 0,
-    },
+  const filterTerms = [
+    "This Week",
+    "This Month",
+    "Last 3 months",
+    "Last 6 months",
   ];
+
+  const [filters, setFilters] = useState({
+    TicketByStatus: {
+      options: filterTerms,
+      selectedValue: "This Week",
+    },
+    TicketBySource: {
+      options: filterTerms,
+      selectedValue: "This Week",
+    },
+    CreatedClosedTickets: {
+      options: filterTerms,
+      selectedValue: "This Week",
+    },
+    TicketByPriority: {
+      options: filterTerms,
+      selectedValue: "This Week",
+    },
+  });
+  console.log("filters: ", filters);
 
   const currentUserDetails = useSelector(
     (state: { MainSPContext: { currentUserDetails: any } }) =>
       state.MainSPContext.currentUserDetails
   );
-
-  console.log("currentUserDetails: ", currentUserDetails);
 
   const currentRoleBasedData: any = (() => {
     if (
@@ -119,6 +108,43 @@ const Dashboard = (): JSX.Element => {
 
   console.log("currentRoleBasedData: ", currentRoleBasedData);
 
+  // Info cards array
+  const infoCards: any[] = [
+    {
+      cardName: "My Tickets",
+      cardImg: myTickets,
+      cardValues: currentRoleBasedData?.data?.length || 0,
+    },
+    {
+      cardName: "Open",
+      cardImg: openTickets,
+      cardValues:
+        getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Open")
+          ?.length || 0,
+    },
+    {
+      cardName: "Closed",
+      cardImg: closedTickets,
+      cardValues:
+        getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Closed")
+          ?.length || 0,
+    },
+    {
+      cardName: "This week's tickets",
+      cardImg: ticketsCreatedThisWeek,
+      cardValues:
+        filterTicketsByTimePeriod(currentRoleBasedData?.data, "thisWeek")
+          ?.length || 0,
+    },
+    {
+      cardName: "Tickets on hold",
+      cardImg: ticketsOnHold,
+      cardValues:
+        getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "On Hold")
+          ?.length || 0,
+    },
+  ];
+
   useEffect(() => {
     getAllTickets(dispatch);
   }, []);
@@ -137,20 +163,60 @@ const Dashboard = (): JSX.Element => {
 
       <div className={styles.metricsGrid}>
         <div className={styles.metricCard}>
-          <div className={styles.chartDetails}>Ticket by status</div>
+          <div className={styles.chartDetails}>
+            <span>Ticket by status</span>
+            <CustomDropDown
+              floatingLabel={false}
+              size="SM"
+              width={"150px"}
+              value={filters.TicketByStatus.selectedValue}
+              options={filters.TicketByStatus.options}
+              noErrorMsg
+              placeholder="select term"
+              onChange={(value) => {
+                setFilters((prev: any) => ({
+                  ...prev,
+                  TicketByStatus: {
+                    ...prev.TicketByStatus,
+                    selectedValue: value,
+                  },
+                }));
+              }}
+            />
+          </div>
           <div className={styles.chart}>
             <TicketByStatusChart
               AllTickets={currentRoleBasedData}
-              Term="This Week"
+              Term={filters.TicketByStatus.selectedValue}
             />
           </div>
         </div>
         <div className={styles.metricCard}>
-          <div className={styles.chartDetails}>Tickets by source</div>
+          <div className={styles.chartDetails}>
+            <span>Tickets by source</span>
+            <CustomDropDown
+              floatingLabel={false}
+              size="SM"
+              width={"150px"}
+              value={filters.TicketBySource.selectedValue}
+              options={filters.TicketBySource.options}
+              noErrorMsg
+              placeholder="select term"
+              onChange={(value) => {
+                setFilters((prev: any) => ({
+                  ...prev,
+                  TicketBySource: {
+                    ...prev.TicketBySource,
+                    selectedValue: value,
+                  },
+                }));
+              }}
+            />
+          </div>
           <div className={styles.chart}>
             <TicketBySource
               AllTickets={currentRoleBasedData}
-              Term="This Week"
+              Term={filters.TicketBySource.selectedValue}
             />
           </div>
         </div>
@@ -158,21 +224,61 @@ const Dashboard = (): JSX.Element => {
 
       <div className={styles.metricsGrid2}>
         <div className={styles.metricCard}>
-          <div className={styles.chartDetails}>Created & Closed Tickets</div>
+          <div className={styles.chartDetails}>
+            <span>Created & Closed Tickets</span>
+            <CustomDropDown
+              floatingLabel={false}
+              size="SM"
+              width={"150px"}
+              value={filters.CreatedClosedTickets.selectedValue}
+              options={filters.CreatedClosedTickets.options}
+              noErrorMsg
+              placeholder="select term"
+              onChange={(value) => {
+                setFilters((prev: any) => ({
+                  ...prev,
+                  CreatedClosedTickets: {
+                    ...prev.CreatedClosedTickets,
+                    selectedValue: value,
+                  },
+                }));
+              }}
+            />
+          </div>
           <div className={styles.chart}>
             <CreatedClosedTickets
               AllTickets={currentRoleBasedData}
-              Term="This Week"
+              Term={filters.CreatedClosedTickets.selectedValue}
             />
           </div>
         </div>
         <div className={styles.metricCard}>
-          <div className={styles.chartDetails}>Tickets by Priority</div>
+          <div className={styles.chartDetails}>
+            <span>Tickets by Priority</span>
+            <CustomDropDown
+              floatingLabel={false}
+              size="SM"
+              width={"150px"}
+              value={filters.TicketByPriority.selectedValue}
+              options={filters.TicketByPriority.options}
+              noErrorMsg
+              placeholder="select term"
+              onChange={(value) => {
+                setFilters((prev: any) => ({
+                  ...prev,
+                  TicketByPriority: {
+                    ...prev.TicketByPriority,
+                    selectedValue: value,
+                  },
+                }));
+              }}
+            />
+          </div>
           <div className={styles.chart}>
             <TicketsByPriority
               AllTickets={currentRoleBasedData}
-              Term="This Week"
-              Status="Open"
+              // Term={filters.TicketByPriority.selectedValue}
+              Status="Un assigned"
             />
           </div>
         </div>
