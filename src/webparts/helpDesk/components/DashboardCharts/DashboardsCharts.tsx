@@ -12,35 +12,43 @@ interface AllticketsDataProps {
     role: string;
     isLoading: boolean;
   };
-  Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months";
+  Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
 }
 
 const TicketByStatusChart = ({
   AllTickets,
+  Term,
 }: AllticketsDataProps): JSX.Element => {
-  // Step 1: Filter tickets by status and count
+  // Group tickets by the specified term
+  const createdTicketsData = groupTicketsByPeriod(
+    AllTickets?.data,
+    Term,
+    "Created"
+  );
+
+  // Flatmap to consolidate all ticket data into a single array
+  const allTicketsFlattened = Object.keys(createdTicketsData)?.flatMap(
+    (key: string) => createdTicketsData[key]?.data || []
+  );
+
   const openTickets =
-    getTicketsByKeyValue(AllTickets?.data, "Status", "Open")?.length || 0;
+    getTicketsByKeyValue(allTicketsFlattened, "Status", "Open")?.length || 0;
 
   const onHoldTickets =
-    getTicketsByKeyValue(AllTickets?.data, "Status", "On Hold")?.length || 0;
+    getTicketsByKeyValue(allTicketsFlattened, "Status", "On Hold")?.length || 0;
 
   const overdueTickets =
-    getTicketsByKeyValue(AllTickets?.data, "Status", "Overdue")?.length || 0;
+    getTicketsByKeyValue(allTicketsFlattened, "Status", "Overdue")?.length || 0;
 
-  console.log("overdueTickets: ", overdueTickets);
   const inProgressTickets =
-    getTicketsByKeyValue(AllTickets?.data, "Status", "In Progress")?.length ||
-    0;
-  console.log("inProgressTickets: ", inProgressTickets);
+    getTicketsByKeyValue(allTicketsFlattened, "Status", "In Progress")
+      ?.length || 0;
 
   // const closedTickets = AllTickets?.filter((ticket: any) => ticket.status === "Closed")?.length || 0;
 
-  // Step 2: Total tickets for calculating percentages
   const totalTickets =
     openTickets + onHoldTickets + inProgressTickets + overdueTickets; // Add other statuses if necessary
 
-  // Step 3: Calculate percentages dynamically
   const ticketByStatus = {
     labels: ["Open", "On Hold", "In Progress", "Overdue"], // Add more labels as needed
     datasets: [
@@ -51,12 +59,11 @@ const TicketByStatusChart = ({
           Math.round((inProgressTickets / totalTickets) * 100) || 0,
           Math.round((overdueTickets / totalTickets) * 100) || 0,
         ],
-        backgroundColor: ["#E0803D", "#0B4D53", "#5962B8", "#F9C74F"], // Corresponding colors for the statuses
+        backgroundColor: ["#0B4D53", "#F9C74F", "#5962B8", "#E0803D"],
       },
     ],
   };
 
-  // Step 4: Options for the chart
   const ticketByStatusOptions = {
     plugins: {
       legend: {
@@ -99,23 +106,37 @@ const TicketByStatusChart = ({
   );
 };
 
-const TicketBySource = ({ AllTickets }: AllticketsDataProps): JSX.Element => {
-  // Step 1: Filter tickets by source and count
+const TicketBySource = ({
+  AllTickets,
+  Term,
+}: AllticketsDataProps): JSX.Element => {
+  // Group tickets by the specified term
+  const createdTicketsData = groupTicketsByPeriod(
+    AllTickets?.data,
+    Term,
+    "Created"
+  );
+
+  // Flatmap to consolidate all ticket data into a single array
+  const allTicketsFlattened = Object.keys(createdTicketsData)?.flatMap(
+    (key: string) => createdTicketsData[key]?.data || []
+  );
+  console.log("allTicketsFlattened: ", allTicketsFlattened);
+
   const emailTickets =
-    AllTickets?.data?.filter((ticket: any) => ticket.TicketSource === "Email")
-      ?.length || 0;
+    allTicketsFlattened?.filter(
+      (ticket: any) => ticket.TicketSource === "Email"
+    )?.length || 0;
 
   const portalTickets =
-    AllTickets?.data?.filter((ticket: any) => ticket.TicketSource === "Web")
+    allTicketsFlattened?.filter((ticket: any) => ticket.TicketSource === "Web")
       ?.length || 0;
 
   // Add more sources if necessary
   // const otherSourceTickets = AllTickets?.filter((ticket: any) => ticket.source === "Other")?.length || 0;
 
-  // Step 2: Total tickets for calculating percentages
   const totalTicketsBySource = emailTickets + portalTickets; // Add other sources if necessary
 
-  // Step 3: Calculate percentages dynamically
   const ticketBySource = {
     labels: ["Email", "Web"], // Add more labels if needed
     datasets: [
@@ -129,7 +150,6 @@ const TicketBySource = ({ AllTickets }: AllticketsDataProps): JSX.Element => {
     ],
   };
 
-  // Step 4: Options for the chart
   const ticketBySourceOptions = {
     plugins: {
       legend: {
@@ -176,21 +196,18 @@ const CreatedClosedTickets = ({
   AllTickets,
   Term,
 }: AllticketsDataProps): JSX.Element => {
-  console.log("Term: ", Term);
   // Group tickets by the specified term
   const createdTicketsData = groupTicketsByPeriod(
     AllTickets?.data,
     Term,
     "Created"
   );
-  console.log("createdTicketsData: ", createdTicketsData);
 
   const closedTicketsData = groupTicketsByPeriod(
     AllTickets?.data?.filter((item: any) => item?.TicketClosedOn !== null),
     Term,
     "TicketClosedOn"
   );
-  console.log("closedTicketsData: ", closedTicketsData);
 
   const createdTicketsPerDay = Object.keys(createdTicketsData).map(
     (day) => createdTicketsData[day]?.count || 0
@@ -271,7 +288,7 @@ const CreatedClosedTickets = ({
 
 const TicketsByPriority = ({
   AllTickets,
-  Term,
+  // Term,
   Status,
 }: {
   AllTickets: {
@@ -279,62 +296,77 @@ const TicketsByPriority = ({
     role: string;
     isLoading: boolean;
   };
-  Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months";
+  // Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months";
   Status: "Open" | "Closed" | "On Hold" | "Overdue" | "Un assigned";
 }): JSX.Element => {
-  let dataFilteredByStatus: any;
+  // Filter tickets based on status
+  let dataFilteredByStatus: any[] = [];
   if (Status === "Un assigned") {
     dataFilteredByStatus =
-      AllTickets?.data?.filter((item: any) => item?.ITOwnerId === null)
-        ?.length || 0;
+      AllTickets?.data?.filter((item: any) => item?.ITOwnerId === null) || [];
+  } else {
+    dataFilteredByStatus = getTicketsByKeyValue(
+      AllTickets?.data,
+      "Status",
+      Status
+    );
   }
-  dataFilteredByStatus =
-    getTicketsByKeyValue(AllTickets?.data, "Status", Status)?.length || 0;
 
-  // ITOwnerId === null
-  console.log("dataFilteredByStatus: ", dataFilteredByStatus);
+  // Group filtered tickets by priority
+  const priorities = [
+    "Standard",
+    "Low priority",
+    "Medium priority",
+    "High priority",
+    "Critical/Impacting Multiple People",
+  ];
 
+  const priorityCounts = priorities.map((priority) => {
+    return dataFilteredByStatus?.filter(
+      (ticket: any) =>
+        ticket.Priority?.toLowerCase() === priority?.toLowerCase()
+    ).length;
+  });
+
+  console.log("priorityCounts: ", priorityCounts);
+
+  // Chart data configuration
   const ticketsByPriority = {
-    labels: [
-      "Standard",
-      "Low priority",
-      "Medium priority",
-      "High priority",
-      "Critical/Impacting Multiple People",
-    ],
-
+    labels: priorities,
     datasets: [
       {
         label: "Tickets",
-        data: [5, 3, 7, 4, 9, 6],
+        data: priorityCounts,
         backgroundColor: [
-          "#4F9DF9",
-          "#0B4D53",
-          "#D74FF9",
-          "#BE6D6D",
-          "#E0803D",
+          "#4F9DF9", // Standard
+          "#0B4D53", // Low priority
+          "#F9C74F", // Medium priority
+          "#BE6D6D", // High priority
+          "#E0803D", // Critical/Impacting Multiple People
         ],
       },
     ],
   };
 
+  // Chart options
   const ticketsByPriorityOptions = {
     plugins: {
       legend: { display: false, position: "bottom" },
-
       datalabels: {
         color: "white",
-        formatter: (value: number, ctx: any) => {
-          return "";
+        formatter: (value: number) => {
+          return value > 0 ? value : "";
         },
       },
     },
     barThickness: 60,
     scales: {
-      x: { title: { display: true, text: "Status" } },
+      x: { title: { display: true, text: "Priority" } },
       y: { title: { display: true, text: "Ticket Count" } },
     },
   };
+
+  // Render the chart using the MainChart component
   return (
     <MainChart
       chartType="Bar"

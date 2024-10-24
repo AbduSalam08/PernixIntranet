@@ -132,11 +132,6 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
                 <Route path="recent" Component={MyTickets} />
               </Route>
             </Route>
-
-            {/* <Route path="my_views" Component={MainLayout}>
-              <Route index Component={MyTickets} />
-              <Route path="recent" Component={MyTickets} />
-            </Route> */}
           </Routes>
         </Suspense>
       </div>

@@ -236,6 +236,7 @@ interface Props {
   noErrorMsg?: boolean;
   errorMsg?: any;
   withLabel?: boolean;
+  floatingLabel?: boolean;
   width?: any;
 }
 
@@ -250,6 +251,7 @@ const CustomDropDown: React.FC<Props> = ({
   isValid,
   noErrorMsg,
   withLabel,
+  floatingLabel = true,
   width,
 }) => {
   const handleChange = useCallback(
@@ -258,6 +260,7 @@ const CustomDropDown: React.FC<Props> = ({
     },
     [onChange]
   );
+
   const customTheme = (outerTheme: Theme): any =>
     createTheme({
       palette: {
@@ -296,6 +299,7 @@ const CustomDropDown: React.FC<Props> = ({
         },
       },
     });
+
   const outerTheme = useTheme();
 
   // Concatenate the size with the style class name
@@ -317,7 +321,7 @@ const CustomDropDown: React.FC<Props> = ({
           sx={{ minWidth: width || "276px" }}
           disabled={disabled}
         >
-          <InputLabel>{placeholder}</InputLabel>
+          {floatingLabel && <InputLabel>{placeholder}</InputLabel>}
           <Select
             value={value || ""}
             className={`${sizeClassName} ${
@@ -353,9 +357,12 @@ const CustomDropDown: React.FC<Props> = ({
                 border: "0",
               },
               ".MuiSelect-select": {
-                padding: "18px !important",
+                padding:
+                  size === "SM" ? "5px 13px !important" : "18px !important",
                 paddingBottom: "6px !important",
-                fontSize: "15px !important",
+                fontSize: size === "SM" ? "14px" : "15px",
+                // width: size === "SM" ? "auto" : "100%",
+                width: "auto",
               },
               fontWeight: "400",
               padding: "0",

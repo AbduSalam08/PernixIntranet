@@ -50,7 +50,7 @@
   }
 
   .chart {
-    height: 90%;
+    height: 88%;
     flex-grow: 1;
     /* Placeholder for chart component */
     background: lightgray;
@@ -58,12 +58,15 @@
   }
 
   .chartDetails {
-    // margin-top: 10px;
     margin-right: auto;
     text-align: center;
     font-size: 16px;
     color: #0b4d53;
     font-family: "osSemiBold", sans-serif;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 
