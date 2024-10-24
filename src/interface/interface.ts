@@ -106,4 +106,13 @@ export interface INavigatePage {
   MotivationPage: string;
   HelpDeskPage: string;
   NewsPage: string;
+  DocRepositoryPage: string;
+  QuestionsCEOPage: string;
+  PollPage: string;
+  CalendarPage: string;
+  OrgChartPage: string;
+  EmployeeDirectoryPage: string;
+  PTOPage: string;
+  ApprovalsPage: string;
+  ProjectTemplatePage: string;
 }

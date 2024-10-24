@@ -4,10 +4,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
-import styles from "./DocumentRepositoryPage.module.scss";
+import styles from "./OrgChartPage.module.scss";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 
-const DocumentRepositoryPage = (props: any): JSX.Element => {
+const OrgChartPage = (props: any): JSX.Element => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const onLoadingFUN = async (): Promise<void> => {
@@ -31,4 +31,4 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
   );
 };
 
-export default DocumentRepositoryPage;
+export default OrgChartPage;

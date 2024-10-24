@@ -90,5 +90,14 @@ export namespace CONFIG {
     HelpDeskPage: "/SitePages/HelpDeskPage.aspx",
     MotivationPage: "/SitePages/MotivationPage.aspx",
     NewsPage: "/SitePages/NewsPage.aspx",
+    ApprovalsPage: "/SitePages/ApprovalsPage.aspx",
+    CalendarPage: "/SitePages/CalendarPage.aspx",
+    DocRepositoryPage: "/SitePages/DocRepositoryPage.aspx",
+    EmployeeDirectoryPage: "/SitePages/EmployeeDirectoryPage.aspx",
+    OrgChartPage: "/SitePages/OrgChartPage.aspx",
+    PollPage: "/SitePages/PollPage.aspx",
+    ProjectTemplatePage: "/SitePages/ProjectTemplatePage.aspx",
+    PTOPage: "/SitePages/PTOPage.aspx",
+    QuestionsCEOPage: "/SitePages/QuestionsCEOPage.aspx",
   };
 }

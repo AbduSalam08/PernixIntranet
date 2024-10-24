@@ -57,11 +57,25 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       img: OrganizationalChart,
       hoverImg: OrganizationalChartWhite,
       text: "Organizational chart",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.OrgChartPage,
+          "_self"
+        );
+      },
     },
     {
       img: EmployeeDirectory,
       hoverImg: EmployeeDirectoryWhite,
       text: "Employee directory",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.EmployeeDirectoryPage,
+          "_self"
+        );
+      },
     },
     {
       img: HelpDesk,
@@ -79,16 +93,37 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       img: PTO,
       hoverImg: PTOWhite,
       text: "PTO",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.PTOPage,
+          "_self"
+        );
+      },
     },
     {
       img: Approvals,
       hoverImg: ApprovalsWhite,
       text: "Approvals",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.ApprovalsPage,
+          "_self"
+        );
+      },
     },
     {
       img: ProjectTemplate,
       hoverImg: ProjectTemplateWhite,
       text: "Project template",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.ProjectTemplatePage,
+          "_self"
+        );
+      },
     },
   ];
 

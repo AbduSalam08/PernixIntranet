@@ -1,8 +1,16 @@
 .container {
   width: 100%;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 128px);
   background-color: #f0f0f0;
   padding: 16px 30px;
+}
+
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 128px);
 }
 
 .headerContainer {
@@ -15,7 +23,6 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    cursor: pointer !important;
 
     .backHeader {
       font-size: 24px;
@@ -64,7 +71,7 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  height: calc(100vh - 216px);
+  height: calc(100vh - 306px);
   overflow: auto;
 
   .cardSection {
@@ -149,7 +156,7 @@
 .bodyNoDataFound {
   display: flex;
   width: 100%;
-  height: calc(100vh - 216px);
+  height: calc(100vh - 306px);
   justify-content: center;
   align-items: center;
   font-size: 18px;
