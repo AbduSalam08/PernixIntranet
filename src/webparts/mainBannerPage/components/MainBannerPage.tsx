@@ -922,24 +922,26 @@ const MainBannerPage = (props: any): JSX.Element => {
   return (
     <div className={styles.container}>
       {isLoading ? (
-        <>
+        <div className={styles.LoaderContainer}>
           <CircularSpinner />
-        </>
+        </div>
       ) : (
         <>
           {/* Header section */}
           <div className={styles.headerContainer}>
-            <div
-              className={styles.backContainer}
-              onClick={(_) => {
-                window.open(
-                  props.context.pageContext.web.absoluteUrl +
-                    CONFIG.NavigatePage.PernixIntranet,
-                  "_self"
-                );
-              }}
-            >
-              <div>
+            <div className={styles.backContainer}>
+              <div
+                style={{
+                  cursor: "pointer",
+                }}
+                onClick={(_) => {
+                  window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
+                }}
+              >
                 <i
                   className="pi pi-arrow-circle-left"
                   style={{

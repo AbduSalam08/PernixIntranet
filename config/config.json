@@ -145,6 +145,46 @@
           "manifest": "./src/webparts/pollPage/PollPageWebPart.manifest.json"
         }
       ]
+    },
+    "org-chart-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/orgChartPage/OrgChartPageWebPart.js",
+          "manifest": "./src/webparts/orgChartPage/OrgChartPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "employee-directory-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/employeeDirectoryPage/EmployeeDirectoryPageWebPart.js",
+          "manifest": "./src/webparts/employeeDirectoryPage/EmployeeDirectoryPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "pto-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ptoPage/PtoPageWebPart.js",
+          "manifest": "./src/webparts/ptoPage/PtoPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "approvals-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/approvalsPage/ApprovalsPageWebPart.js",
+          "manifest": "./src/webparts/approvalsPage/ApprovalsPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "project-template-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/projectTemplatePage/ProjectTemplatePageWebPart.js",
+          "manifest": "./src/webparts/projectTemplatePage/ProjectTemplatePageWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -167,6 +207,11 @@
     "CalendarPageWebPartStrings": "lib/webparts/calendarPage/loc/{locale}.js",
     "DocumentRepositoryPageWebPartStrings": "lib/webparts/documentRepositoryPage/loc/{locale}.js",
     "QuestionsCeoPageWebPartStrings": "lib/webparts/questionsCeoPage/loc/{locale}.js",
-    "PollPageWebPartStrings": "lib/webparts/pollPage/loc/{locale}.js"
+    "PollPageWebPartStrings": "lib/webparts/pollPage/loc/{locale}.js",
+    "OrgChartPageWebPartStrings": "lib/webparts/orgChartPage/loc/{locale}.js",
+    "EmployeeDirectoryPageWebPartStrings": "lib/webparts/employeeDirectoryPage/loc/{locale}.js",
+    "PtoPageWebPartStrings": "lib/webparts/ptoPage/loc/{locale}.js",
+    "ApprovalsPageWebPartStrings": "lib/webparts/approvalsPage/loc/{locale}.js",
+    "ProjectTemplatePageWebPartStrings": "lib/webparts/projectTemplatePage/loc/{locale}.js"
   }
 }
