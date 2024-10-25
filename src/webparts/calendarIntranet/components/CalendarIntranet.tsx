@@ -457,11 +457,15 @@ const CalendarIntranet = (props: any): JSX.Element => {
                   <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
                 </div>
                 <div className={styles.event}>
-                  <p className={styles.Title}>{val.title}</p>
+                  <p className={styles.Title} title={val.title}>
+                    {val.title}
+                  </p>
                   <span className={styles.time}>{`${moment(val.start).format(
                     "hh:mm A"
                   )} - ${moment(val.end).format("hh:mm A")}`}</span>
-                  <span className={styles.description}>{val?.description}</span>
+                  <span className={styles.description} title={val?.description}>
+                    {val?.description}
+                  </span>
                 </div>
               </div>
             ))

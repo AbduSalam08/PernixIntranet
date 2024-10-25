@@ -60,24 +60,36 @@
         align-items: flex-start;
         justify-content: center;
         gap: 5px;
-        .Title {
-          margin: 6px 0px;
-          font-size: 15px;
-          font-weight: 600;
-          font-family: "osSemibold";
-
-          color: #0b4d53;
-        }
         .time {
           color: #adadad;
           font-weight: 400;
           font-family: "osRegular";
           display: block;
         }
+
+        .Title {
+          margin: 6px 0px;
+          font-size: 15px;
+          font-weight: 600;
+          font-family: "osSemibold", sans-serif;
+          color: #0b4d53;
+          color: #adadad;
+          height: 18px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          max-width: 233px;
+        }
+
         .description {
           font-size: 16px;
-          font-family: "osRegular";
+          font-family: "osRegular", sans-serif;
           color: #adadad;
+          height: 18px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          max-width: 233px;
         }
       }
     }
