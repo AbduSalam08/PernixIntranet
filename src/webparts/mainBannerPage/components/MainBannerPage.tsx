@@ -68,7 +68,7 @@ const MainBannerPage = (props: any): JSX.Element => {
   const initialPopupController: any[] = [
     {
       open: false,
-      popupTitle: "Add Motivation",
+      popupTitle: "Add quote",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -90,7 +90,7 @@ const MainBannerPage = (props: any): JSX.Element => {
     },
     {
       open: false,
-      popupTitle: "Update Motivation",
+      popupTitle: "Update",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -112,7 +112,7 @@ const MainBannerPage = (props: any): JSX.Element => {
     },
     {
       open: false,
-      popupTitle: "Delete Motivation",
+      popupTitle: "Delete",
       popupWidth: "450px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -134,7 +134,7 @@ const MainBannerPage = (props: any): JSX.Element => {
     },
     {
       open: false,
-      popupTitle: "View Motivation",
+      popupTitle: "",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -336,6 +336,7 @@ const MainBannerPage = (props: any): JSX.Element => {
       dispatch
     );
     await getChoiceData().then(async (val: string[]) => {
+      console.log("val: ", val);
       setStatusDrop([...val]);
     });
     await getDailyQuote().then(async (val: IQuoteDatas[]) => {
@@ -502,7 +503,7 @@ const MainBannerPage = (props: any): JSX.Element => {
         <div className={styles.firstRow}>
           <FloatingLabelTextarea
             value={formData.Quote.value}
-            placeholder="Motivation Description"
+            placeholder="Description"
             rows={5}
             isValid={formData.Quote.isValid}
             errorMsg={formData.Quote.errorMsg}
@@ -526,6 +527,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           <div>
             <CustomFileUpload
               accept="image/png,image/svg"
+              placeholder="Select Image - 1440 x 640 ( Optional )"
               value={formData?.Attachments?.value?.name || null}
               onFileSelect={(e: any) => {
                 const value: any = e;
@@ -633,7 +635,7 @@ const MainBannerPage = (props: any): JSX.Element => {
         <div className={styles.firstRow}>
           <FloatingLabelTextarea
             value={formData.Quote.value}
-            placeholder="Motivation Description"
+            placeholder="Description"
             rows={5}
             isValid={formData.Quote.isValid}
             errorMsg={formData.Quote.errorMsg}
@@ -657,6 +659,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           <div>
             <CustomFileUpload
               accept="image/png,image/svg"
+              placeholder="Select Image ( Optional )"
               value={
                 isFileEdit
                   ? formData?.Attachments?.value || null
@@ -954,7 +957,11 @@ const MainBannerPage = (props: any): JSX.Element => {
             </div>
 
             <div className={styles.searchContainer}>
-              <div>
+              <div
+                style={{
+                  display: isAdmin ? "flex" : "none",
+                }}
+              >
                 <CustomDropDown
                   noErrorMsg
                   value={commonSearch?.Status}
@@ -1020,7 +1027,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                 }}
               >
                 <DefaultButton
-                  text="Add new"
+                  text="Add a quote"
                   btnType="primaryGreen"
                   startIcon={<Add />}
                   onClick={(_) => {
