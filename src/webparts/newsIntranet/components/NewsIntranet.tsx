@@ -166,7 +166,7 @@ const NewsIntranet = (props: any): JSX.Element => {
           isValid={formData.Title.isValid}
           errorMsg={formData.Title.errorMsg}
           onChange={(e) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Title",
               value,
@@ -283,7 +283,7 @@ const NewsIntranet = (props: any): JSX.Element => {
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
@@ -342,7 +342,8 @@ const NewsIntranet = (props: any): JSX.Element => {
         Number(moment().format("YYYYMMDD")) >=
           Number(moment(newsItem.StartDate).format("YYYYMMDD")) &&
         Number(moment().format("YYYYMMDD")) <=
-          Number(moment(newsItem.EndDate).format("YYYYMMDD"))
+          Number(moment(newsItem.EndDate).format("YYYYMMDD")) &&
+        newsItem.Status === "Active"
     );
 
     setShownewsdata(filteredData);
