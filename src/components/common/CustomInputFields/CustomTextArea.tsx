@@ -147,9 +147,10 @@ export default function FloatingLabelTextarea({
         slotProps={{ textarea: { placeholder } }}
         sx={{
           borderRadius: "6px",
-          border: !isValid
-            ? "1.5px solid #ff8585 !important"
-            : `1.5px solid ${customBorderColor || "#e5e5e5"} !important`,
+          border: `none`,
+          // border: !isValid
+          //   ? "1.5px solid #ff8585 !important"
+          //   : `1.5px solid ${customBorderColor || "#e5e5e5"} !important`,
           paddingTop: "20px", // for the floating label
           width: textAreaWidth ? textAreaWidth : "100%",
           height: rows ? `${rows * 20}px` : "auto",

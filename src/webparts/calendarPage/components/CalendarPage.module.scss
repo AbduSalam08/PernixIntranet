@@ -1,3 +1,7 @@
+.boxWrapper {
+  background-color: #f0f0f0;
+  padding: 20px 0;
+}
 .newsHeaderContainer {
   display: flex;
   justify-content: space-between;
@@ -7,6 +11,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    i {
+      cursor: pointer;
+    }
 
     p {
       font-family: "osSemibold", sans-serif;
@@ -39,10 +46,10 @@
       font-size: 15px;
       font-weight: 500;
       background: #0b4d53;
-      width: 114px;
-      height: 40px;
+      // width: 114px;
+      height: 34px;
       color: #fff;
-      padding: 4px 8px;
+      padding: 4px 20px;
       border-radius: 4px;
       cursor: pointer;
     }
@@ -71,17 +78,18 @@
   margin: 20px;
 
   .eventSection {
-    flex: 0 1 calc(50% - 20px);
+    flex: 0 1 calc(25% - 20px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-    padding: 10px 5px;
-    border-right: 4px solid #0b4d53;
-    border-radius: 4px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 8px 5px 15px 10px;
+    border-left: 4px solid #0b4d53;
+    border-radius: 8px;
     margin-bottom: 11px;
     position: relative;
+    background-color: #fff;
     .date {
       width: 78px;
       border-right: 2px solid #ffeee2;
@@ -109,6 +117,11 @@
         font-weight: 600;
         font-family: "osSemibold";
         color: #0b4d53;
+        max-width: 250px;
+        overflow: hidden;
+        height: 18px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .time {
@@ -122,13 +135,19 @@
         font-size: 16px;
         font-family: "osRegular";
         color: #adadad;
+        max-width: 250px;
+        overflow: hidden;
+        height: 18px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
 
     .icons {
       margin-left: auto;
       display: flex;
-      gap: 8px;
+      gap: 15px;
+      padding: 10px;
       i {
         cursor: pointer;
       }

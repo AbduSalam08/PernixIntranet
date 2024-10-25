@@ -62,7 +62,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
     handleDeleteClick(item.ID);
   };
 
-  const handleView = () => {
+  const handleView = (): any => {
     if (handleViewClick) {
       console.log("clicked");
       handleViewClick(item);
@@ -76,8 +76,8 @@ const NewsCard: React.FC<NewsCardProps> = ({
         className={styles.newsThumbNail}
       />
       <div className={styles.rhsTexts}>
-        <h2>{title}</h2>
-        <span>{description}</span>
+        <h2 title={title}>{title}</h2>
+        <span title={description}>{description}</span>
       </div>
       {!noActionsAndStatus && (
         <div className={styles.rhsActions}>
@@ -96,7 +96,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 onClick={handleView}
                 className="pi pi-eye
 "
-                style={{ color: "#1AB800", fontSize: "1.2rem" }}
+                style={{ color: "#adadad", fontSize: "1.2rem" }}
               />
               {currentUserDetails.role === CONFIG.RoleDetails.user ? (
                 <></>
@@ -104,18 +104,13 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 <>
                   <i
                     onClick={handleEdit}
-                    style={{ color: "#007EF2", fontSize: "1.2rem" }}
-                    className="pi pi-pen-to-square
-
-"
+                    style={{ color: "#adadad", fontSize: "1.2rem" }}
+                    className="pi pi-pen-to-square"
                   />
                   <i
                     onClick={handleDelete}
                     style={{ color: "red", fontSize: "1.2rem" }}
-                    className="pi pi-trash
-
-
-"
+                    className="pi pi-trash"
                   />
                 </>
               )}
