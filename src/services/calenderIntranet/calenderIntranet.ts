@@ -25,10 +25,10 @@ interface IEvent {
 
 const timeZone: string = "India Standard Time"; //for local time zone
 const headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
-const formatTime = (time: string | number): string => {
-  const timeString = time.toString().padStart(2, "0");
-  return `${timeString}:00:00`;
-};
+// const formatTime = (time: string | number): string => {
+//   const timeString = time.toString().padStart(2, "0");
+//   return `${timeString}:00:00`;
+// };
 
 export const createOutlookEvent = async (
   formData: any,
@@ -336,8 +336,31 @@ export const updateOutlookEvent = async (
 
   try {
     const { Title, StartDate, StartTime, EndTime, Description } = formData;
-    const formattedStartTime = formatTime(StartTime.value);
-    const formattedEndTime = formatTime(EndTime.value);
+    // const formattedStartTime = formatTime(StartTime.value);
+    // const formattedEndTime = formatTime(EndTime.value);
+
+    const startDate = new Date(StartTime.value); // Convert to Date object
+    const endDate = new Date(EndTime.value); // Convert to Date object
+
+    // Extract hours and minutes from the Date objects
+    const startHours = startDate.getHours(); // Get hours (0-23)
+    const startMinutes = startDate.getMinutes(); // Get minutes (0-59)
+
+    const endHours = endDate.getHours(); // Get hours (0-23)
+    const endMinutes = endDate.getMinutes(); // Get minutes (0-59)
+
+    console.log("Start Hours:", startHours, "Start Minutes:", startMinutes);
+    console.log("End Hours:", endHours, "End Minutes:", endMinutes);
+
+    // Now you can set the hours and minutes as needed for your event creation
+    const newStartDate = new Date(StartDate.value); // Copy of startDate
+    newStartDate.setHours(startHours, startMinutes, 0, 0); // Set hours and minutes
+
+    const newEndDate = new Date(StartDate.value); // Copy of endDate
+    newEndDate.setHours(endHours, endMinutes, 0, 0); // Set hours and minutes
+
+    console.log(newStartDate.toISOString()); // Outputs the ISO string for the start date
+    console.log(newEndDate.toISOString()); 
 
     const eventUpdate: any = {
       subject: Title.value,
@@ -346,15 +369,20 @@ export const updateOutlookEvent = async (
         content: Description.value,
       },
       start: {
-        dateTime: new Date(
-          StartDate.value.setHours(parseInt(formattedStartTime.split(":")[0]))
-        ),
+        dateTime: newStartDate.toISOString(),
+
+        // dateTime: new Date(
+        //   StartDate.value.setHours(parseInt(formattedStartTime.split(":")[0]))
+        // ),
         timeZone: "UTC",
       },
+
       end: {
-        dateTime: new Date(
-          StartDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
-        ),
+        dateTime: newEndDate.toISOString(),
+
+        // dateTime: new Date(
+        //   StartDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
+        // ),
         timeZone: "UTC",
       },
       location: {

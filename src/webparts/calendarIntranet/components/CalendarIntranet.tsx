@@ -53,7 +53,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
-
+  
   const [showcalendardata, setShowcalendardata] = useState<any[]>([]);
   // const [allcalendardata, setAllcalendardata] = useState<any[]>([]);
 
@@ -402,7 +402,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
+      { highPriorityGroups: [CONFIG.SPGroupName.Calendar_Admin] },
 
       dispatch
     );
@@ -419,7 +419,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
         <SectionHeaderIntranet
           label="Calendar"
           removeAdd={
-            currentUserDetails.role === CONFIG.RoleDetails.user ? false : true
+            currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
           }
           headerAction={() => {
             togglePopupVisibility(
@@ -447,7 +447,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
                 {calenderIntranetData?.error}
               </span>
             </div>
-          ) : showcalendardata?.length == 0 ? (
+          ) : showcalendardata?.length === 0 ? (
             <div>No Events Founds</div>
           ) : (
             showcalendardata?.slice(0, 3).map((val: IEvent, index: number) => (
