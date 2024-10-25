@@ -15,9 +15,8 @@ import {
 } from "../../../redux/features/MotivationalQuotesSlice";
 import { Skeleton } from "primereact/skeleton"; // Import PrimeReact Skeleton
 import { CONFIG } from "../../../config/config";
-import { Add } from "@mui/icons-material";
-import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import { IQuoteDatas, IUserDetails } from "../../../interface/interface";
+import moment from "moment";
 
 // hover images - default
 const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
@@ -140,6 +139,17 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       let tempJSON: IQuoteDatas[] = await Promise.all(
         value?.filter((val: IQuoteDatas) => val.Status === "Active") || []
       );
+      if (tempJSON.length) {
+        tempJSON = await Promise.all(
+          tempJSON?.filter(
+            (val: IQuoteDatas) =>
+              Number(moment().format("YYYYMMDD")) >=
+                Number(moment(val.StartDate).format("YYYYMMDD")) &&
+              Number(moment().format("YYYYMMDD")) <=
+                Number(moment(val.EndDate).format("YYYYMMDD"))
+          )
+        );
+      }
       dispatch(setMotivationalQuotesData(tempJSON?.[0]?.Quote || ""));
       dispatch(setBannerImage(tempJSON?.[0]?.Attachments || ""));
       setLoading(false); // Set loading to false once data is retrieved
@@ -177,29 +187,16 @@ const MainBannerIntranet = (props: any): JSX.Element => {
         />
       )}
 
-      <div
-        className={styles.btnAlign}
-        onClick={(_) => {
-          window.open(
-            props.context.pageContext.web.absoluteUrl +
-              CONFIG.NavigatePage.MotivationPage,
-            "_self"
-          );
-        }}
-      >
-        <DefaultButton
-          onlyIcon={true}
-          btnType="primaryGreen"
-          size="medium"
-          text={
-            <Add
-              sx={{
-                width: "20px",
-                fontSize: "24px",
-                color: "#fff",
-              }}
-            />
-          }
+      <div className={styles.btnAlign}>
+        <i
+          className="pi pi-arrow-right"
+          onClick={(_) => {
+            window.open(
+              props.context.pageContext.web.absoluteUrl +
+                CONFIG.NavigatePage.MotivationPage,
+              "_self"
+            );
+          }}
         />
       </div>
 

@@ -81,6 +81,7 @@
 
   p {
     font-size: 20px;
+    line-height: 1.25;
     font-family: "osMedium", sans-serif;
     color: var(--white);
   }
@@ -175,4 +176,13 @@
   position: absolute;
   top: 12px;
   right: 18px;
+
+  i {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    background-color: #e0803d;
+    color: #ffffff;
+    cursor: pointer;
+  }
 }
