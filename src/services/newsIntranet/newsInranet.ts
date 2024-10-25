@@ -17,7 +17,7 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
     // Fetch news data
     const response = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_News,
-      Select: "*, Author/EMail,Author/Title",
+      Select: "*, Author/EMail, Author/Title",
       Expand: "Author",
       Filter: [
         {
@@ -26,9 +26,9 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
           FilterValue: "1",
         },
       ],
+      Topcount: 5000,
       Orderby: "Created",
       Orderbydecorasc: false,
-      Topcount: 5000,
     });
     console.log("response: ", response);
 

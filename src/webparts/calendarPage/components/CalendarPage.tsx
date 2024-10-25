@@ -357,7 +357,7 @@ const CalendarPage = (props: any): JSX.Element => {
           isValid={formData.Title.isValid}
           errorMsg={formData.Title.errorMsg}
           onChange={(e) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Title",
               value,
@@ -445,7 +445,7 @@ const CalendarPage = (props: any): JSX.Element => {
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
@@ -574,7 +574,7 @@ const CalendarPage = (props: any): JSX.Element => {
           isValid={formData.Title.isValid}
           errorMsg={formData.Title.errorMsg}
           onChange={(e) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Title",
               value,
@@ -662,7 +662,7 @@ const CalendarPage = (props: any): JSX.Element => {
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
