@@ -33,7 +33,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
       />
       <div className={styles.rhsTexts}>
         <h2>{title}</h2>
-        <span>{description}</span>
+        <span title={description}>{description}</span>
       </div>
       {!noActionsAndStatus && (
         <div className={styles.rhsActions}>

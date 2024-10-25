@@ -26,6 +26,9 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
           FilterValue: "1",
         },
       ],
+      Orderby: "Created",
+      Orderbydecorasc: false,
+      Topcount: 5000,
     });
     console.log("response: ", response);
 

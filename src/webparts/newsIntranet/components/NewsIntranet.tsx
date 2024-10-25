@@ -24,6 +24,7 @@ import CircularSpinner from "../../../components/common/Loaders/CircularSpinner"
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
+import moment from "moment";
 // const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -33,7 +34,7 @@ const NewsIntranet = (props: any): JSX.Element => {
   const initialPopupController = [
     {
       open: false,
-      popupTitle: "Add News",
+      popupTitle: "Add a news",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -95,6 +96,7 @@ const NewsIntranet = (props: any): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
   });
+  const [shownewsdata, setShownewsdata] = useState<any>([]);
 
   const newsIntranetData: any = useSelector((state: any) => {
     return state.NewsIntranetData.value;
@@ -157,7 +159,7 @@ const NewsIntranet = (props: any): JSX.Element => {
 
   const popupInputs: any[] = [
     [
-      <div className={styles.addNewsGrid} key={1}>
+      <div key={1}>
         <CustomInput
           value={formData.Title.value}
           placeholder="Enter title"
@@ -174,67 +176,105 @@ const NewsIntranet = (props: any): JSX.Element => {
           }}
         />
 
-        <CustomDateInput
-          value={formData.StartDate.value}
-          label="Start date"
-          error={!formData.StartDate.isValid}
-          errorMsg={formData.StartDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField(
-              "StartDate",
-              date,
-              formData.StartDate.validationRule
-            );
-            handleInputChange("StartDate", date, isValid, errorMsg);
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+            margin: "20px 0px",
           }}
-        />
+        >
+          <div style={{ width: "50%" }}>
+            <CustomDateInput
+              value={formData.StartDate.value}
+              label="Start Date"
+              isDateController={true}
+              minimumDate={new Date()}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
+              error={!formData.StartDate.isValid}
+              errorMsg={formData.StartDate.errorMsg}
+              onChange={(date: any) => {
+                const { isValid, errorMsg } = validateField(
+                  "StartDate",
+                  date,
+                  formData.StartDate.validationRule
+                );
+                handleInputChange("StartDate", date, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div style={{ width: "50%" }}>
+            <CustomDateInput
+              value={formData.EndDate.value}
+              label="End Date"
+              isDateController={true}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
+              error={!formData.EndDate.isValid}
+              errorMsg={formData.EndDate.errorMsg}
+              onChange={(date: any) => {
+                const { isValid, errorMsg } = validateField("EndDate", date, {
+                  required: true,
+                  type: "date",
+                });
+                handleInputChange("EndDate", date, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+            margin: "20px 0px",
+          }}
+        >
+          <div style={{ width: "50%" }}>
+            <CustomDropDown
+              value={formData.Status.value}
+              options={["Active", "In Active"]}
+              placeholder="Status"
+              isValid={formData.Status.isValid}
+              errorMsg={formData.Status.errorMsg}
+              onChange={(value) => {
+                const { isValid, errorMsg } = validateField(
+                  "Status",
+                  value,
+                  formData.Status.validationRule
+                );
+                handleInputChange("Status", value, isValid, errorMsg);
+              }}
+            />
+          </div>
 
-        <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        />
-
-        <CustomDropDown
-          value={formData.Status.value}
-          options={["Active", "In Active"]}
-          placeholder="Status"
-          isValid={formData.Status.isValid}
-          errorMsg={formData.Status.errorMsg}
-          onChange={(value) => {
-            const { isValid, errorMsg } = validateField(
-              "Status",
-              value,
-              formData.Status.validationRule
-            );
-            handleInputChange("Status", value, isValid, errorMsg);
-          }}
-        />
-
-        <CustomFileUpload
-          accept="image/png,image/svg"
-          value={formData.thumbnail.value?.name}
-          onFileSelect={(file) => {
-            console.log("file: ", file);
-            const { isValid, errorMsg } = validateField(
-              "thumbnail",
-              file ? file.name : "",
-              formData.thumbnail.validationRule
-            );
-            handleInputChange("thumbnail", file, isValid, errorMsg);
-          }}
-          placeholder="Thumbnail"
-          isValid={formData.thumbnail.isValid}
-          errMsg={formData.thumbnail.errorMsg}
-        />
+          <div style={{ width: "50%" }}>
+            <CustomFileUpload
+              accept="image/png,image/svg"
+              value={formData.thumbnail.value?.name}
+              onFileSelect={(file) => {
+                console.log("file: ", file);
+                const { isValid, errorMsg } = validateField(
+                  "thumbnail",
+                  file ? file.name : "",
+                  formData.thumbnail.validationRule
+                );
+                handleInputChange("thumbnail", file, isValid, errorMsg);
+              }}
+              placeholder="Thumbnail (1120 x 350)"
+              isValid={formData.thumbnail.isValid}
+              errMsg={formData.thumbnail.errorMsg}
+            />
+          </div>
+        </div>
 
         <FloatingLabelTextarea
           value={formData.Description.value}
@@ -294,6 +334,20 @@ const NewsIntranet = (props: any): JSX.Element => {
     );
   };
 
+  const prepareData = (item: any): void => {
+    let filteredData: any[] = [];
+
+    filteredData = newsIntranetData?.data?.filter(
+      (newsItem: any) =>
+        Number(moment().format("YYYYMMDD")) >=
+          Number(moment(newsItem.StartDate).format("YYYYMMDD")) &&
+        Number(moment().format("YYYYMMDD")) <=
+          Number(moment(newsItem.EndDate).format("YYYYMMDD"))
+    );
+
+    setShownewsdata(filteredData);
+  };
+
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
@@ -302,11 +356,17 @@ const NewsIntranet = (props: any): JSX.Element => {
     );
     getAllNewsData(dispatch);
   }, []);
+  useEffect(() => {
+    prepareData(newsIntranetData?.data);
+  }, [newsIntranetData]);
 
   return (
     <div className={styles.newsContainer}>
       <SectionHeaderIntranet
         label={"News"}
+        removeAdd={
+          currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
+        }
         headerAction={() => {
           togglePopupVisibility(
             setPopupController,
@@ -327,7 +387,7 @@ const NewsIntranet = (props: any): JSX.Element => {
             <span className="disabledText">{newsIntranetData?.error}</span>
           </div>
         ) : (
-          newsIntranetData?.data
+          shownewsdata
             ?.slice(-3)
             .map((item: any, idx: number) => (
               <NewsCard
