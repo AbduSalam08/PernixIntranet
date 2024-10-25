@@ -112,7 +112,7 @@ const MainBannerPage = (props: any): JSX.Element => {
     },
     {
       open: false,
-      popupTitle: "Delete",
+      popupTitle: "Confirmation",
       popupWidth: "450px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -786,7 +786,7 @@ const MainBannerPage = (props: any): JSX.Element => {
             style={{
               backgroundColor:
                 curObject.Status === "Active"
-                  ? "rgb(175, 228, 175)"
+                  ? "#dcf1dc"
                   : "rgb(243, 183, 183)",
               color:
                 curObject.Status === "Active"
@@ -888,7 +888,7 @@ const MainBannerPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          let data: any = {};
+          const data: any = {};
           const column: IMotivateColumn = CONFIG.MotivateColumn;
 
           data[column.ID] = curObject?.ID || null;
@@ -1105,7 +1105,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                           style={{
                             backgroundColor:
                               val.Status === "Active"
-                                ? "rgb(175, 228, 175)"
+                                ? "#dcf1dc"
                                 : "rgb(243, 183, 183)",
                             color:
                               val.Status === "Active"
@@ -1124,7 +1124,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                             <i
                               className="pi pi-eye"
                               style={{
-                                color: "#1ab800",
+                                color: "#adadad",
                               }}
                             />
                           </div>
@@ -1139,7 +1139,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                             <i
                               className="pi pi-pen-to-square"
                               style={{
-                                color: "#007ef2",
+                                color: "#adadad",
                               }}
                             />
                           </div>

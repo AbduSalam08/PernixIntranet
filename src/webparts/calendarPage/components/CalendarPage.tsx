@@ -1,3 +1,5 @@
+/* eslint-disable no-debugger */
+/* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
@@ -73,7 +75,7 @@ const CalendarPage = (props: any): JSX.Element => {
   const initialPopupController = [
     {
       open: false,
-      popupTitle: "New event",
+      popupTitle: "Add an event",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -95,7 +97,7 @@ const CalendarPage = (props: any): JSX.Element => {
 
     {
       open: false,
-      popupTitle: "Update event",
+      popupTitle: "Update",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -117,9 +119,10 @@ const CalendarPage = (props: any): JSX.Element => {
 
     {
       open: false,
-      popupTitle: "Delete event",
+      popupTitle: "Confirmation",
       popupWidth: "450px",
-      popupType: "custom",
+      popupType: "confirmation",
+      confirmationTitle: "Are you sure want to delete this Event?",
       defaultCloseBtn: false,
       popupData: "",
       isLoading: {
@@ -227,7 +230,6 @@ const CalendarPage = (props: any): JSX.Element => {
     }, {} as typeof formData);
 
     setFormData(updatedFormData);
-    debugger;
     if (!hasErrors) {
       (await selectvalue.isEdit)
         ? updateOutlookEvent(selectvalue.id, formData, setPopupController, 1)
@@ -672,7 +674,13 @@ const CalendarPage = (props: any): JSX.Element => {
       </div>,
     ],
     [
-      <div key={3}>
+      <div
+        key={3}
+        style={{
+          width: "100%",
+          textAlign: "center",
+        }}
+      >
         <p>Are you sure want to delete this Event?</p>
       </div>,
     ],
@@ -858,7 +866,7 @@ const CalendarPage = (props: any): JSX.Element => {
     setShowcalendardata([...calendardata]);
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: any): any => {
     // const startTime = item?.start.split("T")[1].split(":")[0];
     // const endTime = item?.end.split("T")[1].split(":")[0];
     setFormData({
@@ -898,7 +906,7 @@ const CalendarPage = (props: any): JSX.Element => {
       "open"
     );
   };
-  const handleDelete = (val: any) => {
+  const handleDelete = (val: any): any => {
     setSelectvalue({ ...selectvalue, id: val.id });
 
     togglePopupVisibility(
@@ -913,8 +921,7 @@ const CalendarPage = (props: any): JSX.Element => {
 
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
-      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
-
+      { highPriorityGroups: [CONFIG.SPGroupName.Calendar_Admin] },
       dispatch
     );
     // BindCalender(calenderIntranetData);
@@ -925,7 +932,7 @@ const CalendarPage = (props: any): JSX.Element => {
   }, [calenderIntranetData]);
 
   return (
-    <div>
+    <div className={styles.boxWrapper}>
       <div className={styles.newsHeaderContainer}>
         <div className={styles.leftSection}>
           <i
@@ -947,6 +954,7 @@ const CalendarPage = (props: any): JSX.Element => {
             secWidth="180px"
             labelText="Search"
             placeholder="Search"
+            noErrorMsg
             onChange={(e) => {
               const value = e;
               objFilter.allSearch = value;
@@ -965,7 +973,7 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           /> */}
           <CustomDateInput
-            label="select Date"
+            label="Select date"
             placeHolder="Date"
             minWidth="180px"
             maxWidth="180px"
@@ -980,8 +988,8 @@ const CalendarPage = (props: any): JSX.Element => {
               handleSearch([...calendardata]);
             }}
           />
-          <div className={styles.refreshBtn}>
-            <i onClick={handleRefresh} className="pi pi-refresh" />
+          <div className={styles.refreshBtn} onClick={handleRefresh}>
+            <i className="pi pi-refresh" />
           </div>
           <div
             style={{
@@ -1048,7 +1056,7 @@ const CalendarPage = (props: any): JSX.Element => {
               className="pi pi-plus"
               style={{ fontSize: "1rem", color: "#fff" }}
             />
-            Add
+            Add an event
           </div>
         </div>
       </div>
@@ -1100,7 +1108,7 @@ const CalendarPage = (props: any): JSX.Element => {
             <img src={errorGrey} alt="Error" />
             <span className="disabledText">{calenderIntranetData?.error}</span>
           </div>
-        ) : showcalendardata?.length == 0 ? (
+        ) : showcalendardata?.length === 0 ? (
           <div
             style={{
               width: "100%",
@@ -1108,9 +1116,12 @@ const CalendarPage = (props: any): JSX.Element => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              fontSize: "14px",
+              color: "#adadad",
+              fontFamily: "osMedium, sans-serif",
             }}
           >
-            No Events Founds
+            No events found.
           </div>
         ) : (
           <div className={styles.eventWrapper}>
@@ -1121,20 +1132,24 @@ const CalendarPage = (props: any): JSX.Element => {
                   <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
                 </div>
                 <div className={styles.event}>
-                  <p className={styles.Title}>{val.title}</p>
+                  <p className={styles.Title} title={styles.Title}>
+                    {val.title}
+                  </p>
                   <span className={styles.time}>
                     {`${moment(val.start).format("hh:mm A")} - ${moment(
                       val.end
                     ).format("hh:mm A")}`}
                   </span>
-                  <span className={styles.description}>{val?.description}</span>
+                  <span className={styles.description} title={val?.description}>
+                    {val?.description}
+                  </span>
                 </div>
 
                 {isAdmin && (
                   <div className={styles.icons}>
                     <i
                       onClick={() => handleEdit(val)}
-                      style={{ color: "#007EF2", fontSize: "1.2rem" }}
+                      style={{ color: "#adadad", fontSize: "1.2rem" }}
                       className="pi pi-pen-to-square
 
 "
@@ -1187,9 +1202,7 @@ const CalendarPage = (props: any): JSX.Element => {
           content={popupInputs[index]}
           popupWidth={popupData.popupWidth}
           defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={
-            popupData.popupType !== "custom" ? popupData.popupTitle : ""
-          }
+          confirmationTitle={popupData?.confirmationTitle}
           popupHeight={index === 0 ? true : false}
           noActionBtn={true}
           // popupActions={[]}

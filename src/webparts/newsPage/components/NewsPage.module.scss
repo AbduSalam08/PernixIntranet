@@ -1,3 +1,7 @@
+.wrapper {
+  background-color: #f0f0f0;
+  padding: 20px 0;
+}
 .newsHeaderContainer {
   display: flex;
   justify-content: space-between;
@@ -7,7 +11,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-
+    i {
+      cursor: pointer;
+    }
     p {
       font-family: "osSemibold", sans-serif;
       color: #0b4d53;
@@ -39,10 +45,10 @@
       font-size: 15px;
       font-weight: 500;
       background: #0b4d53;
-      width: 114px;
-      height: 40px;
+      // width: 114px;
+      height: 34px;
       color: #fff;
-      padding: 4px 8px;
+      padding: 4px 15px;
       border-radius: 4px;
       cursor: pointer;
     }
@@ -72,21 +78,22 @@
 .newsContainer {
   min-height: 400px;
   margin: 20px;
-  padding: 20px;
+  // padding: 20px;
   border-radius: 6px;
-  background-color: #fff;
-  box-shadow: 0px -1px 4px #b6b6b650;
+  // background-color: #fff;
+  // box-shadow: 0px -1px 4px #b6b6b650;
+  box-shadow: none;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
   flex-direction: column;
   gap: 10px;
   .newsContainerWrapper {
-    padding: 0 10px;
+    padding: 0px;
     width: 100%;
     // max-height: 350px;
     height: 100%;
-    gap: 2px;
+    gap: 13px;
     overflow-y: auto;
     display: flex;
     align-items: center;
@@ -96,9 +103,60 @@
 }
 /* Define the grid container */
 .addNewsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Four equal-width columns */
-  gap: 16px; /* Space between grid items */
+  // display: grid;
+  // grid-template-columns: repeat(3, 1fr); /* Four equal-width columns */
+  // gap: 16px; /* Space between grid items */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  .item1 {
+    width: 100%;
+  }
+  .item2 {
+    width: 100%;
+  }
+  .item3 {
+    width: 100%;
+  }
+  .item4 {
+    width: 100%;
+  }
+  .item5 {
+    width: 100%;
+  }
+  .item6 {
+    width: 100%;
+  }
+  .r1 {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 25px;
+  }
+  .r2 {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+  }
+  .r3 {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+  }
+  .r4 {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+  }
 }
 
 /* Make the grid responsive */

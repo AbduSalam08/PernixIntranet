@@ -65,6 +65,7 @@ interface PopupState {
   popupWidth: string;
   popupType: string;
   defaultCloseBtn: boolean;
+  confirmationTitle?: string;
   popupData: string;
   isLoading: {
     inprogress: boolean;
@@ -117,7 +118,7 @@ const NewsPage = (props: any): JSX.Element => {
   const initialPopupController: PopupState[] = [
     {
       open: false,
-      popupTitle: "Add News",
+      popupTitle: "Add an news",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -139,7 +140,7 @@ const NewsPage = (props: any): JSX.Element => {
 
     {
       open: false,
-      popupTitle: "Update News",
+      popupTitle: "Update",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -161,10 +162,11 @@ const NewsPage = (props: any): JSX.Element => {
 
     {
       open: false,
-      popupTitle: "Delete news",
+      popupTitle: "Confirmation",
       popupWidth: "450px",
-      popupType: "custom",
+      popupType: "confirmation",
       defaultCloseBtn: false,
+      confirmationTitle: "Are you sure want to delete this news?",
       popupData: "",
       isLoading: {
         inprogress: false,
@@ -186,8 +188,7 @@ const NewsPage = (props: any): JSX.Element => {
       popupTitle: "",
       popupWidth: "1200px",
       popupType: "custom",
-      defaultCloseBtn: true,
-
+      defaultCloseBtn: false,
       popupData: "",
       isLoading: {
         inprogress: false,
@@ -266,6 +267,7 @@ const NewsPage = (props: any): JSX.Element => {
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
+
   console.log("News_Admin currentUserDetails: ", currentUserDetails);
 
   const handleInputChange = (
@@ -325,203 +327,267 @@ const NewsPage = (props: any): JSX.Element => {
   const popupInputs: any = [
     [
       <div className={styles.addNewsGrid} key={1}>
-        <CustomInput
-          value={formData.Title.value}
-          placeholder="Enter title"
-          isValid={formData.Title.isValid}
-          errorMsg={formData.Title.errorMsg}
-          onChange={(e) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Title",
-              value,
-              formData.Title.validationRule
-            );
-            handleInputChange("Title", value, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r1}>
+          <div className={styles.item1}>
+            <CustomInput
+              value={formData.Title.value}
+              placeholder="Enter title"
+              isValid={formData.Title.isValid}
+              errorMsg={formData.Title.errorMsg}
+              onChange={(e) => {
+                const value = e;
+                const { isValid, errorMsg } = validateField(
+                  "Title",
+                  value,
+                  formData.Title.validationRule
+                );
+                handleInputChange("Title", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
 
-        <CustomDateInput
-          value={formData.StartDate.value}
-          label="Start date"
-          error={!formData.StartDate.isValid}
-          errorMsg={formData.StartDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField(
-              "StartDate",
-              date,
-              formData.StartDate.validationRule
-            );
-            handleInputChange("StartDate", date, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r4}>
+          <div className={styles.item5}>
+            <FloatingLabelTextarea
+              value={formData.Description.value}
+              placeholder="Description"
+              rows={5}
+              isValid={formData.Description.isValid}
+              errorMsg={formData.Description.errorMsg}
+              onChange={(e: any) => {
+                const value = e;
+                const { isValid, errorMsg } = validateField(
+                  "Description",
+                  value,
+                  formData.Description.validationRule
+                );
+                handleInputChange("Description", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
 
-        <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r2}>
+          <div className={styles.item2}>
+            <CustomDateInput
+              value={formData.StartDate.value}
+              label="Start date"
+              error={!formData.StartDate.isValid}
+              errorMsg={formData.StartDate.errorMsg}
+              isDateController={true}
+              minimumDate={new Date()}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
+              onChange={(date: any) => {
+                const { isValid, errorMsg } = validateField(
+                  "StartDate",
+                  date,
+                  formData.StartDate.validationRule
+                );
+                handleInputChange("StartDate", date, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div className={styles.item3}>
+            <CustomDateInput
+              value={formData.EndDate.value}
+              label="End date"
+              error={!formData.EndDate.isValid}
+              errorMsg={formData.EndDate.errorMsg}
+              isDateController={true}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
+              onChange={(date: any) => {
+                const { isValid, errorMsg } = validateField("EndDate", date, {
+                  required: true,
+                  type: "date",
+                });
+                handleInputChange("EndDate", date, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
 
-        <CustomDropDown
-          value={formData.Status.value}
-          options={["Active", "In Active"]}
-          placeholder="Status"
-          isValid={formData.Status.isValid}
-          errorMsg={formData.Status.errorMsg}
-          onChange={(value) => {
-            const { isValid, errorMsg } = validateField(
-              "Status",
-              value,
-              formData.Status.validationRule
-            );
-            handleInputChange("Status", value, isValid, errorMsg);
-          }}
-        />
-
-        <CustomFileUpload
-          accept="image/png,image/svg"
-          value={formData?.thumbnail.value?.name}
-          onFileSelect={async (file) => {
-            console.log("file: ", file);
-            const { isValid, errorMsg } = validateField(
-              "thumbnail",
-              file ? file.name : "",
-              formData.thumbnail.validationRule
-            );
-            await handleInputChange("thumbnail", file, isValid, errorMsg);
-          }}
-          placeholder="Thumbnail"
-          isValid={formData.thumbnail.isValid}
-          errMsg={formData.thumbnail.errorMsg}
-        />
-
-        <FloatingLabelTextarea
-          value={formData.Description.value}
-          placeholder="Description"
-          rows={5}
-          isValid={formData.Description.isValid}
-          errorMsg={formData.Description.errorMsg}
-          onChange={(e: any) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Description",
-              value,
-              formData.Description.validationRule
-            );
-            handleInputChange("Description", value, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r3}>
+          <div className={styles.item4}>
+            <CustomDropDown
+              value={formData.Status.value}
+              options={["Active", "In Active"]}
+              placeholder="Status"
+              isValid={formData.Status.isValid}
+              errorMsg={formData.Status.errorMsg}
+              onChange={(value) => {
+                const { isValid, errorMsg } = validateField(
+                  "Status",
+                  value,
+                  formData.Status.validationRule
+                );
+                handleInputChange("Status", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div className={styles.item5}>
+            <CustomFileUpload
+              accept="image/png,image/svg"
+              value={formData?.thumbnail.value?.name}
+              onFileSelect={async (file) => {
+                console.log("file: ", file);
+                const { isValid, errorMsg } = validateField(
+                  "thumbnail",
+                  file ? file.name : "",
+                  formData.thumbnail.validationRule
+                );
+                await handleInputChange("thumbnail", file, isValid, errorMsg);
+              }}
+              placeholder="Thumbnail (1120 x 350)"
+              isValid={formData.thumbnail.isValid}
+              errMsg={formData.thumbnail.errorMsg}
+            />
+          </div>
+        </div>
       </div>,
     ],
     [
       <div className={styles.addNewsGrid} key={1}>
-        <CustomInput
-          value={formData.Title.value}
-          placeholder="Enter title"
-          isValid={formData.Title.isValid}
-          errorMsg={formData.Title.errorMsg}
-          onChange={(e) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Title",
-              value,
-              formData.Title.validationRule
-            );
-            handleInputChange("Title", value, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r1}>
+          <div className={styles.item1}>
+            <CustomInput
+              value={formData.Title.value}
+              placeholder="Enter title"
+              isValid={formData.Title.isValid}
+              errorMsg={formData.Title.errorMsg}
+              onChange={(e) => {
+                const value = e;
+                const { isValid, errorMsg } = validateField(
+                  "Title",
+                  value,
+                  formData.Title.validationRule
+                );
+                handleInputChange("Title", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
 
-        <CustomDateInput
-          value={formData.StartDate.value}
-          label="Start date"
-          error={!formData.StartDate.isValid}
-          errorMsg={formData.StartDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField(
-              "StartDate",
-              date,
-              formData.StartDate.validationRule
-            );
-            handleInputChange("StartDate", date, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r4}>
+          <div className={styles.item5}>
+            <FloatingLabelTextarea
+              value={formData.Description.value}
+              placeholder="Description"
+              rows={5}
+              isValid={formData.Description.isValid}
+              errorMsg={formData.Description.errorMsg}
+              onChange={(e: any) => {
+                const value = e;
+                const { isValid, errorMsg } = validateField(
+                  "Description",
+                  value,
+                  formData.Description.validationRule
+                );
+                handleInputChange("Description", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
 
-        <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r2}>
+          <div className={styles.item2}>
+            <CustomDateInput
+              value={formData.StartDate.value}
+              label="Start date"
+              error={!formData.StartDate.isValid}
+              errorMsg={formData.StartDate.errorMsg}
+              isDateController={true}
+              minimumDate={new Date()}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
+              onChange={(date: any) => {
+                const { isValid, errorMsg } = validateField(
+                  "StartDate",
+                  date,
+                  formData.StartDate.validationRule
+                );
+                handleInputChange("StartDate", date, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div className={styles.item3}>
+            <CustomDateInput
+              value={formData.EndDate.value}
+              label="End date"
+              error={!formData.EndDate.isValid}
+              errorMsg={formData.EndDate.errorMsg}
+              isDateController={true}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
+              onChange={(date: any) => {
+                const { isValid, errorMsg } = validateField("EndDate", date, {
+                  required: true,
+                  type: "date",
+                });
+                handleInputChange("EndDate", date, isValid, errorMsg);
+              }}
+            />
+          </div>
+        </div>
 
-        <CustomDropDown
-          value={formData.Status.value}
-          options={["Active", "In Active"]}
-          placeholder="Status"
-          isValid={formData.Status.isValid}
-          errorMsg={formData.Status.errorMsg}
-          onChange={(value) => {
-            const { isValid, errorMsg } = validateField(
-              "Status",
-              value,
-              formData.Status.validationRule
-            );
-            handleInputChange("Status", value, isValid, errorMsg);
-          }}
-        />
-
-        <CustomFileUpload
-          accept="image/png,image/svg"
-          value={
-            !isfile
-              ? formData.thumbnail?.value?.FileName || null
-              : formData.thumbnail.value?.name || null
-          }
-          onFileSelect={async (file) => {
-            setIsile(true);
-            console.log("file: ", file);
-            const { isValid, errorMsg } = validateField(
-              "thumbnail",
-              file ? file.name : "",
-              formData.thumbnail.validationRule
-            );
-            await handleInputChange("thumbnail", file, isValid, errorMsg);
-          }}
-          placeholder="Thumbnail"
-          isValid={formData.thumbnail.isValid}
-          errMsg={formData.thumbnail.errorMsg}
-        />
-
-        <FloatingLabelTextarea
-          value={formData.Description.value}
-          placeholder="Description"
-          rows={5}
-          isValid={formData.Description.isValid}
-          errorMsg={formData.Description.errorMsg}
-          onChange={(e: any) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Description",
-              value,
-              formData.Description.validationRule
-            );
-            handleInputChange("Description", value, isValid, errorMsg);
-          }}
-        />
+        <div className={styles.r3}>
+          <div className={styles.item4}>
+            <CustomDropDown
+              value={formData.Status.value}
+              options={["Active", "In Active"]}
+              placeholder="Status"
+              isValid={formData.Status.isValid}
+              errorMsg={formData.Status.errorMsg}
+              onChange={(value) => {
+                const { isValid, errorMsg } = validateField(
+                  "Status",
+                  value,
+                  formData.Status.validationRule
+                );
+                handleInputChange("Status", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div className={styles.item5}>
+            <CustomFileUpload
+              accept="image/png,image/svg"
+              value={
+                !isfile
+                  ? formData.thumbnail?.value?.FileName || null
+                  : formData.thumbnail.value?.name || null
+              }
+              onFileSelect={async (file) => {
+                setIsile(true);
+                console.log("file: ", file);
+                const { isValid, errorMsg } = validateField(
+                  "thumbnail",
+                  file ? file.name : "",
+                  formData.thumbnail.validationRule
+                );
+                await handleInputChange("thumbnail", file, isValid, errorMsg);
+              }}
+              placeholder="Thumbnail (1120 x 350)"
+              isValid={formData.thumbnail.isValid}
+              errMsg={formData.thumbnail.errorMsg}
+            />
+          </div>
+        </div>
       </div>,
     ],
 
@@ -532,9 +598,14 @@ const NewsPage = (props: any): JSX.Element => {
     ],
     [
       <div key={3}>
-        <div style={{ width: "100%", height: "350px" }}>
+        <div style={{ width: "100%", height: "350px", borderRadius: "10px" }}>
           <img
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "10px",
+            }}
             src={formData?.thumbnail?.value}
             alt=""
           />
@@ -698,6 +769,7 @@ const NewsPage = (props: any): JSX.Element => {
         },
       },
     ],
+
     [
       {
         text: "Cancel",
@@ -734,6 +806,25 @@ const NewsPage = (props: any): JSX.Element => {
           setIsEdit(false);
           setID(null);
           setisDelete(false);
+        },
+      },
+    ],
+
+    [
+      {
+        text: "Close",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[3],
+            3,
+            "close"
+          );
         },
       },
     ],
@@ -855,7 +946,7 @@ const NewsPage = (props: any): JSX.Element => {
     if (objFilter.Status) {
       const searchValue = objFilter.Status.trimStart().toLowerCase();
       filteredResults = filteredResults.filter(
-        (item: any) => item?.Status?.toLowerCase() == searchValue
+        (item: any) => item?.Status?.toLowerCase() === searchValue
       );
     }
 
@@ -904,7 +995,7 @@ const NewsPage = (props: any): JSX.Element => {
       initialPopupController[2],
       2,
       "open",
-      "Delete News"
+      "Confirmation"
     );
   };
 
@@ -968,7 +1059,7 @@ const NewsPage = (props: any): JSX.Element => {
       : newsData;
 
   return (
-    <>
+    <div className={styles.wrapper}>
       <div className={styles.newsHeaderContainer}>
         <div className={styles.leftSection}>
           <i
@@ -985,19 +1076,24 @@ const NewsPage = (props: any): JSX.Element => {
           <p>News</p>
         </div>
         <div className={styles.rightSection}>
-          <CustomDropDown
-            value={searchField.Status}
-            width={"200px"}
-            options={["Active", "In Active"]}
-            placeholder="Status"
-            onChange={(value) => {
-              objFilter.Status = value;
-              setSearchField({ ...searchField, Status: value });
-              handleSearch([...shownewsData]);
-            }}
-          />{" "}
+          {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+            <CustomDropDown
+              value={searchField.Status}
+              noErrorMsg
+              width={"200px"}
+              options={["Active", "In Active"]}
+              placeholder="Status"
+              onChange={(value) => {
+                objFilter.Status = value;
+                setSearchField({ ...searchField, Status: value });
+                handleSearch([...shownewsData]);
+              }}
+            />
+          ) : null}
+
           <CustomInput
             value={searchField.allSearch}
+            noErrorMsg
             secWidth="180px"
             labelText="Search"
             placeholder="Search"
@@ -1019,7 +1115,7 @@ const NewsPage = (props: any): JSX.Element => {
             }}
           /> */}
           <CustomDateInput
-            label="select Date"
+            label="Select date"
             placeHolder="Date"
             minWidth="180px"
             maxWidth="180px"
@@ -1102,7 +1198,7 @@ const NewsPage = (props: any): JSX.Element => {
               className="pi pi-plus"
               style={{ fontSize: "1rem", color: "#fff" }}
             />
-            Add new
+            Add an news
           </div>
         </div>
       </div>
@@ -1110,6 +1206,39 @@ const NewsPage = (props: any): JSX.Element => {
       {/* tabs */}
       <div className={styles.tabsContainer}>
         {CONFIG.TabsName.map((str: string, i: number) => {
+          return currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+                prepareNewsData(str);
+              }}
+            >
+              {str}
+            </div>
+          ) : i === 0 ? (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+                prepareNewsData(str);
+              }}
+            >
+              {str}
+            </div>
+          ) : (
+            ""
+          );
+        })}
+        {/* {CONFIG.TabsName.map((str: string, i: number) => {
           return (
             <div
               key={i}
@@ -1127,7 +1256,7 @@ const NewsPage = (props: any): JSX.Element => {
               {str}
             </div>
           );
-        })}
+        })} */}
       </div>
 
       <div className={styles.newsContainer}>
@@ -1204,7 +1333,8 @@ const NewsPage = (props: any): JSX.Element => {
             popupWidth={popupData.popupWidth}
             defaultCloseBtn={popupData.defaultCloseBtn || false}
             confirmationTitle={
-              popupData.popupType !== "custom" ? popupData.popupTitle : ""
+              popupData?.confirmationTitle
+              // popupData.popupType !== "custom" ? popupData.popupTitle : ""
             }
             popupHeight={index === 0 ? true : false}
             noActionBtn={true}
@@ -1226,7 +1356,7 @@ const NewsPage = (props: any): JSX.Element => {
       ) : (
         ""
       )}
-    </>
+    </div>
   );
 };
 
