@@ -63,63 +63,183 @@
     border-radius: 4px;
   }
 }
+.eventWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  margin: 20px;
+
+  .eventSection {
+    flex: 0 1 calc(50% - 20px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    padding: 10px 5px;
+    border-right: 4px solid #0b4d53;
+    border-radius: 4px;
+    margin-bottom: 11px;
+    position: relative;
+    .date {
+      width: 78px;
+      border-right: 2px solid #ffeee2;
+      text-align: center;
+
+      p {
+        margin: 6px 0px;
+        font-size: 17px;
+        font-weight: 600;
+        color: #e0803d;
+      }
+    }
+
+    .event {
+      width: calc(100% - 78px);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 5px;
+
+      .Title {
+        margin: 6px 0px;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: "osSemibold";
+        color: #0b4d53;
+      }
+
+      .time {
+        color: #adadad;
+        font-weight: 400;
+        font-family: "osRegular";
+        display: block;
+      }
+
+      .description {
+        font-size: 16px;
+        font-family: "osRegular";
+        color: #adadad;
+      }
+    }
+
+    .icons {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      i {
+        cursor: pointer;
+      }
+
+      .deleteicon {
+        cursor: pointer;
+        color: red;
+        font-size: "1.2rem";
+      }
+
+      .editicon {
+        cursor: pointer;
+        color: #007ef2;
+        font-size: "1.2rem";
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .eventSection {
+      flex: 0 1 100%;
+    }
+  }
+}
 
 .calenderSection {
   width: 100%;
 }
 
-.calendarContainer {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 20px;
-}
+// .calendarContainer {
+//   display: flex;
+//   justify-content: center;
+//   flex-wrap: wrap;
+//   margin: 20px;
 
-.eventWrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px; // Add spacing between items
-  width: 100%;
-}
+//   .eventWrapper {
+//     display: flex;
+//     flex-wrap: wrap;
+//     gap: 20px; // Add spacing between items
+//     width: 100%;
 
-.eventBox {
-  width: calc(
-    50% - 10px
-  ); // Each box takes 50% of the width minus some gap for spacing
-}
+//     .eventBox {
+//       width: calc(
+//         50% - 10px
+//       ); // Each box takes 50% of the width minus some gap for spacing
 
-.eventSection {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-  padding: 10px 5px;
-  border-right: 4px solid #0b4d53;
-  border-radius: 4px;
-  margin-bottom: 16px;
+//       .eventSection {
+//         display: flex;
+//         justify-content: space-between;
+//         align-items: center;
+//         gap: 10px;
+//         box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+//         padding: 10px 5px;
+//         border-right: 4px solid #0b4d53;
+//         border-radius: 4px;
+//         margin-bottom: 16px;
 
-  .date {
-    width: 78px;
-    border-right: 2px solid #ffeee2;
-    text-align: center;
+//         .date {
+//           width: 78px;
+//           border-right: 2px solid #ffeee2;
+//           text-align: center;
 
-    p {
-      margin: 5px 0px;
-      font-size: 17px;
-      font-weight: 600;
-      color: #e0803d;
-    }
-  }
+//           p {
+//             margin: 5px 0px;
+//             font-size: 17px;
+//             font-weight: 600;
+//             color: #e0803d;
+//           }
+//         }
 
-  .event {
-    width: calc(100% - 78px);
+//         .event {
+//           width: calc(100% - 78px);
+//           .eventContent {
+//             display: flex;
+//             align-items: center;
+//             justify-content: space-between;
 
-    p {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 600;
-      color: #0b4d53;
-    }
-  }
-}
+//             div {
+//               display: flex;
+//               flex-direction: column;
+//               align-items: flex-start;
+//               justify-content: center;
+//               gap: 5px;
+
+//               p {
+//                 margin: 0;
+//                 font-size: 15px;
+//                 font-weight: 600;
+//                 color: #0b4d53;
+//               }
+//               .time {
+//                 color: #adadad;
+//                 font-weight: 400;
+//                 font-family: "osRegular";
+//                 display: block;
+//               }
+//               .description {
+//                 font-size: 16px;
+//                 font-family: "osRegular";
+//                 color: #adadad;
+//               }
+//             }
+
+//             .icons {
+//               display: flex;
+//               align-items: center;
+//               gap: 10px;
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// }

@@ -1,6 +1,7 @@
 import { graph } from "@pnp/graph/presets/all";
-import moment from "moment";
+// import moment from "moment";
 import { setCalenderIntranetData } from "../../redux/features/CalenderIntranetSlice";
+import moment from "moment";
 // import moment from "moment";
 
 /* eslint-disable  @typescript-eslint/no-use-before-define */
@@ -13,20 +14,20 @@ interface IEvent {
   end: string;
   isAllDay: boolean;
 }
-import { Calendar } from "@fullcalendar/core";
-import interactionPlugin from "@fullcalendar/interaction";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import listPlugin from "@fullcalendar/list";
-import bootstrap5Plugin from "@fullcalendar/bootstrap5";
+// import { Calendar } from "@fullcalendar/core";
+// import interactionPlugin from "@fullcalendar/interaction";
+// import dayGridPlugin from "@fullcalendar/daygrid";
+// import timeGridPlugin from "@fullcalendar/timegrid";
+// import listPlugin from "@fullcalendar/list";
+// import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 // import "./Style.css";
 // import "../../../assets/styles/style.css";
 
 const timeZone: string = "India Standard Time"; //for local time zone
 const headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
 const formatTime = (time: string | number): string => {
-  const timeString = time.toString().padStart(2, "0"); // Ensure it's two digits
-  return `${timeString}:00:00`; // Append ":00" for minutes if not provided
+  const timeString = time.toString().padStart(2, "0");
+  return `${timeString}:00:00`;
 };
 
 export const createOutlookEvent = async (
@@ -53,10 +54,33 @@ export const createOutlookEvent = async (
   try {
     // Combining date and time for start and end
     const { Title, StartDate, StartTime, EndTime, Description } = formData;
-    const formattedStartTime = formatTime(StartTime.value); // Format startTime
-    const formattedEndTime = formatTime(EndTime.value); // Format endTime
+    // const formattedStartTime = formatTime(StartTime.value); // Format startTime
+    // const formattedEndTime = formatTime(EndTime.value); // Format endTime
 
-    debugger;
+    // Assuming StartTime.value and EndTime.value are Date objects
+    const startDate = new Date(StartTime.value); // Convert to Date object
+    const endDate = new Date(EndTime.value); // Convert to Date object
+
+    // Extract hours and minutes from the Date objects
+    const startHours = startDate.getHours(); // Get hours (0-23)
+    const startMinutes = startDate.getMinutes(); // Get minutes (0-59)
+
+    const endHours = endDate.getHours(); // Get hours (0-23)
+    const endMinutes = endDate.getMinutes(); // Get minutes (0-59)
+
+    console.log("Start Hours:", startHours, "Start Minutes:", startMinutes);
+    console.log("End Hours:", endHours, "End Minutes:", endMinutes);
+
+    // Now you can set the hours and minutes as needed for your event creation
+    const newStartDate = new Date(StartDate.value); // Copy of startDate
+    newStartDate.setHours(startHours, startMinutes, 0, 0); // Set hours and minutes
+
+    const newEndDate = new Date(StartDate.value); // Copy of endDate
+    newEndDate.setHours(endHours, endMinutes, 0, 0); // Set hours and minutes
+
+    console.log(newStartDate.toISOString()); // Outputs the ISO string for the start date
+    console.log(newEndDate.toISOString()); // Outputs the ISO string for the end date
+
     const event: any = {
       subject: Title.value,
       body: {
@@ -64,15 +88,17 @@ export const createOutlookEvent = async (
         content: Description.value,
       },
       start: {
-        dateTime: new Date(
-          StartDate.value.setHours(parseInt(formattedStartTime.split(":")[0]))
-        ),
+        // dateTime: new Date(
+        //   StartDate.value.setHours(parseInt(formattedStartTime.split(":")[0]))
+        // ),
+        dateTime: newStartDate.toISOString(),
         timeZone: "UTC",
       },
       end: {
-        dateTime: new Date(
-          StartDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
-        ),
+        // dateTime: new Date(
+        //   StartDate.value.setHours(parseInt(formattedEndTime.split(":")[0]))
+        // ),
+        dateTime: newEndDate.toISOString(),
         timeZone: "UTC",
       },
       location: {
@@ -179,15 +205,19 @@ export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
       isAllDay: val.isAllDay,
     }));
 
-    console.log(arrDatas, "arrdatas");
-    if (isview == "") {
-      BindCalender(arrDatas);
-    }
+    let filtervalue = arrDatas.sort(
+      (a: any, b: any) => moment(a.start).valueOf() - moment(b.start).valueOf()
+    );
+
+    console.log(filtervalue, "arrdatas");
+    // if (isview == "") {
+    //   BindCalender(arrDatas);
+    // }
     // Combine today's and upcoming events and update the state
     dispatch?.(
       setCalenderIntranetData({
         isLoading: false,
-        data: arrDatas,
+        data: filtervalue,
       })
     );
 
@@ -207,81 +237,81 @@ export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
   }
 };
 
-const BindCalender = (data: any): any => {
-  const calendarEl: any = document.getElementById("myCalendar");
-  const _Calendar = new Calendar(calendarEl, {
-    plugins: [
-      interactionPlugin,
-      dayGridPlugin,
-      timeGridPlugin,
-      listPlugin,
-      bootstrap5Plugin,
-    ],
-    selectable: true,
-    buttonText: {
-      today: "Today",
-      dayGridMonth: "Month",
-      dayGridWeek: "Week - ListGrid",
-      timeGridWeek: "Week",
-      dayGridDay: "Day - ListGrid",
-      timeGridDay: "Day",
-      listWeek: "List",
-    },
+// const BindCalender = (data: any): any => {
+//   const calendarEl: any = document.getElementById("myCalendar");
+//   const _Calendar = new Calendar(calendarEl, {
+//     plugins: [
+//       interactionPlugin,
+//       dayGridPlugin,
+//       timeGridPlugin,
+//       listPlugin,
+//       bootstrap5Plugin,
+//     ],
+//     selectable: true,
+//     buttonText: {
+//       today: "Today",
+//       dayGridMonth: "Month",
+//       dayGridWeek: "Week - ListGrid",
+//       timeGridWeek: "Week",
+//       dayGridDay: "Day - ListGrid",
+//       timeGridDay: "Day",
+//       listWeek: "List",
+//     },
 
-    headerToolbar: {
-      left: "prev",
-      center: "title",
-      right: "next",
-    },
-    initialDate: new Date(),
+//     headerToolbar: {
+//       left: "prev",
+//       center: "title",
+//       right: "next",
+//     },
+//     initialDate: new Date(),
 
-    events: data,
-    height: "auto",
-    displayEventTime: true,
-    weekends: true,
-    dayMaxEventRows: true,
-    views: {
-      dayGrid: {
-        dayMaxEventRows: 4,
-      },
-    },
-    showNonCurrentDates: false,
-    fixedWeekCount: false,
-    eventDidMount: (event) => {
-      // const eventTitle = event.event._def.title.toLowerCase();
-      event.el.setAttribute("data-bs-target", "event");
-    },
+//     events: data,
+//     height: "auto",
+//     displayEventTime: true,
+//     weekends: true,
+//     dayMaxEventRows: true,
+//     views: {
+//       dayGrid: {
+//         dayMaxEventRows: 4,
+//       },
+//     },
+//     showNonCurrentDates: false,
+//     fixedWeekCount: false,
+//     eventDidMount: (event) => {
+//       // const eventTitle = event.event._def.title.toLowerCase();
+//       event.el.setAttribute("data-bs-target", "event");
+//     },
 
-    dateClick: function (arg) {
-      const allDayNumberElements = document.querySelectorAll(
-        ".fc-daygrid-day-number"
-      );
-      allDayNumberElements.forEach((dayNumber) => {
-        (dayNumber as HTMLElement).style.color = "";
-      });
+//     dateClick: function (arg) {
+//       const allDayNumberElements = document.querySelectorAll(
+//         ".fc-daygrid-day-number"
+//       );
+//       allDayNumberElements.forEach((dayNumber) => {
+//         (dayNumber as HTMLElement).style.color = "";
+//       });
 
-      const dayNumber = arg.dayEl.querySelector(".fc-daygrid-day-number");
-      if (dayNumber) {
-        (dayNumber as HTMLElement).style.color = "#00a99d";
-      }
-      const selectedDateString = moment(arg.dateStr).format("YYYYMMDD");
+//       const dayNumber = arg.dayEl.querySelector(".fc-daygrid-day-number");
+//       if (dayNumber) {
+//         (dayNumber as HTMLElement).style.color = "#00a99d";
+//       }
+//       const selectedDateString = moment(arg.dateStr).format("YYYYMMDD");
 
-      const filterEvents = data.filter(
-        (event: any) =>
-          moment(event.start).format("YYYYMMDD") === selectedDateString
-      );
+//       const filterEvents = data.filter(
+//         (event: any) =>
+//           moment(event.start).format("YYYYMMDD") === selectedDateString
+//       );
 
-      filterEvents.length &&
-        filterEvents.sort(
-          (a: any, b: any) =>
-            moment(a.start).valueOf() - moment(b.start).valueOf()
-        );
-    },
-  });
+//       filterEvents.length &&
+//         filterEvents.sort(
+//           (a: any, b: any) =>
+//             moment(a.start).valueOf() - moment(b.start).valueOf()
+//         );
+//     },
+//   });
 
-  _Calendar.updateSize();
-  _Calendar.render();
-};
+//   _Calendar.updateSize();
+//   _Calendar.render();
+// };
 
 export const updateOutlookEvent = async (
   eventId: string, // The ID of the event you want to edit

@@ -25,6 +25,7 @@ import { resetFormData, validateField } from "../../../utils/commonUtils";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import Popup from "../../../components/common/Popups/Popup";
 import dayjs from "dayjs";
+import { RoleAuth } from "../../../services/CommonServices";
 interface IEvent {
   title: string;
   description: string;
@@ -42,6 +43,7 @@ let objFilter: SearchField = {
   allSearch: "",
 };
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+let isAdmin: boolean = false;
 
 const CalendarPage = (props: any): JSX.Element => {
   // const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -62,10 +64,16 @@ const CalendarPage = (props: any): JSX.Element => {
     return state.CalenderIntranetData.value;
   });
 
+  const currentUserDetails: any = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
+  );
+
+  isAdmin = currentUserDetails.role === CONFIG.RoleDetails.user ? false : true;
+
   const initialPopupController = [
     {
       open: false,
-      popupTitle: "Add Event",
+      popupTitle: "New event",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -87,7 +95,7 @@ const CalendarPage = (props: any): JSX.Element => {
 
     {
       open: false,
-      popupTitle: "Update Event",
+      popupTitle: "Update event",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -109,8 +117,8 @@ const CalendarPage = (props: any): JSX.Element => {
 
     {
       open: false,
-      popupTitle: "Delete Event",
-      popupWidth: "900px",
+      popupTitle: "Delete event",
+      popupWidth: "450px",
       popupType: "custom",
       defaultCloseBtn: false,
       popupData: "",
@@ -229,6 +237,115 @@ const CalendarPage = (props: any): JSX.Element => {
     }
   };
   const popupInputs: any[] = [
+    // [
+    //   <div key={1}>
+    //     <CustomInput
+    //       value={formData.Title.value}
+    //       placeholder="Enter title"
+    //       secWidth="100%"
+    //       isValid={formData.Title.isValid}
+    //       errorMsg={formData.Title.errorMsg}
+    //       onChange={(e) => {
+    //         const value = e;
+    //         const { isValid, errorMsg } = validateField(
+    //           "Title",
+    //           value,
+    //           formData.Title.validationRule
+    //         );
+    //         handleInputChange("Title", value, isValid, errorMsg);
+    //       }}
+    //     />
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         gap: "20px",
+    //         alignItems: "center",
+    //         margin: "20px 0px",
+    //       }}
+    //     >
+    //       <CustomDateInput
+    //         value={formData.StartDate.value}
+    //         label="Start date"
+    //         error={!formData.StartDate.isValid}
+    //         errorMsg={formData.StartDate.errorMsg}
+    //         onChange={(date: any) => {
+    //           const { isValid, errorMsg } = validateField(
+    //             "StartDate",
+    //             date,
+    //             formData.StartDate.validationRule
+    //           );
+    //           handleInputChange("StartDate", date, isValid, errorMsg);
+    //         }}
+    //       />
+
+    //       {/* <CustomDateInput
+    //       value={formData.EndDate.value}
+    //       label="End date"
+    //       error={!formData.EndDate.isValid}
+    //       errorMsg={formData.EndDate.errorMsg}
+    //       onChange={(date: any) => {
+    //         const { isValid, errorMsg } = validateField("EndDate", date, {
+    //           required: true,
+    //           type: "date",
+    //         });
+    //         handleInputChange("EndDate", date, isValid, errorMsg);
+    //       }}
+    //     /> */}
+
+    //       <CustomInput
+    //         value={formData.StartTime.value}
+    //         placeholder="Enter start time"
+    //         isValid={formData.StartTime.isValid}
+    //         errorMsg={formData.StartTime.errorMsg}
+    //         type="number"
+    //         onChange={(e) => {
+    //           const value = e.toString();
+    //           const { isValid, errorMsg } = validateField(
+    //             "StartTime",
+    //             value,
+    //             formData.StartTime.validationRule
+    //           );
+    //           handleInputChange("StartTime", value, isValid, errorMsg);
+    //         }}
+    //       />
+
+    //       <CustomInput
+    //         value={formData.EndTime.value}
+    //         placeholder="Enter end time"
+    //         type="number"
+    //         isValid={formData.EndTime.isValid}
+    //         errorMsg={formData.EndTime.errorMsg}
+    //         onChange={(e) => {
+    //           const value = e.toString();
+    //           const { isValid, errorMsg } = validateField(
+    //             "EndTime",
+    //             value,
+    //             formData.EndTime.validationRule
+    //           );
+    //           handleInputChange("EndTime", value, isValid, errorMsg);
+    //         }}
+    //       />
+    //     </div>
+
+    //     <FloatingLabelTextarea
+    //       value={formData.Description.value}
+    //       placeholder="Description"
+    //       rows={5}
+    //       isValid={formData.Description.isValid}
+    //       errorMsg={formData.Description.errorMsg}
+    //       onChange={(e: any) => {
+    //         const value = e;
+    //         const { isValid, errorMsg } = validateField(
+    //           "Description",
+    //           value,
+    //           formData.Description.validationRule
+    //         );
+    //         handleInputChange("Description", value, isValid, errorMsg);
+    //       }}
+    //     />
+    //   </div>,
+    // ],
+
     [
       <div key={1}>
         <CustomInput
@@ -257,7 +374,9 @@ const CalendarPage = (props: any): JSX.Element => {
         >
           <CustomDateInput
             value={formData.StartDate.value}
-            label="Start date"
+            label="Date"
+            isDateController={true}
+            minimumDate={new Date()}
             error={!formData.StartDate.isValid}
             errorMsg={formData.StartDate.errorMsg}
             onChange={(date: any) => {
@@ -270,51 +389,49 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           />
 
-          {/* <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        /> */}
-
-          <CustomInput
+          <CustomDateInput
             value={formData.StartTime.value}
-            placeholder="Enter start time"
-            isValid={formData.StartTime.isValid}
+            disabledInput={!formData.StartDate.value}
+            timeOnly
+            isDateController={true}
+            minimumDate={new Date()}
+            showIcon={false}
+            label="Start Time"
+            error={!formData.StartTime.isValid}
             errorMsg={formData.StartTime.errorMsg}
-            type="number"
-            onChange={(e) => {
-              const value = e.toString();
+            onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
                 "StartTime",
-                value,
+                date,
                 formData.StartTime.validationRule
               );
-              handleInputChange("StartTime", value, isValid, errorMsg);
+              handleInputChange("StartTime", date, isValid, errorMsg);
             }}
           />
 
-          <CustomInput
+          <CustomDateInput
             value={formData.EndTime.value}
-            placeholder="Enter end time"
-            type="number"
-            isValid={formData.EndTime.isValid}
+            disabledInput={
+              formData.StartDate.value
+                ? formData.StartTime.value
+                  ? false
+                  : true
+                : true
+            }
+            timeOnly
+            isDateController={true}
+            minimumDate={new Date()}
+            showIcon={false}
+            label="End Time"
+            error={!formData.EndTime.isValid}
             errorMsg={formData.EndTime.errorMsg}
-            onChange={(e) => {
-              const value = e.toString();
+            onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
                 "EndTime",
-                value,
+                date,
                 formData.EndTime.validationRule
               );
-              handleInputChange("EndTime", value, isValid, errorMsg);
+              handleInputChange("EndTime", date, isValid, errorMsg);
             }}
           />
         </div>
@@ -337,8 +454,117 @@ const CalendarPage = (props: any): JSX.Element => {
         />
       </div>,
     ],
+    // [
+    //   <div key={2}>
+    //     <CustomInput
+    //       value={formData.Title.value}
+    //       placeholder="Enter title"
+    //       secWidth="100%"
+    //       isValid={formData.Title.isValid}
+    //       errorMsg={formData.Title.errorMsg}
+    //       onChange={(e) => {
+    //         const value = e;
+    //         const { isValid, errorMsg } = validateField(
+    //           "Title",
+    //           value,
+    //           formData.Title.validationRule
+    //         );
+    //         handleInputChange("Title", value, isValid, errorMsg);
+    //       }}
+    //     />
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         gap: "20px",
+    //         alignItems: "center",
+    //         margin: "20px 0px",
+    //       }}
+    //     >
+    //       <CustomDateInput
+    //         value={formData.StartDate.value}
+    //         label="Start date"
+    //         error={!formData.StartDate.isValid}
+    //         errorMsg={formData.StartDate.errorMsg}
+    //         onChange={(date: any) => {
+    //           const { isValid, errorMsg } = validateField(
+    //             "StartDate",
+    //             date,
+    //             formData.StartDate.validationRule
+    //           );
+    //           handleInputChange("StartDate", date, isValid, errorMsg);
+    //         }}
+    //       />
+
+    //       {/* <CustomDateInput
+    //       value={formData.EndDate.value}
+    //       label="End date"
+    //       error={!formData.EndDate.isValid}
+    //       errorMsg={formData.EndDate.errorMsg}
+    //       onChange={(date: any) => {
+    //         const { isValid, errorMsg } = validateField("EndDate", date, {
+    //           required: true,
+    //           type: "date",
+    //         });
+    //         handleInputChange("EndDate", date, isValid, errorMsg);
+    //       }}
+    //     /> */}
+
+    //       <CustomInput
+    //         value={formData.StartTime.value}
+    //         placeholder="Enter start time"
+    //         isValid={formData.StartTime.isValid}
+    //         errorMsg={formData.StartTime.errorMsg}
+    //         type="number"
+    //         onChange={(e) => {
+    //           const value = e.toString();
+    //           const { isValid, errorMsg } = validateField(
+    //             "StartTime",
+    //             value,
+    //             formData.StartTime.validationRule
+    //           );
+    //           handleInputChange("StartTime", value, isValid, errorMsg);
+    //         }}
+    //       />
+
+    //       <CustomInput
+    //         value={formData.EndTime.value}
+    //         placeholder="Enter end time"
+    //         type="number"
+    //         isValid={formData.EndTime.isValid}
+    //         errorMsg={formData.EndTime.errorMsg}
+    //         onChange={(e) => {
+    //           const value = e.toString();
+    //           const { isValid, errorMsg } = validateField(
+    //             "EndTime",
+    //             value,
+    //             formData.EndTime.validationRule
+    //           );
+    //           handleInputChange("EndTime", value, isValid, errorMsg);
+    //         }}
+    //       />
+    //     </div>
+
+    //     <FloatingLabelTextarea
+    //       value={formData.Description.value}
+    //       placeholder="Description"
+    //       rows={5}
+    //       isValid={formData.Description.isValid}
+    //       errorMsg={formData.Description.errorMsg}
+    //       onChange={(e: any) => {
+    //         const value = e;
+    //         const { isValid, errorMsg } = validateField(
+    //           "Description",
+    //           value,
+    //           formData.Description.validationRule
+    //         );
+    //         handleInputChange("Description", value, isValid, errorMsg);
+    //       }}
+    //     />
+    //   </div>,
+    // ],
+
     [
-      <div key={2}>
+      <div key={1}>
         <CustomInput
           value={formData.Title.value}
           placeholder="Enter title"
@@ -365,7 +591,9 @@ const CalendarPage = (props: any): JSX.Element => {
         >
           <CustomDateInput
             value={formData.StartDate.value}
-            label="Start date"
+            label="Date"
+            isDateController={true}
+            minimumDate={new Date()}
             error={!formData.StartDate.isValid}
             errorMsg={formData.StartDate.errorMsg}
             onChange={(date: any) => {
@@ -378,51 +606,49 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           />
 
-          {/* <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        /> */}
-
-          <CustomInput
+          <CustomDateInput
             value={formData.StartTime.value}
-            placeholder="Enter start time"
-            isValid={formData.StartTime.isValid}
+            disabledInput={!formData.StartDate.value}
+            timeOnly
+            isDateController={true}
+            minimumDate={new Date()}
+            showIcon={false}
+            label="Start Time"
+            error={!formData.StartTime.isValid}
             errorMsg={formData.StartTime.errorMsg}
-            type="number"
-            onChange={(e) => {
-              const value = e.toString();
+            onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
                 "StartTime",
-                value,
+                date,
                 formData.StartTime.validationRule
               );
-              handleInputChange("StartTime", value, isValid, errorMsg);
+              handleInputChange("StartTime", date, isValid, errorMsg);
             }}
           />
 
-          <CustomInput
+          <CustomDateInput
             value={formData.EndTime.value}
-            placeholder="Enter end time"
-            type="number"
-            isValid={formData.EndTime.isValid}
+            disabledInput={
+              formData.StartDate.value
+                ? formData.StartTime.value
+                  ? false
+                  : true
+                : true
+            }
+            timeOnly
+            isDateController={true}
+            minimumDate={new Date()}
+            showIcon={false}
+            label="End Time"
+            error={!formData.EndTime.isValid}
             errorMsg={formData.EndTime.errorMsg}
-            onChange={(e) => {
-              const value = e.toString();
+            onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
                 "EndTime",
-                value,
+                date,
                 formData.EndTime.validationRule
               );
-              handleInputChange("EndTime", value, isValid, errorMsg);
+              handleInputChange("EndTime", date, isValid, errorMsg);
             }}
           />
         </div>
@@ -633,8 +859,8 @@ const CalendarPage = (props: any): JSX.Element => {
   };
 
   const handleEdit = (item: any) => {
-    const startTime = item?.start.split("T")[1].split(":")[0];
-    const endTime = item?.end.split("T")[1].split(":")[0];
+    // const startTime = item?.start.split("T")[1].split(":")[0];
+    // const endTime = item?.end.split("T")[1].split(":")[0];
     setFormData({
       Title: {
         ...formData.Title,
@@ -649,12 +875,12 @@ const CalendarPage = (props: any): JSX.Element => {
       StartTime: {
         ...formData.StartTime,
         isValid: true,
-        value: startTime || "",
+        value: new Date(item.start) || "",
       },
       EndTime: {
         ...formData.EndTime,
         isValid: true,
-        value: endTime || "",
+        value: new Date(item.end) || "",
       },
 
       Description: {
@@ -684,6 +910,13 @@ const CalendarPage = (props: any): JSX.Element => {
   };
   useEffect(() => {
     getEvents(dispatch, "viewall");
+
+    RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
+
+      dispatch
+    );
     // BindCalender(calenderIntranetData);
   }, []);
 
@@ -751,12 +984,12 @@ const CalendarPage = (props: any): JSX.Element => {
             <i onClick={handleRefresh} className="pi pi-refresh" />
           </div>
           <div
-            // style={{
-            //   display:
-            //     currentUserDetails.role === CONFIG.RoleDetails.user
-            //       ? "none"
-            //       : "flex",
-            // }}
+            style={{
+              display:
+                currentUserDetails.role === CONFIG.RoleDetails.user
+                  ? "none"
+                  : "flex",
+            }}
             className={styles.addNewbtn}
             onClick={() => {
               resetFormData(formData, setFormData);
@@ -823,7 +1056,7 @@ const CalendarPage = (props: any): JSX.Element => {
       {/* tabs */}
       <div className={styles.tabsContainer}>
         {CONFIG.TabsName.map((str: string, i: number) => {
-          return (
+          return isAdmin ? (
             <div
               key={i}
               style={{
@@ -834,13 +1067,27 @@ const CalendarPage = (props: any): JSX.Element => {
                 setSelectedTab(str);
 
                 onLoadingFUN(str);
-                // prepareNewsData(str);
-
-                //prepareDatas(str);
               }}
             >
               {str}
             </div>
+          ) : i === 0 ? (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+
+                onLoadingFUN(str);
+              }}
+            >
+              {str}
+            </div>
+          ) : (
+            ""
           );
         })}
       </div>
@@ -853,7 +1100,7 @@ const CalendarPage = (props: any): JSX.Element => {
             <img src={errorGrey} alt="Error" />
             <span className="disabledText">{calenderIntranetData?.error}</span>
           </div>
-        ) : calenderIntranetData?.data?.length == 0 ? (
+        ) : showcalendardata?.length == 0 ? (
           <div
             style={{
               width: "100%",
@@ -866,58 +1113,44 @@ const CalendarPage = (props: any): JSX.Element => {
             No Events Founds
           </div>
         ) : (
-          <div className={styles.calendarContainer}>
-            <div className={styles.eventWrapper}>
-              {showcalendardata?.map((val: IEvent, index: number) => (
-                <div className={styles.eventBox} key={index}>
-                  <div className={styles.eventSection}>
-                    <div className={styles.date}>
-                      <p>{`${moment(val.start)
-                        .format("D")
-                        .padStart(2, "0")}`}</p>
-                      <p>{`${moment(val.start)
-                        .format("MMM")
-                        .toUpperCase()}`}</p>
-                    </div>
-                    <div className={styles.event}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <div>
-                          <p style={{ margin: "4px 0px" }}>{val.title}</p>
-                          <p style={{ margin: "4px 0px" }}>{val.description}</p>
-                          <p style={{ margin: "4px 0px" }}>
-                            {moment(val.start).format("hh:mm A")}
-                          </p>
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                          }}
-                        >
-                          <i
-                            onClick={() => handleEdit(val)}
-                            style={{ color: "#007EF2", fontSize: "1.2rem" }}
-                            className="pi pi-pen-to-square"
-                          />
-                          <i
-                            onClick={() => handleDelete(val)}
-                            style={{ color: "red", fontSize: "1.2rem" }}
-                            className="pi pi-trash"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+          <div className={styles.eventWrapper}>
+            {showcalendardata?.map((val: IEvent, index: number) => (
+              <div className={styles.eventSection} key={index}>
+                <div className={styles.date}>
+                  <p>{`${moment(val.start).format("D").padStart(2, "0")}`}</p>
+                  <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
                 </div>
-              ))}
-            </div>
+                <div className={styles.event}>
+                  <p className={styles.Title}>{val.title}</p>
+                  <span className={styles.time}>
+                    {`${moment(val.start).format("hh:mm A")} - ${moment(
+                      val.end
+                    ).format("hh:mm A")}`}
+                  </span>
+                  <span className={styles.description}>{val?.description}</span>
+                </div>
+
+                {isAdmin && (
+                  <div className={styles.icons}>
+                    <i
+                      onClick={() => handleEdit(val)}
+                      style={{ color: "#007EF2", fontSize: "1.2rem" }}
+                      className="pi pi-pen-to-square
+
+"
+                    />
+                    <i
+                      onClick={() => handleDelete(val)}
+                      style={{ color: "red", fontSize: "1.2rem" }}
+                      className="pi pi-trash
+
+
+"
+                    />{" "}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
