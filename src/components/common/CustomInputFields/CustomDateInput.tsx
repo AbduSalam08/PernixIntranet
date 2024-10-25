@@ -27,6 +27,8 @@ interface DDateInputProps {
   isDateController?: boolean;
   minimumDate?: any;
   maximumDate?: any;
+  timeOnly?: boolean;
+  showIcon?: boolean;
 }
 
 const DDateInput: React.FC<DDateInputProps> = ({
@@ -51,6 +53,8 @@ const DDateInput: React.FC<DDateInputProps> = ({
   isDateController = false,
   minimumDate = null,
   maximumDate = null,
+  timeOnly = false,
+  showIcon = true,
 }) => {
   const handleChange = useCallback(
     (e: any) => {
@@ -107,6 +111,7 @@ const DDateInput: React.FC<DDateInputProps> = ({
         {!readOnly ? (
           <FloatLabel>
             <Calendar
+              timeOnly={timeOnly}
               value={value}
               onChange={(data: any) => {
                 handleChange(data);
@@ -114,7 +119,7 @@ const DDateInput: React.FC<DDateInputProps> = ({
               disabled={disabledInput}
               minDate={minDate}
               maxDate={maxDate}
-              showIcon
+              showIcon={showIcon}
               monthNavigator
               yearNavigator
               yearRange="2000:2100"

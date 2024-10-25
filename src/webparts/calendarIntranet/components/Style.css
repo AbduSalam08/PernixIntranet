@@ -195,3 +195,7 @@ th[role="columnheader"] a {
 .fc .fc-button-primary:focus {
   box-shadow: none !important;
 }
+
+.p-float-label:has(.p-inputwrapper-filled) label {
+  top: 4px;
+}

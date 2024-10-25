@@ -4,26 +4,22 @@
 /* eslint-disable @typescript-eslint/no-floating-promises*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// import { Calendar } from "@fullcalendar/core";
-// import interactionPlugin from "@fullcalendar/interaction";
-// import dayGridPlugin from "@fullcalendar/daygrid";
-// import timeGridPlugin from "@fullcalendar/timegrid";
-// import listPlugin from "@fullcalendar/list";
-// import bootstrap5Plugin from "@fullcalendar/bootstrap5";
+import { Calendar } from "@fullcalendar/core";
+import interactionPlugin from "@fullcalendar/interaction";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
+import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 import "./Style.css";
 import "../../../assets/styles/style.css";
 import * as moment from "moment";
+
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 
-// import { graph } from "@pnp/graph/presets/all";
-// const plusIcon = require("../../../assets/images/svg/plus.png");
-
-// const timeZone: string = "India Standard Time"; //for local time zone
-// const headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
 import styles from "./CalendarIntranet.module.scss";
 interface IEvent {
   title: string;
@@ -44,6 +40,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import { CONFIG } from "../../../config/config";
+import { RoleAuth } from "../../../services/CommonServices";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -53,11 +50,17 @@ const CalendarIntranet = (props: any): JSX.Element => {
   const calenderIntranetData: any = useSelector((state: any) => {
     return state.CalenderIntranetData.value;
   });
+  const currentUserDetails: any = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
+  );
+
+  const [showcalendardata, setShowcalendardata] = useState<any[]>([]);
+  // const [allcalendardata, setAllcalendardata] = useState<any[]>([]);
 
   const initialPopupController = [
     {
       open: false,
-      popupTitle: "Add Event",
+      popupTitle: "New event",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -202,7 +205,9 @@ const CalendarIntranet = (props: any): JSX.Element => {
         >
           <CustomDateInput
             value={formData.StartDate.value}
-            label="Start date"
+            label="Date"
+            isDateController={true}
+            minimumDate={new Date()}
             error={!formData.StartDate.isValid}
             errorMsg={formData.StartDate.errorMsg}
             onChange={(date: any) => {
@@ -215,51 +220,49 @@ const CalendarIntranet = (props: any): JSX.Element => {
             }}
           />
 
-          {/* <CustomDateInput
-          value={formData.EndDate.value}
-          label="End date"
-          error={!formData.EndDate.isValid}
-          errorMsg={formData.EndDate.errorMsg}
-          onChange={(date: any) => {
-            const { isValid, errorMsg } = validateField("EndDate", date, {
-              required: true,
-              type: "date",
-            });
-            handleInputChange("EndDate", date, isValid, errorMsg);
-          }}
-        /> */}
-
-          <CustomInput
+          <CustomDateInput
             value={formData.StartTime.value}
-            placeholder="Enter start time"
-            isValid={formData.StartTime.isValid}
+            disabledInput={!formData.StartDate.value}
+            timeOnly
+            isDateController={true}
+            minimumDate={new Date()}
+            showIcon={false}
+            label="Start Time"
+            error={!formData.StartTime.isValid}
             errorMsg={formData.StartTime.errorMsg}
-            type="number"
-            onChange={(e) => {
-              const value = e.toString();
+            onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
                 "StartTime",
-                value,
+                date,
                 formData.StartTime.validationRule
               );
-              handleInputChange("StartTime", value, isValid, errorMsg);
+              handleInputChange("StartTime", date, isValid, errorMsg);
             }}
           />
 
-          <CustomInput
+          <CustomDateInput
             value={formData.EndTime.value}
-            placeholder="Enter end time"
-            type="number"
-            isValid={formData.EndTime.isValid}
+            disabledInput={
+              formData.StartDate.value
+                ? formData.StartTime.value
+                  ? false
+                  : true
+                : true
+            }
+            timeOnly
+            isDateController={true}
+            minimumDate={new Date(formData.StartTime.value)}
+            showIcon={false}
+            label="End Time"
+            error={!formData.EndTime.isValid}
             errorMsg={formData.EndTime.errorMsg}
-            onChange={(e) => {
-              const value = e.toString();
+            onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
                 "EndTime",
-                value,
+                date,
                 formData.EndTime.validationRule
               );
-              handleInputChange("EndTime", value, isValid, errorMsg);
+              handleInputChange("EndTime", date, isValid, errorMsg);
             }}
           />
         </div>
@@ -316,195 +319,108 @@ const CalendarIntranet = (props: any): JSX.Element => {
     ],
   ];
 
-  // const [datas, setDatas] = useState<IEvent[]>([]);
+  const BindCalender = (data: any): any => {
+    const calendarEl: any = document.getElementById("myCalendar");
+    const _Calendar = new Calendar(calendarEl, {
+      plugins: [
+        interactionPlugin,
+        dayGridPlugin,
+        timeGridPlugin,
+        listPlugin,
+        bootstrap5Plugin,
+      ],
+      selectable: true,
+      buttonText: {
+        today: "Today",
+        dayGridMonth: "Month",
+        dayGridWeek: "Week - ListGrid",
+        timeGridWeek: "Week",
+        dayGridDay: "Day - ListGrid",
+        timeGridDay: "Day",
+        listWeek: "List",
+      },
 
-  // const BindCalender = (data: any): any => {
-  //   const calendarEl: any = document.getElementById("myCalendar");
-  //   const _Calendar = new Calendar(calendarEl, {
-  //     plugins: [
-  //       interactionPlugin,
-  //       dayGridPlugin,
-  //       timeGridPlugin,
-  //       listPlugin,
-  //       bootstrap5Plugin,
-  //     ],
-  //     selectable: true,
-  //     buttonText: {
-  //       today: "Today",
-  //       dayGridMonth: "Month",
-  //       dayGridWeek: "Week - ListGrid",
-  //       timeGridWeek: "Week",
-  //       dayGridDay: "Day - ListGrid",
-  //       timeGridDay: "Day",
-  //       listWeek: "List",
-  //     },
+      headerToolbar: {
+        left: "prev",
+        center: "title",
+        right: "next",
+      },
+      initialDate: new Date(),
 
-  //     headerToolbar: {
-  //       left: "prev",
-  //       center: "title",
-  //       right: "next",
-  //     },
-  //     initialDate: new Date(),
+      events: data,
+      height: "auto",
+      displayEventTime: true,
+      weekends: true,
+      dayMaxEventRows: true,
+      views: {
+        dayGrid: {
+          dayMaxEventRows: 4,
+        },
+      },
+      showNonCurrentDates: false,
+      fixedWeekCount: false,
+      eventDidMount: (event) => {
+        // const eventTitle = event.event._def.title.toLowerCase();
+        event.el.setAttribute("data-bs-target", "event");
+      },
 
-  //     events: data,
-  //     height: "auto",
-  //     displayEventTime: true,
-  //     weekends: true,
-  //     dayMaxEventRows: true,
-  //     views: {
-  //       dayGrid: {
-  //         dayMaxEventRows: 4,
-  //       },
-  //     },
-  //     showNonCurrentDates: false,
-  //     fixedWeekCount: false,
-  //     eventDidMount: (event) => {
-  //       // const eventTitle = event.event._def.title.toLowerCase();
-  //       event.el.setAttribute("data-bs-target", "event");
-  //     },
+      dateClick: function (arg) {
+        const allDayNumberElements = document.querySelectorAll(
+          ".fc-daygrid-day-number"
+        );
+        allDayNumberElements.forEach((dayNumber) => {
+          (dayNumber as HTMLElement).style.color = "";
+        });
 
-  //     dateClick: function (arg) {
-  //       const allDayNumberElements = document.querySelectorAll(
-  //         ".fc-daygrid-day-number"
-  //       );
-  //       allDayNumberElements.forEach((dayNumber) => {
-  //         (dayNumber as HTMLElement).style.color = "";
-  //       });
+        const dayNumber = arg.dayEl.querySelector(".fc-daygrid-day-number");
+        if (dayNumber) {
+          (dayNumber as HTMLElement).style.color = "#00a99d";
+        }
+        const selectedDateString = moment(arg.dateStr).format("YYYYMMDD");
 
-  //       const dayNumber = arg.dayEl.querySelector(".fc-daygrid-day-number");
-  //       if (dayNumber) {
-  //         (dayNumber as HTMLElement).style.color = "#00a99d";
-  //       }
-  //       const selectedDateString = moment(arg.dateStr).format("YYYYMMDD");
+        const filterEvents = data.filter(
+          (event: any) =>
+            moment(event.start).format("YYYYMMDD") === selectedDateString
+        );
 
-  //       const filterEvents = data.filter(
-  //         (event: any) =>
-  //           moment(event.start).format("YYYYMMDD") === selectedDateString
-  //       );
+        filterEvents.length &&
+          filterEvents.sort(
+            (a: any, b: any) =>
+              moment(a.start).valueOf() - moment(b.start).valueOf()
+          );
 
-  //       filterEvents.length &&
-  //         filterEvents.sort(
-  //           (a: any, b: any) =>
-  //             moment(a.start).valueOf() - moment(b.start).valueOf()
-  //         );
-  //     },
-  //   });
+        setShowcalendardata([...filterEvents]);
+      },
+    });
 
-  //   _Calendar.updateSize();
-  //   _Calendar.render();
-  // };
+    _Calendar.updateSize();
+    _Calendar.render();
 
-  // const getEvents = (): any => {
-  //   graph.groups
-  //     // .getById("78038f17-b25d-453a-8442-c8bc07465725")
-  //     // .getById("d00c8420-d7d0-499e-a292-f449c438073c")
-  //     .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
-  //     .events.configure({ headers })
-  //     .top(999)()
-  //     .then((result: any) => {
-  //       const arrDatas: IEvent[] = [];
-
-  //       result.forEach((val: any) => {
-  //         arrDatas.push({
-  //           title: val.subject ? val.subject : "",
-  //           description: val.bodyPreview ? val.bodyPreview : "",
-  //           start: val.start ? val.start.dateTime : "",
-  //           end: val.end ? val.end.dateTime : "",
-  //           isAllDay: val.isAllDay,
-  //         });
-  //       });
-
-  //       const now = moment();
-  //       const todaysEvents: any[] = arrDatas.filter(
-  //         (val) =>
-  //           moment(val.start).format("YYYYMMDD") === now.format("YYYYMMDD")
-  //       );
-
-  //       const filterEvents = todaysEvents.sort(
-  //         (a: any, b: any) =>
-  //           moment(a.start).valueOf() - moment(b.start).valueOf()
-  //       );
-  //       console.log(filterEvents, "filterevents");
-
-  //       // if (todaysEvents.length > 0) {
-  //       // } else {
-  //       const upcomingEvents = arrDatas.filter(
-  //         (val) => moment(val.start) >= now
-  //       );
-  //       console.log(upcomingEvents, "upcomingevents");
-
-  //       if (upcomingEvents.length > 0) {
-  //         upcomingEvents.sort(
-  //           (a: any, b: any) =>
-  //             moment(a.start).valueOf() - moment(b.start).valueOf()
-  //         );
-  //         // setDatas([...todaysEvents, ...upcomingEvents]);
-  //         // }
-  //       }
-
-  //       BindCalender(arrDatas);
-  //     })
-  //     .then(() => {
-  //       // hideRowsWithSameClass();
-  //     })
-  //     .catch((err: any) => {
-  //       console.log(err);
-  //     });
-  // };
-
-  // const createOutlookEvent = async (): Promise<any> => {
-  //   const startDate = moment().add(1, "days").toISOString(); // Event start time
-  //   const endDate = moment().add(1, "days").add(1, "hours").toISOString(); // Event end time
-
-  //   const event: any = {
-  //     subject: "PnP SPFx Event1",
-  //     body: {
-  //       contentType: "HTML",
-  //       content: "This is a sample event created using PnP JS in SPFx.",
-  //     },
-  //     start: {
-  //       dateTime: startDate,
-  //       timeZone: "UTC",
-  //     },
-  //     end: {
-  //       dateTime: endDate,
-  //       timeZone: "UTC",
-  //     },
-  //     location: {
-  //       displayName: "Online Meeting",
-  //     },
-  //     attendees: [
-  //       {
-  //         emailAddress: {
-  //           address: "attendee@example.com",
-  //           name: "Attendee Name",
-  //         },
-  //         type: "required",
-  //       },
-  //     ],
-  //   };
-
-  //   try {
-  //     await graph.groups
-  //       .getById("28cda519-7707-4fe0-b87a-51f9b8e558e0")
-  //       .calendar.events.add(event);
-  //     alert("Event created successfully");
-  //     console.log("Event created successfully");
-  //     getEvents();
-  //   } catch (error) {
-  //     console.error("Error creating event", error);
-  //   }
-  // };
+    setShowcalendardata(data);
+  };
 
   useEffect(() => {
+    RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
+
+      dispatch
+    );
     getEvents(dispatch, "");
     // BindCalender(calenderIntranetData);
   }, []);
+
+  useEffect(() => {
+    BindCalender(calenderIntranetData?.data);
+  }, [calenderIntranetData]);
   return (
     <div className={styles.calenderContainer}>
       <div className={styles.header}>
         <SectionHeaderIntranet
           label="Calendar"
+          removeAdd={
+            currentUserDetails.role === CONFIG.RoleDetails.user ? false : true
+          }
           headerAction={() => {
             togglePopupVisibility(
               setPopupController,
@@ -531,23 +447,24 @@ const CalendarIntranet = (props: any): JSX.Element => {
                 {calenderIntranetData?.error}
               </span>
             </div>
-          ) : calenderIntranetData?.data?.length == 0 ? (
+          ) : showcalendardata?.length == 0 ? (
             <div>No Events Founds</div>
           ) : (
-            calenderIntranetData?.data
-              ?.slice(0, 4)
-              .map((val: IEvent, index: number) => (
-                <div className={styles.eventSection} key={index}>
-                  <div className={styles.date}>
-                    <p>{`${moment(val.start).format("D").padStart(2, "0")}`}</p>
-                    <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
-                  </div>
-                  <div className={styles.event}>
-                    <p>{val.title}</p>
-                    <p>{moment(val.start).format("hh:mm A")}</p>
-                  </div>
+            showcalendardata?.slice(0, 3).map((val: IEvent, index: number) => (
+              <div className={styles.eventSection} key={index}>
+                <div className={styles.date}>
+                  <p>{`${moment(val.start).format("D").padStart(2, "0")}`}</p>
+                  <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
                 </div>
-              ))
+                <div className={styles.event}>
+                  <p className={styles.Title}>{val.title}</p>
+                  <span className={styles.time}>{`${moment(val.start).format(
+                    "hh:mm A"
+                  )} - ${moment(val.end).format("hh:mm A")}`}</span>
+                  <span className={styles.description}>{val?.description}</span>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
