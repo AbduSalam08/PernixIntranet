@@ -12,12 +12,24 @@ import styles from "./MyTickets.module.scss";
 import { useEffect, useState } from "react";
 import { Add } from "@mui/icons-material";
 import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
-import { validateField } from "../../../../utils/commonUtils";
+import {
+  currentRoleBasedDataUtil,
+  filterTicketsByTimePeriod,
+  getTicketsByKeyValue,
+  validateField,
+} from "../../../../utils/commonUtils";
 import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 import CustomFileUpload from "../../../../components/common/CustomInputFields/CustomFileUpload";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
+import InfoCard from "../../components/InfoCard/InfoCard";
+// Import SVGs
+const myTickets: any = require("../../assets/images/svg/myTickets.svg");
+const openTickets: any = require("../../assets/images/svg/openTickets.svg");
+const closedTickets: any = require("../../assets/images/svg/closedTickets.svg");
+const ticketsCreatedThisWeek: any = require("../../assets/images/svg/ticketsCreatedThisWeek.svg");
+const ticketsOnHold: any = require("../../assets/images/svg/ticketsOnHold.svg");
 
 const MyTickets = (): JSX.Element => {
   const dispatch = useDispatch();
@@ -383,49 +395,48 @@ const MyTickets = (): JSX.Element => {
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
   );
-  console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
 
-  const currentRoleBasedData: any = (() => {
-    if (
-      currentUserDetails?.role === "Pernix_Admin" ||
-      currentUserDetails?.role === "HelpDesk_Ticket_Managers"
-    ) {
-      return {
-        ...HelpDeskTicktesData,
-        role: "ticket_manager",
-      };
-    } else {
-      const isUser = HelpDeskTicktesData?.data?.some(
-        (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
-      );
+  const currentRoleBasedData = currentRoleBasedDataUtil(
+    currentUserDetails,
+    HelpDeskTicktesData
+  );
 
-      const isItOwner = HelpDeskTicktesData?.data?.some(
-        (item: any) => item?.ITOwner?.EMail === currentUserDetails?.email
-      );
-
-      let role = "undefined";
-
-      if (isUser) {
-        role = "user";
-      }
-      if (isItOwner) {
-        role = "it_owner";
-      }
-
-      return {
-        ...HelpDeskTicktesData,
-        role,
-        data: isUser
-          ? HelpDeskTicktesData?.data?.filter(
-              (item: any) =>
-                item?.EmployeeName?.EMail === currentUserDetails?.email
-            )
-          : HelpDeskTicktesData?.data,
-      };
-    }
-  })();
-
-  console.log("currentRoleBasedData: ", currentRoleBasedData);
+  // Info cards array
+  const infoCards: any[] = [
+    {
+      cardName: "My Tickets",
+      cardImg: myTickets,
+      cardValues: currentRoleBasedData?.data?.length || 0,
+    },
+    {
+      cardName: "Open",
+      cardImg: openTickets,
+      cardValues:
+        getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Open")
+          ?.length || 0,
+    },
+    {
+      cardName: "Closed",
+      cardImg: closedTickets,
+      cardValues:
+        getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Closed")
+          ?.length || 0,
+    },
+    {
+      cardName: "This week's tickets",
+      cardImg: ticketsCreatedThisWeek,
+      cardValues:
+        filterTicketsByTimePeriod(currentRoleBasedData?.data, "thisWeek")
+          ?.length || 0,
+    },
+    {
+      cardName: "Tickets on hold",
+      cardImg: ticketsOnHold,
+      cardValues:
+        getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "On Hold")
+          ?.length || 0,
+    },
+  ];
 
   useEffect(() => {
     getAllTickets(dispatch);
@@ -444,12 +455,18 @@ const MyTickets = (): JSX.Element => {
           startIcon={<Add />}
         />
       </div>
+      {currentRoleBasedData?.role === "user" && (
+        <div className={styles.infoCards}>
+          {infoCards?.map((item: any, idx: number) => (
+            <InfoCard idx={idx} item={item} key={idx} />
+          ))}
+        </div>
+      )}
       <DataTable
         rows={data}
         columns={columns}
-        pageSize={10} // Optional page size
-        checkboxSelection={false} // Enable checkbox selection
-        // pagination={true} // Enable pagination
+        pageSize={10}
+        checkboxSelection={false}
       />
 
       {/* new ticket slide */}

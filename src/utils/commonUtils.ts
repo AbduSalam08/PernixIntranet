@@ -340,3 +340,38 @@ export const groupTicketsByPeriod = (
 
   return groupedByPeriod;
 };
+
+export const currentRoleBasedDataUtil: any = (
+  currentUserDetails: any,
+  HelpDeskTicktesData: any
+) => {
+  if (
+    currentUserDetails?.role === "Pernix_Admin" ||
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+  ) {
+    return {
+      ...HelpDeskTicktesData,
+      role: "ticket_manager",
+    };
+  } else if (currentUserDetails?.role === "HelpDesk_IT_Owners") {
+    const isItOwner = HelpDeskTicktesData?.data?.filter(
+      (item: any) =>
+        item?.ITOwner?.EMail === currentUserDetails?.email ||
+        item?.EmployeeName?.EMail === currentUserDetails?.email
+    );
+    console.log("isItOwner: ", isItOwner);
+    return {
+      data: isItOwner,
+      role: "it_owner",
+    };
+  } else {
+    const isUser = HelpDeskTicktesData?.data?.filter(
+      (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
+    );
+
+    return {
+      data: isUser,
+      role: "user",
+    };
+  }
+};

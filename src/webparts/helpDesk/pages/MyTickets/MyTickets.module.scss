@@ -59,3 +59,27 @@
     height: 22px;
   }
 }
+
+.infoCards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); // 5-column grid for large screens
+  gap: 20px;
+  padding: 10px 0;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr); // 4-column for medium screens
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, 1fr); // 3-column for smaller screens
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr); // 2-column for small screens
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr; // 1-column for extra small screens
+  }
+}
