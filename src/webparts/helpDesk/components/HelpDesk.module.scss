@@ -11,3 +11,12 @@
 .ticketHeader {
   padding: 15px;
 }
+.disabledText {
+  font-size: 14px;
+  color: #adadad;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  text-align: center;
+  width: 100%;
+}

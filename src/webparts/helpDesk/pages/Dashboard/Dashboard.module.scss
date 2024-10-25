@@ -53,8 +53,9 @@
     height: 88%;
     flex-grow: 1;
     /* Placeholder for chart component */
-    background: lightgray;
+    background: #fff;
     border-radius: 10px;
+    width: 100%;
   }
 
   .chartDetails {
@@ -92,4 +93,10 @@
   @media (max-width: 400px) {
     grid-template-columns: 1fr; // 1-column for extra small screens
   }
+}
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
