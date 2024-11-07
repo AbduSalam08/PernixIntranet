@@ -23,15 +23,18 @@ const CustomPeoplePicker: React.FC<any> = ({
   readOnly,
   noErrorMsg = false,
   mandatory,
+  multiUsers = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const mainContext: any = useSelector(
     (state: any) => state.MainSPContext.value
   );
+  console.log("mainContext: ", mainContext);
 
-  const selectedUserItem = selectedItem ? [selectedItem] : [];
+  const selectedUserItem = selectedItem ? [...selectedItem] : [];
 
   const handleChange = (items: any[]): void => {
+    console.log("items: ", items);
     const obj = items?.map((item: any) => ({
       id: item.id,
       email: item?.secondaryText,

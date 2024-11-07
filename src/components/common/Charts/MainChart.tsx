@@ -2,6 +2,7 @@
 // MainChart.tsx
 import { Pie, Doughnut, Line, Bar } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Skeleton } from "@mui/material"; // Import Skeleton
 
 import {
   Chart as ChartJS,
@@ -35,6 +36,7 @@ interface MainChartProps {
   options?: any;
   height?: string;
   width?: string;
+  isLoading?: boolean; // Add isLoading prop
 }
 
 const MainChart = ({
@@ -43,48 +45,29 @@ const MainChart = ({
   options,
   height = "100%",
   width = "100%",
+  isLoading = false, // Default to false
 }: MainChartProps): any => {
   const renderChart = (): any => {
     switch (chartType) {
       case "Pie":
         return (
-          <Pie
-            data={data}
-            style={{
-              maxHeight: "85%",
-            }}
-            options={options}
-          />
+          <Pie data={data} style={{ maxHeight: "85%" }} options={options} />
         );
       case "Doughnut":
         return (
           <Doughnut
             data={data}
-            style={{
-              maxHeight: "85%",
-            }}
+            style={{ maxHeight: "85%" }}
             options={options}
           />
         );
       case "Line":
         return (
-          <Line
-            data={data}
-            style={{
-              maxHeight: "85%",
-            }}
-            options={options}
-          />
+          <Line data={data} style={{ maxHeight: "85%" }} options={options} />
         );
       case "Bar":
         return (
-          <Bar
-            data={data}
-            style={{
-              maxHeight: "85%",
-            }}
-            options={options}
-          />
+          <Bar data={data} style={{ maxHeight: "85%" }} options={options} />
         );
       default:
         return null;
@@ -100,11 +83,16 @@ const MainChart = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "40px",
+        padding: isLoading ? "0" : "40px",
         background: "#fff",
+        height: isLoading ? "100%" : "auto",
       }}
     >
-      {renderChart()}
+      {isLoading ? (
+        <Skeleton variant="rectangular" height={"100%"} width={width} />
+      ) : (
+        renderChart()
+      )}
     </div>
   );
 };

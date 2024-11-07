@@ -1,0 +1,61 @@
+:root {
+  --overdue-color: #f44336;
+  --open-color: #28a745; /* Add color for Open */
+  --inProgress-color: #007bff; /* Add color for In Progress */
+  --onHold-color: #ffc107; /* Add color for On Hold */
+  --closed-color: #6c757d; /* Add color for Closed */
+}
+
+.statusPill {
+  padding: 4px 12px;
+  min-width: 125px;
+  border-radius: 40px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "osMedium", sans-serif !important;
+  height: 27px;
+  user-select: none !important;
+
+  &.overdue {
+    color: var(--overdue-color);
+    background-color: #f4433620;
+  }
+  &.open {
+    color: var(--open-color);
+    background-color: #28a74520; /* Adjust text color if needed */
+  }
+  &.inProgress {
+    color: var(--inProgress-color);
+    background-color: #007bff20; /* Adjust text color if needed */
+  }
+  &.onHold {
+    color: var(--onHold-color);
+    background-color: #ffc10720; /* Adjust text color if needed */
+  }
+  &.closed {
+    color: var(--closed-color);
+    background-color: #6c757d20; /* Adjust text color if needed */
+  }
+}
+
+.SM {
+  font-size: 12px;
+  padding: 0px 10px;
+  height: 24px !important;
+  min-width: 95px !important;
+  font-family: "osMedium", sans-serif !important;
+}
+
+.MD {
+  font-size: 14px;
+  padding: 6px 25px;
+  min-width: 100px !important;
+  font-family: "osMedium", sans-serif !important;
+}
+
+.XL {
+  font-size: 18px;
+  padding: 8px 30px;
+}

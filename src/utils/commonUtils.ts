@@ -5,6 +5,8 @@
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import isoWeek from "dayjs/plugin/isoWeek";
+import { setHelpDeskTickets } from "../redux/features/HelpDeskSlice";
+import { getAllTickets } from "../services/HelpDeskMainServices/dashboardServices";
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
@@ -92,6 +94,9 @@ export const validateField = (
   // if (required && type === "string" && typeof value !== "string") {
   //   return { isValid: false, errorMsg: "Invalid string format" };
   // }
+  if (!required) {
+    return { isValid: true, errorMsg: "" };
+  }
 
   if (required && type === "string" && !value) {
     return {
@@ -347,6 +352,7 @@ export const currentRoleBasedDataUtil: any = (
 ) => {
   if (
     currentUserDetails?.role === "Pernix_Admin" ||
+    currentUserDetails?.role === "Super Admin" ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
   ) {
     return {
@@ -374,4 +380,259 @@ export const currentRoleBasedDataUtil: any = (
       role: "user",
     };
   }
+};
+
+export const generateTicketNumber = (number: number): string => {
+  console.log("number: ", number);
+
+  // If number is not finite, default to 0
+  const validNumber = isFinite(number) ? number : 0;
+
+  // Convert number to string and pad it to 4 digits
+  return `T_${String(validNumber).padStart(4, "0")}`;
+};
+
+// filter tickets by route path
+export const ticketsFilter = async (
+  currentPath: string,
+  helpDeskTicketsData: any,
+  dispatch: any
+): Promise<void> => {
+  if (currentPath.split("/").pop() === "all_tickets") {
+    await getAllTickets(dispatch);
+  }
+  if (currentPath?.includes("unassigned")) {
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.ITOwnerId === null
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "unassigned",
+      })
+    );
+  }
+  if (currentPath?.includes("open")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.Status === "Open"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Open",
+      })
+    );
+  }
+  if (currentPath?.includes("email")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.TicketSource?.toLowerCase() === "email"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Open",
+      })
+    );
+  }
+  if (currentPath?.includes("web")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.TicketSource?.toLowerCase() === "web"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Open",
+      })
+    );
+  }
+  if (currentPath?.includes("closed")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.Status === "Closed"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Closed",
+      })
+    );
+  }
+  if (currentPath?.includes("onhold")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.Status === "On Hold"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "On Hold",
+      })
+    );
+  }
+  if (currentPath?.includes("inprogress")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.Status === "In Progress"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "In Progress",
+      })
+    );
+  }
+  if (currentPath?.includes("overdue")) {
+    console.log("pass");
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.Status === "Overdue"
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Overdue",
+      })
+    );
+  }
+  if (currentPath?.includes("recent")) {
+    const createdTicketsData = groupTicketsByPeriod(
+      helpDeskTicketsData?.AllData,
+      "This Week",
+      "Created"
+    );
+    const allCreatedTicketsFlattened = Object.keys(createdTicketsData)?.flatMap(
+      (key: string) => createdTicketsData[key]?.data || []
+    );
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: allCreatedTicketsFlattened,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Last 7 days",
+      })
+    );
+  }
+};
+
+export const getCurrentRoleForTicketsRoute = (
+  currentUserDetails: any
+): string => {
+  return currentUserDetails?.role === "Pernix_Admin" ||
+    currentUserDetails?.role === "Super Admin" ||
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+    ? "/helpdesk_manager"
+    : currentUserDetails?.role === "HelpDesk_IT_Owners"
+    ? "/it_owner"
+    : `/${currentUserDetails?.role}`;
+};
+
+export const sortByCreatedDate = (data: any[]): any[] => {
+  return data?.sort((a, b) => {
+    const dateA = new Date(a.Created).getTime();
+    const dateB = new Date(b.Created).getTime();
+    return dateB - dateA; // Newest items will come first
+  });
+};
+interface TicketData {
+  ID: number;
+  TicketNumber: string;
+  Category: string;
+  Priority: string;
+  Status: string;
+}
+// Helper function to format ticket data
+export const formatTicketData = (data: any): any => {
+  return data.map((item: TicketData | any) => ({
+    Created: item?.Created,
+    id: item?.ID,
+    ticket_number: item?.TicketNumber,
+    IT_owner: item?.ITOwner,
+    category: item?.Category,
+    priority: item?.Priority,
+    status: item?.Status,
+  }));
+};
+
+// Filters tickets based on a search term across all fields except 'id' and 'created'
+export const filterTicketsBySearch = (
+  tickets: any[],
+  searchTerm: string
+): any[] => {
+  console.log("searchTerm: ", searchTerm);
+  if (!searchTerm) return tickets;
+  return tickets.filter((ticket) =>
+    Object.keys(ticket).some((key) =>
+      ["id", "Created"].includes(key)
+        ? false
+        : ticket[key]
+            ?.toString()
+            .toLowerCase()
+            .includes(searchTerm?.toLowerCase())
+    )
+  );
+};
+
+// Filters tickets based on selected category
+export const filterTicketsByCategory = (
+  tickets: any[],
+  selectedCategory: string | any
+): any[] => {
+  if (!selectedCategory) return tickets;
+  return tickets.filter((ticket) => ticket.category === selectedCategory);
+};
+
+// Filters tickets based on selected priority
+export const filterTicketsByPriority = (
+  tickets: any[],
+  selectedPriority: string | any
+): any[] => {
+  if (!selectedPriority) return tickets;
+  return tickets.filter((ticket) => ticket.priority === selectedPriority);
+};
+
+// Sorts tickets by priority and/or created date
+export const sortTickets = (
+  tickets: any[],
+  sortBy: string,
+  prioritySort: boolean = true
+): any[] => {
+  const sortedTickets = [...tickets];
+
+  if (sortBy === "New to old") {
+    sortedTickets.sort(
+      (a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime()
+    );
+  } else if (sortBy === "Old to new") {
+    sortedTickets.sort(
+      (a, b) => new Date(a.Created).getTime() - new Date(b.Created).getTime()
+    );
+  }
+
+  return sortedTickets;
 };

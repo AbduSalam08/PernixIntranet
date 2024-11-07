@@ -125,8 +125,8 @@
 
 // dropdown input
 .dropdowninput {
-  border: 1px solid #adadad50 !important;
-  border-radius: 4px !important;
+  border: none !important;
+  border-radius: 6px !important;
   color: #414141 !important;
   // padding: 0 10px !important;
   font-size: 16px !important;
@@ -154,7 +154,7 @@
 
 .customDropDownInputSM {
   @extend .dropdowninput;
-  height: 30px !important;
+  height: 34px !important;
   font-size: 14px !important;
 }
 
@@ -404,6 +404,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     margin-top: 14px;
+    min-height: 18px;
   }
 
   .clearBtn {
@@ -418,14 +419,59 @@
   .error {
     color: #ff0000;
     margin-top: 4px;
-    font-size: 12px;
-    font-family: "osRegular", sans-serif !important;
+    font-size: 13px;
+    font-family: "osMedium", sans-serif !important;
   }
 
   .acceptedInfo {
     color: #999;
     margin-top: 4px;
-    font-size: 12px;
-    font-family: "osRegular", sans-serif !important;
+    font-size: 13px;
+    font-family: "osMedium", sans-serif !important;
+  }
+}
+// file align styles
+.fileNameAlign {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  width: 100% !important;
+  gap: 5px;
+  min-height: 0px;
+  max-height: 114px;
+  overflow: auto;
+  padding: 10px;
+  margin: 14px 0px;
+  background-color: #fff;
+  border-radius: 4px;
+
+  div {
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    div:nth-child(1) {
+      width: 90%;
+      font-family: "osRegular", sans-serif !important;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      padding: 6px;
+    }
+
+    div:nth-child(2) {
+      width: 10%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      svg {
+        font-size: 20px;
+        font-weight: 500;
+        color: #ff0000;
+        cursor: pointer;
+      }
+    }
   }
 }
