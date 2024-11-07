@@ -2,6 +2,8 @@ import { graph } from "@pnp/graph/presets/all";
 // import moment from "moment";
 import { setCalenderIntranetData } from "../../redux/features/CalenderIntranetSlice";
 import moment from "moment";
+import { CONFIG } from "../../config/config";
+import SpServices from "../SPServices/SpServices";
 // import moment from "moment";
 
 /* eslint-disable  @typescript-eslint/no-use-before-define */
@@ -29,6 +31,18 @@ const headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
 //   const timeString = time.toString().padStart(2, "0");
 //   return `${timeString}:00:00`;
 // };
+
+const getAzureGroupId = async (): Promise<string> => {
+  let azureId: string = "";
+
+  await SpServices.SPReadItems({
+    Listname: CONFIG.ListNames.Calendar_Azure_Group_ID,
+  }).then((res: any) => {
+    azureId = res?.[0]?.Title || "";
+  });
+
+  return azureId;
+};
 
 export const createOutlookEvent = async (
   formData: any,
@@ -115,10 +129,10 @@ export const createOutlookEvent = async (
       ],
     };
 
+    const calendarGUID: string = await getAzureGroupId();
+
     // Add the event to the calendar
-    await graph.groups
-      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
-      .calendar.events.add(event);
+    await graph.groups.getById(calendarGUID).calendar.events.add(event);
 
     // Create the updated state
 
@@ -189,9 +203,11 @@ export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
       })
     );
 
+    const calendarGUID: string = await getAzureGroupId();
+
     // Fetch the events data
     const result = await graph.groups
-      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
+      .getById(calendarGUID)
       .events.configure({ headers })
       .top(999)();
     console.log(result, "result");
@@ -360,7 +376,7 @@ export const updateOutlookEvent = async (
     newEndDate.setHours(endHours, endMinutes, 0, 0); // Set hours and minutes
 
     console.log(newStartDate.toISOString()); // Outputs the ISO string for the start date
-    console.log(newEndDate.toISOString()); 
+    console.log(newEndDate.toISOString());
 
     const eventUpdate: any = {
       subject: Title.value,
@@ -390,9 +406,11 @@ export const updateOutlookEvent = async (
       },
     };
 
+    const calendarGUID: string = await getAzureGroupId();
+
     // Update the event
     await graph.groups
-      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
+      .getById(calendarGUID)
       .calendar.events.getById(eventId)
       .update(eventUpdate);
 
@@ -468,9 +486,11 @@ export const deleteOutlookEvent = async (
   });
 
   try {
+    const calendarGUID: string = await getAzureGroupId();
+
     // Delete the event
     await graph.groups
-      .getById("d22c8ed9-1acc-4e41-b539-3a509152306f")
+      .getById(calendarGUID)
       .calendar.events.getById(eventId)
       .delete();
 

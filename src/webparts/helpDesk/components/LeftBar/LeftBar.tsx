@@ -1,8 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
-import { useSelector } from "react-redux";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./LeftBar.module.scss";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import {
+  currentRoleBasedDataUtil,
+  getCurrentRoleForTicketsRoute,
+  // groupTicketsByPeriod,
+} from "../../../../utils/commonUtils";
+// import { setHelpDeskTickets } from "../../../../redux/features/HelpDeskSlice";
+import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 
 interface NavItem {
   label: string;
@@ -17,122 +25,184 @@ interface UserDetails {
 
 const LeftBar: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const location = useLocation(); // Get current location to determine active link
-  const [activePath, setActivePath] = useState(location.pathname); // Active path state
-
-  const defaultOnClick = (label: string): void => {
-    console.log(`${label} clicked!`);
-  };
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
 
   const currentUserDetails = useSelector(
     (state: { MainSPContext: { currentUserDetails: UserDetails } }) =>
       state.MainSPContext.currentUserDetails
   );
+  const HelpDeskTicktesData: any = useSelector(
+    (state: any) => state.HelpDeskTicktesData.value
+  );
 
-  const currentRole: string =
-    currentUserDetails?.role === "Pernix_Admin" ||
-    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
-      ? "/helpdesk_manager"
-      : currentUserDetails?.role === "HelpDesk_IT_Owners"
-      ? "/it_owner"
-      : `/${currentUserDetails?.role}`;
+  const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
 
-  const navItems: NavItem[] =
-    currentUserDetails?.role !== "user"
-      ? [
-          {
-            label: "Dashboard",
-            path: `${currentRole}/dashboard`,
-            onClick: () => console.log("Dashboard clicked!"),
-          },
-          {
-            label: "All tickets",
-            path: `${currentRole}/all_tickets`,
-            children: [
-              {
-                label: "Tickets to handle",
-                path: `${currentRole}/all_tickets/handle`,
-              },
-              {
-                label: "My open tickets",
-                path: `${currentRole}/all_tickets/open`,
-              },
-              {
-                label: "My tickets in last 7 days",
-                path: `${currentRole}/all_tickets/recent`,
-              },
-            ],
-          },
-          {
-            label: "Status",
-            path: `${currentRole}/tickets/status`,
-            children: [
-              {
-                label: "Open",
-                path: `${currentRole}/tickets/status/open`,
-              },
-              {
-                label: "On hold",
-                path: `${currentRole}/tickets/status/onhold`,
-              },
-              {
-                label: "Close",
-                path: `${currentRole}/tickets/status/closed`,
-              },
-            ],
-          },
-        ]
-      : [
-          {
-            label: "All tickets",
-            path: `${currentRole}/all_tickets`,
-            children: [
-              {
-                label: "Tickets to handle",
-                path: `${currentRole}/all_tickets/handle`,
-              },
-              {
-                label: "My open tickets",
-                path: `${currentRole}/all_tickets/open`,
-              },
-              {
-                label: "My tickets in last 7 days",
-                path: `${currentRole}/all_tickets/recent`,
-              },
-            ],
-          },
-          {
-            label: "Status",
-            path: `${currentRole}/tickets/status`,
-            children: [
-              {
-                label: "Open",
-                path: `${currentRole}/tickets/status/open`,
-              },
-              {
-                label: "On hold",
-                path: `${currentRole}/tickets/status/onhold`,
-              },
-              {
-                label: "Close",
-                path: `${currentRole}/tickets/status/closed`,
-              },
-            ],
-          },
-        ];
+  const currentRoleBasedData: any = currentRoleBasedDataUtil(
+    currentUserDetails,
+    HelpDeskTicktesData
+  );
+  console.log("currentRoleBasedData: ", currentRoleBasedData);
 
-  const handleNavigation = (item: NavItem): void => {
-    const itemOnClick = item.onClick || (() => defaultOnClick(item.label));
-    itemOnClick();
-    if (item.path) {
-      setActivePath(item.path); // Set active path when item is clicked
-      navigate(item.path);
+  // Define nav items
+  useEffect(() => {
+    const items: NavItem[] =
+      currentUserDetails?.role !== "user"
+        ? [
+            {
+              label: "Dashboard",
+              path: `${currentRole}/dashboard`,
+            },
+            {
+              label: "All tickets",
+              path: `${currentRole}/all_tickets`,
+              onClick: async () => {
+                await getAllTickets(dispatch);
+                // dispatch(
+                //   setHelpDeskTickets({
+                //     isLoading: true,
+                //     data: HelpDeskTicktesData?.data,
+                //     ticketType: "All tickets",
+                //     AllData: HelpDeskTicktesData?.AllData,
+                //   })
+                // );
+              },
+              children: [
+                {
+                  label: "Unassigned tickets",
+                  path: `${currentRole}/all_tickets/unassigned`,
+                },
+                // {
+                //   label: "My open tickets",
+                //   path: `${currentRole}/all_tickets/open`,
+                //   onClick: async () => {
+                //     // await Promise.all([getAllTickets(dispatch)]);
+
+                //     const filterHandleData: any =
+                //       HelpDeskTicktesData?.AllData?.filter(
+                //         (item: any) => item?.Status === "Open"
+                //       );
+
+                //     dispatch(
+                //       setHelpDeskTickets({
+                //         isLoading: true,
+                //         data: filterHandleData,
+                //         AllData: HelpDeskTicktesData?.AllData,
+                //         ticketType: "My open",
+                //       })
+                //     );
+                //   },
+                // },
+                {
+                  label: "My tickets in last 7 days",
+                  path: `${currentRole}/all_tickets/recent`,
+                },
+              ],
+            },
+            {
+              label: "Status",
+              path: `${currentRole}/tickets/status/open`,
+              children: [
+                {
+                  label: "Open",
+                  path: `${currentRole}/tickets/status/open`,
+                },
+                {
+                  label: "On hold",
+                  path: `${currentRole}/tickets/status/onhold`,
+                },
+                {
+                  label: "Closed",
+                  path: `${currentRole}/tickets/status/closed`,
+                },
+                {
+                  label: "In progress",
+                  path: `${currentRole}/tickets/status/inprogress`,
+                },
+                {
+                  label: "Overdue",
+                  path: `${currentRole}/tickets/status/overdue`,
+                },
+              ],
+            },
+          ]
+        : [
+            {
+              label: "My tickets",
+              path: `${currentRole}/all_tickets`,
+              children: [
+                // {
+                //   label: "Tickets to handle",
+                //   path: `${currentRole}/all_tickets/handle`,
+                // },
+                // {
+                //   label: "My open tickets",
+                //   path: `${currentRole}/all_tickets/open`,
+                // },
+                {
+                  label: "My tickets in last 7 days",
+                  path: `${currentRole}/all_tickets/recent`,
+                },
+              ],
+            },
+            {
+              label: "Status",
+              path: `${currentRole}/tickets/status/open`,
+              children: [
+                {
+                  label: "Open",
+                  path: `${currentRole}/tickets/status/open`,
+                },
+                {
+                  label: "On hold",
+                  path: `${currentRole}/tickets/status/onhold`,
+                },
+                {
+                  label: "Closed",
+                  path: `${currentRole}/tickets/status/closed`,
+                },
+                {
+                  label: "In progress",
+                  path: `${currentRole}/tickets/status/inprogress`,
+                },
+                {
+                  label: "Overdue",
+                  path: `${currentRole}/tickets/status/overdue`,
+                },
+              ],
+            },
+          ];
+
+    // Set the nav items
+    setNavItems(items);
+  }, [currentUserDetails, currentRole]);
+
+  // Check if the current path matches the item path or any of its children
+  const isActive = (item: NavItem): boolean => {
+    if (location.pathname === item.path) {
+      return true;
     }
+    if (item.children) {
+      return item.children.some((child) => location.pathname === child.path);
+    }
+    return false;
   };
 
-  // Check if any of the children paths match the active path
-  const isChildActive = (children: NavItem[]): boolean => {
-    return children.some((child) => activePath === child.path);
+  // Determine if the parent is active based on children
+  const isParentActive = (item: NavItem): boolean => {
+    return item.children
+      ? item.children.some((child) => location.pathname === child.path)
+      : false;
+  };
+
+  const handleNavigation = (item: NavItem): void => {
+    if (item.onClick) {
+      item.onClick();
+    }
+    if (item.path) {
+      navigate(item.path);
+    }
   };
 
   return (
@@ -140,31 +210,67 @@ const LeftBar: React.FC = (): JSX.Element => {
       {navItems.map((item, index) => (
         <div key={index} className={styles.navItem}>
           <div
-            onClick={() => handleNavigation(item)}
+            onClick={() => {
+              handleNavigation(item);
+              item?.onClick?.();
+            }}
             className={`${styles.navLink} ${
-              activePath === item.path ? styles.activeNavLink : ""
-            } `}
+              isActive(item) && !isParentActive(item)
+                ? styles.activeNavLink
+                : ""
+            }`}
           >
-            {item.label}
-            <ArrowRightIcon
+            <div className={styles.parentLabel}>
+              {item.label}
+              <ArrowRightIcon
+                className={`${
+                  item.children && isParentActive(item)
+                    ? styles.parentActive
+                    : styles.parentInActive
+                }`}
+              />
+            </div>
+
+            <span
               className={`${
-                item.children && isChildActive(item.children)
-                  ? styles.parentActive
-                  : styles.parentInActive
+                location.pathname === item?.path &&
+                currentRoleBasedData?.data?.length &&
+                (item?.label === "All tickets" || item?.label === "My tickets")
+                  ? styles.countBadge
+                  : styles.hiddenBadge
               }`}
-            />
+            >
+              {location.pathname === item?.path
+                ? currentRoleBasedData?.data?.length
+                : ""}
+            </span>
           </div>
-          {item.children && item.children.length > 0 && (
+          {item.children && (
             <div className={styles.subNav}>
               {item.children.map((child, childIndex) => (
                 <div
                   key={childIndex}
-                  onClick={() => handleNavigation(child)}
+                  onClick={() => {
+                    handleNavigation(child);
+                    child?.onClick?.();
+                  }}
                   className={`${styles.subNavItem} ${
-                    activePath === child.path ? styles.activeNavLink : ""
+                    location.pathname === child.path ? styles.activeNavLink : ""
                   }`}
                 >
                   {child.label}
+
+                  <span
+                    className={`${
+                      location.pathname === child.path
+                        ? styles.countBadge
+                        : styles.hiddenBadge
+                    }`}
+                  >
+                    {location.pathname === child.path
+                      ? currentRoleBasedData?.data?.length
+                      : ""}
+                  </span>
                 </div>
               ))}
             </div>

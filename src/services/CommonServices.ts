@@ -105,7 +105,7 @@ export const RoleAuth = async (
   try {
     const currentUser: any = await sp.web.currentUser.get();
     currentUserID = currentUser?.Id || null;
-    currentUserEmail = currentUser?.Email.toLowerCase() || "";
+    currentUserEmail = currentUser?.Email || "";
     currentUserName = currentUser?.Title || "";
   } catch (err) {
     console.log("Error getting current user: ", err);
@@ -119,7 +119,8 @@ export const RoleAuth = async (
 
     const isSuperAdmin: boolean =
       superAdminUsers?.some(
-        (item: any) => item.Email.toLowerCase() === currentUserEmail
+        (item: any) =>
+          item.Email.toLowerCase() === currentUserEmail?.toLowerCase()
       ) || false;
 
     if (isSuperAdmin) {
@@ -142,7 +143,8 @@ export const RoleAuth = async (
         .users.get();
 
       _isAdmin = groupAdminUsers?.some(
-        (val: any) => val.Email.toLowerCase() === currentUserEmail
+        (val: any) =>
+          val.Email.toLowerCase() === currentUserEmail?.toLowerCase()
       );
 
       if (_isAdmin) {
@@ -164,7 +166,8 @@ export const RoleAuth = async (
         .users.get();
 
       _isAdmin = groupAdminUsers?.some(
-        (val: any) => val.Email.toLowerCase() === currentUserEmail
+        (val: any) =>
+          val.Email.toLowerCase() === currentUserEmail?.toLowerCase()
       );
 
       if (_isAdmin) {

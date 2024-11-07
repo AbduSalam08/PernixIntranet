@@ -18,8 +18,11 @@ import {
   getQuestionCeo,
 } from "../../../services/QuestionCEOIntranet/QuestionCEOIntranet";
 import { useDispatch, useSelector } from "react-redux";
+import ViewAll from "../../../components/common/ViewAll/ViewAll";
+import { CONFIG } from "../../../config/config";
+import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 // import { useSelector } from "react-redux";
-const QuestionsCeoIntranet = (): JSX.Element => {
+const QuestionsCeoIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
 
   const QuestionCEOIntranetData: any = useSelector((state: any) => {
@@ -58,6 +61,9 @@ const QuestionsCeoIntranet = (): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
+  const [CEOQuestions, setCEOQuestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  console.log("CEOQuestions", CEOQuestions);
 
   // const newsIntranetData: any = useSelector((state: any) => {
   //   return state.NewsIntranetData.value;
@@ -180,8 +186,28 @@ const QuestionsCeoIntranet = (): JSX.Element => {
   ];
 
   useEffect(() => {
+    if (QuestionCEOIntranetData?.data?.length > 0) {
+      setIsLoading(true);
+      const filteredData = QuestionCEOIntranetData?.data
+        ?.filter((item: any) => item.isActive)
+        .reverse()
+        .slice(0, 5);
+      setCEOQuestions([...filteredData]);
+      setIsLoading(false);
+    }
+  }, [QuestionCEOIntranetData]);
+
+  useEffect(() => {
     getQuestionCeo(dispatch);
   }, [dispatch]);
+
+  const handlenavigate = (): void => {
+    window.open(
+      props.context.pageContext.web.absoluteUrl +
+        CONFIG.NavigatePage.QuestionsCEOPage,
+      "_self"
+    );
+  };
 
   const productTemplate = (val: any): JSX.Element => {
     return (
@@ -227,36 +253,40 @@ const QuestionsCeoIntranet = (): JSX.Element => {
     );
   };
 
-  return (
+  return isLoading ? (
+    <div className={styles.LoaderContainer}>
+      <CircularSpinner />
+    </div>
+  ) : (
     <div className={styles.quesToCEOContainer}>
       <SectionHeaderIntranet
-        label={"Question to the CEO"}
+        label={"Question to CEO"}
         headerAction={() => {
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
             0,
-            "open"
+            "open",
+            "Submit a question to CEO"
           );
           resetFormData(formData, setFormData);
         }}
       />
 
-      <div className={styles.contentSexction}>
+      <div className={styles.contentSection}>
         <Carousel
-          value={QuestionCEOIntranetData?.data}
+          value={CEOQuestions}
           numScroll={1}
           numVisible={1}
           showIndicators={true}
           showNavigators={false}
           circular
-          autoplayInterval={
-            QuestionCEOIntranetData?.data?.length > 1 ? 3000 : 8.64e7
-          }
+          autoplayInterval={CEOQuestions?.length > 1 ? 3000 : 8.64e7}
           // responsiveOptions={responsiveOptions}
           itemTemplate={productTemplate}
         />
       </div>
+      <ViewAll onClick={handlenavigate} />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup

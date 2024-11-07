@@ -1,0 +1,157 @@
+.commentCard {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  margin: 10px 0;
+  gap: 10px;
+  .userProfile {
+    margin-right: 10px;
+    margin-top: 5px;
+  }
+
+  .commentCardMain {
+    flex-grow: 1;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.2s;
+
+    &.authorHighlightWrap {
+      border: 1px solid #c4692e20;
+    }
+
+    .commentHeader {
+      position: relative; // Add this to position the pseudo-element
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background-color: #1f363b15;
+      border-bottom: 1px solid #eee;
+      border-radius: 6px 6px 0 0;
+
+      // Add triangle indicator
+      &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: -10.5px; // Position it to the left of the header
+        transform: translateY(-50%);
+        border-style: solid;
+        border-width: 8px 10px 8px 0; // Triangle shape
+        border-color: transparent #1f363b15 transparent transparent; // Change color as needed
+      }
+
+      &.authorHighlight {
+        background-color: #c4692e20;
+        border-bottom: 1px solid #c4692e20;
+
+        &::before {
+          border-color: transparent #c4692e20 transparent transparent; // Change color for authorHighlight
+        }
+
+        .texts {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          .author {
+            font-size: 14px;
+            color: #8f410d;
+            font-family: "osSemiBold", sans-serif;
+          }
+        }
+        .info {
+          font-size: 12px;
+          color: #696258;
+          font-family: "osMedium", sans-serif;
+        }
+        .extraInfo {
+          font-size: 12px;
+          color: #696258;
+          // margin-left: 5px;
+          padding-left: 10px;
+          border-left: 1px solid #55555580;
+          font-family: "osMedium", sans-serif;
+        }
+        .hamb {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          .roleBadge {
+            background-color: #8f410d;
+            color: #ffffff;
+            font-size: 11px;
+            font-family: "osMedium", sans-serif;
+            padding: 5px 8px;
+            border-radius: 3px;
+            margin-left: 6px;
+            width: max-content;
+          }
+        }
+      }
+
+      .texts {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        .author {
+          font-size: 14px;
+          color: var(--primary-pernix-green-dark);
+          font-family: "osSemiBold", sans-serif;
+        }
+      }
+      .info,
+      .extraInfo {
+        font-size: 12px;
+        color: #586069;
+        font-family: "osMedium", sans-serif;
+        padding-left: 10px;
+        border-left: 1px solid #55555580;
+      }
+      .hamb {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        .roleBadge {
+          background-color: #24292e;
+          color: #ffffff;
+          font-size: 11px;
+          font-family: "osMedium", sans-serif;
+          padding: 5px 8px;
+          border-radius: 3px;
+          margin-left: 6px;
+          width: max-content;
+        }
+      }
+    }
+  }
+
+  .commentSpace {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #24292e;
+    line-height: 1.5;
+    font-family: "osMedium", sans-serif;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeIn {
+  opacity: 0;
+  animation: fadeIn 0.15s ease-in-out forwards;
+}

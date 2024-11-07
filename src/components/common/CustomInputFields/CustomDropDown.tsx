@@ -238,6 +238,7 @@ interface Props {
   withLabel?: boolean;
   floatingLabel?: boolean;
   width?: any;
+  highlightDropdown?: boolean;
 }
 
 const CustomDropDown: React.FC<Props> = ({
@@ -253,6 +254,7 @@ const CustomDropDown: React.FC<Props> = ({
   withLabel,
   floatingLabel = true,
   width,
+  highlightDropdown,
 }) => {
   const handleChange = useCallback(
     (e) => {
@@ -313,6 +315,10 @@ const CustomDropDown: React.FC<Props> = ({
         justifyContent: "flex-start",
         flexDirection: "column",
         gap: "2px",
+        width: width,
+        border: highlightDropdown ? "1px solid #eeeeee" : "none",
+        borderRadius: "6px",
+        overflow: "hidden",
       }}
     >
       <ThemeProvider theme={customTheme(outerTheme)}>
@@ -321,14 +327,23 @@ const CustomDropDown: React.FC<Props> = ({
           sx={{ minWidth: width || "276px" }}
           disabled={disabled}
         >
-          {floatingLabel && <InputLabel>{placeholder}</InputLabel>}
+          {floatingLabel && (
+            <InputLabel
+              sx={{
+                marginLeft: highlightDropdown ? "-3px !important" : "6px",
+              }}
+            >
+              {placeholder}
+            </InputLabel>
+          )}
           <Select
-            value={value || ""}
+            value={size === "SM" ? value || placeholder : value || ""}
             className={`${sizeClassName} ${
               disabled ? styles.disabledInput : ""
             }`}
             onChange={handleChange}
             displayEmpty
+            placeholder={size === "SM" ? placeholder : ""}
             variant="filled"
             inputProps={{ "aria-label": placeholder }}
             label={placeholder}
@@ -358,8 +373,14 @@ const CustomDropDown: React.FC<Props> = ({
               },
               ".MuiSelect-select": {
                 padding:
-                  size === "SM" ? "5px 13px !important" : "18px !important",
-                paddingBottom: "6px !important",
+                  size === "SM"
+                    ? "5px 13px !important"
+                    : highlightDropdown
+                    ? "18px 10px 6px 10px !important"
+                    : "18px !important",
+                paddingBottom: highlightDropdown
+                  ? "3px !important"
+                  : "6px !important",
                 fontSize: size === "SM" ? "14px" : "15px",
                 // width: size === "SM" ? "auto" : "100%",
                 width: "100%",
@@ -372,14 +393,20 @@ const CustomDropDown: React.FC<Props> = ({
             }}
           >
             <MenuItem
-              sx={{ color: "#555 !important" }}
+              sx={{ color: "#555 !important", fontSize: "14px" }}
               disabled={true}
               value={placeholder}
             >
               {placeholder}
             </MenuItem>
             {options?.map((option: any, i: number) => (
-              <MenuItem key={i} value={option}>
+              <MenuItem
+                key={i}
+                value={option}
+                sx={{
+                  fontSize: "14px",
+                }}
+              >
                 {option}
               </MenuItem>
             ))}

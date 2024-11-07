@@ -1,30 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Pagination } from "@mui/material";
+import { Pagination, Stack } from "@mui/material";
 import "./DataTable.css";
 
 interface DataTableProps {
   rows: any[]; // Array of data rows
+  onRowClick?: any; // Array of data rows
   columns: GridColDef[]; // Define columns with GridColDef type for better type safety
   pageSize?: number; // Optional pageSize prop
   checkboxSelection?: boolean; // Enable checkbox selection
+  isLoading?: boolean; // Enable checkbox selection
   disableSelectionOnClick?: boolean; // Disable selection on click
+  emptyMessage?: string;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
   rows,
   columns,
+  isLoading,
   pageSize = 5, // Default pageSize
   checkboxSelection = false,
   disableSelectionOnClick = true,
+  onRowClick,
+  emptyMessage,
 }) => {
   // Add state for page and page size
   const [currentPage, setCurrentPage] = useState(1); // Start from page 1
   const [pageSizeState, setPageSizeState] = useState(pageSize);
 
   // Calculate total pages based on rows and page size
-  const totalPages = Math.ceil(rows.length / pageSizeState);
+  const totalPages = Math?.ceil(rows?.length / pageSizeState);
 
   // Handle page change
   const handlePageChange = (
@@ -41,10 +47,14 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   // Calculate the rows to display based on the current page and page size
-  const paginatedRows = rows.slice(
+  const paginatedRows = rows?.slice(
     (currentPage - 1) * pageSizeState,
     currentPage * pageSizeState
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rows?.length]);
 
   return (
     <div
@@ -58,9 +68,33 @@ const DataTable: React.FC<DataTableProps> = ({
         headerHeight={45}
         rowHeight={45}
         rows={paginatedRows} // Display paginated rows
-        columns={columns.map((col) => ({
+        onRowClick={onRowClick}
+        components={{
+          NoRowsOverlay: () => (
+            <Stack
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
+              color={"#adadad"}
+            >
+              {emptyMessage || "No data found!"}
+            </Stack>
+          ),
+          NoResultsOverlay: () => (
+            <Stack
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
+              color={"#adadad"}
+            >
+              {emptyMessage || "No data found!"}
+            </Stack>
+          ),
+        }}
+        columns={columns?.map((col) => ({
           ...col,
           flex: 1,
+          filterable: true,
           resizable: true,
           renderHeader: (params: any) => (
             <span
@@ -85,6 +119,7 @@ const DataTable: React.FC<DataTableProps> = ({
           headerClassName: "header", // Add a class to the header for custom styles
         }))} // Set flex and resizable
         hideFooter
+        loading={isLoading}
         hideFooterPagination
         hideFooterSelectedRowCount
         checkboxSelection={checkboxSelection}
@@ -92,8 +127,8 @@ const DataTable: React.FC<DataTableProps> = ({
         pageSize={pageSizeState} // Set page size
         onPageSizeChange={handlePageSizeChange} // Listen for page size change
         paginationMode="client"
-        rowCount={rows.length} // Use total number of rows for pagination calculation
         columnBuffer={2}
+        filterMode="client"
         disableColumnMenu
         sx={{
           ":root": {
@@ -109,7 +144,7 @@ const DataTable: React.FC<DataTableProps> = ({
           },
           "& .MuiDataGrid-columnHeaders": {
             border: "none", // Remove border from column headers
-            backgroundColor: "#0B4D5310",
+            backgroundColor: "#0B4D5306",
             borderBottom: "1px solid #eeeeee90", // Set body rows to light grey
             "& .MuiDataGrid-columnSeparator": {
               display: "none",
@@ -134,9 +169,15 @@ const DataTable: React.FC<DataTableProps> = ({
           },
           "& .MuiDataGrid-cell": {
             border: "none", // Remove borders from cell
+            fontFamily: `'osRegular',sans-serif`,
+            outline: "none",
             "&:focus": {
-              outline: "none", // Remove focus outline
+              outline: "none !important", // Remove focus outline
               border: "none",
+            },
+            "&:focus-within": {
+              border: "none",
+              outline: "none !important", // Remove focus outline
             },
           },
           "& .MuiDataGrid-virtualScroller": {

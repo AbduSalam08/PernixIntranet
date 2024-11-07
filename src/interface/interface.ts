@@ -13,6 +13,8 @@ export interface IListName {
   Intranet_QuestionToCEO: string;
   Intranet_ShoutOuts: string;
   HelpDesk_AllTickets: string;
+  Calendar_Azure_Group_ID: string;
+  HelpDesk_TicketConversations: string;
 }
 
 export interface ISPGroupName {
@@ -27,6 +29,7 @@ export interface ISPGroupName {
   Pernix_Admin: string;
   Poll_Admin: string;
   QuestionCEO_Admin: string;
+  QuestionCEO: string;
   Shoutouts_Admin: string;
   HelpDesk_Ticket_Managers: string;
   HelpDesk_IT_Owners: string;
@@ -59,6 +62,25 @@ export interface IQuoteDatas {
   FileName: string;
   Status: string;
   IsDelete: boolean;
+}
+
+export interface IAttachObj {
+  isSubFiles: boolean;
+  name: string;
+  content: any;
+  fileType: string;
+  ServerRelativeUrl: string;
+}
+
+export interface IDocRepository {
+  ID: number;
+  Content: IAttachObj;
+}
+
+export interface IDocRepositoryColumn {
+  ID: string;
+  FolderName: string;
+  Content: string;
 }
 
 export interface IPaginationData {

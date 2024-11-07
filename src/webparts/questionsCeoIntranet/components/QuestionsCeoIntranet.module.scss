@@ -1,3 +1,10 @@
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}
 .quesToCEOContainer {
   box-shadow: 0px -1px 4px 0px #b9b9b940;
   border-radius: 6px;
@@ -9,7 +16,7 @@
   // justify-content: center;
   // padding: 25px;
 
-  .contentSexction {
+  .contentSection {
     padding: 15px 20px;
     box-shadow: 0px -1px 4px 0px #b6b6b640;
     margin-top: 20px;

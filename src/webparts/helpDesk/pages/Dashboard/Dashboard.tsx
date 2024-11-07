@@ -34,6 +34,7 @@ const Dashboard = (): JSX.Element => {
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
   );
+  console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
 
   const filterTerms = [
     "This Week",
@@ -85,31 +86,29 @@ const Dashboard = (): JSX.Element => {
   // Info cards array
   const infoCards: any[] = [
     {
-      cardName: "All Tickets",
-      // currentRoleBasedData?.role === "ticket_manager"
-      //   ? "All Tickets"
-      //   : "My Tickets",
-
+      // cardName: "All Tickets",
+      cardName:
+        currentRoleBasedData?.role === "ticket_manager"
+          ? "All tickets"
+          : "My tickets",
       cardImg: myTickets,
       cardValues: currentRoleBasedData?.data?.length || 0,
     },
     {
-      cardName: "Open",
-      // currentRoleBasedData?.role === "ticket_manager"
-      //   ? "Open"
-      //   : "My open tickets",
-
+      // cardName: "Open",
+      cardName:
+        currentRoleBasedData?.role === "ticket_manager" ? "Open" : "My open",
       cardImg: openTickets,
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Open")
           ?.length || 0,
     },
     {
-      cardName: "Closed",
-      // currentRoleBasedData?.role === "ticket_manager"
-      //   ? "Closed"
-      //   : "My closed tickets",
-
+      // cardName: "Closed",
+      cardName:
+        currentRoleBasedData?.role === "ticket_manager"
+          ? "Closed"
+          : "My closed",
       cardImg: closedTickets,
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Closed")
@@ -118,7 +117,7 @@ const Dashboard = (): JSX.Element => {
     {
       cardName:
         currentRoleBasedData?.role === "ticket_manager"
-          ? "Un assigned"
+          ? "Unassigned"
           : "This week's tickets",
       cardImg: ticketsCreatedThisWeek,
       cardValues:
@@ -150,7 +149,12 @@ const Dashboard = (): JSX.Element => {
 
       <div className={styles.infoCards}>
         {infoCards?.map((item: any, idx: number) => (
-          <InfoCard idx={idx} item={item} key={idx} />
+          <InfoCard
+            idx={idx}
+            item={item}
+            isLoading={HelpDeskTicktesData?.isLoading}
+            key={idx}
+          />
         ))}
       </div>
 
@@ -179,6 +183,7 @@ const Dashboard = (): JSX.Element => {
           </div>
           <div className={styles.chart}>
             <TicketByStatusChart
+              isLoading={HelpDeskTicktesData?.isLoading}
               AllTickets={currentRoleBasedData}
               Term={filters.TicketByStatus.selectedValue}
             />
@@ -208,6 +213,7 @@ const Dashboard = (): JSX.Element => {
           </div>
           <div className={styles.chart}>
             <TicketBySource
+              isLoading={HelpDeskTicktesData?.isLoading}
               AllTickets={currentRoleBasedData}
               Term={filters.TicketBySource.selectedValue}
             />
@@ -241,6 +247,7 @@ const Dashboard = (): JSX.Element => {
             </div>
             <div className={styles.chart}>
               <CreatedClosedTickets
+                isLoading={HelpDeskTicktesData?.isLoading}
                 AllTickets={currentRoleBasedData}
                 Term={filters.CreatedClosedTickets.selectedValue}
               />
@@ -290,9 +297,9 @@ const Dashboard = (): JSX.Element => {
               />
             </div>
           </div>
-          ``
           <div className={styles.chart}>
             <TicketsByPriority
+              isLoading={HelpDeskTicktesData?.isLoading}
               AllTickets={currentRoleBasedData}
               Term={filters.TicketByPriority.termsSelectedValue}
               Status={filters.TicketByPriority.statusSelectedValue}
