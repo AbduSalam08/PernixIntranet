@@ -336,7 +336,6 @@ const MainBannerPage = (props: any): JSX.Element => {
       dispatch
     );
     await getChoiceData().then(async (val: string[]) => {
-      console.log("val: ", val);
       setStatusDrop([...val]);
     });
     await getDailyQuote().then(async (val: IQuoteDatas[]) => {
@@ -400,7 +399,10 @@ const MainBannerPage = (props: any): JSX.Element => {
     }
   };
 
-  const handleDelete = async (data: any): Promise<void> => {
+  const handleDelete = async (
+    data: any,
+    tab: string = CONFIG.TabsName[0]
+  ): Promise<void> => {
     let isDeleted: boolean = await deleteMotivated(data, setPopupController, 2);
 
     if (isDeleted) {
@@ -411,10 +413,14 @@ const MainBannerPage = (props: any): JSX.Element => {
       masterQuotes?.splice(curIndex, 1);
     }
 
-    // await prepareDatas(CONFIG.TabsName[0]);
+    await prepareDatas(tab);
   };
 
-  const handleUpdate = async (data: any, fileData: any): Promise<void> => {
+  const handleUpdate = async (
+    data: any,
+    fileData: any,
+    tab: string
+  ): Promise<void> => {
     let updatedJSON: any = await updateMotivated(
       data,
       fileData,
@@ -431,10 +437,14 @@ const MainBannerPage = (props: any): JSX.Element => {
     masterQuotes?.splice(curIndex, 1, { ...updatedJSON });
 
     setIsFileEdit(true);
-    // await prepareDatas(CONFIG.TabsName[0]);
+    await prepareDatas(tab);
   };
 
-  const handleSubmit = async (data: any, fileData: any): Promise<void> => {
+  const handleSubmit = async (
+    data: any,
+    fileData: any,
+    tab: string
+  ): Promise<void> => {
     const addedJSON: any = await addMotivated(
       data,
       fileData,
@@ -444,10 +454,12 @@ const MainBannerPage = (props: any): JSX.Element => {
 
     masterQuotes = [addedJSON, ...masterQuotes];
 
-    // await prepareDatas(CONFIG.TabsName[0]);
+    await prepareDatas(tab);
   };
 
-  const handleData = async (): Promise<void> => {
+  const handleData = async (
+    tab: string = CONFIG.TabsName[0]
+  ): Promise<void> => {
     let hasErrors: boolean = false;
 
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
@@ -490,8 +502,8 @@ const MainBannerPage = (props: any): JSX.Element => {
       fileData[column.Attachments] = formData?.Attachments?.value || null;
 
       curObject?.ID
-        ? await handleUpdate({ ...data }, { ...fileData })
-        : await handleSubmit({ ...data }, { ...fileData });
+        ? await handleUpdate({ ...data }, { ...fileData }, tab)
+        : await handleSubmit({ ...data }, { ...fileData }, tab);
     } else {
       console.log("Form contains errors");
     }
@@ -659,7 +671,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           <div>
             <CustomFileUpload
               accept="image/png,image/svg"
-              placeholder="Select Image ( Optional )"
+              placeholder="Select Image - 1440 x 640 ( Optional )"
               value={
                 isFileEdit
                   ? formData?.Attachments?.value || null
@@ -830,7 +842,7 @@ const MainBannerPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleData();
+          await handleData(selectedTab);
         },
       },
     ],
@@ -859,7 +871,7 @@ const MainBannerPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleData();
+          await handleData(selectedTab);
         },
       },
     ],
@@ -894,7 +906,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           data[column.ID] = curObject?.ID || null;
           data[column.IsDelete] = true;
 
-          await handleDelete({ ...data });
+          await handleDelete({ ...data }, selectedTab);
         },
       },
     ],
@@ -1130,7 +1142,10 @@ const MainBannerPage = (props: any): JSX.Element => {
                           </div>
                           <div
                             style={{
-                              display: isAdmin ? "flex" : "none",
+                              display:
+                                isAdmin && selectedTab !== "Previous"
+                                  ? "flex"
+                                  : "none",
                             }}
                             onClick={(_) => {
                               handleSelect({ ...val }, "edit");
@@ -1206,7 +1221,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                   "close"
                 );
                 if (popupData?.isLoading?.success) {
-                  prepareDatas(CONFIG.TabsName[0]);
+                  prepareDatas(selectedTab || CONFIG.TabsName[0]);
                 }
                 resetFormData(formData, setFormData);
               }}

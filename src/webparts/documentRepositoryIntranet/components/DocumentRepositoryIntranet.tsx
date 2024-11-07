@@ -1,23 +1,57 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import styles from "./DocumentRepositoryIntranet.module.scss";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import Popup from "../../../components/common/Popups/Popup";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
+import {
+  IAttachObj,
+  IDocRepository,
+  IDocRepositoryColumn,
+  IFormFields,
+  IUserDetails,
+} from "../../../interface/interface";
+import { RoleAuth } from "../../../services/CommonServices";
+import { CONFIG } from "../../../config/config";
+import {
+  addDocRepository,
+  getDocRepository,
+} from "../../../services/docRepositoryIntranet/docRepositoryIntranet";
+import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
+import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+
+/* Interface creation */
+interface IDocField {
+  FolderName: IFormFields;
+  Content: IFormFields;
+}
+
+/* Global variable creation */
 const folderIcon = require("../../../assets/images/svg/folderIcon.svg");
 
-const DocumentRepositoryIntranet = (): JSX.Element => {
-  const dispatch = useDispatch();
-  console.log("dispatch: ", dispatch);
+let isAdmin: boolean = false;
+let masterRes: any[] = [];
+let masterDocDatas: IDocRepository[] = [];
 
-  // popup properties
+const DocumentRepositoryIntranet = (props: any): JSX.Element => {
+  /* Local variable creation */
+  const dispatch = useDispatch();
+
+  const currentUserDetails: IUserDetails = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
+  );
+  isAdmin = currentUserDetails.role === CONFIG.RoleDetails.user ? false : true;
+
+  /* popup properties */
   const initialPopupController = [
     {
       open: false,
@@ -42,32 +76,45 @@ const DocumentRepositoryIntranet = (): JSX.Element => {
     },
   ];
 
-  const [popupController, setPopupController] = useState(
+  const initialFormData: IDocField = {
+    FolderName: {
+      value: "",
+      isValid: true,
+      errorMsg: "Please enter file name.",
+      validationRule: {
+        required: true,
+        type: "string",
+      },
+    },
+    Content: {
+      value: null,
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "file",
+      },
+    },
+  };
+
+  /* State creation */
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [filDocDatas, setFilDocDatas] = useState<IDocRepository[]>([]);
+  const [popupController, setPopupController] = useState<any[]>(
     initialPopupController
   );
-
-  const [formData, setFormData] = useState<any>({
-    Title: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid title",
-      validationRule: { required: true, type: "string" },
-    },
-    URL: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid title",
-      validationRule: { required: true, type: "url" },
-    },
+  const [formData, setFormData] = useState<IDocField | any>({
+    ...initialFormData,
   });
 
-  const handleInputChange = (
+  /* Functions creation */
+  const handleInputChange = async (
     field: string,
     value: any,
     isValid: boolean,
     errorMsg: string = ""
-  ): void => {
-    setFormData((prevData: any) => ({
+  ): Promise<void> => {
+    setFormData((prevData: IDocField | any) => ({
       ...prevData,
       [field]: {
         ...prevData[field],
@@ -78,13 +125,67 @@ const DocumentRepositoryIntranet = (): JSX.Element => {
     }));
   };
 
-  const handleSubmit = async (): Promise<any> => {
-    let hasErrors = false;
+  const curItemDatasFilter = async (path: string): Promise<boolean> => {
+    let isAvailable: boolean = false;
 
-    // Validate each field and update the state with error messages
+    isAvailable = masterRes?.some((val: any) => val.FileDirRef === path);
+
+    return isAvailable;
+  };
+
+  const splitResponseDatas = async (): Promise<void> => {
+    let filMasterFolder: IDocRepository[] = [];
+    masterDocDatas = [];
+
+    filMasterFolder = await Promise.all(
+      masterRes?.filter(
+        (val: any) =>
+          val.FileSystemObjectType === 1 &&
+          `${CONFIG.fileFlowPath}/${val.FileLeafRef}` === val.FileRef
+      )
+    );
+
+    masterDocDatas = await Promise.all(
+      filMasterFolder?.map(async (val: any) => {
+        let masObjAttach: IAttachObj = {
+          isSubFiles: await curItemDatasFilter(val.FileRef),
+          name: val?.FileLeafRef,
+          content: [],
+          fileType: "master_folder",
+          ServerRelativeUrl: val?.FileRef,
+        };
+
+        return {
+          ID: val?.ID || null,
+          Content: masObjAttach,
+          IsDelete: false,
+        };
+      })
+    );
+
+    setFilDocDatas([...masterDocDatas]);
+    setIsLoading(false);
+  };
+
+  const handleSubmit = async (
+    data: any,
+    folderPath: string = CONFIG.fileFlowPath,
+    idx: number
+  ): Promise<void> => {
+    await addDocRepository(data, folderPath, setPopupController, idx);
+
+    await getDocRepository().then(async (val: any[]) => {
+      masterRes = [...val];
+      await splitResponseDatas();
+    });
+  };
+
+  const handleData = async (folderPath: string, idx: number): Promise<void> => {
+    let hasErrors: boolean = false;
+
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
-      const { isValid, errorMsg } = validateField(
+      let { isValid, errorMsg } = validateField(
         key,
         fieldData.value,
         fieldData?.validationRule
@@ -92,6 +193,17 @@ const DocumentRepositoryIntranet = (): JSX.Element => {
 
       if (!isValid) {
         hasErrors = true;
+      } else if (key === "FolderName") {
+        isValid = !filDocDatas?.some(
+          (val: IDocRepository) =>
+            val.Content.fileType !== "file" &&
+            val.Content.name.toLowerCase() ===
+              formData?.FolderName?.value.toLowerCase()
+        );
+        hasErrors = !isValid;
+        errorMsg = !isValid
+          ? `${formData?.FolderName?.value}, this folder name already exists.`
+          : "";
       }
 
       return {
@@ -106,46 +218,72 @@ const DocumentRepositoryIntranet = (): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      // await addNews(formData, setPopupController, 0);
+      let data: any = {};
+      const column: IDocRepositoryColumn = CONFIG.DocRepositoryColumn;
+
+      data[column.FolderName] = formData?.FolderName?.value || "";
+      data[column.Content] = formData?.Content?.value || null;
+
+      await handleSubmit({ ...data }, folderPath, idx);
     } else {
       console.log("Form contains errors");
     }
   };
 
+  const onLoadingFUN = async (): Promise<void> => {
+    await RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      {
+        highPriorityGroups: [CONFIG.SPGroupName.Documentrepository_Admin],
+      },
+      dispatch
+    );
+
+    await getDocRepository().then(async (val: any[]) => {
+      masterRes = [...val];
+      await splitResponseDatas();
+    });
+  };
+
   const popupInputs: any[] = [
     [
-      <div className={styles.addDocGrid} key={1}>
-        <CustomInput
-          value={formData.Title.value}
-          placeholder="Enter title"
-          isValid={formData.Title.isValid}
-          errorMsg={formData.Title.errorMsg}
-          onChange={(e) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "Title",
-              value,
-              formData.Title.validationRule
-            );
-            handleInputChange("Title", value, isValid, errorMsg);
-          }}
-        />
-
-        <CustomInput
-          value={formData.URL.value}
-          placeholder="Paste URL"
-          isValid={formData.URL.isValid}
-          errorMsg={formData.URL.errorMsg}
-          onChange={(e) => {
-            const value = e;
-            const { isValid, errorMsg } = validateField(
-              "URL",
-              value,
-              formData.URL.validationRule
-            );
-            handleInputChange("URL", value, isValid, errorMsg);
-          }}
-        />
+      <div className={styles.popupLayoutDesign} key={1}>
+        <div className={styles.firstRow}>
+          <CustomInput
+            value={formData.FolderName.value}
+            placeholder="Folder name"
+            isValid={formData.FolderName.isValid}
+            errorMsg={formData.FolderName.errorMsg}
+            onChange={(e: any) => {
+              const value = e.trimStart();
+              const { isValid, errorMsg } = validateField(
+                "FolderName",
+                value,
+                formData.FolderName.validationRule
+              );
+              handleInputChange("FolderName", value, isValid, errorMsg);
+            }}
+          />
+        </div>
+        <div className={styles.secondRow}>
+          <CustomMultipleFileUpload
+            accept="application/*"
+            placeholder="Click to upload a file"
+            multiple
+            value={formData?.Content?.value?.name || null}
+            onFileSelect={(e: any) => {
+              const value: any = e;
+              const { isValid, errorMsg } = validateField(
+                "Content",
+                value?.name || null,
+                formData.Content.validationRule
+              );
+              handleInputChange("Content", value || null, isValid, errorMsg);
+            }}
+            isValid={formData.Content.isValid}
+            errMsg={formData.Content.errorMsg}
+          />
+        </div>
       </div>,
     ],
   ];
@@ -176,118 +314,130 @@ const DocumentRepositoryIntranet = (): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleSubmit();
+          await handleData(CONFIG.fileFlowPath, 0);
         },
       },
     ],
   ];
 
-  const foldersData = [
-    {
-      title: "Project Documents",
-      url: "https://example.com/project-documents",
-    },
-    {
-      title: "Marketing Assets",
-      url: "https://example.com/marketing-assets",
-    },
-    {
-      title: "Financial Reports",
-      url: "https://example.com/financial-reports",
-    },
-    {
-      title: "Client Presentations",
-      url: "https://example.com/client-presentations",
-    },
-    {
-      title: "Team Photos",
-      url: "https://example.com/team-photos",
-    },
-    {
-      title: "Contracts and Agreements",
-      url: "https://example.com/contracts-agreements",
-    },
-    {
-      title: "Design Mockups",
-      url: "https://example.com/design-mockups",
-    },
-  ];
+  useEffect(() => {
+    setIsLoading(true);
+    onLoadingFUN();
+  }, []);
 
-  const folderTemplate = (item: any, index: number): any => {
+  const folderTemplate = (item: IDocRepository, index: number): JSX.Element => {
     return (
-      <div className={styles.folderCard} key={index}>
+      <div
+        className={styles.folderCard}
+        key={index}
+        onClick={() => {
+          localStorage.removeItem(CONFIG.selMasterFolder);
+          localStorage.setItem(
+            CONFIG.selMasterFolder,
+            JSON.stringify({
+              Name: item?.Content?.name,
+              Path: item?.Content?.ServerRelativeUrl,
+            })
+          );
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.DocRepositoryPage,
+            "_self"
+          );
+        }}
+      >
         <img src={folderIcon} alt="folder image" />
-        <span>{item?.title}</span>
+        <span>{item?.Content?.name}</span>
       </div>
     );
   };
 
   return (
     <div className={styles.docRepoContainer}>
-      <SectionHeaderIntranet
-        label="Document Repository"
-        headerAction={() => {
-          togglePopupVisibility(
-            setPopupController,
-            initialPopupController[0],
-            0,
-            "open"
-          );
-          resetFormData(formData, setFormData);
-        }}
-      />
-
-      {/* <Carousel
-        className={styles.docCarousel}
-        value={foldersData}
-        numVisible={7}
-        numScroll={2}
-        responsiveOptions={responsiveOptions}
-        itemTemplate={folderTemplate}
-      /> */}
-      <div className={styles.docCarousel}>
-        {foldersData?.map((item: any, index: number) => {
-          return folderTemplate(item, index);
-        })}
-      </div>
-
-      <ViewAll />
-
-      {popupController?.map((popupData: any, index: number) => (
-        <Popup
-          key={index}
-          isLoading={popupData?.isLoading}
-          messages={popupData?.messages}
-          resetPopup={() => {
-            setPopupController((prev: any): any => {
-              resetPopupController(prev, index, true);
-            });
+      {isLoading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "auto",
           }}
-          PopupType={popupData.popupType}
-          onHide={() => {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              index,
-              "close"
-            );
-            resetFormData(formData, setFormData);
-          }}
-          popupTitle={
-            popupData.popupType !== "confimation" && popupData.popupTitle
-          }
-          popupActions={popupActions[index]}
-          visibility={popupData.open}
-          content={popupInputs[index]}
-          popupWidth={popupData.popupWidth}
-          defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={
-            popupData.popupType !== "custom" ? popupData.popupTitle : ""
-          }
-          popupHeight={index === 0 ? true : false}
-          noActionBtn={true}
-        />
-      ))}
+        >
+          <CircularSpinner />
+        </div>
+      ) : (
+        <>
+          <SectionHeaderIntranet
+            label="Document Repository"
+            removeAdd={!isAdmin}
+            headerAction={() => {
+              resetFormData(formData, setFormData);
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open"
+              );
+            }}
+          />
+
+          <div className={styles.docCarousel}>
+            {filDocDatas
+              ?.slice(0, 7)
+              ?.map((item: IDocRepository, index: number) => {
+                return folderTemplate(item, index);
+              })}
+          </div>
+
+          <ViewAll
+            onClick={() => {
+              localStorage.removeItem(CONFIG.selMasterFolder);
+              window.open(
+                props.context.pageContext.web.absoluteUrl +
+                  CONFIG.NavigatePage.DocRepositoryPage,
+                "_self"
+              );
+            }}
+          />
+
+          {popupController?.map((popupData: any, index: number) => (
+            <Popup
+              key={index}
+              isLoading={popupData?.isLoading}
+              messages={popupData?.messages}
+              resetPopup={() => {
+                setPopupController((prev: any): any => {
+                  resetPopupController(prev, index, true);
+                });
+              }}
+              PopupType={popupData.popupType}
+              onHide={() => {
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[0],
+                  index,
+                  "close"
+                );
+                resetFormData(formData, setFormData);
+              }}
+              popupTitle={
+                popupData.popupType !== "confimation" && popupData.popupTitle
+              }
+              popupActions={popupActions[index]}
+              visibility={popupData.open}
+              content={popupInputs[index]}
+              popupWidth={popupData.popupWidth}
+              defaultCloseBtn={popupData.defaultCloseBtn || false}
+              confirmationTitle={
+                popupData.popupType !== "custom" ? popupData.popupTitle : ""
+              }
+              popupHeight={index === 0 ? true : false}
+              noActionBtn={true}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 };
