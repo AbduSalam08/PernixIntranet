@@ -12,3 +12,131 @@
   width: 100%;
   height: calc(100vh - 144px);
 }
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  .backContainer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    .backHeader {
+      font-size: 24px;
+      font-weight: 600;
+      color: #0b4d53;
+      font-family: "osSemibold", sans-serif;
+    }
+  }
+
+  .searchContainer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    .refreshBTN {
+      padding: 7px;
+      border-radius: 4px;
+      background-color: #0b4d53;
+      cursor: pointer;
+
+      i {
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffff;
+      }
+    }
+  }
+}
+
+.tabContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+
+  .tabsAlign {
+    display: flex;
+    align-items: center;
+
+    .clickTab {
+      height: 24px;
+      font-size: 18px;
+      font-weight: 500;
+      color: #7c7c7c;
+      cursor: pointer;
+    }
+  }
+
+  .selectedTab {
+    height: 24px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+.bodyContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5%;
+
+  .folderSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    width: 30%;
+    margin-bottom: 20px;
+
+    .folderItems {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+
+      img {
+        height: 20px;
+        width: 20px;
+      }
+
+      div {
+        width: 100%;
+        font-size: 16px;
+        font-weight: 600;
+      }
+    }
+
+    svg {
+      color: #ff0000;
+    }
+  }
+}
+
+.bodyNoDataFound {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 306px);
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0b4d53;
+}
+
+.popupLayoutDesign {
+  .firstRow {
+    margin-bottom: 20px;
+
+    div {
+      width: 100%;
+    }
+  }
+
+  .secondRow {
+    div {
+      width: 100%;
+    }
+  }
+}

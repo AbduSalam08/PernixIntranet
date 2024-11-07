@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import {
+  IDocRepositoryColumn,
   IListName,
   IMotivateColumn,
   INavigatePage,
@@ -13,9 +14,15 @@ import {
 
 export namespace CONFIG {
   export const TenantDetail: ITenantDetail = {
-    webURL: `${window.location.origin}/sites/PernixIntranet`,
+    webURL: `${window.location.origin}${window.location.pathname
+      .split("/", 3)
+      .join("/")}`,
     tenantURL: `${window.location.origin}`,
   };
+
+  export const fileFlowPath: string = `${window.location.pathname
+    .split("/", 3)
+    .join("/")}/Intranet_DocumentRepository`;
 
   export const ListNames: IListName = {
     Intranet_DocumentRepository: "Intranet_DocumentRepository",
@@ -25,6 +32,8 @@ export namespace CONFIG {
     Intranet_QuestionToCEO: "Intranet_QuestionToCEO",
     Intranet_ShoutOuts: "Intranet_ShoutOuts",
     HelpDesk_AllTickets: "HelpDesk_AllTickets",
+    Calendar_Azure_Group_ID: "Calendar_Azure_Group_ID",
+    HelpDesk_TicketConversations: "HelpDesk_TicketConversations",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -39,10 +48,22 @@ export namespace CONFIG {
     Pernix_Admin: "Pernix_Admin",
     Poll_Admin: "Poll_Admin",
     QuestionCEO_Admin: "QuestionCEO_Admin",
+    QuestionCEO: "QuestionCEO",
     Shoutouts_Admin: "Shoutouts_Admin",
     HelpDesk_Ticket_Managers: "HelpDesk_Ticket_Managers",
     HelpDesk_IT_Owners: "HelpDesk_IT_Owners",
   };
+
+  export const QuestionsPageTabsName: string[] = [
+    "All questions",
+    "Questions by me",
+    "Un answered questions",
+  ];
+
+  export const ShoutOutsPageTabsName: string[] = [
+    "All shout-out",
+    "Shout-out by me",
+  ];
 
   export const RoleDetails: IRoleDetails = {
     SuperAdmin: "Super Admin",
@@ -84,6 +105,14 @@ export namespace CONFIG {
     Date: null,
     Status: "",
   };
+
+  export const DocRepositoryColumn: IDocRepositoryColumn = {
+    ID: "ID",
+    FolderName: "FolderName",
+    Content: "Content",
+  };
+
+  export const selMasterFolder: string = "selMasterFolder";
 
   export const NavigatePage: INavigatePage = {
     PernixIntranet: "/SitePages/PernixIntranet.aspx",
