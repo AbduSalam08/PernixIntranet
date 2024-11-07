@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -7,15 +8,26 @@ import DataTable from "../../../../components/common/DataTable/DataTable";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
 // images
 const reopenTicket: any = require("../../../../assets/images/svg/reopenTicket.svg");
+import EditIcon from "@mui/icons-material/Edit";
+const infoRed: any = require("../../../helpDesk/assets/images/svg/infoRed.svg");
 
 import styles from "./MyTickets.module.scss";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Add } from "@mui/icons-material";
 import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
 import {
   currentRoleBasedDataUtil,
-  filterTicketsByTimePeriod,
+  filterTicketsByCategory,
+  filterTicketsByPriority,
+  filterTicketsBySearch,
+  formatTicketData,
+  // filterTicketsByTimePeriod,
+  generateTicketNumber,
+  getCurrentRoleForTicketsRoute,
   getTicketsByKeyValue,
+  // sortByCreatedDate,
+  sortTickets,
+  ticketsFilter,
   validateField,
 } from "../../../../utils/commonUtils";
 import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
@@ -24,6 +36,26 @@ import CustomFileUpload from "../../../../components/common/CustomInputFields/Cu
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import InfoCard from "../../components/InfoCard/InfoCard";
+import { toast } from "react-toastify";
+import {
+  TicketCategories,
+  TicketPriority,
+  TicketStatus,
+} from "../../../../constants/HelpDeskTicket";
+import { ToastContainer } from "react-toastify";
+import {
+  addNewTicket,
+  updateTicket,
+} from "../../../../services/HelpDeskMainServices/ticketServices";
+import { Avatar } from "primereact/avatar";
+import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
+import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
+import { useLocation, useNavigate } from "react-router-dom";
+import { mapRowDataToFormData } from "../../../../utils/helpdeskUtils";
+import { togglePopupVisibility } from "../../../../utils/popupUtils";
+import Popup from "../../../../components/common/Popups/Popup";
+import dayjs from "dayjs";
+import { getAttachmentofTicket } from "../../../../services/HelpDeskMainServices/ticketViewServices";
 // Import SVGs
 const myTickets: any = require("../../assets/images/svg/myTickets.svg");
 const openTickets: any = require("../../assets/images/svg/openTickets.svg");
@@ -33,254 +65,257 @@ const ticketsOnHold: any = require("../../assets/images/svg/ticketsOnHold.svg");
 
 const MyTickets = (): JSX.Element => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [openNewTicketSlide, setOpenNewTicketSlide] = useState<{
+    open: boolean;
+    type: "view" | "add" | "update";
+    data?: any;
+  }>({
+    open: false,
+    type: "add",
+    data: [],
+  });
 
-  const [openNewTicketSlide, setOpenNewTicketSlide] = useState(false);
-  const handleView = (row: any): any => {
-    alert(`View clicked for row: ${JSON.stringify(row)}`);
-  };
-
-  const data = [
+  const initialPopupController = [
     {
-      id: 1,
-      ticket_number: "T-0001",
-      IT_owner: "Alice",
-      category: "Network",
-      priority: "High",
-      status: "Open",
-    },
-    {
-      id: 2,
-      ticket_number: "T-0002",
-      IT_owner: "Bob",
-      category: "Hardware",
-      priority: "Medium",
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      ticket_number: "T-0003",
-      IT_owner: "Charlie",
-      category: "Software",
-      priority: "Low",
-      status: "Resolved",
-    },
-    {
-      id: 4,
-      ticket_number: "T-0004",
-      IT_owner: "David",
-      category: "Database",
-      priority: "High",
-      status: "Open",
-    },
-    {
-      id: 5,
-      ticket_number: "T-0005",
-      IT_owner: "Eve",
-      category: "Security",
-      priority: "Critical",
-      status: "Open",
-    },
-    {
-      id: 6,
-      ticket_number: "T-0006",
-      IT_owner: "Frank",
-      category: "User Support",
-      priority: "Medium",
-      status: "Closed",
-    },
-    {
-      id: 7,
-      ticket_number: "T-0007",
-      IT_owner: "Grace",
-      category: "Network",
-      priority: "High",
-      status: "In Progress",
-    },
-    {
-      id: 8,
-      ticket_number: "T-0008",
-      IT_owner: "Hannah",
-      category: "Software",
-      priority: "Low",
-      status: "Open",
-    },
-    {
-      id: 9,
-      ticket_number: "T-0009",
-      IT_owner: "Ivy",
-      category: "Hardware",
-      priority: "Medium",
-      status: "Resolved",
-    },
-    {
-      id: 0,
-      ticket_number: "T-0010",
-      IT_owner: "Jack",
-      category: "Database",
-      priority: "High",
-      status: "Closed",
-    },
-    {
-      id: 1,
-      ticket_number: "T-0011",
-      IT_owner: "Karen",
-      category: "Security",
-      priority: "Critical",
-      status: "Open",
-    },
-    {
-      id: 2,
-      ticket_number: "T-0012",
-      IT_owner: "Leo",
-      category: "User Support",
-      priority: "Medium",
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      ticket_number: "T-0013",
-      IT_owner: "Mona",
-      category: "Network",
-      priority: "High",
-      status: "Open",
-    },
-    {
-      id: 4,
-      ticket_number: "T-0014",
-      IT_owner: "Nina",
-      category: "Software",
-      priority: "Low",
-      status: "Resolved",
-    },
-    {
-      id: 5,
-      ticket_number: "T-0015",
-      IT_owner: "Oscar",
-      category: "Hardware",
-      priority: "Medium",
-      status: "Closed",
-    },
-    {
-      id: 6,
-      ticket_number: "T-0016",
-      IT_owner: "Paul",
-      category: "Database",
-      priority: "High",
-      status: "In Progress",
-    },
-    {
-      id: 7,
-      ticket_number: "T-0017",
-      IT_owner: "Quinn",
-      category: "Security",
-      priority: "Critical",
-      status: "Open",
-    },
-    {
-      id: 8,
-      ticket_number: "T-0018",
-      IT_owner: "Ray",
-      category: "User Support",
-      priority: "Medium",
-      status: "Open",
-    },
-    {
-      id: 9,
-      ticket_number: "T-0019",
-      IT_owner: "Sophie",
-      category: "Network",
-      priority: "High",
-      status: "Resolved",
-    },
-    {
-      id: 0,
-      ticket_number: "T-0020",
-      IT_owner: "Tom",
-      category: "Software",
-      priority: "Low",
-      status: "Closed",
-    },
-    {
-      id: 1,
-      ticket_number: "T-0021",
-      IT_owner: "Uma",
-      category: "Hardware",
-      priority: "Medium",
-      status: "In Progress",
-    },
-    {
-      id: 2,
-      ticket_number: "T-0022",
-      IT_owner: "Vera",
-      category: "Database",
-      priority: "High",
-      status: "Open",
-    },
-    {
-      id: 3,
-      ticket_number: "T-0023",
-      IT_owner: "Will",
-      category: "Security",
-      priority: "Critical",
-      status: "Closed",
-    },
-    {
-      id: 4,
-      ticket_number: "T-0024",
-      IT_owner: "Xena",
-      category: "User Support",
-      priority: "Medium",
-      status: "In Progress",
-    },
-    {
-      id: 5,
-      ticket_number: "T-0025",
-      IT_owner: "Yara",
-      category: "Network",
-      priority: "High",
-      status: "Open",
-    },
-    {
-      id: 6,
-      ticket_number: "T-0026",
-      IT_owner: "Zane",
-      category: "Software",
-      priority: "Low",
-      status: "Resolved",
-    },
-    {
-      id: 7,
-      ticket_number: "T-0027",
-      IT_owner: "Anna",
-      category: "Hardware",
-      priority: "Medium",
-      status: "Closed",
-    },
-    {
-      id: 8,
-      ticket_number: "T-0028",
-      IT_owner: "Ben",
-      category: "Database",
-      priority: "High",
-      status: "In Progress",
-    },
-    {
-      id: 9,
-      ticket_number: "T-0029",
-      IT_owner: "Cathy",
-      category: "Security",
-      priority: "Critical",
-      status: "Open",
-    },
-    {
-      id: 0,
-      ticket_number: "T-0030",
-      IT_owner: "Derek",
-      category: "User Support",
-      priority: "Medium",
-      status: "Open",
+      open: false,
+      popupTitle: "Confirmation",
+      popupWidth: "450px",
+      popupType: "confirmation",
+      defaultCloseBtn: false,
+      confirmationTitle: "Are you sure want to repeat this ticket?",
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "News Deleted successfully!",
+        error: "Something went wrong!",
+        successDescription: "The new news 'ABC' has been Deleted successfully.",
+        errorDescription:
+          "An error occured while Deleting news, please try again later.",
+        inprogress: "Deleting new news, please wait...",
+      },
     },
   ];
+
+  const [popupController, setPopupController] = useState(
+    initialPopupController
+  );
+
+  const currentUserDetails = useSelector(
+    (state: any) => state.MainSPContext.currentUserDetails
+  );
+
+  const isTicketManager: boolean =
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers";
+  const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
+
+  const HelpDeskTicktesData: any = useSelector(
+    (state: any) => state.HelpDeskTicktesData.value
+  );
+
+  const currentRoleBasedData = currentRoleBasedDataUtil(
+    currentUserDetails,
+    HelpDeskTicktesData
+  );
+
+  const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
+
+  const initialData = {
+    TicketNumber: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid title",
+      validationRule: { required: true, type: "string" },
+    },
+    EmployeeNameId: {
+      value: null,
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "string" },
+    },
+    ITOwnerId: {
+      value: null,
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: {
+        required: isTicketManager,
+        type: "string",
+      },
+    },
+    TicketManagerId: {
+      value: isTicketManager ? currentUserDetails?.id : null,
+      isValid: true,
+      errorMsg: "TicketManager is required",
+      validationRule: { required: false, type: "array" },
+    },
+    Attachment: {
+      value: null,
+      isValid: true,
+      errorMsg: "Invalid file",
+      validationRule: { required: false, type: "file" },
+    },
+    Category: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+    TicketDescription: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "string" },
+    },
+    Priority: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+    TicketSource: {
+      value: "Web",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "string" },
+    },
+    Status: {
+      value: isTicketManager || isITOwner ? "" : "Open",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: {
+        required: isTicketManager || isITOwner,
+        type: "string",
+      },
+    },
+    RepeatedTicket: {
+      value: false,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "boolean" },
+    },
+    RepeatedTicketSourceId: {
+      value: null,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "string" },
+    },
+    Rating: {
+      value: null,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "number" },
+    },
+    TicketClosedOn: {
+      value: null,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "date" },
+    },
+    TicketRepeatedOn: {
+      value: null,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: false, type: "date" },
+    },
+  };
+
+  const [formData, setFormData] = useState<any>(initialData);
+  console.log("formData: ", formData);
+
+  const popupActions: any = [
+    [
+      {
+        text: "No",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Yes",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async () => {
+          // await handleSubmit();
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+          const currentRowData: any = popupController[0]?.popupData;
+
+          const formDataAppended = {
+            TicketNumber: {
+              value: currentRowData?.TicketNumber,
+            },
+            Status: { value: "Open" },
+            RepeatedTicketSourceId: { value: currentRowData?.ID },
+            RepeatedTicket: { value: true },
+            TicketRepeatedOn: { value: dayjs(new Date()) },
+            Category: { value: currentRowData?.Category },
+            Priority: { value: currentRowData?.Priority },
+            EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
+            TicketSource: { value: currentRowData?.TicketSource },
+            TicketDescription: { value: currentRowData?.TicketDescription },
+            TicketManagerId: {
+              value: currentRowData?.TicketManagerId
+                ? currentRowData?.TicketManager?.ID
+                : null,
+            },
+            ITOwnerId: {
+              value: currentRowData?.ITOwnerId
+                ? currentRowData?.ITOwner?.ID
+                : null,
+            },
+          };
+          console.log("formDataAppended: ", formDataAppended);
+
+          await Promise.all([
+            addNewTicket(formDataAppended, ["Attachments"], true),
+          ])
+            .then(async (res: any) => {
+              navigate(`${currentRole}/all_tickets`);
+              await Promise.all([getAllTickets(dispatch)]);
+            })
+            .catch((err: any) => {
+              console.log("err: ", err);
+            });
+        },
+      },
+    ],
+  ];
+
+  const [dataGridProps, setDataGridProps] = useState<{
+    data: any[];
+    sortedBy: "Old to new" | "New to old";
+    sortedByOptions: ["Old to new", "New to old"];
+  }>({
+    data: [],
+    sortedBy: "New to old",
+    sortedByOptions: ["Old to new", "New to old"],
+  });
+  console.log("dataGridProps: ", dataGridProps);
+  const [searchTerm, setSearchTerm] = useState("");
+  console.log("setSearchTerm: ", setSearchTerm);
+  const [selectedCategory, setSelectedCategory] = useState<any>("");
+  const [selectedPriority, setSelectedPriority] = useState<any>("");
 
   const columns = [
     {
@@ -288,12 +323,59 @@ const MyTickets = (): JSX.Element => {
       field: "ticket_number",
       headerName: "Ticket no",
       width: 200,
+      renderCell: (params: any) => {
+        return (
+          <span
+            className={styles.clickableLink}
+            onClick={() => {
+              navigate(
+                `${currentRole}/all_tickets/${params?.row?.ticket_number}/view_ticket`,
+                {
+                  state: params?.row,
+                }
+              );
+            }}
+          >
+            {params?.value}
+          </span>
+        );
+      },
     },
     {
       sortable: false,
       field: "IT_owner",
-      headerName: "IT Owner",
+      headerName: "IT/Business Owner",
       width: 200,
+      renderCell: (params: any) => {
+        return (
+          <>
+            {params?.value ? (
+              <>
+                <Avatar
+                  image={`/_layouts/15/userphoto.aspx?size=S&username=${params?.value?.EMail}`}
+                  shape="circle"
+                  size="normal"
+                  style={{
+                    margin: "0 !important",
+                    border: "1px solid #adadad70",
+                    width: "23px",
+                    height: "23px",
+                    marginRight: "10px",
+                  }}
+                />
+                <span
+                  title={params?.value?.Title}
+                  className={styles.userNamePill}
+                >
+                  {params?.value?.Title}
+                </span>
+              </>
+            ) : (
+              <StatusPill size="SM" status="Unassigned" />
+            )}
+          </>
+        );
+      },
     },
     {
       sortable: false,
@@ -312,6 +394,8 @@ const MyTickets = (): JSX.Element => {
       field: "status",
       headerName: "Status",
       maxWidth: 150,
+      renderCell: (params: any) =>
+        params?.value ? <StatusPill size="SM" status={params?.value} /> : "-",
     },
     {
       field: "actions",
@@ -319,56 +403,96 @@ const MyTickets = (): JSX.Element => {
       headerName: "Actions",
       width: 200,
       renderCell: (params: any) => (
-        <button
-          onClick={() => {
-            handleView(params);
-          }}
-          className={styles.reopenTicket}
-        >
-          <img src={reopenTicket} />
-        </button>
+        <div className={styles.actionButtons}>
+          <button
+            title="Repeat this ticket"
+            onClick={() => {
+              const ticketNumber = params?.row?.ticket_number;
+              const currentRowData: any = HelpDeskTicktesData?.AllData?.filter(
+                (item: any) => item?.TicketNumber === ticketNumber
+              )?.[0];
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open",
+                "",
+                currentRowData,
+                `Are you sure want to repeat this ticket "${ticketNumber}" ?`
+              );
+            }}
+            className={styles.reopenTicket}
+          >
+            <img src={reopenTicket} />
+          </button>
+          <button
+            title="Edit this ticket"
+            onClick={async () => {
+              const ticketNumber = params?.row?.ticket_number;
+              const currentRowData: any = HelpDeskTicktesData?.AllData?.filter(
+                (item: any) => item?.TicketNumber === ticketNumber
+              )?.[0];
+
+              const currentAttachment = await getAttachmentofTicket(
+                currentRowData?.ID
+              );
+
+              console.log("currentRowData: ", currentRowData);
+              setOpenNewTicketSlide({
+                open: true,
+                type: "update",
+                data: currentRowData,
+              });
+
+              console.log(
+                "currentaAttachment: ",
+                currentAttachment[0]?.FileName
+              );
+
+              setFormData((prev: any) =>
+                mapRowDataToFormData(
+                  currentRowData,
+                  prev,
+                  isTicketManager,
+                  currentUserDetails,
+                  isITOwner
+                )
+              );
+
+              setFormData((prev: any) => ({
+                ...prev,
+                Attachment: {
+                  ...prev?.Attachment,
+                  value: {
+                    name: currentAttachment[0]?.FileName,
+                  },
+                },
+              }));
+              // handleView(params);
+            }}
+            className={styles.reopenTicket}
+          >
+            <EditIcon
+              sx={{
+                color: "#2b4d51",
+                fontSize: "16px",
+              }}
+            />
+          </button>
+        </div>
       ),
     },
   ];
 
-  const [formData, setFormData] = useState<any>({
-    Title: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid title",
-      validationRule: { required: true, type: "string" },
-    },
-    SendTowards: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid input",
-      validationRule: { required: true, type: "date" },
-    },
-    EndDate: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid input",
-      validationRule: { required: true, type: "date" },
-    },
-    Status: {
-      value: "",
-      isValid: true,
-      errorMsg: "Status is required",
-      validationRule: { required: true, type: "string" },
-    },
-    thumbnail: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid file",
-      validationRule: { required: true, type: "file" },
-    },
-    Description: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-  });
+  const priorityLevelIntimations: any = {
+    Standard: null,
+    "Low Priority": "Resolution within 3-5 business days.",
+    "Medium Priority": "Resolution within 48 hours.",
+    "High Priority":
+      "Same-day resolution. (Please only select high priority if necessary. IT may adjust priority based on other business objectives.)",
+    "Critical/Impacting Multiple People":
+      "Selecting this priority will alert multiple IT personnel and senior managers for immediate resolution. Use this for business-critical issues (e.g., Vista or Internet is down).",
+  };
 
   const handleInputChange = (
     field: string,
@@ -387,46 +511,98 @@ const MyTickets = (): JSX.Element => {
     }));
   };
 
-  const currentUserDetails = useSelector(
-    (state: { MainSPContext: { currentUserDetails: any } }) =>
-      state.MainSPContext.currentUserDetails
-  );
+  const handleSubmit = async (): Promise<any> => {
+    let hasErrors = false;
 
-  const HelpDeskTicktesData: any = useSelector(
-    (state: any) => state.HelpDeskTicktesData.value
-  );
+    // Validate each field and update the state with error messages
+    const updatedFormData = Object.keys(formData).reduce((acc, key) => {
+      const fieldData = formData[key];
+      const { isValid, errorMsg } = validateField(
+        key,
+        fieldData?.value,
+        fieldData?.validationRule
+      );
 
-  const currentRoleBasedData = currentRoleBasedDataUtil(
-    currentUserDetails,
-    HelpDeskTicktesData
-  );
+      if (!isValid) {
+        hasErrors = true;
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          ...fieldData,
+          isValid,
+          errorMsg,
+        },
+      };
+    }, {} as typeof formData);
+
+    setFormData(updatedFormData);
+    console.log("hasErrors: ", hasErrors);
+    if (!hasErrors) {
+      console.log("formData: ", formData);
+      if (openNewTicketSlide.type === "add") {
+        await Promise.all([addNewTicket(formData, ["Attachment"])])
+          .then(async (res: any) => {
+            await getAllTickets(dispatch);
+            navigate(`${currentRole}/all_tickets`);
+            setOpenNewTicketSlide({
+              open: false,
+              type: "add",
+            });
+            setFormData(initialData);
+          })
+          ?.catch((err: any) => {
+            console.log("err: ", err);
+          });
+      } else {
+        await Promise.all([
+          updateTicket(openNewTicketSlide?.data?.ID, formData, ["Attachment"]),
+        ])
+          .then(async (res: any) => {
+            await getAllTickets(dispatch);
+            navigate(`${currentRole}/all_tickets`);
+            setOpenNewTicketSlide({
+              open: false,
+              type: "add",
+            });
+            setFormData(initialData);
+          })
+          ?.catch((err: any) => {
+            console.log("err: ", err);
+          });
+      }
+    } else {
+      toast.warning("Please fill out all fields!", {
+        position: "top-center",
+        autoClose: 3500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+    }
+  };
 
   // Info cards array
   const infoCards: any[] = [
     {
-      cardName: "My Tickets",
+      cardName: "My tickets",
       cardImg: myTickets,
       cardValues: currentRoleBasedData?.data?.length || 0,
     },
     {
-      cardName: "Open",
+      cardName: "My open",
       cardImg: openTickets,
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Open")
           ?.length || 0,
     },
     {
-      cardName: "Closed",
+      cardName: "My closed",
       cardImg: closedTickets,
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Closed")
-          ?.length || 0,
-    },
-    {
-      cardName: "This week's tickets",
-      cardImg: ticketsCreatedThisWeek,
-      cardValues:
-        filterTicketsByTimePeriod(currentRoleBasedData?.data, "thisWeek")
           ?.length || 0,
     },
     {
@@ -436,45 +612,195 @@ const MyTickets = (): JSX.Element => {
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "On Hold")
           ?.length || 0,
     },
+    {
+      cardName: "Tickets in progress",
+      cardImg: ticketsCreatedThisWeek,
+      cardValues:
+        getTicketsByKeyValue(
+          currentRoleBasedData?.data,
+          "Status",
+          "In Progress"
+        )?.length || 0,
+    },
   ];
 
-  useEffect(() => {
-    getAllTickets(dispatch);
-  }, []);
+  // Apply filters and sorting
+  const filteredData = useMemo(() => {
+    let formattedData = formatTicketData(currentRoleBasedData?.data || []);
 
+    // Apply global search, category, and priority filters
+    formattedData = filterTicketsBySearch(formattedData, searchTerm);
+    formattedData = filterTicketsByCategory(formattedData, selectedCategory);
+    formattedData = filterTicketsByPriority(formattedData, selectedPriority);
+
+    // Sort by priority and date based on sortBy state
+    return sortTickets(formattedData, dataGridProps.sortedBy, true);
+  }, [
+    searchTerm,
+    selectedCategory,
+    selectedPriority,
+    dataGridProps.sortedBy,
+    currentRoleBasedData?.data,
+  ]);
+
+  // Update dataGridProps when filtered data changes
+  useEffect(() => {
+    setDataGridProps((prev) => ({
+      ...prev,
+      data: filteredData,
+    }));
+  }, [filteredData]);
+
+  // Handle filtering and navigation on path change
+  useEffect(() => {
+    ticketsFilter(
+      `${currentRole}${location.pathname}`,
+      HelpDeskTicktesData,
+      dispatch
+    );
+    navigate(location.pathname, { state: null });
+  }, [location.pathname]);
   return (
     <div className={styles.mytickets}>
       <div className={styles.mytickets_header}>
         <PageHeader title={"All tickets"} noBackBtn />
-        <DefaultButton
-          btnType="primaryGreen"
-          text={"New ticket"}
-          onClick={() => {
-            setOpenNewTicketSlide(true);
-          }}
-          startIcon={<Add />}
-        />
+
+        <div className={styles.topLevelFilter}>
+          <DefaultButton
+            btnType="primaryGreen"
+            onlyIcon
+            text={"Reset"}
+            onClick={async () => {
+              // await getAllTickets(dispatch);
+              setSearchTerm("");
+              setSelectedCategory("");
+              setSelectedPriority("");
+            }}
+          />
+          <CustomDropDown
+            floatingLabel={false}
+            size="SM"
+            highlightDropdown
+            width={"150px"}
+            value={dataGridProps.sortedBy}
+            options={dataGridProps?.sortedByOptions}
+            noErrorMsg
+            placeholder="Sort by"
+            onChange={(value) => {
+              setDataGridProps((prev: any) => ({
+                ...prev,
+                sortedBy: value,
+              }));
+            }}
+          />
+          <input
+            onChange={(e: any) => {
+              setSearchTerm(e?.target?.value);
+            }}
+            className={"basicSMInput"}
+            value={searchTerm}
+            placeholder="Search"
+          />
+          <CustomDropDown
+            floatingLabel={false}
+            size="SM"
+            highlightDropdown
+            width={"150px"}
+            value={selectedCategory}
+            options={TicketCategories}
+            noErrorMsg
+            placeholder="Category"
+            onChange={(value) => {
+              setSelectedCategory(value);
+            }}
+          />
+          <CustomDropDown
+            floatingLabel={false}
+            size="SM"
+            highlightDropdown
+            width={"150px"}
+            value={selectedPriority}
+            options={TicketPriority}
+            noErrorMsg
+            placeholder="Priority"
+            onChange={(value) => {
+              setSelectedPriority(value);
+            }}
+          />
+
+          <DefaultButton
+            btnType="primaryGreen"
+            text={"New ticket"}
+            onClick={async () => {
+              // await getAllTickets(dispatch);
+              setOpenNewTicketSlide({
+                open: true,
+                type: "add",
+              });
+              const lastTicketID: number = Math.max(
+                0,
+                ...(HelpDeskTicktesData?.data ?? [])
+                  ?.map((item: any) => item?.ID)
+                  ?.filter(
+                    (id: number | undefined) => id !== undefined && id !== null
+                  )
+              );
+
+              const newTicketNumber = generateTicketNumber(lastTicketID + 1);
+
+              setFormData((prev: any) => ({
+                ...prev,
+                EmployeeNameId: {
+                  ...prev.EmployeeNameId,
+                  value: currentUserDetails?.id
+                    ? {
+                        id: currentUserDetails?.id,
+                        email: currentUserDetails?.email,
+                        name: currentUserDetails?.userName,
+                      }
+                    : "",
+                },
+                TicketNumber: {
+                  ...prev.TicketNumber,
+                  value: newTicketNumber,
+                },
+              }));
+            }}
+            startIcon={<Add />}
+          />
+        </div>
       </div>
       {currentRoleBasedData?.role === "user" && (
         <div className={styles.infoCards}>
           {infoCards?.map((item: any, idx: number) => (
-            <InfoCard idx={idx} item={item} key={idx} />
+            <InfoCard
+              idx={idx}
+              item={item}
+              isLoading={HelpDeskTicktesData?.isLoading}
+              key={idx}
+            />
           ))}
         </div>
       )}
       <DataTable
-        rows={data}
+        rows={dataGridProps?.data ?? []}
+        // rows={dataGridProps?.sortedBy==="Asc (Old)"? currentRoleBasedData?.data:dataGridProps?.sortedBy==="Desc (Latest)"?DescData:[]}
         columns={columns}
+        emptyMessage="No tickets found!"
+        isLoading={HelpDeskTicktesData?.isLoading}
         pageSize={10}
         checkboxSelection={false}
       />
-
       {/* new ticket slide */}
       <Drawer
         anchor={"right"}
-        open={openNewTicketSlide}
+        open={openNewTicketSlide.open}
         onClose={() => {
-          setOpenNewTicketSlide(false);
+          setOpenNewTicketSlide({
+            open: false,
+            type: "add",
+          });
+          setFormData(initialData);
         }}
         sx={{
           "& .MuiPaper-root.MuiPaper-elevation": {
@@ -487,118 +813,274 @@ const MyTickets = (): JSX.Element => {
         <div className={styles.newTicketSlide}>
           <>
             <PageHeader
-              title={"New ticket"}
+              title={
+                openNewTicketSlide?.type === "add"
+                  ? "New ticket"
+                  : "Update ticket details"
+              }
               headerClick={() => {
-                setOpenNewTicketSlide(false);
+                setOpenNewTicketSlide({ open: false, type: "add" });
               }}
               centered
               underlined
             />
             <div className={styles.inputs}>
-              <CustomInput
-                value={formData.Title.value}
-                placeholder="Ticket number"
-                isValid={formData.Title.isValid}
-                errorMsg={formData.Title.errorMsg}
-                onChange={(e) => {
-                  const value = e;
-                  const { isValid, errorMsg } = validateField(
-                    "Title",
-                    value,
-                    formData.Title.validationRule
-                  );
-                  handleInputChange("Title", value, isValid, errorMsg);
-                }}
-              />
-              <CustomInput
-                value={formData.Title.value}
-                placeholder="Employee name"
-                isValid={formData.Title.isValid}
-                errorMsg={formData.Title.errorMsg}
-                onChange={(e) => {
-                  const value = e;
-                  const { isValid, errorMsg } = validateField(
-                    "Title",
-                    value,
-                    formData.Title.validationRule
-                  );
-                  handleInputChange("Title", value, isValid, errorMsg);
-                }}
-              />
+              <>
+                <CustomInput
+                  value={formData?.TicketNumber?.value}
+                  // disabled
+                  readOnly
+                  placeholder="Ticket number"
+                  isValid={formData?.TicketNumber?.isValid}
+                  errorMsg={formData?.TicketNumber?.errorMsg}
+                  onChange={(e) => {
+                    const value = e;
+                    const { isValid, errorMsg } = validateField(
+                      "TicketNumber",
+                      value,
+                      formData?.TicketNumber?.validationRule
+                    );
+                    handleInputChange("TicketNumber", value, isValid, errorMsg);
+                  }}
+                />
 
-              <CustomPeoplePicker
-                labelText="IT Owner"
-                isValid={formData.SendTowards.isValid}
-                errorMsg={formData.SendTowards.errorMsg}
-                selectedItem={formData.SendTowards.value || []}
-                onChange={(item: any) => {
-                  const value = item[0];
-                  console.log("value: ", value);
-                  const { isValid, errorMsg } = validateField(
-                    "SendTowards",
-                    value,
-                    formData.SendTowards.validationRule
-                  );
-                  handleInputChange("SendTowards", value, isValid, errorMsg);
-                }}
-              />
+                <CustomPeoplePicker
+                  labelText="Employee Name"
+                  isValid={formData?.EmployeeNameId?.isValid}
+                  errorMsg={formData?.EmployeeNameId?.errorMsg}
+                  noErrorMsg
+                  readOnly
+                  selectedItem={[formData?.EmployeeNameId?.value?.email]}
+                  onChange={(item: any) => {
+                    const value = item[0];
+                    console.log("value: ", value);
+                    const { isValid, errorMsg } = validateField(
+                      "EmployeeNameId",
+                      value,
+                      formData?.EmployeeNameId?.validationRule
+                    );
+                    handleInputChange(
+                      "EmployeeNameId",
+                      value,
+                      isValid,
+                      errorMsg
+                    );
+                  }}
+                />
 
-              <CustomDropDown
-                value={formData.Status.value}
-                options={["Active", "In Active"]}
-                placeholder="Category"
-                isValid={formData.Status.isValid}
-                errorMsg={formData.Status.errorMsg}
-                onChange={(value) => {
-                  const { isValid, errorMsg } = validateField(
-                    "Status",
-                    value,
-                    formData.Status.validationRule
-                  );
-                  handleInputChange("Status", value, isValid, errorMsg);
-                }}
-              />
+                {isTicketManager && (
+                  <CustomPeoplePicker
+                    labelText="IT Owner"
+                    isValid={formData?.ITOwnerId?.isValid}
+                    errorMsg={formData?.ITOwnerId?.errorMsg}
+                    selectedItem={[formData?.ITOwnerId?.value?.email]}
+                    onChange={(item: any) => {
+                      const value = item[0];
+                      console.log("value: ", value);
+                      const { isValid, errorMsg } = validateField(
+                        "ITOwnerId",
+                        value,
+                        formData?.ITOwnerId?.validationRule
+                      );
+                      handleInputChange("ITOwnerId", value, isValid, errorMsg);
+                    }}
+                  />
+                )}
 
-              <CustomDropDown
-                value={formData.Status.value}
-                options={["Active", "In Active"]}
-                placeholder="Priority"
-                isValid={formData.Status.isValid}
-                errorMsg={formData.Status.errorMsg}
-                onChange={(value) => {
-                  const { isValid, errorMsg } = validateField(
-                    "Status",
-                    value,
-                    formData.Status.validationRule
-                  );
-                  handleInputChange("Status", value, isValid, errorMsg);
-                }}
-              />
-              <CustomFileUpload
-                accept="image/png,image/svg"
-                value={formData.thumbnail.value?.name}
-                onFileSelect={(file) => {
-                  console.log("file: ", file);
-                  const { isValid, errorMsg } = validateField(
-                    "thumbnail",
-                    file ? file.name : "",
-                    formData.StartDate.thumbnail
-                  );
-                  handleInputChange("thumbnail", file, isValid, errorMsg);
-                }}
-                placeholder="Attachment"
-                isValid={formData.thumbnail.isValid}
-                errMsg={formData.thumbnail.errorMsg}
-              />
+                <CustomDropDown
+                  value={formData?.Category?.value}
+                  options={TicketCategories}
+                  placeholder="Category"
+                  isValid={formData?.Category?.isValid}
+                  errorMsg={formData?.Category?.errorMsg}
+                  onChange={(value) => {
+                    const { isValid, errorMsg } = validateField(
+                      "Category",
+                      value,
+                      formData?.Category?.validationRule
+                    );
+                    handleInputChange("Category", value, isValid, errorMsg);
+                  }}
+                />
+
+                <div className={styles.priorityWrapper}>
+                  <div className={styles.priorityInputWrapper}>
+                    <CustomDropDown
+                      value={formData?.Priority?.value}
+                      options={TicketPriority}
+                      placeholder="Priority"
+                      width={"100%"}
+                      isValid={formData?.Priority?.isValid}
+                      errorMsg={formData?.Priority?.errorMsg}
+                      onChange={(value) => {
+                        const { isValid, errorMsg } = validateField(
+                          "Priority",
+                          value,
+                          formData?.Priority?.validationRule
+                        );
+                        handleInputChange("Priority", value, isValid, errorMsg);
+                      }}
+                    />
+                    {priorityLevelIntimations[formData?.Priority?.value] && (
+                      <img src={infoRed} />
+                    )}
+                  </div>
+                  {priorityLevelIntimations[formData?.Priority?.value] ? (
+                    <span className={styles.priorityIntimation}>
+                      Note:{" "}
+                      {priorityLevelIntimations[formData?.Priority?.value] ??
+                        ""}
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                </div>
+
+                {(isTicketManager || isITOwner) && (
+                  <CustomDropDown
+                    disabled={
+                      openNewTicketSlide?.data?.Status === "Closed" &&
+                      openNewTicketSlide?.type === "update"
+                    }
+                    value={formData?.Status?.value}
+                    options={TicketStatus}
+                    placeholder="Status"
+                    isValid={formData?.Status?.isValid}
+                    errorMsg={formData?.Status?.errorMsg}
+                    onChange={(value) => {
+                      const { isValid, errorMsg } = validateField(
+                        "Status",
+                        value,
+                        formData?.Status?.validationRule
+                      );
+                      handleInputChange("Status", value, isValid, errorMsg);
+                    }}
+                  />
+                )}
+
+                <FloatingLabelTextarea
+                  value={formData.TicketDescription.value}
+                  placeholder="Description"
+                  rows={5}
+                  isValid={formData.TicketDescription.isValid}
+                  errorMsg={formData.TicketDescription.errorMsg}
+                  readOnly={currentUserDetails?.role !== "user"}
+                  onChange={(e: any) => {
+                    const value = e.trimStart();
+                    const { isValid, errorMsg } = validateField(
+                      "TicketDescription",
+                      value,
+                      formData.TicketDescription.validationRule
+                    );
+                    handleInputChange(
+                      "TicketDescription",
+                      value,
+                      isValid,
+                      errorMsg
+                    );
+                  }}
+                />
+
+                {openNewTicketSlide?.type === "add" ||
+                (openNewTicketSlide?.type === "update" &&
+                  openNewTicketSlide?.data?.EmployeeName?.EMail ===
+                    currentUserDetails?.email) ? (
+                  <CustomFileUpload
+                    accept="image/png,image/svg"
+                    value={formData?.Attachment?.value?.name}
+                    onFileSelect={(file) => {
+                      console.log("file: ", file);
+                      const { isValid, errorMsg } = validateField(
+                        "Attachment",
+                        file ? file.name : "",
+                        formData?.Attachment
+                      );
+                      handleInputChange("Attachment", file, isValid, errorMsg);
+                    }}
+                    placeholder="Attachment"
+                    isValid={formData?.Attachment?.isValid}
+                    errMsg={formData?.Attachment?.errorMsg}
+                  />
+                ) : (
+                  ""
+                  // <span>
+                  //   <img src={fileIcon} />
+                  //   {formData?.Attachment?.value?.name}
+                  // </span>
+                )}
+              </>
             </div>
           </>
 
           <div className={styles.actions}>
-            <DefaultButton btnType="darkGreyVariant" text={"Cancel"} />
-            <DefaultButton btnType="primaryGreen" text={"Submit"} />
+            <DefaultButton
+              btnType="darkGreyVariant"
+              text={"Cancel"}
+              onClick={() => {
+                setOpenNewTicketSlide({ open: false, type: "add" });
+                setFormData(initialData);
+              }}
+            />
+            <DefaultButton
+              btnType="primaryGreen"
+              text={"Submit"}
+              disabled={
+                !Object.keys(formData)
+                  .filter((key) => formData[key]?.validationRule?.required)
+                  .every((key) => formData[key].isValid)
+              }
+              onClick={handleSubmit}
+            />
           </div>
         </div>
       </Drawer>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
+      {/* popup */}
+      {popupController?.map((popupData: any, index: number) => (
+        <Popup
+          popupCustomBgColor="#fff"
+          key={index}
+          isLoading={popupData?.isLoading}
+          messages={popupData?.messages}
+          // resetPopup={() => {
+          // setPopupController((prev: any): any => {
+          //    resetPopupController(prev, index, true);
+          // });
+          // }}
+          PopupType={popupData.popupType}
+          onHide={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              index,
+              "close"
+            );
+            // resetFormData(formData, setFormData);
+          }}
+          popupTitle={
+            popupData.popupType !== "confimation" && popupData.popupTitle
+          }
+          popupActions={popupActions[index]}
+          visibility={popupData.open}
+          // content={popupInputs[index]}
+          popupWidth={popupData.popupWidth}
+          defaultCloseBtn={popupData.defaultCloseBtn || false}
+          confirmationTitle={popupData?.confirmationTitle}
+          popupHeight={index === 0 ? true : false}
+          noActionBtn={false}
+        />
+      ))}
     </div>
   );
 };

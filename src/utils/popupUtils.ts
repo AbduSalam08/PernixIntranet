@@ -5,7 +5,8 @@ export const togglePopupVisibility = (
   index?: any,
   action?: "open" | "close" | any,
   popupTitle?: any,
-  popupData?: any
+  popupData?: any,
+  confirmationTitle?: any
 ): void => {
   // Immediately toggle the popup visibility
   setPopupController((prev: any) =>
@@ -17,6 +18,7 @@ export const togglePopupVisibility = (
               popupWidth: popup?.popupWidth,
               open: action === "open" ? true : false,
               popupTitle: popupTitle || popup.popupTitle,
+              confirmationTitle: confirmationTitle || popup.confirmationTitle,
               popupData: popupData || "",
             }
           : { ...popup }

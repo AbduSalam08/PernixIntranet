@@ -5,6 +5,9 @@ const mainData = {
   value: {
     isLoading: true,
     data: [],
+    AllData: [],
+    uniqueData: [],
+    ticketType: "All tickets",
   },
 };
 

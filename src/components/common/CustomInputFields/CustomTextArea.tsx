@@ -15,6 +15,7 @@ const StyledTextarea = styled(TextareaAutosize)({
   // paddingBlockStart: "1em",
   // paddingInlineEnd: `var(--Textarea-paddingInline)`,
   flex: "auto",
+  width: "100%",
   alignSelf: "stretch",
   color: "inherit",
   backgroundColor: "transparent",
@@ -27,6 +28,7 @@ const StyledTextarea = styled(TextareaAutosize)({
     opacity: 0,
     display: "none",
     transition: "0.1s ease-out",
+    left: "12px",
   },
   "&:focus::placeholder": {
     display: "none",
@@ -37,15 +39,18 @@ const StyledTextarea = styled(TextareaAutosize)({
     top: "0.5rem",
     color: "#a4a4a4",
     fontSize: "0.75rem",
+    left: "12px",
   },
   "&:focus + textarea + label": {
     color: "#a4a4a4",
+    left: "12px",
   },
 });
 
 const StyledLabel = styled("label")(({ theme }) => ({
   position: "absolute",
   lineHeight: 1,
+  left: "12px",
   top: "calc((var(--Textarea-minHeight) - 1em) / 1.3)",
   fontWeight: theme.vars.fontWeight.md,
   color: "#a4a4a4",
@@ -61,7 +66,11 @@ const InnerTextarea = React.forwardRef<
   // React.JSX.IntrinsicElements["textarea"]
 >(function InnerTextarea(props, ref) {
   return (
-    <React.Fragment>
+    <div
+      style={{
+        overflow: "auto",
+      }}
+    >
       <StyledTextarea
         placeholder=""
         minRows={2}
@@ -69,8 +78,8 @@ const InnerTextarea = React.forwardRef<
         ref={ref}
         id="textarea"
       />
-      <StyledLabel htmlFor={"textarea"}>{props.placeholder}</StyledLabel>
-    </React.Fragment>
+      <StyledLabel htmlFor={"textarea"}>{props?.placeholder}</StyledLabel>
+    </div>
   );
 });
 

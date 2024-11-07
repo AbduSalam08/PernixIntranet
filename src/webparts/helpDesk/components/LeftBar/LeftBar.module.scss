@@ -18,6 +18,11 @@
   padding: 0px;
   width: 100%;
 }
+.parentLabel {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 
 .navLink {
   transition: all 0.1s !important;
@@ -31,7 +36,7 @@
   padding: 12px 15px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   cursor: pointer;
   &:hover {
     color: #555;
@@ -60,12 +65,17 @@
   width: calc(100% - 15px);
   cursor: pointer;
   font-size: 13px;
+  height: 40px;
   font-family: "osSemiBold", sans-serif;
   padding: 10px;
   border-radius: 4px;
   color: #666666;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   &:hover {
     color: #000;
+    background-color: #eeeeee50;
   }
 }
 .parentInActive {
@@ -80,4 +90,38 @@
   margin-left: 5px;
   color: #0b4d53;
   opacity: 1;
+}
+
+/* Define the slide-down animation */
+@keyframes slideDown {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0px);
+    opacity: 1;
+  }
+}
+
+.countBadge {
+  font-size: 12px;
+  color: #fff;
+  background-color: var(--primary-orange);
+  border-radius: 50%;
+  width: 20px;
+  // height: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  /* Add the slide-down animation */
+  animation: slideDown 0.2s ease both;
+}
+
+.hiddenBadge {
+  background-color: transparent;
+  opacity: 0;
+  pointer-events: none;
 }

@@ -12,6 +12,7 @@ interface AllticketsDataProps {
     role: string;
     isLoading: boolean;
   };
+  isLoading: boolean;
   Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
 }
 
@@ -20,7 +21,7 @@ export const emptyMessageText = (): JSX.Element => {
 };
 
 const TicketByStatusChart = memo(
-  ({ AllTickets, Term }: AllticketsDataProps): JSX.Element => {
+  ({ AllTickets, Term, isLoading }: AllticketsDataProps): JSX.Element => {
     // Group tickets by the specified term
     const createdTicketsData = groupTicketsByPeriod(
       AllTickets?.data,
@@ -106,6 +107,7 @@ const TicketByStatusChart = memo(
       <MainChart
         chartType="Pie"
         height="90%"
+        isLoading={isLoading}
         data={ticketByStatus}
         options={ticketByStatusOptions}
       />
@@ -114,7 +116,7 @@ const TicketByStatusChart = memo(
 );
 
 const TicketBySource = memo(
-  ({ AllTickets, Term }: AllticketsDataProps): JSX.Element => {
+  ({ AllTickets, Term, isLoading }: AllticketsDataProps): JSX.Element => {
     // Group tickets by the specified term
     const createdTicketsData = groupTicketsByPeriod(
       AllTickets?.data,
@@ -192,6 +194,7 @@ const TicketBySource = memo(
       emptyMessageText()
     ) : (
       <MainChart
+        isLoading={isLoading}
         height="90%"
         chartType="Doughnut"
         data={ticketBySource}
@@ -202,7 +205,7 @@ const TicketBySource = memo(
 );
 
 const CreatedClosedTickets = memo(
-  ({ AllTickets, Term }: AllticketsDataProps): JSX.Element => {
+  ({ AllTickets, Term, isLoading }: AllticketsDataProps): JSX.Element => {
     // Group tickets by the specified term
     const createdTicketsData = groupTicketsByPeriod(
       AllTickets?.data,
@@ -298,6 +301,7 @@ const CreatedClosedTickets = memo(
     ) : (
       <MainChart
         chartType="Line"
+        isLoading={isLoading}
         data={createdClosedTickets}
         options={createdClosedTicketsOptions}
       />
@@ -310,12 +314,14 @@ const TicketsByPriority = memo(
     AllTickets,
     Term,
     Status,
+    isLoading,
   }: {
     AllTickets: {
       data: any[];
       role: string;
       isLoading: boolean;
     };
+    isLoading: boolean;
     Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
     Status:
       | "Open"
@@ -409,6 +415,7 @@ const TicketsByPriority = memo(
       emptyMessageText()
     ) : (
       <MainChart
+        isLoading={isLoading}
         chartType="Bar"
         data={ticketsByPriority}
         options={ticketsByPriorityOptions}
