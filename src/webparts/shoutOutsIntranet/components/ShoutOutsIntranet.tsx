@@ -66,6 +66,10 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
     initialPopupController
   );
 
+  const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  console.log("shoutOutsData", shoutOutsData);
+
   const [formData, setFormData] = useState<any>({
     SendTowards: {
       value: [],
@@ -107,7 +111,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
         key,
-        fieldData.value,
+        key !== "SendTowards" ? fieldData.value : [fieldData.value],
         fieldData?.validationRule
       );
 
@@ -127,14 +131,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      // togglePopupVisibility(
-      //   setPopupController,
-      //   initialPopupController[0],
-      //   0,
-      //   "close"
-      // );
-      // resetFormData(formData, setFormData);
-      await addShoutOut(formData, setPopupController, 0);
+      await addShoutOut(formData, setPopupController, 0, dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -144,7 +141,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
     [
       <div className={styles.addShoutOutGrid} key={1}>
         <CustomPeoplePicker
-          labelText="Send To"
+          labelText="Shout-out to"
           isValid={formData.SendTowards.isValid}
           errorMsg={formData.SendTowards.errorMsg}
           selectedItem={formData.SendTowards.value || []}
@@ -153,7 +150,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
             console.log("value: ", value);
             const { isValid, errorMsg } = validateField(
               "SendTowards",
-              value,
+              item,
               formData.SendTowards.validationRule
             );
             handleInputChange("SendTowards", value, isValid, errorMsg);
@@ -172,7 +169,12 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
               value,
               formData.Description.validationRule
             );
-            handleInputChange("Description", value, isValid, errorMsg);
+            handleInputChange(
+              "Description",
+              value.trimStart(),
+              isValid,
+              errorMsg
+            );
           }}
         />
       </div>,
@@ -257,13 +259,9 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
           <img src={`${img}`} alt="" className={styles.img} />
           <i className="pi pi-caret-right" style={{ fontSize: "20px" }} />
           <Avatar
-            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.senderImage}`}
+            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.receiverImage}`}
             // size="large"
             shape="circle"
-            // style={{
-            //   width: "20px !important",
-            //   height: "20px !important",
-            // }}
             data-pr-tooltip={val.receiverName}
           />
         </div>
@@ -274,11 +272,26 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
   };
 
   useEffect(() => {
+    if (shoutOutData?.data?.length > 0) {
+      setIsLoading(true);
+      const filteredData = shoutOutData?.data
+        ?.filter((item: any) => item.isActive)
+        .reverse()
+        .slice(0, 5);
+      setShoutOutsData([...filteredData]);
+      setIsLoading(false);
+    }
+  }, [shoutOutData]);
+  useEffect(() => {
     dispatch(setMainSPContext(props?.context));
     getAllShoutOutsData(dispatch);
   }, [dispatch]);
 
-  return (
+  return isLoading ? (
+    <div className={styles.LoaderContainer}>
+      <CircularSpinner />
+    </div>
+  ) : (
     <div className={`Shoutout ${styles.ShoutoutContainer}`}>
       <SectionHeaderIntranet
         label={"Shout-outs"}
@@ -287,7 +300,8 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
             setPopupController,
             initialPopupController[0],
             0,
-            "open"
+            "open",
+            "New Shout-outs"
           );
           resetFormData(formData, setFormData);
         }}
@@ -303,12 +317,12 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
           </div>
         ) : (
           <Carousel
-            value={shoutOutData?.data}
+            value={shoutOutsData}
             numScroll={1}
             numVisible={1}
             showIndicators={true}
             showNavigators={false}
-            autoplayInterval={shoutOutData?.data?.length > 1 ? 3000 : 8.64e7}
+            autoplayInterval={shoutOutsData?.length > 1 ? 3000 : 8.64e7}
             circular
             responsiveOptions={responsiveOptions}
             itemTemplate={shoutOutTemplate}

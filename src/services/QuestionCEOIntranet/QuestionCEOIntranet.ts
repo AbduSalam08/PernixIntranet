@@ -4,99 +4,14 @@
 import moment from "moment";
 import { setQuestionCEOIntranetData } from "../../redux/features/QuestionCEOIntranetSlice";
 import SpServices from "../SPServices/SpServices";
+import { sp } from "@pnp/sp";
+import { CONFIG } from "../../config/config";
 // import SpServices from "../SPServices/SpServices";
 // import { log } from "@pnp/pnpjs";
 // import SpServices from "../SPServices/SpServices";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable @typescript-eslint/no-floating-promises */
-
-export const addQuestionCeo = async (
-  formData: any,
-  setLoaderState: any,
-  index: number,
-  dispatch: any
-): Promise<any> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState]; // Create a copy of the array
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
-  try {
-    //Add item to the SharePoint list
-    const addItem: any = await SpServices.SPAddItem({
-      Listname: "Intranet_QuestionsToCEO",
-      RequestJSON: {
-        Question: formData.Description.value,
-      },
-    });
-
-    // const newQuestionItem = {
-    //   title: formData.Description.value,
-    //   date: moment(new Date()).format("DD/MM/YYYY"),
-    //   avatarUrl: "", // Assuming the author is the logged-in user
-    //   replies: [
-    //     {
-    //       content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-    //       date: "26/08/2024",
-    //       avatarUrl: "https://randomuser.me/api/portraits/men/34.jpg",
-    //     },
-    //   ],
-    // };
-
-    console.log(addItem, "addItem");
-
-    // Success state after item and attachment are added
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The new Question '${formData.Description.value}' has been added successfully.`,
-        },
-      };
-      return updatedState;
-    });
-  } catch (error) {
-    console.error("Error while adding Question:", error);
-
-    // Handle error state
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding Question, please try again later.",
-        },
-      };
-      return updatedState;
-    });
-  }
-};
 
 // export const getQuestionCeo = async (dispatch: any): Promise<any> => {
 //   dispatch?.(
@@ -151,6 +66,39 @@ export const addQuestionCeo = async (
 //     );
 //   }
 // };
+
+export const questionsCurrentUserRole = async (
+  setUserRole: any
+): Promise<any> => {
+  let userDetails = {};
+  const currentUser: any = await sp.web.currentUser.get();
+  const currentUserEmail = currentUser?.Email.toLowerCase() || "";
+
+  const questionCEOAdminData: any = await sp.web.siteGroups
+    .getByName(CONFIG.SPGroupName.QuestionCEO_Admin)
+    .users.get();
+  const questionCEOData: any = await sp.web.siteGroups
+    .getByName(CONFIG.SPGroupName.QuestionCEO)
+    .users.get();
+
+  const isAdmin = questionCEOAdminData?.some(
+    (val: any) => val.Email.toLowerCase() === currentUserEmail
+  );
+  const isCEO = questionCEOData?.some(
+    (val: any) => val.Email.toLowerCase() === currentUserEmail
+  );
+  if (isCEO) {
+    setUserRole("CEO");
+    userDetails = { role: "CEO", email: currentUserEmail };
+  } else if (isAdmin) {
+    setUserRole("Admin");
+    userDetails = { role: "Admin", email: currentUserEmail };
+  } else {
+    setUserRole("User");
+    userDetails = { role: "User", email: currentUserEmail };
+  }
+  return userDetails;
+};
 export const getQuestionCeo = async (dispatch: any): Promise<any> => {
   dispatch?.(
     setQuestionCEOIntranetData({
@@ -177,11 +125,12 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
     const questionCeoData = questionsResponse.map((question: any) => {
       // Filter responses that match the current question ID
       const filteredResponses = responsesResponse.filter(
-        (response: any) => response.Questionceo.ID === question.ID
+        (response: any) => response.Questionceo?.ID === question?.ID
       );
 
       // Structure the replies array for the current question
       const replies = filteredResponses.map((res: any) => ({
+        ID: res.ID,
         content: res.Title || "No response text provided.", // Use response text if available
         date: moment(res.Created).format("DD/MM/YYYY"), // Format the created date
         avatarUrl:
@@ -191,7 +140,9 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
 
       // Return the structured question and replies data
       return {
+        ID: question.ID,
         title: question.Question || "", // Question from Intranet_QuestionsToCEO
+        isActive: question.isActive ? true : false,
         date: moment(question.Created).format("DD/MM/YYYY") || null, // Format the question's created date
         avatarUrl:
           question.Author?.EMail ||
@@ -207,8 +158,6 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
         data: questionCeoData, // Structured question and replies data
       })
     );
-
-    console.log("questionCeoData: ", questionCeoData);
   } catch (error) {
     console.error("Error fetching data:", error);
     dispatch?.(
@@ -218,5 +167,229 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
         error: error.message || "Error fetching data",
       })
     );
+  }
+};
+
+export const addQuestionCeo = async (
+  formData: any,
+  setLoaderState: any,
+  index: number,
+  dispatch: any
+): Promise<any> => {
+  // Start loader for the specific item at the given index
+  setLoaderState((prevState: any) => {
+    const updatedState = [...prevState]; // Create a copy of the array
+    updatedState[index] = {
+      ...updatedState[index],
+      popupWidth: "450px",
+      isLoading: {
+        inprogress: true,
+        error: false,
+        success: false,
+      },
+    };
+    return updatedState;
+  });
+  try {
+    //Add item to the SharePoint list
+    const addItem: any = await SpServices.SPAddItem({
+      Listname: "Intranet_QuestionsToCEO",
+      RequestJSON: {
+        Question: formData.Description.value,
+      },
+    }).then((res: any) => {
+      console.log(addItem, "addItem");
+      // Success state after item and attachment are added
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState]; // Copy state array
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: true,
+            error: false,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            successDescription: `The new Question '${formData.Description.value}' has been added successfully.`,
+          },
+        };
+        return updatedState;
+      });
+      getQuestionCeo(dispatch);
+    });
+  } catch (error) {
+    console.error("Error while adding Question:", error);
+
+    // Handle error state
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState]; // Copy state array
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: false,
+          success: false,
+          error: true,
+        },
+        messages: {
+          ...updatedState[index].messages,
+          errorDescription:
+            "An error occurred while adding Question, please try again later.",
+        },
+      };
+      return updatedState;
+    });
+  }
+};
+export const removeSearchParamsID = (): void => {
+  // Get the current URL
+  const currentUrl = new URL(window.location.href);
+
+  // Get the search parameters (query string)
+  const params = new URLSearchParams(currentUrl.search);
+
+  // Remove the 'ID' parameter if it exists
+  if (params.has("ID")) {
+    params.delete("ID");
+
+    // Construct the new URL without the 'ID' parameter
+    const newUrl = `${currentUrl.origin}${currentUrl.pathname}${
+      params.toString() ? "?" + params.toString() : ""
+    }`;
+
+    // Update the URL in the browser without reloading the page
+    window.history.replaceState({}, "", newUrl);
+  }
+};
+
+export const changeQuestionActiveStatus = async (
+  qusId: number,
+  isActive: boolean
+): Promise<void> => {
+  await SpServices.SPUpdateItem({
+    Listname: "Intranet_QuestionsToCEO",
+    ID: qusId,
+    RequestJSON: { isActive: isActive },
+  });
+};
+export const submitCEOQuestionAnswer = async (
+  type: string,
+  qusId: number,
+  ansId: number,
+  answer: string,
+  setLoaderState: any,
+  index: number,
+  dispatch: any
+): Promise<void> => {
+  setLoaderState((prevState: any) => {
+    const updatedState = [...prevState]; // Create a copy of the array
+    updatedState[index] = {
+      ...updatedState[index],
+      popupWidth: "450px",
+      isLoading: {
+        inprogress: true,
+        error: false,
+        success: false,
+      },
+    };
+    return updatedState;
+  });
+  if (type === "Update") {
+    await SpServices.SPUpdateItem({
+      Listname: "Intranet_QuestionCEOresponse",
+      ID: ansId,
+      RequestJSON: { Title: answer },
+    })
+      .then((res: any) => {
+        getQuestionCeo(dispatch);
+        removeSearchParamsID();
+        setLoaderState((prevState: any) => {
+          const updatedState = [...prevState]; // Copy state array
+          updatedState[index] = {
+            ...updatedState[index],
+            popupWidth: "450px",
+            isLoading: {
+              inprogress: false,
+              success: true,
+              error: false,
+            },
+            messages: {
+              ...updatedState[index].messages,
+              successDescription: `The answer '${answer}' has been updated successfully.`,
+            },
+          };
+          return updatedState;
+        });
+      })
+      .catch((err: any) => {
+        console.log("Answer updated error", err);
+        setLoaderState((prevState: any) => {
+          const updatedState = [...prevState]; // Copy state array
+          updatedState[index] = {
+            ...updatedState[index],
+            popupWidth: "450px",
+            isLoading: {
+              inprogress: false,
+              success: false,
+              error: true,
+            },
+            messages: {
+              ...updatedState[index].messages,
+              errorDescription:
+                "An error occurred while updating answer, please try again later.",
+            },
+          };
+          return updatedState;
+        });
+      });
+  } else {
+    await SpServices.SPAddItem({
+      Listname: "Intranet_QuestionCEOresponse",
+      RequestJSON: { Title: answer, QuestionceoId: qusId },
+    })
+      .then((res: any) => {
+        getQuestionCeo(dispatch);
+        removeSearchParamsID();
+        setLoaderState((prevState: any) => {
+          const updatedState = [...prevState]; // Copy state array
+          updatedState[index] = {
+            ...updatedState[index],
+            popupWidth: "450px",
+            isLoading: {
+              inprogress: false,
+              success: true,
+              error: false,
+            },
+            messages: {
+              ...updatedState[index].messages,
+              successDescription: `The answer '${answer}' has been added successfully.`,
+            },
+          };
+          return updatedState;
+        });
+      })
+      .catch((err: any) => {
+        console.log("Answer added error", err);
+        setLoaderState((prevState: any) => {
+          const updatedState = [...prevState]; // Copy state array
+          updatedState[index] = {
+            ...updatedState[index],
+            popupWidth: "450px",
+            isLoading: {
+              inprogress: false,
+              success: false,
+              error: true,
+            },
+            messages: {
+              ...updatedState[index].messages,
+              errorDescription:
+                "An error occurred while adding answer, please try again later.",
+            },
+          };
+          return updatedState;
+        });
+      });
   }
 };

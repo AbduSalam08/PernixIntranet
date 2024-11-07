@@ -1,12 +1,14 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import "~@fluentui/react/dist/sass/References.scss";
 
-.LoaderContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.addShoutOutGrid {
   width: 100%;
-  height: calc(100vh - 144px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
+
 .boxWrapper {
   background-color: #f0f0f0;
   padding: 20px 0;
@@ -69,72 +71,6 @@
     }
   }
 }
-.addNewsGrid {
-  // display: grid;
-  // grid-template-columns: repeat(3, 1fr); /* Four equal-width columns */
-  // gap: 16px; /* Space between grid items */
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  gap: 20px;
-
-  .item1 {
-    width: 100%;
-  }
-
-  .item2 {
-    width: 100%;
-  }
-
-  .item3 {
-    width: 100%;
-  }
-
-  .item4 {
-    width: 100%;
-  }
-
-  .item5 {
-    width: 100%;
-  }
-
-  .item6 {
-    width: 100%;
-  }
-
-  .r1 {
-    width: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 25px;
-  }
-
-  .r2 {
-    width: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 20px;
-  }
-
-  .r3 {
-    width: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 20px;
-  }
-
-  .r4 {
-    width: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 20px;
-  }
-}
 
 .tabsContainer {
   display: flex;
@@ -150,68 +86,89 @@
     border-radius: 4px;
   }
 }
+
 .questionSection {
   width: 100%;
 }
-.question {
-  margin: 0;
-  color: #0b4d53;
-  font-size: 16px;
-  font-family: "osSemibold", sans-serif;
+
+.mainContainer {
+  width: 100%;
+  height: calc(100vh - 128px);
+  background-color: #f0f0f0;
+  padding: 16px 30px;
 }
 
-    .contentSection {
-      padding: 15px 20px 0px 20px;
-      // box-shadow: 0px -1px 4px 0px #b6b6b640;
-      margin-top: 10px;
-      // height: 350px;
-      background-color: #fff;
-      display: flex;
-  
-      .questions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-  
-        .imgsection {
-          width: 30px;
-        }
-  
-        .ques {
-          width: calc(100% - 30px);
-          margin: 0;
-          color: #0b4d53;
-          font-size: 16px;
-          font-family: "osSemibold", sans-serif;
-        }
-  
-        .answer {
-          width: calc(100% - 30px);
-          margin: 0;
-          color: #4b4b4b;
-          font-size: 14px;
-          line-height: 21px;
-          font-family: "osRegular", sans-serif;
-        }
+.contentSection {
+  padding: 15px 20px 0px 20px;
+  // box-shadow: 0px -1px 4px 0px #b6b6b640;
+  margin-top: 10px;
+  // height: 350px;
+  background-color: #fff;
+  display: flex;
+
+  .Container {
+    background-color: #fff;
+    padding: 10px;
+
+    .shoutOutHeader {
+      // font-weight: bold;
+      // color: #333;
+      margin-bottom: 10px;
+      // font-family: "Open Sans", sans-serif;
+
+      .sender {
+        font-size: 16px;
+        // font-weight: 600;
+        color: #e0803d;
+        font-family: "osSemibold", sans-serif;
       }
-  
-      .date {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-        color: #878787;
-        font-size: 14px;
-        font-family: "osRegular", sans-serif;
-  
-        // font-weight: 500;
-        margin: 5px 0px 15px 0px;
-  
-        i {
-          color: #e0803d;
-        }
+
+      .receiver {
+        color: #e0803d;
+        font-size: 16px;
+        // font-weight: 600;
+        font-family: "osSemibold", sans-serif;
+      }
+
+      .recogonized {
+        font-size: 16px;
+        font-weight: 600;
+        color: #a7a7a7;
+        font-family: "osSemibold", sans-serif;
       }
     }
+
+    .iconSection {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0px;
+
+      .img {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .message {
+      margin: 0;
+      font-size: 13px;
+      // font-weight: 400;
+      color: #4b4b4b;
+      line-height: 20px;
+      margin: 10px 0px 20px 0px;
+      font-family: "osRegular", sans-serif;
+    }
+  }
+}
+
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}
 
 .rhsActions {
   display: flex;
@@ -221,7 +178,7 @@
   width: 10%;
 }
 
-.activepill {
+.approvedPill {
   padding: 6px;
   border-radius: 4px;
   background-color: #e4fae8;
@@ -230,13 +187,12 @@
   width: 85px;
   text-align: center;
   font-family: "osMedium", sans-serif;
-
   @media (max-width: 630px) {
     font-size: 10px;
   }
 }
 
-.inactivepill {
+.rejectedPill {
   padding: 6px;
   border-radius: 4px;
   background-color: #fae4e4;
@@ -245,7 +201,19 @@
   width: 85px;
   text-align: center;
   font-family: "osMedium", sans-serif;
-
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
+}
+.pendingPill {
+  padding: 6px;
+  border-radius: 4px;
+  background-color: #e5e4fa;
+  font-size: 12px;
+  color: #4e37fd;
+  width: 85px;
+  text-align: center;
+  font-family: "osMedium", sans-serif;
   @media (max-width: 630px) {
     font-size: 10px;
   }

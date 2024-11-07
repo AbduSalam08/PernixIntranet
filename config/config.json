@@ -185,6 +185,22 @@
           "manifest": "./src/webparts/projectTemplatePage/ProjectTemplatePageWebPart.manifest.json"
         }
       ]
+    },
+    "shout-outs-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/shoutOutsPage/ShoutOutsPageWebPart.js",
+          "manifest": "./src/webparts/shoutOutsPage/ShoutOutsPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "blogs-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/blogsPage/BlogsPageWebPart.js",
+          "manifest": "./src/webparts/blogsPage/BlogsPageWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -212,6 +228,8 @@
     "EmployeeDirectoryPageWebPartStrings": "lib/webparts/employeeDirectoryPage/loc/{locale}.js",
     "PtoPageWebPartStrings": "lib/webparts/ptoPage/loc/{locale}.js",
     "ApprovalsPageWebPartStrings": "lib/webparts/approvalsPage/loc/{locale}.js",
-    "ProjectTemplatePageWebPartStrings": "lib/webparts/projectTemplatePage/loc/{locale}.js"
+    "ProjectTemplatePageWebPartStrings": "lib/webparts/projectTemplatePage/loc/{locale}.js",
+    "ShoutOutsPageWebPartStrings": "lib/webparts/shoutOutsPage/loc/{locale}.js",
+    "BlogsPageWebPartStrings": "lib/webparts/blogsPage/loc/{locale}.js"
   }
 }
