@@ -27,8 +27,12 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Add, Delete } from "@mui/icons-material";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
+import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
+import moment from "moment";
 const PollIntranet = (props: any): JSX.Element => {
   const curUser = props.context._pageContext._user.email;
+
+  const [currentPoll, setCurrentPoll] = useState<any>(null);
 
   const dispatch = useDispatch();
   // popup properties
@@ -94,6 +98,19 @@ const PollIntranet = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "Invalid title",
       validationRule: { required: true, type: "string" },
+    },
+
+    StartDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "date" },
+    },
+    EndDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "date" },
     },
   });
 
@@ -341,6 +358,62 @@ const PollIntranet = (props: any): JSX.Element => {
           }}
         />
       </div>,
+
+      <div
+        key={2}
+        style={{
+          display: "flex",
+          gap: "20px",
+          alignItems: "center",
+          margin: "20px 0px",
+        }}
+      >
+        <div style={{ width: "50%" }}>
+          <CustomDateInput
+            value={formData.StartDate.value}
+            label="Start Date"
+            isDateController={true}
+            minimumDate={new Date()}
+            maximumDate={
+              formData?.EndDate?.value
+                ? new Date(formData?.EndDate?.value)
+                : null
+            }
+            error={!formData.StartDate.isValid}
+            errorMsg={formData.StartDate.errorMsg}
+            onChange={(date: any) => {
+              const { isValid, errorMsg } = validateField(
+                "StartDate",
+                date,
+                formData.StartDate.validationRule
+              );
+              handleInputChange("StartDate", date, isValid, errorMsg);
+            }}
+          />
+        </div>
+        <div style={{ width: "50%" }}>
+          <CustomDateInput
+            value={formData.EndDate.value}
+            label="End Date"
+            isDateController={true}
+            minimumDate={
+              formData?.StartDate?.value
+                ? new Date(formData?.StartDate?.value)
+                : null
+            }
+            maximumDate={null}
+            error={!formData.EndDate.isValid}
+            errorMsg={formData.EndDate.errorMsg}
+            onChange={(date: any) => {
+              const { isValid, errorMsg } = validateField("EndDate", date, {
+                required: true,
+                type: "date",
+              });
+              handleInputChange("EndDate", date, isValid, errorMsg);
+            }}
+          />
+        </div>
+      </div>,
       mappedItem,
     ],
   ];
@@ -435,18 +508,22 @@ const PollIntranet = (props: any): JSX.Element => {
 
   useEffect(() => {
     fetchPollData(dispatch, curUser);
-
-    // setSelectedOption((prev: any) => ({
-    //   ...prev,
-    //   OptionId: PollIntranetData?.data?.[0]?.PreviousOption,
-    // }));
-  }, [dispatch]);
+  }, [dispatch, curUser]);
 
   useEffect(() => {
-    if (PollIntranetData?.data?.[0]?.PreviousOption) {
+    if (PollIntranetData?.data) {
+      // Filter to get the current poll based on date
+      const today = moment().format("YYYYMMDD");
+      const activePoll = PollIntranetData.data.filter(
+        (poll: any) =>
+          moment(poll?.StartDate).format("YYYYMMDD") <= today &&
+          moment(poll?.EndDate).format("YYYYMMDD") >= today
+      );
+      setCurrentPoll(activePoll || null);
+
       setSelectedOption((prev: any) => ({
         ...prev,
-        OptionId: PollIntranetData.data?.[0]?.PreviousOption,
+        OptionId: activePoll[0]?.PreviousOption,
       }));
     }
   }, [PollIntranetData]);
@@ -468,54 +545,52 @@ const PollIntranet = (props: any): JSX.Element => {
           }}
         />
 
-        <div className={styles["poll-header"]}>
-          {PollIntranetData?.data?.[0]?.Question}
-        </div>
+        {currentPoll ? (
+          <>
+            <div className={styles["poll-header"]}>
+              {currentPoll[0]?.Question}
+            </div>
 
-        {PollIntranetData?.data?.[0]?.options?.map(
-          (val: any, index: number) => (
-            <div key={index}>
-              <div
-                className={styles.container}
-                onClick={() => {
-                  handleOptionClick(
-                    PollIntranetData?.data?.[0]?.Id,
-                    val.Id,
-                    val.Title,
-                    PollIntranetData?.data?.[0]?.resId
-                  );
-                }}
-              >
-                {/* Background fill that respects padding */}
+            {currentPoll[0]?.options?.map((val: any, index: number) => (
+              <div key={index}>
                 <div
-                  style={{ width: `${val?.Percentage}%` }}
-                  className={styles.backgroundfill}
-                />
-
-                {/* Content displayed on top of the background */}
-                <div className={styles.contentSection}>
+                  className={styles.container}
+                  onClick={() => {
+                    handleOptionClick(
+                      currentPoll[0]?.Id,
+                      val.Id,
+                      val.Title,
+                      currentPoll[0]?.resId
+                    );
+                  }}
+                >
                   <div
-                    className={styles.content}
-                    // style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                  >
-                    <p>{index + 1}.</p>
-                    {selectedOption.OptionId === val?.Id && (
-                      <i className="pi pi-check" />
-                    )}
-                    <p>{val?.Title}</p>
+                    style={{ width: `${val?.Percentage}%` }}
+                    className={styles.backgroundfill}
+                  />
+
+                  <div className={styles.contentSection}>
+                    <div className={styles.content}>
+                      <p>{index + 1}.</p>
+                      {selectedOption?.OptionId === val?.Id && (
+                        <i className="pi pi-check" />
+                      )}
+                      <p>{val?.Title}</p>
+                    </div>
+                    <p>{`${val?.Percentage}%`}</p>
                   </div>
-                  <p>{`${val?.Percentage}%`}</p>
                 </div>
               </div>
-            </div>
-          )
-        )}
-        {!(
-          selectedOption.OptionId === PollIntranetData.data?.[0]?.PreviousOption
-        ) && (
-          <div className={styles.voteButton}>
-            <Button label="vote" onClick={handleSubmitVote} />
-          </div>
+            ))}
+
+            {selectedOption?.OptionId !== currentPoll[0]?.PreviousOption && (
+              <div className={styles.voteButton}>
+                <Button label="Vote" onClick={handleSubmitVote} />
+              </div>
+            )}
+          </>
+        ) : (
+          <p>No active poll available at the moment.</p>
         )}
       </div>
 
@@ -542,7 +617,6 @@ const PollIntranet = (props: any): JSX.Element => {
             if (popupData?.isLoading?.success) {
               fetchPollData(dispatch, curUser);
             }
-            // resetFormData(formData, setFormData);
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle
