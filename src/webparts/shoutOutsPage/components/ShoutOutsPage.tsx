@@ -61,7 +61,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   console.log(props);
 
   const dispatch = useDispatch();
-  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const searchField: IPageSearchFields = CONFIG.PageSearchFields;
   const ShoutOutsStoreData: any = useSelector((state: any) => {
     return state.ShoutOutsData.value;
   });
@@ -528,7 +528,6 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   ];
 
   const onLoadingFUN = async (curTab: any): Promise<void> => {
-    debugger;
     setIsLoading(true);
     let filteredData: any[] = [];
     const userData = await shoutOutsCurrentUserRole(setCurrentUserData);
@@ -540,7 +539,9 @@ const ShoutOutsPage = (props: any): JSX.Element => {
         });
       } else {
         filteredData = ShoutOutsStoreData?.data?.filter((newsItem: any) => {
-          return newsItem.senderImage === userData.email;
+          return (
+            newsItem.senderImage.toLowerCase() === userData.email.toLowerCase()
+          );
         });
       }
     } else {
@@ -550,7 +551,10 @@ const ShoutOutsPage = (props: any): JSX.Element => {
         });
       } else {
         filteredData = ShoutOutsStoreData?.data?.filter((newsItem: any) => {
-          return newsItem.senderImage === userData.email;
+          return (
+            newsItem.senderImage.toLowerCase() === userData.email.toLowerCase()
+          );
+          // return newsItem.senderImage === "Devaraj.p@technorucs.com";
         });
       }
     }
@@ -590,7 +594,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
           />
-          <p>Shout outs</p>
+          <p>Shout-outs</p>
         </div>
         <div className={styles.rightSection}>
           <div>
@@ -608,6 +612,18 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                 handleSearch([...shoutOutsData]);
               }}
             />
+          </div>
+          <div
+            className={styles.refreshBTN}
+            onClick={(_) => {
+              searchField.Search = "";
+              searchField.Status = "";
+              searchField.Date = null;
+              setCommonSearch({ ...searchField });
+              handleSearch([...shoutOutsData]);
+            }}
+          >
+            <i className="pi pi-refresh" />
           </div>
           <div
             style={{
@@ -631,18 +647,6 @@ const ShoutOutsPage = (props: any): JSX.Element => {
             />
             Add shout-out
           </div>
-          <div
-            className={styles.refreshBTN}
-            onClick={(_) => {
-              searchField.Search = "";
-              searchField.Status = "";
-              searchField.Date = null;
-              setCommonSearch({ ...searchField });
-              handleSearch([...shoutOutsData]);
-            }}
-          >
-            <i className="pi pi-refresh" />
-          </div>
         </div>
       </div>
       {/* tabs */}
@@ -654,6 +658,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
               style={{
                 borderBottom:
                   selectedTab === str ? "3px solid #e0803d" : "none",
+                cursor: "pointer",
               }}
               onClick={(_) => {
                 setPagination(CONFIG.PaginationData);
@@ -762,7 +767,8 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                       <div />
                     )}
                     <div className={styles.actionBtns}>
-                      {val.senderImage === currentUserData.email &&
+                      {val?.senderImage?.toLowerCase() ===
+                        currentUserData?.email?.toLowerCase() &&
                         !val.isActive && (
                           <i
                             onClick={() => {
@@ -799,7 +805,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                                 initialPopupController[0],
                                 0,
                                 "open",
-                                "Update shout outs"
+                                "Update shout-out"
                               );
                             }}
                             style={{
@@ -815,7 +821,6 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                           checked={val.isActive}
                           className="sectionToggler"
                           onChange={(e: any) => {
-                            debugger;
                             setShowShoutOutsData((prevItems) =>
                               prevItems.map((item: any, idx: number) =>
                                 val?.ID === item?.ID
