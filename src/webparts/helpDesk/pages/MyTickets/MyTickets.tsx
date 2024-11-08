@@ -13,7 +13,7 @@ const infoRed: any = require("../../../helpDesk/assets/images/svg/infoRed.svg");
 
 import styles from "./MyTickets.module.scss";
 import { useEffect, useMemo, useState } from "react";
-import { Add } from "@mui/icons-material";
+import { Add, RestartAlt } from "@mui/icons-material";
 import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
 import {
   currentRoleBasedDataUtil,
@@ -62,11 +62,13 @@ const openTickets: any = require("../../assets/images/svg/openTickets.svg");
 const closedTickets: any = require("../../assets/images/svg/closedTickets.svg");
 const ticketsCreatedThisWeek: any = require("../../assets/images/svg/ticketsCreatedThisWeek.svg");
 const ticketsOnHold: any = require("../../assets/images/svg/ticketsOnHold.svg");
+const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
 
 const MyTickets = (): JSX.Element => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+
   const [openNewTicketSlide, setOpenNewTicketSlide] = useState<{
     open: boolean;
     type: "view" | "add" | "update";
@@ -184,7 +186,8 @@ const MyTickets = (): JSX.Element => {
       validationRule: { required: false, type: "string" },
     },
     Status: {
-      value: isTicketManager || isITOwner ? "" : "Open",
+      // value: isTicketManager || isITOwner ? "" : "Open",
+      value: "Open",
       isValid: true,
       errorMsg: "This field is required",
       validationRule: {
@@ -311,9 +314,9 @@ const MyTickets = (): JSX.Element => {
     sortedBy: "New to old",
     sortedByOptions: ["Old to new", "New to old"],
   });
-  console.log("dataGridProps: ", dataGridProps);
+
   const [searchTerm, setSearchTerm] = useState("");
-  console.log("setSearchTerm: ", setSearchTerm);
+
   const [selectedCategory, setSelectedCategory] = useState<any>("");
   const [selectedPriority, setSelectedPriority] = useState<any>("");
 
@@ -463,9 +466,12 @@ const MyTickets = (): JSX.Element => {
                 ...prev,
                 Attachment: {
                   ...prev?.Attachment,
-                  value: {
-                    name: currentAttachment[0]?.FileName,
-                  },
+                  value: currentAttachment?.[0]
+                    ? {
+                        ...currentAttachment?.[0],
+                        name: currentAttachment[0]?.FileName,
+                      }
+                    : null,
                 },
               }));
               // handleView(params);
@@ -640,7 +646,7 @@ const MyTickets = (): JSX.Element => {
     selectedCategory,
     selectedPriority,
     dataGridProps.sortedBy,
-    currentRoleBasedData?.data,
+    currentRoleBasedData?.data?.length,
   ]);
 
   // Update dataGridProps when filtered data changes
@@ -666,17 +672,6 @@ const MyTickets = (): JSX.Element => {
         <PageHeader title={"All tickets"} noBackBtn />
 
         <div className={styles.topLevelFilter}>
-          <DefaultButton
-            btnType="primaryGreen"
-            onlyIcon
-            text={"Reset"}
-            onClick={async () => {
-              // await getAllTickets(dispatch);
-              setSearchTerm("");
-              setSelectedCategory("");
-              setSelectedPriority("");
-            }}
-          />
           <CustomDropDown
             floatingLabel={false}
             size="SM"
@@ -698,6 +693,9 @@ const MyTickets = (): JSX.Element => {
               setSearchTerm(e?.target?.value);
             }}
             className={"basicSMInput"}
+            style={{
+              width: "150px",
+            }}
             value={searchTerm}
             placeholder="Search"
           />
@@ -727,6 +725,22 @@ const MyTickets = (): JSX.Element => {
               setSelectedPriority(value);
             }}
           />
+
+          {(searchTerm || selectedPriority || selectedCategory) && (
+            <div className="slideUpFade">
+              <DefaultButton
+                btnType="primaryGreen"
+                onlyIcon
+                text={<RestartAlt />}
+                onClick={async () => {
+                  // await getAllTickets(dispatch);
+                  setSearchTerm("");
+                  setSelectedCategory("");
+                  setSelectedPriority("");
+                }}
+              />
+            </div>
+          )}
 
           <DefaultButton
             btnType="primaryGreen"
@@ -936,27 +950,28 @@ const MyTickets = (): JSX.Element => {
                   )}
                 </div>
 
-                {(isTicketManager || isITOwner) && (
-                  <CustomDropDown
-                    disabled={
-                      openNewTicketSlide?.data?.Status === "Closed" &&
-                      openNewTicketSlide?.type === "update"
-                    }
-                    value={formData?.Status?.value}
-                    options={TicketStatus}
-                    placeholder="Status"
-                    isValid={formData?.Status?.isValid}
-                    errorMsg={formData?.Status?.errorMsg}
-                    onChange={(value) => {
-                      const { isValid, errorMsg } = validateField(
-                        "Status",
-                        value,
-                        formData?.Status?.validationRule
-                      );
-                      handleInputChange("Status", value, isValid, errorMsg);
-                    }}
-                  />
-                )}
+                {(isTicketManager || isITOwner) &&
+                  openNewTicketSlide?.type === "update" && (
+                    <CustomDropDown
+                      disabled={
+                        openNewTicketSlide?.data?.Status === "Closed" &&
+                        openNewTicketSlide?.type === "update"
+                      }
+                      value={formData?.Status?.value}
+                      options={TicketStatus}
+                      placeholder="Status"
+                      isValid={formData?.Status?.isValid}
+                      errorMsg={formData?.Status?.errorMsg}
+                      onChange={(value) => {
+                        const { isValid, errorMsg } = validateField(
+                          "Status",
+                          value,
+                          formData?.Status?.validationRule
+                        );
+                        handleInputChange("Status", value, isValid, errorMsg);
+                      }}
+                    />
+                  )}
 
                 <FloatingLabelTextarea
                   value={formData.TicketDescription.value}
@@ -1001,12 +1016,28 @@ const MyTickets = (): JSX.Element => {
                     isValid={formData?.Attachment?.isValid}
                     errMsg={formData?.Attachment?.errorMsg}
                   />
+                ) : formData?.Attachment?.value !== null ? (
+                  <span
+                    className={styles.fileSource}
+                    onClick={() => {
+                      window.open(
+                        `${window.location.origin}${formData?.Attachment?.value?.ServerRelativeUrl}?web=1`
+                      );
+                    }}
+                  >
+                    <p>Attachment</p>
+                    <div className={styles.fileName}>
+                      <img src={fileIcon} />
+                      <span>{formData?.Attachment?.value?.name}</span>
+                    </div>
+                  </span>
                 ) : (
-                  ""
-                  // <span>
-                  //   <img src={fileIcon} />
-                  //   {formData?.Attachment?.value?.name}
-                  // </span>
+                  <span className={styles.fileSource}>
+                    <p>Attachment</p>
+                    <div className={styles.fileName}>
+                      <span>No attachment found.</span>
+                    </div>
+                  </span>
                 )}
               </>
             </div>

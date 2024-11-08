@@ -8,8 +8,8 @@ interface Props {
 }
 
 const QuickLinkCard = ({ value, onClick, idx }: Props): JSX.Element => {
-  const [hover, setHover] = useState(false); // State to track hover status
-  const isOddCard: boolean = (idx + 1) % 2 === 1;
+  const [hover, setHover] = useState(false);
+  const isOddCard: boolean = (idx + 1) % 2 === 0;
 
   return (
     <div

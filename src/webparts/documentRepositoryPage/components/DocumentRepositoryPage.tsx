@@ -18,7 +18,7 @@ import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
-import { Add, Clear, Upload } from "@mui/icons-material";
+import { Add, Upload } from "@mui/icons-material";
 import {
   addDocRepository,
   deleteDocRepository,
@@ -31,6 +31,7 @@ import resetPopupController, {
 } from "../../../utils/popupUtils";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 /* Interface creation */
 interface ITabObject {
@@ -45,7 +46,7 @@ interface IDocField {
 
 /* Global variable creation */
 const folderIcon = require("../../../assets/images/svg/folderIcon.svg");
-const fileIcon = require("../../../assets/images/svg/file.svg");
+const fileIcon = require("../../../webparts/helpDesk/assets/images/svg/fileIcon.svg");
 
 let items: ITabObject[] = [{ name: "Home", path: CONFIG.fileFlowPath }];
 let isAdmin: boolean = false;
@@ -236,8 +237,17 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     let tempFilter: any[] = [];
     let filteredItems: IDocRepository[] = [];
 
+    let filFilePath: string = "";
+
+    if (filePath.includes(window.location.origin)) {
+      const location: string = window.location.origin;
+      filFilePath = filePath.slice(location.length);
+    } else {
+      filFilePath = filePath;
+    }
+
     tempFilter = await Promise.all(
-      masterRes?.filter((val: any) => val.FileDirRef === filePath)
+      masterRes?.filter((val: any) => val?.FileDirRef === filFilePath)
     );
 
     filteredItems = await Promise.all(
@@ -538,7 +548,9 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     ],
     [
       <div key={3}>
-        <p>Are you sure you want to delete this folder?</p>
+        <p>
+          Are you sure you want to delete this {curObject?.Content?.fileType}?
+        </p>
       </div>,
     ],
   ];
@@ -753,99 +765,106 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
             </div>
           </div>
 
-          {/* Tab section */}
-          <div className={styles.tabContainer}>
-            {selectedPath?.map((val: ITabObject, idx: number) => {
-              return (
-                <div key={idx}>
-                  {selectedPath.length !== idx + 1 ? (
-                    <div className={styles.tabsAlign}>
-                      <div
-                        className={styles.clickTab}
-                        onClick={() => {
-                          handleSelectFolder(
-                            "remove",
-                            val.name,
-                            idx + 1,
-                            val.path
-                          );
-                        }}
-                      >
-                        {val.name}
-                      </div>
-                      <NavigateNextIcon
-                        style={{
-                          color: "#7c7c7c",
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className={styles.selectedTab}>{val.name}</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Body section */}
-          {isFileSearch ? (
-            <>
-              <CircularSpinner />
-            </>
-          ) : curDocDatas.length ? (
-            <div className={styles.bodyContainer}>
-              {curDocDatas?.map((val: IDocRepository, idx: number) => {
+          <div className={styles.docRepoWrapper}>
+            {/* Tab section */}
+            <div className={styles.tabContainer}>
+              {selectedPath?.map((val: ITabObject, idx: number) => {
                 return (
-                  <div key={idx} className={styles.folderSection}>
-                    <div
-                      className={styles.folderItems}
-                      title={val?.Content?.name}
-                      onClick={() => {
-                        if (val?.Content?.fileType !== "file") {
-                          handleSelectFolder(
-                            "add",
-                            val?.Content?.name,
-                            idx + 1,
-                            val?.Content?.ServerRelativeUrl
-                          );
-                        } else {
-                          window.open(
-                            val?.Content?.ServerRelativeUrl + "?web=1"
-                          );
-                        }
-                      }}
-                    >
-                      <img
-                        src={
-                          val?.Content?.fileType !== "file"
-                            ? folderIcon
-                            : fileIcon
-                        }
-                        alt="Doc"
-                      />
-                      <div>{val?.Content?.name}</div>
-                    </div>
-                    {!val?.Content?.isSubFiles &&
-                    val?.Content?.fileType !== "file" ? (
-                      <Clear
-                        onClick={() => {
-                          setCurObject({ ...val });
-                          togglePopupVisibility(
-                            setPopupController,
-                            initialPopupController[2],
-                            2,
-                            "open"
-                          );
-                        }}
-                      />
-                    ) : null}
+                  <div key={idx}>
+                    {selectedPath.length !== idx + 1 ? (
+                      <div className={styles.tabsAlign}>
+                        <div
+                          className={styles.clickTab}
+                          onClick={() => {
+                            handleSelectFolder(
+                              "remove",
+                              val.name,
+                              idx + 1,
+                              val.path
+                            );
+                          }}
+                        >
+                          {val.name}
+                        </div>
+                        <NavigateNextIcon
+                          style={{
+                            color: "#7c7c7c",
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles.selectedTab}>{val.name}</div>
+                    )}
                   </div>
                 );
               })}
             </div>
-          ) : (
-            <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
-          )}
+
+            {/* Body section */}
+            {isFileSearch ? (
+              <>
+                <CircularSpinner />
+              </>
+            ) : curDocDatas.length ? (
+              <div className={styles.bodyContainer}>
+                {curDocDatas?.map((val: IDocRepository, idx: number) => {
+                  return (
+                    <div key={idx} className={styles.folderSection}>
+                      <div
+                        className={styles.folderItems}
+                        title={val?.Content?.name}
+                        onClick={() => {
+                          if (val?.Content?.fileType !== "file") {
+                            handleSelectFolder(
+                              "add",
+                              val?.Content?.name,
+                              idx + 1,
+                              val?.Content?.ServerRelativeUrl
+                            );
+                          } else {
+                            window.open(
+                              val?.Content?.ServerRelativeUrl + "?web=1"
+                            );
+                          }
+                        }}
+                      >
+                        <img
+                          src={
+                            val?.Content?.fileType !== "file"
+                              ? folderIcon
+                              : fileIcon
+                          }
+                          className={
+                            val?.Content?.fileType !== "file"
+                              ? styles.folderIcon
+                              : styles.fileIcon
+                          }
+                          alt="Doc"
+                        />
+                        <span>{val?.Content?.name}</span>
+                        {!val?.Content?.isSubFiles && isAdmin ? (
+                          <DeleteIcon
+                            className={styles.deleteIcon}
+                            onClick={() => {
+                              setCurObject({ ...val });
+                              togglePopupVisibility(
+                                setPopupController,
+                                initialPopupController[2],
+                                2,
+                                "open"
+                              );
+                            }}
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
+            )}
+          </div>
 
           {/* add and edit popup section */}
           {popupController?.map((popupData: any, index: number) => (

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { MoreVert } from "@mui/icons-material";
+// import { MoreVert } from "@mui/icons-material";
 import styles from "./CommentCard.module.scss"; // Import the SCSS module
 import Popup from "../../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../../utils/popupUtils";
@@ -54,9 +54,9 @@ const CommentCard = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>): any => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleMenuClick = (event: React.MouseEvent<HTMLElement>): any => {
+  //   setAnchorEl(event.currentTarget);
+  // };
 
   const handleMenuClose = (): void => {
     setAnchorEl(null);
@@ -124,7 +124,7 @@ const CommentCard = ({
           </div>
           <div className={styles.hamb}>
             {role && <span className={styles.roleBadge}>{role}</span>}
-            {ownComment && (
+            {/* {ownComment && (
               <div onClick={handleMenuClick}>
                 <MoreVert
                   sx={{
@@ -133,7 +133,7 @@ const CommentCard = ({
                   }}
                 />
               </div>
-            )}
+            )} */}
 
             <Menu
               anchorEl={anchorEl}

@@ -568,7 +568,7 @@ interface TicketData {
 }
 // Helper function to format ticket data
 export const formatTicketData = (data: any): any => {
-  return data.map((item: TicketData | any) => ({
+  return data?.map((item: TicketData | any) => ({
     Created: item?.Created,
     id: item?.ID,
     ticket_number: item?.TicketNumber,
@@ -584,12 +584,16 @@ export const filterTicketsBySearch = (
   tickets: any[],
   searchTerm: string
 ): any[] => {
-  console.log("searchTerm: ", searchTerm);
+  console.log("tickets: ", tickets);
   if (!searchTerm) return tickets;
   return tickets.filter((ticket) =>
     Object.keys(ticket).some((key) =>
       ["id", "Created"].includes(key)
         ? false
+        : ["IT_owner"].includes(key)
+        ? ticket[key]?.EMail?.toString()
+            ?.toLowerCase()
+            ?.includes(searchTerm?.toLowerCase())
         : ticket[key]
             ?.toString()
             .toLowerCase()
@@ -604,7 +608,7 @@ export const filterTicketsByCategory = (
   selectedCategory: string | any
 ): any[] => {
   if (!selectedCategory) return tickets;
-  return tickets.filter((ticket) => ticket.category === selectedCategory);
+  return tickets?.filter((ticket) => ticket.category === selectedCategory);
 };
 
 // Filters tickets based on selected priority
@@ -613,7 +617,7 @@ export const filterTicketsByPriority = (
   selectedPriority: string | any
 ): any[] => {
   if (!selectedPriority) return tickets;
-  return tickets.filter((ticket) => ticket.priority === selectedPriority);
+  return tickets?.filter((ticket) => ticket.priority === selectedPriority);
 };
 
 // Sorts tickets by priority and/or created date
@@ -625,11 +629,11 @@ export const sortTickets = (
   const sortedTickets = [...tickets];
 
   if (sortBy === "New to old") {
-    sortedTickets.sort(
+    sortedTickets?.sort(
       (a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime()
     );
   } else if (sortBy === "Old to new") {
-    sortedTickets.sort(
+    sortedTickets?.sort(
       (a, b) => new Date(a.Created).getTime() - new Date(b.Created).getTime()
     );
   }
