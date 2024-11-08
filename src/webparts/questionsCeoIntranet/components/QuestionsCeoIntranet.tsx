@@ -211,7 +211,7 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
 
   const productTemplate = (val: any): JSX.Element => {
     return (
-      <div>
+      <div style={{ minHeight: "310px" }}>
         <div className={styles.questions}>
           <div className={styles.imgsection}>
             <Avatar
@@ -220,33 +220,40 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
               // size="small"
               shape="circle"
               style={{
-                width: "40px !important",
-                height: "40px !important",
+                width: "25px !important",
+                height: "25px !important",
               }}
               // data-pr-tooltip={val.receiverName}
             />
           </div>
-          <p className={styles.ques}>{val.title}</p>
+          <p className={styles.ques} title={val.title}>
+            {val.title}
+          </p>
         </div>
-        <p className={styles.date}>
-          <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
-          {val.date}
-        </p>
 
         <div>
-          <div className={styles.questions}>
+          <div className={styles.answer}>
             <div className={styles.imgsection}>
               <Avatar
                 className="qustionceo"
                 image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies[0]?.avatarUrl}`}
                 shape="circle"
+                style={{
+                  width: "25px !important",
+                  height: "25px !important",
+                }}
               />
             </div>
-            <p className={styles.answer}>{val.replies[0]?.content}</p>
+            <p title={val.replies[0]?.content}>{val.replies[0]?.content}</p>
           </div>
-          <p className={styles.date}>
+          {/* <p className={styles.date}>
             <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
             {val.replies[0]?.date}
+          </p> */}
+
+          <p className={styles.date}>
+            {/* <i className="pi pi-clock" style={{ fontSize: "1rem" }} /> */}
+            Posted on :{val.date}
           </p>
         </div>
       </div>

@@ -113,8 +113,12 @@ const MyTickets = (): JSX.Element => {
   );
 
   const isTicketManager: boolean =
-    currentUserDetails?.role === "HelpDesk_Ticket_Managers";
-  const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers" ||
+    currentUserDetails?.role === "Super Admin";
+
+  const isITOwner: boolean =
+    currentUserDetails?.role === "HelpDesk_IT_Owners" ||
+    currentUserDetails?.role === "Super Admin";
 
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
@@ -228,7 +232,10 @@ const MyTickets = (): JSX.Element => {
   };
 
   const [formData, setFormData] = useState<any>(initialData);
-  console.log("formData: ", formData);
+
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [submitClicked, setSubmitClicked] = useState(false);
+  console.log("loadingSubmit: ", loadingSubmit);
 
   const popupActions: any = [
     [
@@ -441,6 +448,8 @@ const MyTickets = (): JSX.Element => {
               );
 
               console.log("currentRowData: ", currentRowData);
+              setLoadingSubmit(false);
+              setSubmitClicked(false);
               setOpenNewTicketSlide({
                 open: true,
                 type: "update",
@@ -506,6 +515,14 @@ const MyTickets = (): JSX.Element => {
     isValid: boolean,
     errorMsg: string = ""
   ): void => {
+    if (
+      Object.keys(formData)
+        .filter((key) => formData[key]?.validationRule?.required)
+        .every((key) => formData[key].isValid)
+    ) {
+      setLoadingSubmit(false);
+    }
+
     setFormData((prevData: any) => ({
       ...prevData,
       [field]: {
@@ -519,7 +536,13 @@ const MyTickets = (): JSX.Element => {
 
   const handleSubmit = async (): Promise<any> => {
     let hasErrors = false;
-
+    if (
+      !Object.keys(formData)
+        .filter((key) => formData[key]?.validationRule?.required)
+        .every((key) => formData[key].isValid)
+    ) {
+      setLoadingSubmit(true);
+    }
     // Validate each field and update the state with error messages
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
@@ -547,6 +570,9 @@ const MyTickets = (): JSX.Element => {
     console.log("hasErrors: ", hasErrors);
     if (!hasErrors) {
       console.log("formData: ", formData);
+      setLoadingSubmit(true);
+      setSubmitClicked(true);
+      console.log("oadingSubmit: ", loadingSubmit);
       if (openNewTicketSlide.type === "add") {
         await Promise.all([addNewTicket(formData, ["Attachment"])])
           .then(async (res: any) => {
@@ -587,6 +613,7 @@ const MyTickets = (): JSX.Element => {
         pauseOnHover: true,
         draggable: false,
       });
+      setLoadingSubmit(true);
     }
   };
 
@@ -666,6 +693,21 @@ const MyTickets = (): JSX.Element => {
     );
     navigate(location.pathname, { state: null });
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (
+      Object.keys(formData)
+        .filter((key) => formData[key]?.validationRule?.required)
+        .every((key) => formData[key].isValid)
+    ) {
+      setLoadingSubmit(false);
+    }
+    console.log("submitClicked: ", submitClicked);
+    if (submitClicked) {
+      setLoadingSubmit(true);
+    }
+  }, [formData]);
+
   return (
     <div className={styles.mytickets}>
       <div className={styles.mytickets_header}>
@@ -747,6 +789,8 @@ const MyTickets = (): JSX.Element => {
             text={"New ticket"}
             onClick={async () => {
               // await getAllTickets(dispatch);
+              setLoadingSubmit(false);
+              setSubmitClicked(false);
               setOpenNewTicketSlide({
                 open: true,
                 type: "add",
@@ -1055,11 +1099,7 @@ const MyTickets = (): JSX.Element => {
             <DefaultButton
               btnType="primaryGreen"
               text={"Submit"}
-              disabled={
-                !Object.keys(formData)
-                  .filter((key) => formData[key]?.validationRule?.required)
-                  .every((key) => formData[key].isValid)
-              }
+              disabled={loadingSubmit}
               onClick={handleSubmit}
             />
           </div>
@@ -1109,7 +1149,7 @@ const MyTickets = (): JSX.Element => {
           defaultCloseBtn={popupData.defaultCloseBtn || false}
           confirmationTitle={popupData?.confirmationTitle}
           popupHeight={index === 0 ? true : false}
-          noActionBtn={false}
+          noActionBtn={true}
         />
       ))}
     </div>

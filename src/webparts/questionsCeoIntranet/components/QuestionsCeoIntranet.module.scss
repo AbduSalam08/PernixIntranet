@@ -21,6 +21,16 @@
     box-shadow: 0px -1px 4px 0px #b6b6b640;
     margin-top: 20px;
     height: 350px;
+    overflow: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    &::-webkit-scrollbar {
+      width: 2px !important;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: transparent !important;
+    }
 
     .questions {
       display: flex;
@@ -34,29 +44,30 @@
         width: calc(100% - 30px);
         margin: 0;
         color: #0b4d53;
-        font-size: 16px;
-        font-family: "osSemibold", sans-serif;
-      }
-      .answer {
-        width: calc(100% - 30px);
-        margin: 0;
-        color: #4b4b4b;
         font-size: 14px;
-        line-height: 21px;
-        font-family: "osRegular", sans-serif;
+        font-family: "osSemibold", sans-serif;
+        max-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        white-space: normal;
       }
     }
     .date {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 8px;
       color: #878787;
-      font-size: 14px;
+      font-size: 13px;
       font-family: "osRegular", sans-serif;
-
+      margin-bottom: 20px;
       // font-weight: 500;
-      margin: 5px 0px 20px 0px;
+      // margin: 5px 0px 20px 0px;
       i {
         color: #e0803d;
       }
@@ -68,4 +79,30 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Four equal-width columns */
   gap: 16px; /* Space between grid items */
+}
+
+.answer {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0;
+  color: #4b4b4b;
+  line-height: 21px;
+  margin: 10px 0;
+  p {
+    font-family: "osRegular", sans-serif;
+    line-height: 23px;
+    font-size: 14px;
+    max-height: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 6;
+    -webkit-line-clamp: 6;
+    white-space: normal;
+  }
 }

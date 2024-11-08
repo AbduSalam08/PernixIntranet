@@ -200,7 +200,7 @@ const Popup = ({
                     {confirmationTitle}
                   </span>
                 </div>
-                {/* {footerContent()} */}
+                {footerContent()}
               </div>
             ) : (
               <div className={styles.contentWrapper}>
