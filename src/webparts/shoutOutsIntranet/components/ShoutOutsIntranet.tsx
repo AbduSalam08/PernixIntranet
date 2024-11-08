@@ -317,27 +317,29 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
         }}
       />
 
-      <div className={styles.carousel}>
-        {shoutOutData?.isLoading ? (
-          <CircularSpinner />
-        ) : shoutOutData?.error ? (
-          <div className="errorWrapper">
-            <img src={errorGrey} alt="Error" />
-            <span className="disabledText">{shoutOutData?.error}</span>
-          </div>
-        ) : (
-          <Carousel
-            value={shoutOutsData}
-            numScroll={1}
-            numVisible={1}
-            showIndicators={true}
-            showNavigators={false}
-            autoplayInterval={shoutOutsData?.length > 1 ? 3000 : 8.64e7}
-            circular
-            responsiveOptions={responsiveOptions}
-            itemTemplate={shoutOutTemplate}
-          />
-        )}
+      <div className={styles.carouselWrapper}>
+        <div className={styles.carousel}>
+          {shoutOutData?.isLoading ? (
+            <CircularSpinner />
+          ) : shoutOutData?.error ? (
+            <div className="errorWrapper">
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{shoutOutData?.error}</span>
+            </div>
+          ) : (
+            <Carousel
+              value={shoutOutsData}
+              numScroll={1}
+              numVisible={1}
+              showIndicators={true}
+              showNavigators={false}
+              autoplayInterval={shoutOutsData?.length > 1 ? 3000 : 8.64e7}
+              circular
+              responsiveOptions={responsiveOptions}
+              itemTemplate={shoutOutTemplate}
+            />
+          )}
+        </div>
       </div>
       <ViewAll onClick={handlenavigate} />
 
