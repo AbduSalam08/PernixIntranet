@@ -24,6 +24,8 @@ import {
   getAllShoutOutsData,
 } from "../../../services/shoutOutIntranet/shoutOutIntranet";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import ViewAll from "../../../components/common/ViewAll/ViewAll";
+import { CONFIG } from "../../../config/config";
 // images
 const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
@@ -287,6 +289,14 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
     getAllShoutOutsData(dispatch);
   }, [dispatch]);
 
+  const handlenavigate = (): void => {
+    window.open(
+      props.context.pageContext.web.absoluteUrl +
+        CONFIG.NavigatePage.ShoutOutsPage,
+      "_self"
+    );
+  };
+
   return isLoading ? (
     <div className={styles.LoaderContainer}>
       <CircularSpinner />
@@ -329,6 +339,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
           />
         )}
       </div>
+      <ViewAll onClick={handlenavigate} />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup

@@ -29,12 +29,19 @@ import { Add, Delete } from "@mui/icons-material";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 import moment from "moment";
+import { CONFIG } from "../../../config/config";
+import ViewAll from "../../../components/common/ViewAll/ViewAll";
+import { RoleAuth } from "../../../services/CommonServices";
 const PollIntranet = (props: any): JSX.Element => {
+  const dispatch = useDispatch();
   const curUser = props.context._pageContext._user.email;
+
+  const currentUserDetails: any = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
+  );
 
   const [currentPoll, setCurrentPoll] = useState<any>(null);
 
-  const dispatch = useDispatch();
   // popup properties
   const initialPopupController = [
     {
@@ -99,9 +106,8 @@ const PollIntranet = (props: any): JSX.Element => {
       errorMsg: "Invalid title",
       validationRule: { required: true, type: "string" },
     },
-
     StartDate: {
-      value: "",
+      value: new Date(),
       isValid: true,
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
@@ -265,7 +271,7 @@ const PollIntranet = (props: any): JSX.Element => {
             isValid={option.isValid}
             errorMsg={option.errorMsg}
             onChange={(e) => {
-              const value = e;
+              const value = e.trimStart();
               const { isValid, errorMsg } = validateField(
                 "Title",
                 value,
@@ -298,11 +304,6 @@ const PollIntranet = (props: any): JSX.Element => {
               }
             />
           ) : (
-            // <i
-            //   className="pi pi-plus"
-            //   onClick={handleAddOption}
-            //   style={{ cursor: "pointer" }}
-            // />
             /* Show delete icon for non-last options or if last option is empty */
             index !== options.length - 1 && (
               <DefaultButton
@@ -315,40 +316,26 @@ const PollIntranet = (props: any): JSX.Element => {
                     sx={{
                       width: "20px",
                       fontSize: "24px",
-                      // color: "#FD3737",
                     }}
                   />
                 }
               />
-              // <i
-              //   className="pi pi-trash"
-              //   onClick={() => handleDeleteOption(index)}
-              //   style={{
-              //     cursor: "pointer",
-              //     color: "#FD3737",
-              //     fontSize: "24px",
-              //   }}
-              // />
             )
           )}
         </div>
       ))
     : [];
 
-  // console.log("mappedItem", mappedItem);
   const popupInputs: any[] = [
     [
-      <div
-        // className={styles.addNewsGrid}
-        key={1}
-      >
+      <div key={1}>
         <CustomInput
           value={formData.Title.value}
           placeholder="Enter Question"
           isValid={formData.Title.isValid}
           errorMsg={formData.Title.errorMsg}
           onChange={(e) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Title",
               value,
@@ -506,7 +493,20 @@ const PollIntranet = (props: any): JSX.Element => {
     }
   };
 
+  const handlenavigate = (): void => {
+    window.open(
+      props.context.pageContext.web.absoluteUrl + CONFIG.NavigatePage.PollPage,
+      "_self"
+    );
+  };
+
   useEffect(() => {
+    RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.Poll_Admin] },
+
+      dispatch
+    );
     fetchPollData(dispatch, curUser);
   }, [dispatch, curUser]);
 
@@ -532,16 +532,40 @@ const PollIntranet = (props: any): JSX.Element => {
     <>
       <div className={styles.PollContainer}>
         <SectionHeaderIntranet
-          label={"Poll"}
+          title="Create a new poll"
+          label="Poll"
+          removeAdd={
+            currentUserDetails.role !== CONFIG.RoleDetails.user ? false : true
+          }
           headerAction={() => {
+            resetFormData(formData, setFormData);
+            resetOptionsData(options, setOptions);
+            setFormData({
+              Title: {
+                value: "",
+                isValid: true,
+                errorMsg: "Invalid title",
+                validationRule: { required: true, type: "string" },
+              },
+              StartDate: {
+                value: new Date(),
+                isValid: true,
+                errorMsg: "Invalid input",
+                validationRule: { required: true, type: "date" },
+              },
+              EndDate: {
+                value: "",
+                isValid: true,
+                errorMsg: "Invalid input",
+                validationRule: { required: true, type: "date" },
+              },
+            });
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               0,
               "open"
             );
-            resetFormData(formData, setFormData);
-            resetOptionsData(options, setOptions);
           }}
         />
 
@@ -592,6 +616,8 @@ const PollIntranet = (props: any): JSX.Element => {
         ) : (
           <p>No active poll available at the moment.</p>
         )}
+
+        <ViewAll onClick={handlenavigate} />
       </div>
 
       {popupController?.map((popupData: any, index: number) => (
