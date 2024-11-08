@@ -357,6 +357,7 @@ const NewsIntranet = (props: any): JSX.Element => {
     );
     getAllNewsData(dispatch);
   }, []);
+
   useEffect(() => {
     prepareData(newsIntranetData?.data);
   }, [newsIntranetData]);
@@ -389,8 +390,8 @@ const NewsIntranet = (props: any): JSX.Element => {
           </div>
         ) : (
           shownewsdata
-            ?.slice(-3)
-            .map((item: any, idx: number) => (
+            ?.slice(0, 3)
+            ?.map((item: any, idx: number) => (
               <NewsCard
                 title={item?.title}
                 imageUrl={item?.imageUrl}

@@ -198,12 +198,10 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
           (val: IDocRepository) =>
             val.Content.fileType !== "file" &&
             val.Content.name.toLowerCase() ===
-              formData?.FolderName?.value.toLowerCase()
+              formData?.FolderName?.value?.trim()?.toLowerCase()
         );
         hasErrors = !isValid;
-        errorMsg = !isValid
-          ? `${formData?.FolderName?.value}, this folder name already exists.`
-          : "";
+        errorMsg = !isValid ? "Folder name already exists." : "";
       }
 
       return {
