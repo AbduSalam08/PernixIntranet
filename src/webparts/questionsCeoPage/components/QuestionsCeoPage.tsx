@@ -26,7 +26,11 @@ import Popup from "../../../components/common/Popups/Popup";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { Paginator } from "primereact/paginator";
-import { IPaginationData } from "../../../interface/interface";
+import {
+  IPageSearchFields,
+  IPaginationData,
+} from "../../../interface/interface";
+import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 interface IReplies {
   avatarUrl: string;
   content: string;
@@ -63,9 +67,11 @@ interface PopupState {
 
 const QuestionsCeoPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
+  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
   const QuestionCEOIntranetData: any = useSelector((state: any) => {
     return state.QuestionCEOIntranetData.value;
   });
+  console.log("QuestionCEOIntranetData", QuestionCEOIntranetData);
 
   const [pagination, setPagination] = useState<IPaginationData>(
     CONFIG.PaginationData
@@ -96,18 +102,36 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     },
   });
   const [ceoQuestionsdata, setCeoQuestionsdata] = useState<IQuestion[]>([]);
-  const [userRole, setUserRole] = useState<string>("User");
+  const [showCEOQuestions, setShowCEOQuestions] = useState<IQuestion[]>([]);
+  const [userDetails, setUserDetails] = useState<any>({});
   const [selectedTab, setSelectedTab] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParamsQusID, setSearchParamsQusID] = useState<any>(null);
-  console.log(searchParamsQusID);
+  const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
+    ...CONFIG.PageSearchFields,
+  });
 
-  const totalRecords = ceoQuestionsdata?.length || 0;
+  const totalRecords = showCEOQuestions?.length || 0;
   const onPageChange = (event: any): void => {
     setPagination({
       first: event?.first || CONFIG.PaginationData.first,
       rows: event?.rows || CONFIG.PaginationData.rows,
     });
+  };
+
+  const handleSearch = async (masterArray: IQuestion[]): Promise<void> => {
+    let temp: IQuestion[] = [...masterArray];
+    if (searchField.Search) {
+      temp = temp?.filter(
+        (val: any) =>
+          val?.title.toLowerCase().includes(searchField.Search.toLowerCase()) ||
+          val?.replies[0]?.content
+            .toLowerCase()
+            .includes(searchField.Search.toLowerCase())
+      );
+    }
+    setShowCEOQuestions([...temp]);
+    await onPageChange("");
   };
 
   // popup properties
@@ -230,14 +254,20 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   };
 
   const handleAnswerSubmit = async () => {
-    const type = formData.answer.ID ? "Update" : "New";
     setSearchParamsQusID(null);
     if (formData.answer.value !== "") {
+      // await submitCEOQuestionAnswer(
+      //   type,
+      //   formData.qustion.ID,
+      //   formData.answer.ID,
+      //   formData.answer.value,
+      //   setPopupController,
+      //   0,
+      //   dispatch
+      // );
       await submitCEOQuestionAnswer(
-        type,
-        formData.qustion.ID,
-        formData.answer.ID,
-        formData.answer.value,
+        formData,
+        userDetails?.email,
         setPopupController,
         0,
         dispatch
@@ -283,7 +313,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           isValid={newFormData.Description.isValid}
           errorMsg={newFormData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
@@ -360,8 +390,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   ];
 
   const onLoadingFUN = async (curTab: any): Promise<void> => {
+    setIsLoading(true);
     let filteredData: any[] = [];
-    const userDetails = await questionsCurrentUserRole(setUserRole);
+    const userDetails = await questionsCurrentUserRole(setUserDetails);
     console.log(userDetails);
 
     if (QuestionCEOIntranetData?.data?.length && userDetails?.role === "CEO") {
@@ -445,23 +476,23 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       }
     }
     setSelectedTab(curTab);
-    setCeoQuestionsdata([...filteredData]);
+    setCeoQuestionsdata([...filteredData].reverse());
+    setShowCEOQuestions([...filteredData].reverse());
     setIsLoading(false);
   };
 
   useEffect(() => {
     if (QuestionCEOIntranetData?.data?.length > 0) {
-      onLoadingFUN(CONFIG.QuestionsPageTabsName[0]);
+      onLoadingFUN(selectedTab || CONFIG.QuestionsPageTabsName[0]);
     }
-  }, [QuestionCEOIntranetData || userRole]);
+  }, [QuestionCEOIntranetData]);
 
   useEffect(() => {
     const urlObj = new URL(window.location.href);
     const params = new URLSearchParams(urlObj.search);
     const ID = params.get("ID");
     setSearchParamsQusID(Number(ID));
-
-    // questionsCurrentUserRole(setUserRole);
+    // questionsCurrentUserRole(setUserDetails);
     getQuestionCeo(dispatch);
   }, [dispatch]);
 
@@ -484,30 +515,60 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
           />
-          <p>Questions to the CEO</p>
+          <p>Questions to CEO</p>
         </div>
         <div className={styles.rightSection}>
+          <div>
+            <CustomInput
+              noErrorMsg
+              value={commonSearch?.Search}
+              placeholder="Search"
+              onChange={(e: any) => {
+                const value: string = e.trimStart();
+                searchField.Search = value;
+                setCommonSearch((prev: IPageSearchFields) => ({
+                  ...prev,
+                  Search: value,
+                }));
+                handleSearch([...ceoQuestionsdata]);
+              }}
+            />
+          </div>
+          {userDetails?.role !== "CEO" && (
+            <div
+              style={{
+                display: "flex",
+              }}
+              className={styles.addNewbtn}
+              onClick={() => {
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[1],
+                  1,
+                  "open",
+                  "Submit a question to CEO"
+                );
+                resetFormData(newFormData, setNewFormData);
+              }}
+            >
+              <i
+                className="pi pi-plus"
+                style={{ fontSize: "1rem", color: "#fff" }}
+              />
+              Add question
+            </div>
+          )}
           <div
-            style={{
-              display: "flex",
-            }}
-            className={styles.addNewbtn}
-            onClick={() => {
-              togglePopupVisibility(
-                setPopupController,
-                initialPopupController[1],
-                1,
-                "open",
-                "Submit a question to CEO"
-              );
-              resetFormData(newFormData, setNewFormData);
+            className={styles.refreshBTN}
+            onClick={(_) => {
+              searchField.Search = "";
+              searchField.Status = "";
+              searchField.Date = null;
+              setCommonSearch({ ...searchField });
+              handleSearch([...ceoQuestionsdata]);
             }}
           >
-            <i
-              className="pi pi-plus"
-              style={{ fontSize: "1rem", color: "#fff" }}
-            />
-            Add an question
+            <i className="pi pi-refresh" />
           </div>
         </div>
       </div>
@@ -515,7 +576,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       <div className={styles.tabsContainer}>
         {CONFIG.QuestionsPageTabsName.map((str: string, i: number) => {
           if (str === CONFIG.QuestionsPageTabsName[1]) {
-            if (userRole !== "CEO") {
+            if (userDetails.role !== "CEO") {
               return (
                 <div
                   key={i}
@@ -524,6 +585,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                       selectedTab === str ? "3px solid #e0803d" : "none",
                   }}
                   onClick={(_) => {
+                    setPagination(CONFIG.PaginationData);
+                    if (selectedTab !== str) {
+                      searchField.Search = "";
+                      searchField.Status = "";
+                      searchField.Date = null;
+                      setCommonSearch({ ...searchField });
+                      getQuestionCeo(dispatch);
+                    }
                     setSelectedTab(str);
                     onLoadingFUN(str);
                   }}
@@ -533,7 +602,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               );
             }
           } else if (str === CONFIG.QuestionsPageTabsName[2]) {
-            if (userRole === "CEO") {
+            if (userDetails.role === "CEO") {
               return (
                 <div
                   key={i}
@@ -542,6 +611,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                       selectedTab === str ? "3px solid #e0803d" : "none",
                   }}
                   onClick={(_) => {
+                    setPagination(CONFIG.PaginationData);
+                    if (selectedTab !== str) {
+                      searchField.Search = "";
+                      searchField.Status = "";
+                      searchField.Date = null;
+                      setCommonSearch({ ...searchField });
+                      getQuestionCeo(dispatch);
+                    }
                     setSelectedTab(str);
                     onLoadingFUN(str);
                   }}
@@ -559,6 +636,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                     selectedTab === str ? "3px solid #e0803d" : "none",
                 }}
                 onClick={(_) => {
+                  setPagination(CONFIG.PaginationData);
+                  if (selectedTab !== str) {
+                    searchField.Search = "";
+                    searchField.Status = "";
+                    searchField.Date = null;
+                    setCommonSearch({ ...searchField });
+                    getQuestionCeo(dispatch);
+                  }
                   setSelectedTab(str);
                   onLoadingFUN(str);
                 }}
@@ -569,86 +654,83 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           }
         })}
       </div>
-      <div className={styles.questionSection}>
-        {QuestionCEOIntranetData?.isLoading ? (
-          <CircularSpinner />
-        ) : QuestionCEOIntranetData?.error ? (
-          <div className="errorWrapper">
-            {/* <img src={errorGrey} alt="Error" /> */}
-            <span className="disabledText">
-              {QuestionCEOIntranetData?.error}
-            </span>
-          </div>
-        ) : ceoQuestionsdata?.length === 0 ? (
-          <div
-            style={{
-              width: "100%",
-              height: "50vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: "14px",
-              color: "#adadad",
-              fontFamily: "osMedium, sans-serif",
-            }}
-          >
-            No events found.
-          </div>
-        ) : (
-          <div>
-            {ceoQuestionsdata
-              ?.slice(pagination.first, pagination.first + pagination.rows)
-              ?.map((val: any, index: number) => {
-                return (
-                  <div key={index} className={styles.contentSection}>
-                    <div style={{ width: "90%" }}>
+
+      {showCEOQuestions?.length === 0 ? (
+        <div
+          style={{
+            width: "100%",
+            height: "50vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "14px",
+            color: "#adadad",
+            fontFamily: "osMedium, sans-serif",
+          }}
+        >
+          No questions found.
+        </div>
+      ) : (
+        <div className={styles.bodyContainer}>
+          {showCEOQuestions
+            ?.slice(pagination.first, pagination.first + pagination.rows)
+            ?.map((val: any, index: number) => {
+              return (
+                <div key={index} className={styles.cardSection}>
+                  <div
+                    style={{
+                      minHeight:
+                        userDetails.role !== "User" ? "306px" : "340px",
+                      maxHeight:
+                        userDetails.role !== "User" ? "306px" : "340px",
+                    }}
+                    className={styles.cardBody}
+                  >
+                    <div className={styles.questions}>
+                      <div className={styles.imgsection}>
+                        <Avatar
+                          className="qustionceo"
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.avatarUrl}`}
+                          // size="small"
+                          shape="circle"
+                          style={{
+                            width: "40px !important",
+                            height: "40px !important",
+                          }}
+                          // data-pr-tooltip={val.receiverName}
+                        />
+                      </div>
+                      <p className={styles.ques}>{val.title}</p>
+                    </div>
+                    <p className={styles.date}>
+                      <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
+                      {val.date}
+                    </p>
+                    <div>
                       <div className={styles.questions}>
                         <div className={styles.imgsection}>
                           <Avatar
                             className="qustionceo"
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.avatarUrl}`}
-                            // size="small"
+                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies[0]?.avatarUrl}`}
                             shape="circle"
-                            style={{
-                              width: "40px !important",
-                              height: "40px !important",
-                            }}
-                            // data-pr-tooltip={val.receiverName}
                           />
                         </div>
-                        <p className={styles.ques}>{val.title}</p>
+                        <p className={styles.answer}>
+                          {val.replies[0]?.content}
+                        </p>
                       </div>
                       <p className={styles.date}>
                         <i
                           className="pi pi-clock"
                           style={{ fontSize: "1rem" }}
                         />
-                        {val.date}
+                        {val.replies[0]?.date}
                       </p>
-                      <div>
-                        <div className={styles.questions}>
-                          <div className={styles.imgsection}>
-                            <Avatar
-                              className="qustionceo"
-                              image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies[0]?.avatarUrl}`}
-                              shape="circle"
-                            />
-                          </div>
-                          <p className={styles.answer}>
-                            {val.replies[0]?.content}
-                          </p>
-                        </div>
-                        <p className={styles.date}>
-                          <i
-                            className="pi pi-clock"
-                            style={{ fontSize: "1rem" }}
-                          />
-                          {val.replies[0]?.date}
-                        </p>
-                      </div>
                     </div>
-                    <div className={styles.rhsActions}>
-                      {userRole === "Admin" && (
+                  </div>
+                  {userDetails.role !== "User" && (
+                    <div className={styles.cardFooter}>
+                      {userDetails.role === "Admin" ? (
                         <div
                           className={
                             val.isActive
@@ -658,17 +740,19 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                         >
                           {val.isActive ? "Active" : "In Active"}
                         </div>
+                      ) : (
+                        <div />
                       )}
-                      {userRole !== "User" && (
+                      {userDetails.role !== "User" && (
                         <div className={styles.actionBtns}>
-                          {userRole === "Admin" && (
+                          {userDetails.role === "Admin" && (
                             <InputSwitch
                               checked={val.isActive}
                               className="sectionToggler"
                               onChange={(e) => {
-                                setCeoQuestionsdata((prevItems) =>
+                                setShowCEOQuestions((prevItems) =>
                                   prevItems.map((item: any, idx: number) =>
-                                    idx === index
+                                    val?.ID === item?.ID
                                       ? { ...item, isActive: e.value }
                                       : item
                                   )
@@ -677,7 +761,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                               }}
                             />
                           )}
-                          {userRole !== "Admin" && (
+                          {userDetails.role !== "Admin" && (
                             <i
                               onClick={() => {
                                 setFormData({
@@ -713,14 +797,19 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                         </div>
                       )}
                     </div>
-                  </div>
-                );
-              })}
-          </div>
-        )}
-      </div>
-      {ceoQuestionsdata.length > 0 && (
-        <div className="card">
+                  )}
+                </div>
+              );
+            })}
+        </div>
+      )}
+      {showCEOQuestions.length > 0 && (
+        <div
+          className="card"
+          style={{
+            padding: "4px 0px",
+          }}
+        >
           <Paginator
             first={pagination.first}
             rows={pagination.rows}

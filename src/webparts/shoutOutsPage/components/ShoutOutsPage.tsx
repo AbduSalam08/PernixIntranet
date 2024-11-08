@@ -18,7 +18,10 @@ import {
   updateShoutOut,
 } from "../../../services/shoutOutIntranet/shoutOutIntranet";
 import { CONFIG } from "../../../config/config";
-import { IPaginationData } from "../../../interface/interface";
+import {
+  IPageSearchFields,
+  IPaginationData,
+} from "../../../interface/interface";
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
@@ -29,6 +32,7 @@ import { resetFormData, validateField } from "../../../utils/commonUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import { InputSwitch } from "primereact/inputswitch";
+import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
 
 interface PopupState {
@@ -57,16 +61,24 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   console.log(props);
 
   const dispatch = useDispatch();
+  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
   const ShoutOutsStoreData: any = useSelector((state: any) => {
     return state.ShoutOutsData.value;
   });
   const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
+  const [showShoutOutsData, setShowShoutOutsData] = useState<any[]>([]);
   const [currentUserData, setCurrentUserData] = useState<any>({});
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [pagination, setPagination] = useState<IPaginationData>(
     CONFIG.PaginationData
   );
+  const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
+    ...CONFIG.PageSearchFields,
+  });
+  console.log("selectedTab", selectedTab);
+  console.log("shoutOutsData", shoutOutsData);
+
   const [formData, setFormData] = useState<any>({
     SendTowards: {
       value: [],
@@ -99,18 +111,33 @@ const ShoutOutsPage = (props: any): JSX.Element => {
       validationRule: { required: false, type: "number" },
     },
   });
-  console.log("formData: ", formData);
-  console.log("ShoutOutsStoreData: ", ShoutOutsStoreData);
-  console.log("currentUserData: ", currentUserData);
-  console.log("shoutOutsData: ", shoutOutsData);
-  console.log("selectedTab: ", selectedTab);
 
-  const totalRecords = shoutOutsData?.length || 0;
+  const totalRecords = showShoutOutsData?.length || 0;
   const onPageChange = (event: any): void => {
     setPagination({
       first: event?.first || CONFIG.PaginationData.first,
       rows: event?.rows || CONFIG.PaginationData.rows,
     });
+  };
+
+  const handleSearch = async (masterArray: any[]): Promise<void> => {
+    let temp: any[] = [...masterArray];
+    if (searchField.Search) {
+      temp = temp?.filter(
+        (val: any) =>
+          val?.message
+            .toLowerCase()
+            .includes(searchField.Search.toLowerCase()) ||
+          val?.receiverName
+            .toLowerCase()
+            .includes(searchField.Search.toLowerCase()) ||
+          val?.senderName
+            .toLowerCase()
+            .includes(searchField.Search.toLowerCase())
+      );
+    }
+    setShowShoutOutsData([...temp]);
+    await onPageChange("");
   };
 
   // popup properties
@@ -260,7 +287,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
           labelText="Shout-out to"
           isValid={formData.SendTowards.isValid}
           errorMsg={formData.SendTowards.errorMsg}
-          selectedItem={formData.SendTowards.value || []}
+          selectedItem={[formData?.SendTowards?.value]}
           readOnly
           onChange={(item: any) => {
             const value = item[0];
@@ -281,7 +308,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
           errorMsg={formData.Description.errorMsg}
           disabled={formData.Status.value !== "Pending"}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
@@ -322,7 +349,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
@@ -501,6 +528,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   ];
 
   const onLoadingFUN = async (curTab: any): Promise<void> => {
+    debugger;
     setIsLoading(true);
     let filteredData: any[] = [];
     const userData = await shoutOutsCurrentUserRole(setCurrentUserData);
@@ -527,13 +555,14 @@ const ShoutOutsPage = (props: any): JSX.Element => {
       }
     }
     setSelectedTab(curTab);
-    setShoutOutsData([...filteredData]);
+    setShoutOutsData([...filteredData].reverse());
+    setShowShoutOutsData([...filteredData].reverse());
     setIsLoading(false);
   };
 
   useEffect(() => {
     if (ShoutOutsStoreData?.data?.length > 0) {
-      onLoadingFUN(CONFIG.ShoutOutsPageTabsName[0]);
+      onLoadingFUN(selectedTab || CONFIG.ShoutOutsPageTabsName[0]);
     }
   }, [ShoutOutsStoreData]);
 
@@ -564,6 +593,22 @@ const ShoutOutsPage = (props: any): JSX.Element => {
           <p>Shout outs</p>
         </div>
         <div className={styles.rightSection}>
+          <div>
+            <CustomInput
+              noErrorMsg
+              value={commonSearch?.Search}
+              placeholder="Search"
+              onChange={(e: any) => {
+                const value: string = e.trimStart();
+                searchField.Search = value;
+                setCommonSearch((prev: IPageSearchFields) => ({
+                  ...prev,
+                  Search: value,
+                }));
+                handleSearch([...shoutOutsData]);
+              }}
+            />
+          </div>
           <div
             style={{
               display: "flex",
@@ -575,7 +620,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                 initialPopupController[1],
                 1,
                 "open",
-                "New Shout-outs"
+                "New Shout-out"
               );
               resetFormData(formData, setFormData);
             }}
@@ -584,7 +629,19 @@ const ShoutOutsPage = (props: any): JSX.Element => {
               className="pi pi-plus"
               style={{ fontSize: "1rem", color: "#fff" }}
             />
-            Add an shout-out
+            Add shout-out
+          </div>
+          <div
+            className={styles.refreshBTN}
+            onClick={(_) => {
+              searchField.Search = "";
+              searchField.Status = "";
+              searchField.Date = null;
+              setCommonSearch({ ...searchField });
+              handleSearch([...shoutOutsData]);
+            }}
+          >
+            <i className="pi pi-refresh" />
           </div>
         </div>
       </div>
@@ -599,7 +656,15 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                   selectedTab === str ? "3px solid #e0803d" : "none",
               }}
               onClick={(_) => {
-                // setSelectedTab(str);
+                setPagination(CONFIG.PaginationData);
+                if (selectedTab !== str) {
+                  searchField.Search = "";
+                  searchField.Status = "";
+                  searchField.Date = null;
+                  setCommonSearch({ ...searchField });
+                  getAllShoutOutsData(dispatch);
+                }
+                setSelectedTab(str);
                 onLoadingFUN(str);
               }}
             >
@@ -609,172 +674,173 @@ const ShoutOutsPage = (props: any): JSX.Element => {
         })}
       </div>
 
-      <div className={styles.questionSection}>
-        {ShoutOutsStoreData?.isLoading ? (
-          <CircularSpinner />
-        ) : ShoutOutsStoreData?.error ? (
-          <div className="errorWrapper">
-            {/* <img src={errorGrey} alt="Error" /> */}
-            <span className="disabledText">{ShoutOutsStoreData?.error}</span>
-          </div>
-        ) : shoutOutsData?.length === 0 ? (
-          <div
-            style={{
-              width: "100%",
-              height: "50vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: "14px",
-              color: "#adadad",
-              fontFamily: "osMedium, sans-serif",
-            }}
-          >
-            No events found.
-          </div>
-        ) : (
-          <div>
-            {shoutOutsData
-              ?.slice(pagination.first, pagination.first + pagination.rows)
-              ?.map((val: any, index: number) => {
-                return (
-                  <div key={index} className={styles.contentSection}>
-                    <div style={{ width: "90%" }}>
-                      <div className={styles.Container}>
-                        <p className={styles.shoutOutHeader}>
-                          <span className={styles.sender}>
-                            {val?.senderName}
-                          </span>{" "}
-                          <span className={styles.recogonized}>
-                            recognized{" "}
-                          </span>
-                          <span className={styles.receiver}>
-                            {val?.receiverName}
-                          </span>
-                        </p>
+      {showShoutOutsData?.length === 0 ? (
+        <div
+          style={{
+            width: "100%",
+            height: "50vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "14px",
+            color: "#adadad",
+            fontFamily: "osMedium, sans-serif",
+          }}
+        >
+          No shout outs found.
+        </div>
+      ) : (
+        <div className={styles.bodyContainer}>
+          {showShoutOutsData
+            ?.slice(pagination.first, pagination.first + pagination.rows)
+            ?.map((val: any, index: number) => {
+              return (
+                <div key={index} className={styles.cardSection}>
+                  <div
+                    style={{
+                      minHeight:
+                        currentUserData.userRole !== "User"
+                          ? "306px"
+                          : val?.isActive
+                          ? "330px"
+                          : "306px",
+                      maxHeight:
+                        currentUserData.userRole !== "User"
+                          ? "306px"
+                          : val?.isActive
+                          ? "330px"
+                          : "306px",
+                    }}
+                    className={styles.cardBody}
+                  >
+                    <div className={styles.Container}>
+                      <p className={styles.shoutOutHeader}>
+                        <span className={styles.sender}>{val?.senderName}</span>{" "}
+                        <span className={styles.recogonized}>recognized </span>
+                        <span className={styles.receiver}>
+                          {val?.receiverName}
+                        </span>
+                      </p>
 
-                        <div className={styles.iconSection}>
-                          <Avatar
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.senderImage}`}
-                            // size="small"
-                            shape="circle"
-                            style={{
-                              width: "40px !important",
-                              height: "40px !important",
-                            }}
-                            data-pr-tooltip={val.receiverName}
-                          />
-                          <img src={`${img}`} alt="" className={styles.img} />
-                          <i
-                            className="pi pi-caret-right"
-                            style={{ fontSize: "20px" }}
-                          />
-                          <Avatar
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.receiverImage}`}
-                            // size="large"
-                            shape="circle"
-                            // style={{
-                            //   width: "20px !important",
-                            //   height: "20px !important",
-                            // }}
-                            data-pr-tooltip={val.receiverName}
-                          />
-                        </div>
+                      <div className={styles.iconSection}>
+                        <Avatar
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.senderImage}`}
+                          shape="circle"
+                          style={{
+                            width: "40px !important",
+                            height: "40px !important",
+                          }}
+                          data-pr-tooltip={val.receiverName}
+                        />
+                        <img src={`${img}`} alt="" className={styles.img} />
+                        <i
+                          className="pi pi-caret-right"
+                          style={{ fontSize: "20px" }}
+                        />
+                        <Avatar
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.receiverImage}`}
+                          shape="circle"
+                          data-pr-tooltip={val.receiverName}
+                        />
+                      </div>
 
-                        <p className={styles.message}>{val.message}</p>
-                      </div>
-                    </div>
-                    <div className={styles.rhsActions}>
-                      {currentUserData.userRole === "Admin" && (
-                        <div
-                          className={
-                            val.isActive
-                              ? styles.approvedPill
-                              : styles.rejectedPill
-                          }
-                        >
-                          {val.isActive ? "Active" : "In Active"}
-                        </div>
-                      )}
-                      {/* {(currentUserData.userRole === "Admin" ||
-                        (val.senderImage === currentUserData.email &&
-                          !val.isActive)) && ( */}
-                      <div className={styles.actionBtns}>
-                        {val.senderImage === currentUserData.email &&
-                          !val.isActive && (
-                            <i
-                              onClick={() => {
-                                setFormData({
-                                  SendTowards: {
-                                    ...formData.SendTowards,
-                                    isValid: true,
-                                    // value: val.receiverDetails || {},
-                                    value: val.receiverName || {},
-                                  },
-                                  Description: {
-                                    ...formData.Description,
-                                    isValid: true,
-                                    value: val?.message || "",
-                                  },
-                                  Status: {
-                                    ...formData.Description,
-                                    isValid: true,
-                                    value: val.Status || "",
-                                  },
-                                  Owner: {
-                                    ...formData.Description,
-                                    isValid: true,
-                                    value: val.senderImage || "",
-                                  },
-                                  ID: {
-                                    ...formData.Description,
-                                    isValid: true,
-                                    value: val.ID || null,
-                                  },
-                                });
-                                togglePopupVisibility(
-                                  setPopupController,
-                                  initialPopupController[0],
-                                  0,
-                                  "open",
-                                  "Update shout outs"
-                                );
-                              }}
-                              style={{
-                                color: "#adadad",
-                                fontSize: "1.2rem",
-                                cursor: "pointer",
-                              }}
-                              className="pi pi-pen-to-square"
-                            />
-                          )}
-                        {currentUserData.userRole === "Admin" && (
-                          <InputSwitch
-                            checked={val.isActive}
-                            className="sectionToggler"
-                            onChange={(e: any) => {
-                              setShoutOutsData((prevItems) =>
-                                prevItems.map((item: any, idx: number) =>
-                                  idx === index
-                                    ? { ...item, isActive: e.value }
-                                    : item
-                                )
-                              );
-                              changeShoutOutActiveStatus(val.ID, e.value);
-                            }}
-                          />
-                        )}
-                      </div>
-                      {/* )} */}
+                      <p className={styles.message}>{val.message}</p>
                     </div>
                   </div>
-                );
-              })}
-          </div>
-        )}
-      </div>
-      {shoutOutsData.length > 0 && (
-        <div className="card">
+                  <div className={styles.cardFooter}>
+                    {currentUserData.userRole === "Admin" ? (
+                      <div
+                        className={
+                          val.isActive
+                            ? styles.approvedPill
+                            : styles.rejectedPill
+                        }
+                      >
+                        {val.isActive ? "Active" : "In Active"}
+                      </div>
+                    ) : (
+                      <div />
+                    )}
+                    <div className={styles.actionBtns}>
+                      {val.senderImage === currentUserData.email &&
+                        !val.isActive && (
+                          <i
+                            onClick={() => {
+                              setFormData({
+                                SendTowards: {
+                                  ...formData.SendTowards,
+                                  isValid: true,
+                                  // value: val.receiverDetails || {},
+                                  value: val.receiverName || {},
+                                },
+                                Description: {
+                                  ...formData.Description,
+                                  isValid: true,
+                                  value: val?.message || "",
+                                },
+                                Status: {
+                                  ...formData.Description,
+                                  isValid: true,
+                                  value: val.Status || "",
+                                },
+                                Owner: {
+                                  ...formData.Description,
+                                  isValid: true,
+                                  value: val.senderImage || "",
+                                },
+                                ID: {
+                                  ...formData.Description,
+                                  isValid: true,
+                                  value: val.ID || null,
+                                },
+                              });
+                              togglePopupVisibility(
+                                setPopupController,
+                                initialPopupController[0],
+                                0,
+                                "open",
+                                "Update shout outs"
+                              );
+                            }}
+                            style={{
+                              color: "#adadad",
+                              fontSize: "1.2rem",
+                              cursor: "pointer",
+                            }}
+                            className="pi pi-pen-to-square"
+                          />
+                        )}
+                      {currentUserData.userRole === "Admin" && (
+                        <InputSwitch
+                          checked={val.isActive}
+                          className="sectionToggler"
+                          onChange={(e: any) => {
+                            debugger;
+                            setShowShoutOutsData((prevItems) =>
+                              prevItems.map((item: any, idx: number) =>
+                                val?.ID === item?.ID
+                                  ? { ...item, isActive: e.value }
+                                  : item
+                              )
+                            );
+                            changeShoutOutActiveStatus(val.ID, e.value);
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      )}
+      {showShoutOutsData.length > 0 && (
+        <div
+          className="card"
+          style={{
+            padding: "4px 0px",
+          }}
+        >
           <Paginator
             first={pagination.first}
             rows={pagination.rows}
@@ -803,6 +869,8 @@ const ShoutOutsPage = (props: any): JSX.Element => {
               "close"
             );
             if (popupData?.isLoading?.success) {
+              // setIsile(false);
+              // getAllNewsData(dispatch);
             }
             // resetFormData(formData, setFormData);
           }}
