@@ -356,8 +356,8 @@ html {
 }
 /* width */
 *::-webkit-scrollbar {
-  width: 6px !important;
-  height: 4px !important;
+  width: 6px;
+  height: 4px;
 }
 
 /* Track */
@@ -685,4 +685,22 @@ em {
 }
 .basicSMInput::placeholder {
   color: #414141 !important;
+}
+.slideUpFade {
+  opacity: 0;
+  transition: 0.2s all;
+  animation: slideAndFade 0.17s both ease !important;
+}
+@keyframes slideAndFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    /* Start off-screen */
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    /* Slide down */
+  }
 }

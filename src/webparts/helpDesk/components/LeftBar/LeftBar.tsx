@@ -48,7 +48,60 @@ const LeftBar: React.FC = (): JSX.Element => {
   // Define nav items
   useEffect(() => {
     const items: NavItem[] =
-      currentUserDetails?.role !== "user"
+      currentUserDetails?.role === "user"
+        ? [
+            {
+              label: "My tickets",
+              path: `${currentRole}/all_tickets`,
+              children: [
+                {
+                  label: "My tickets in last 7 days",
+                  path: `${currentRole}/all_tickets/recent`,
+                },
+              ],
+            },
+            {
+              label: "Status",
+              path: `${currentRole}/tickets/status/open`,
+              children: [
+                {
+                  label: "Open",
+                  path: `${currentRole}/tickets/status/open`,
+                },
+                {
+                  label: "On hold",
+                  path: `${currentRole}/tickets/status/onhold`,
+                },
+                {
+                  label: "Closed",
+                  path: `${currentRole}/tickets/status/closed`,
+                },
+                {
+                  label: "In progress",
+                  path: `${currentRole}/tickets/status/inprogress`,
+                },
+                {
+                  label: "Overdue",
+                  path: `${currentRole}/tickets/status/overdue`,
+                },
+              ],
+            },
+            {
+              label: "Ticket source",
+              path: `${currentRole}/tickets/source/web`,
+              children: [
+                {
+                  label: "Web portal",
+                  path: `${currentRole}/tickets/source/web`,
+                },
+                {
+                  label: "Email",
+                  path: `${currentRole}/tickets/source/email`,
+                },
+              ],
+            },
+          ]
+        : currentUserDetails?.role === "HelpDesk_IT_Owners"
         ? [
             {
               label: "Dashboard",
@@ -59,41 +112,8 @@ const LeftBar: React.FC = (): JSX.Element => {
               path: `${currentRole}/all_tickets`,
               onClick: async () => {
                 await getAllTickets(dispatch);
-                // dispatch(
-                //   setHelpDeskTickets({
-                //     isLoading: true,
-                //     data: HelpDeskTicktesData?.data,
-                //     ticketType: "All tickets",
-                //     AllData: HelpDeskTicktesData?.AllData,
-                //   })
-                // );
               },
               children: [
-                {
-                  label: "Unassigned tickets",
-                  path: `${currentRole}/all_tickets/unassigned`,
-                },
-                // {
-                //   label: "My open tickets",
-                //   path: `${currentRole}/all_tickets/open`,
-                //   onClick: async () => {
-                //     // await Promise.all([getAllTickets(dispatch)]);
-
-                //     const filterHandleData: any =
-                //       HelpDeskTicktesData?.AllData?.filter(
-                //         (item: any) => item?.Status === "Open"
-                //       );
-
-                //     dispatch(
-                //       setHelpDeskTickets({
-                //         isLoading: true,
-                //         data: filterHandleData,
-                //         AllData: HelpDeskTicktesData?.AllData,
-                //         ticketType: "My open",
-                //       })
-                //     );
-                //   },
-                // },
                 {
                   label: "My tickets in last 7 days",
                   path: `${currentRole}/all_tickets/recent`,
@@ -123,23 +143,40 @@ const LeftBar: React.FC = (): JSX.Element => {
                 {
                   label: "Overdue",
                   path: `${currentRole}/tickets/status/overdue`,
+                },
+              ],
+            },
+            {
+              label: "Ticket source",
+              path: `${currentRole}/tickets/source/web`,
+              children: [
+                {
+                  label: "Web portal",
+                  path: `${currentRole}/tickets/source/web`,
+                },
+                {
+                  label: "Email",
+                  path: `${currentRole}/tickets/source/email`,
                 },
               ],
             },
           ]
         : [
             {
-              label: "My tickets",
+              label: "Dashboard",
+              path: `${currentRole}/dashboard`,
+            },
+            {
+              label: "All tickets",
               path: `${currentRole}/all_tickets`,
+              onClick: async () => {
+                await getAllTickets(dispatch);
+              },
               children: [
-                // {
-                //   label: "Tickets to handle",
-                //   path: `${currentRole}/all_tickets/handle`,
-                // },
-                // {
-                //   label: "My open tickets",
-                //   path: `${currentRole}/all_tickets/open`,
-                // },
+                {
+                  label: "Unassigned tickets",
+                  path: `${currentRole}/all_tickets/unassigned`,
+                },
                 {
                   label: "My tickets in last 7 days",
                   path: `${currentRole}/all_tickets/recent`,
@@ -169,6 +206,20 @@ const LeftBar: React.FC = (): JSX.Element => {
                 {
                   label: "Overdue",
                   path: `${currentRole}/tickets/status/overdue`,
+                },
+              ],
+            },
+            {
+              label: "Ticket source",
+              path: `${currentRole}/tickets/source/web`,
+              children: [
+                {
+                  label: "Web portal",
+                  path: `${currentRole}/tickets/source/web`,
+                },
+                {
+                  label: "Email",
+                  path: `${currentRole}/tickets/source/email`,
                 },
               ],
             },
