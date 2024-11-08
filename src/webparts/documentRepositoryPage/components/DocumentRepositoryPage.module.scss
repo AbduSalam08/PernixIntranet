@@ -55,14 +55,18 @@
 .tabContainer {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
-
+  justify-content: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  margin-bottom: 10px;
   .tabsAlign {
     display: flex;
     align-items: center;
-
+    justify-content: center;
+    gap: 5px;
+    margin-left: 5px;
     .clickTab {
-      height: 24px;
       font-size: 18px;
       font-weight: 500;
       color: #7c7c7c;
@@ -71,45 +75,70 @@
   }
 
   .selectedTab {
-    height: 24px;
+    height: 32px;
+    margin: 0 5px;
     font-size: 18px;
     font-weight: 500;
+    background-color: #0b4d5310;
+    color: #0b4d53;
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
 .bodyContainer {
+  width: 100%;
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 5%;
+  gap: 20px;
 
   .folderSection {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     cursor: pointer;
-    width: 30%;
+    width: auto;
     margin-bottom: 20px;
 
     .folderItems {
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
       width: 100%;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px;
+      width: 150px;
+      height: 100px;
+      position: relative;
 
-      img {
-        height: 20px;
-        width: 20px;
+      .folderIcon {
+        height: 50px;
+        width: 50px;
+      }
+      .fileIcon {
+        height: 40px;
+        width: 40px;
       }
 
-      div {
+      span {
         width: 100%;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 14px;
+        text-align: center;
+        max-width: 130px;
+        overflow: hidden;
+        // height: 15px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: "osMedium", sans-serif !important;
       }
-    }
-
-    svg {
-      color: #ff0000;
     }
   }
 }
@@ -139,4 +168,25 @@
       width: 100%;
     }
   }
+}
+.docRepoWrapper {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 15px 30px;
+}
+.deleteIcon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #ff000010;
+  border-radius: 4px;
+  color: #c10000;
+  // font-size: 16px;
+  padding: 2px;
 }

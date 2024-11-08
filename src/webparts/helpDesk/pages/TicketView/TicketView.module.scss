@@ -11,12 +11,22 @@
   justify-content: center;
 }
 .tcLhs {
+  height: 100%;
   width: 75%;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 20px;
+  padding: 0 10px;
+  &::-webkit-scrollbar {
+    width: 2px !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
 }
 .ticketHeader {
   width: 100%;
@@ -100,21 +110,34 @@
 }
 
 .tcRhs {
+  // height: calc(100vh - 200px);
   height: 100%;
+  padding: 0 10px;
+  border-radius: 10px;
+  overflow-y: auto;
   width: 25%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   gap: 20px;
+
   .detailsCard {
     width: 100%;
-    // min-height: calc(35% - 100px);
     background-color: #fff;
     border-radius: 8px;
     padding: 10px 15px;
   }
+
+  &::-webkit-scrollbar {
+    width: 2px !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
 }
+
 .heading {
   width: 97%;
   margin-left: auto;
@@ -273,4 +296,20 @@
   color: #eff5ff;
   margin-left: 15px;
   font-family: "osRegular", sans-serif;
+}
+.fileName {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  img {
+    width: 18px;
+    height: 18px;
+  }
+  span {
+    font-size: 14px;
+    color: #0a3622;
+    font-family: "osMedium", sans-serif !important;
+  }
 }

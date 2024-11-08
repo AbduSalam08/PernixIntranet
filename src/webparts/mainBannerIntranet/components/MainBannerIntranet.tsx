@@ -19,7 +19,7 @@ import { IQuoteDatas, IUserDetails } from "../../../interface/interface";
 import moment from "moment";
 
 // hover images - default
-const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
+// const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
 const EmployeeDirectory = require("../../../assets/images/svg/quickLinks/exployeeDirectory.svg");
 const HelpDesk = require("../../../assets/images/svg/quickLinks/helpdesk.svg");
 const PTO = require("../../../assets/images/svg/quickLinks/pto.svg");
@@ -27,7 +27,7 @@ const Approvals = require("../../../assets/images/svg/quickLinks/approvals.svg")
 const ProjectTemplate = require("../../../assets/images/svg/quickLinks/projectTemplate.svg");
 
 // hover images - white
-const OrganizationalChartWhite = require("../../../assets/images/svg/quickLinks/orgChartWhite.svg");
+// const OrganizationalChartWhite = require("../../../assets/images/svg/quickLinks/orgChartWhite.svg");
 const EmployeeDirectoryWhite = require("../../../assets/images/svg/quickLinks/exployeeDirectoryWhite.svg");
 const HelpDeskWhite = require("../../../assets/images/svg/quickLinks/helpdeskWhite.svg");
 const PTOWhite = require("../../../assets/images/svg/quickLinks/ptoWhite.svg");
@@ -52,18 +52,18 @@ const MainBannerIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
 
   const quickLinks = [
-    {
-      img: OrganizationalChart,
-      hoverImg: OrganizationalChartWhite,
-      text: "Organizational chart",
-      onClick: (_: any) => {
-        window.open(
-          props.context.pageContext.web.absoluteUrl +
-            CONFIG.NavigatePage.OrgChartPage,
-          "_self"
-        );
-      },
-    },
+    // {
+    //   img: OrganizationalChart,
+    //   hoverImg: OrganizationalChartWhite,
+    //   text: "Organizational chart",
+    //   onClick: (_: any) => {
+    //     window.open(
+    //       props.context.pageContext.web.absoluteUrl +
+    //         CONFIG.NavigatePage.OrgChartPage,
+    //       "_self"
+    //     );
+    //   },
+    // },
     {
       img: EmployeeDirectory,
       hoverImg: EmployeeDirectoryWhite,

@@ -175,3 +175,32 @@
   justify-content: center;
   gap: 10px;
 }
+.fileSource {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 13px;
+  font-size: 14px;
+  font-family: "osMedium", sans-serif !important;
+  p {
+    font-size: 16px;
+    color: #adadad;
+  }
+  .fileName {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    img {
+      width: 18px;
+      height: 18px;
+    }
+    span {
+      font-size: 14px;
+      color: #0a3622;
+      font-family: "osMedium", sans-serif !important;
+    }
+  }
+}

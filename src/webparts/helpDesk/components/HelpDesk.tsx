@@ -50,7 +50,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
       <Suspense fallback={<AppLoader />}>
         <Routes>
           {/* Invalid Route Fallback */}
-          <Route path="*" Component={ErrorElement} />
+          <Route path="*" element={<ErrorElement />} />
 
           {/* ADMIN ROUTES */}
           <Route path="/admin" Component={MainLayout} />
@@ -76,6 +76,10 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
                 <Route path="onhold" Component={MyTickets} />
                 <Route path="inprogress" Component={MyTickets} />
                 <Route path="overdue" Component={MyTickets} />
+              </Route>
+              <Route path="source" Component={MyTickets}>
+                <Route path="web" Component={MyTickets} />
+                <Route path="email" Component={MyTickets} />
               </Route>
             </Route>
 
@@ -103,6 +107,10 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
                 <Route path="onhold" Component={MyTickets} />
                 <Route path="inprogress" Component={MyTickets} />
                 <Route path="overdue" Component={MyTickets} />
+              </Route>
+              <Route path="source" Component={MyTickets}>
+                <Route path="web" Component={MyTickets} />
+                <Route path="email" Component={MyTickets} />
               </Route>
             </Route>
             <Route
@@ -133,6 +141,10 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
                 <Route path="onhold" Component={MyTickets} />
                 <Route path="inprogress" Component={MyTickets} />
                 <Route path="overdue" Component={MyTickets} />
+              </Route>
+              <Route path="source" Component={MyTickets}>
+                <Route path="web" Component={MyTickets} />
+                <Route path="email" Component={MyTickets} />
               </Route>
             </Route>
             <Route
