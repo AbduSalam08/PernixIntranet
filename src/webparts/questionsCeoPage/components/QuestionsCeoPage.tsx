@@ -67,11 +67,10 @@ interface PopupState {
 
 const QuestionsCeoPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
-  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const searchField: IPageSearchFields = CONFIG.PageSearchFields;
   const QuestionCEOIntranetData: any = useSelector((state: any) => {
     return state.QuestionCEOIntranetData.value;
   });
-  console.log("QuestionCEOIntranetData", QuestionCEOIntranetData);
 
   const [pagination, setPagination] = useState<IPaginationData>(
     CONFIG.PaginationData
@@ -255,19 +254,36 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
 
   const handleAnswerSubmit = async () => {
     setSearchParamsQusID(null);
-    if (formData.answer.value !== "") {
-      // await submitCEOQuestionAnswer(
-      //   type,
-      //   formData.qustion.ID,
-      //   formData.answer.ID,
-      //   formData.answer.value,
-      //   setPopupController,
-      //   0,
-      //   dispatch
-      // );
+    let hasErrors: boolean = false;
+
+    const updatedFormData = Object.keys(formData).reduce((acc, key) => {
+      const fieldData = formData[key];
+      const { isValid, errorMsg } = validateField(
+        key,
+        fieldData.value,
+        fieldData?.validationRule
+      );
+
+      if (!isValid) {
+        hasErrors = true;
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          ...fieldData,
+          isValid,
+          errorMsg,
+        },
+      };
+    }, {} as typeof formData);
+
+    setFormData(updatedFormData);
+
+    if (!hasErrors) {
       await submitCEOQuestionAnswer(
         formData,
-        userDetails?.email,
+        userDetails?.email?.toLowerCase(),
         setPopupController,
         0,
         dispatch
@@ -428,7 +444,10 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       } else if (curTab === CONFIG.QuestionsPageTabsName[1]) {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
-            return newsItem?.avatarUrl === userDetails?.email;
+            return (
+              newsItem?.avatarUrl?.toLowerCase() ===
+              userDetails?.email?.toLowerCase()
+            );
           }
         );
       } else {
@@ -452,7 +471,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
             return (
-              newsItem?.avatarUrl === userDetails?.email &&
+              newsItem?.avatarUrl?.toLowerCase() ===
+                userDetails?.email?.toLowerCase() &&
               newsItem?.replies.length > 0
             );
           }
@@ -469,7 +489,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
             return (
-              newsItem?.avatarUrl === userDetails?.email && newsItem?.isActive
+              newsItem?.avatarUrl?.toLowerCase() ===
+                userDetails?.email?.toLowerCase() && newsItem?.isActive
             );
           }
         );
@@ -515,7 +536,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
           />
-          <p>Questions to CEO</p>
+          <p>Question to CEO</p>
         </div>
         <div className={styles.rightSection}>
           <div>
@@ -534,30 +555,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               }}
             />
           </div>
-          {userDetails?.role !== "CEO" && (
-            <div
-              style={{
-                display: "flex",
-              }}
-              className={styles.addNewbtn}
-              onClick={() => {
-                togglePopupVisibility(
-                  setPopupController,
-                  initialPopupController[1],
-                  1,
-                  "open",
-                  "Submit a question to CEO"
-                );
-                resetFormData(newFormData, setNewFormData);
-              }}
-            >
-              <i
-                className="pi pi-plus"
-                style={{ fontSize: "1rem", color: "#fff" }}
-              />
-              Add question
-            </div>
-          )}
           <div
             className={styles.refreshBTN}
             onClick={(_) => {
@@ -570,6 +567,30 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           >
             <i className="pi pi-refresh" />
           </div>
+          {userDetails?.role !== "CEO" && (
+            <div
+              style={{
+                display: "flex",
+              }}
+              className={styles.addNewbtn}
+              onClick={() => {
+                resetFormData(newFormData, setNewFormData);
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[1],
+                  1,
+                  "open",
+                  "Submit a question to CEO"
+                );
+              }}
+            >
+              <i
+                className="pi pi-plus"
+                style={{ fontSize: "1rem", color: "#fff" }}
+              />
+              Add question
+            </div>
+          )}
         </div>
       </div>
       {/* tabs */}
@@ -583,6 +604,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   style={{
                     borderBottom:
                       selectedTab === str ? "3px solid #e0803d" : "none",
+                    cursor: "pointer",
                   }}
                   onClick={(_) => {
                     setPagination(CONFIG.PaginationData);
@@ -609,6 +631,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   style={{
                     borderBottom:
                       selectedTab === str ? "3px solid #e0803d" : "none",
+                    cursor: "pointer",
                   }}
                   onClick={(_) => {
                     setPagination(CONFIG.PaginationData);
@@ -634,6 +657,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                 style={{
                   borderBottom:
                     selectedTab === str ? "3px solid #e0803d" : "none",
+                  cursor: "pointer",
                 }}
                 onClick={(_) => {
                   setPagination(CONFIG.PaginationData);
@@ -700,14 +724,13 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                           // data-pr-tooltip={val.receiverName}
                         />
                       </div>
-                      <p className={styles.ques}>{val.title}</p>
+                      <p className={styles.ques} title={val.title}>
+                        {val.title}
+                      </p>
                     </div>
-                    <p className={styles.date}>
-                      <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
-                      {val.date}
-                    </p>
+
                     <div>
-                      <div className={styles.questions}>
+                      <div className={styles.answer}>
                         <div className={styles.imgsection}>
                           <Avatar
                             className="qustionceo"
@@ -715,17 +738,21 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                             shape="circle"
                           />
                         </div>
-                        <p className={styles.answer}>
+                        <p title={val.replies[0]?.content}>
                           {val.replies[0]?.content}
                         </p>
                       </div>
                       <p className={styles.date}>
-                        <i
+                        {/* <i
                           className="pi pi-clock"
                           style={{ fontSize: "1rem" }}
-                        />
-                        {val.replies[0]?.date}
+                        /> */}
+                        Posted on :{val.replies[0]?.date}
                       </p>
+                      {/* <p className={styles.date}>
+                        <i className="pi pi-clock" style={{ fontSize: "1rem" }} /> 
+                        Responded on :{val.date}
+                      </p> */}
                     </div>
                   </div>
                   {userDetails.role !== "User" && (

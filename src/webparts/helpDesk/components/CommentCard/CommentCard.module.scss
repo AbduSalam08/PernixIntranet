@@ -138,6 +138,10 @@
     color: #24292e;
     line-height: 1.5;
     font-family: "osMedium", sans-serif;
+    li {
+      list-style: disc !important;
+      margin-left: 15px !important;
+    }
   }
 }
 @keyframes fadeIn {

@@ -223,7 +223,8 @@ export const addQuestionCeo = async (
           },
           messages: {
             ...updatedState[index].messages,
-            successDescription: `The new Question '${formData.Description.value}' has been added successfully.`,
+            successDescription: `The new Question has been added successfully.`,
+            // successDescription: `The new Question '${formData.Description.value}' has been added successfully.`,
           },
         };
         return updatedState;
@@ -333,7 +334,8 @@ export const submitCEOQuestionAnswer = async (
           },
           messages: {
             ...updatedState[index].messages,
-            successDescription: `The answer '${formData?.answer?.value}' has been updated successfully.`,
+            successDescription: `The answer has been updated successfully.`,
+            // successDescription: `The answer '${formData?.answer?.value}' has been updated successfully.`,
           },
         };
         return updatedState;
