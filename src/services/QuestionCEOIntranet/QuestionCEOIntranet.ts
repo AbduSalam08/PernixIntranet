@@ -88,13 +88,13 @@ export const questionsCurrentUserRole = async (
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
   if (isCEO) {
-    setUserRole("CEO");
+    setUserRole({ role: "CEO", email: currentUserEmail });
     userDetails = { role: "CEO", email: currentUserEmail };
   } else if (isAdmin) {
-    setUserRole("Admin");
+    setUserRole({ role: "Admin", email: currentUserEmail });
     userDetails = { role: "Admin", email: currentUserEmail };
   } else {
-    setUserRole("User");
+    setUserRole({ role: "User", email: currentUserEmail });
     userDetails = { role: "User", email: currentUserEmail };
   }
   return userDetails;
@@ -109,34 +109,45 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
   try {
     // Fetch questions from the Intranet_QuestionsToCEO list
     const questionsResponse = await SpServices.SPReadItems({
-      Listname: "Intranet_QuestionsToCEO",
+      Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
       Select: "*, Author/Title, Author/EMail, Author/Id",
       Expand: "Author",
     });
 
     // Fetch responses from the Intranet_Response list
-    const responsesResponse = await SpServices.SPReadItems({
-      Listname: "Intranet_QuestionCEOresponse",
-      Select: "*, Questionceo/ID, Author/Title, Author/EMail", // Include Question/ID to filter by Question lookup
-      Expand: "Questionceo, Author", // Expand the Question and Author lookup fields
-    });
+    // const responsesResponse = await SpServices.SPReadItems({
+    //   Listname: "Intranet_QuestionCEOresponse",
+    //   Select: "*, Questionceo/ID, Author/Title, Author/EMail", // Include Question/ID to filter by Question lookup
+    //   Expand: "Questionceo, Author", // Expand the Question and Author lookup fields
+    // });
 
     // Prepare the final structured data by filtering responses for each question
     const questionCeoData = questionsResponse.map((question: any) => {
       // Filter responses that match the current question ID
-      const filteredResponses = responsesResponse.filter(
-        (response: any) => response.Questionceo?.ID === question?.ID
-      );
+      // const filteredResponses = responsesResponse.filter(
+      //   (response: any) => response.Questionceo?.ID === question?.ID
+      // );
 
       // Structure the replies array for the current question
-      const replies = filteredResponses.map((res: any) => ({
-        ID: res.ID,
-        content: res.Title || "No response text provided.", // Use response text if available
-        date: moment(res.Created).format("DD/MM/YYYY"), // Format the created date
-        avatarUrl:
-          res.Author?.EMail ||
-          "https://randomuser.me/api/portraits/placeholder.jpg", // Use author's email as avatar or a placeholder
-      }));
+      // const replies = filteredResponses.map((res: any) => ({
+      //   ID: res.ID,
+      //   content: res.Title || "No response text provided.", // Use response text if available
+      //   date: moment(res.Created).format("DD/MM/YYYY"), // Format the created date
+      //   avatarUrl:
+      //     res.Author?.EMail ||
+      //     "https://randomuser.me/api/portraits/placeholder.jpg", // Use author's email as avatar or a placeholder
+      // }));
+
+      const replies = question?.Answer
+        ? [
+            {
+              ID: question.ID,
+              content: question?.Answer,
+              date: question?.AnswerDate,
+              avatarUrl: question?.AnswerBy,
+            },
+          ]
+        : [];
 
       // Return the structured question and replies data
       return {
@@ -193,7 +204,7 @@ export const addQuestionCeo = async (
   try {
     //Add item to the SharePoint list
     const addItem: any = await SpServices.SPAddItem({
-      Listname: "Intranet_QuestionsToCEO",
+      Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
       RequestJSON: {
         Question: formData.Description.value,
       },
@@ -269,20 +280,24 @@ export const changeQuestionActiveStatus = async (
   isActive: boolean
 ): Promise<void> => {
   await SpServices.SPUpdateItem({
-    Listname: "Intranet_QuestionsToCEO",
+    Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
     ID: qusId,
     RequestJSON: { isActive: isActive },
   });
 };
+
 export const submitCEOQuestionAnswer = async (
-  type: string,
-  qusId: number,
-  ansId: number,
-  answer: string,
+  formData: any,
+  answeUser: string,
   setLoaderState: any,
   index: number,
   dispatch: any
 ): Promise<void> => {
+  const payloadJson = {
+    Answer: formData?.answer?.value,
+    AnswerBy: answeUser,
+    AnswerDate: moment(new Date()).format("DD/MM/YYYY"),
+  };
   setLoaderState((prevState: any) => {
     const updatedState = [...prevState]; // Create a copy of the array
     updatedState[index] = {
@@ -296,100 +311,101 @@ export const submitCEOQuestionAnswer = async (
     };
     return updatedState;
   });
-  if (type === "Update") {
-    await SpServices.SPUpdateItem({
-      Listname: "Intranet_QuestionCEOresponse",
-      ID: ansId,
-      RequestJSON: { Title: answer },
-    })
-      .then((res: any) => {
-        getQuestionCeo(dispatch);
-        removeSearchParamsID();
-        setLoaderState((prevState: any) => {
-          const updatedState = [...prevState]; // Copy state array
-          updatedState[index] = {
-            ...updatedState[index],
-            popupWidth: "450px",
-            isLoading: {
-              inprogress: false,
-              success: true,
-              error: false,
-            },
-            messages: {
-              ...updatedState[index].messages,
-              successDescription: `The answer '${answer}' has been updated successfully.`,
-            },
-          };
-          return updatedState;
-        });
-      })
-      .catch((err: any) => {
-        console.log("Answer updated error", err);
-        setLoaderState((prevState: any) => {
-          const updatedState = [...prevState]; // Copy state array
-          updatedState[index] = {
-            ...updatedState[index],
-            popupWidth: "450px",
-            isLoading: {
-              inprogress: false,
-              success: false,
-              error: true,
-            },
-            messages: {
-              ...updatedState[index].messages,
-              errorDescription:
-                "An error occurred while updating answer, please try again later.",
-            },
-          };
-          return updatedState;
-        });
+
+  // if (type === "Update") {
+  await SpServices.SPUpdateItem({
+    Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
+    ID: formData?.qustion?.ID,
+    RequestJSON: payloadJson,
+  })
+    .then((res: any) => {
+      getQuestionCeo(dispatch);
+      removeSearchParamsID();
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState]; // Copy state array
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: true,
+            error: false,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            successDescription: `The answer '${formData?.answer?.value}' has been updated successfully.`,
+          },
+        };
+        return updatedState;
       });
-  } else {
-    await SpServices.SPAddItem({
-      Listname: "Intranet_QuestionCEOresponse",
-      RequestJSON: { Title: answer, QuestionceoId: qusId },
     })
-      .then((res: any) => {
-        getQuestionCeo(dispatch);
-        removeSearchParamsID();
-        setLoaderState((prevState: any) => {
-          const updatedState = [...prevState]; // Copy state array
-          updatedState[index] = {
-            ...updatedState[index],
-            popupWidth: "450px",
-            isLoading: {
-              inprogress: false,
-              success: true,
-              error: false,
-            },
-            messages: {
-              ...updatedState[index].messages,
-              successDescription: `The answer '${answer}' has been added successfully.`,
-            },
-          };
-          return updatedState;
-        });
-      })
-      .catch((err: any) => {
-        console.log("Answer added error", err);
-        setLoaderState((prevState: any) => {
-          const updatedState = [...prevState]; // Copy state array
-          updatedState[index] = {
-            ...updatedState[index],
-            popupWidth: "450px",
-            isLoading: {
-              inprogress: false,
-              success: false,
-              error: true,
-            },
-            messages: {
-              ...updatedState[index].messages,
-              errorDescription:
-                "An error occurred while adding answer, please try again later.",
-            },
-          };
-          return updatedState;
-        });
+    .catch((err: any) => {
+      console.log("Answer updated error", err);
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState]; // Copy state array
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: false,
+            error: true,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            errorDescription:
+              "An error occurred while updating answer, please try again later.",
+          },
+        };
+        return updatedState;
       });
-  }
+    });
+  // } else {
+  //   await SpServices.SPAddItem({
+  //     Listname: "Intranet_QuestionCEOresponse",
+  //     RequestJSON: { Title: formData?.answer?.value },
+  //   })
+  //     .then((res: any) => {
+  //       getQuestionCeo(dispatch);
+  //       removeSearchParamsID();
+  //       setLoaderState((prevState: any) => {
+  //         const updatedState = [...prevState]; // Copy state array
+  //         updatedState[index] = {
+  //           ...updatedState[index],
+  //           popupWidth: "450px",
+  //           isLoading: {
+  //             inprogress: false,
+  //             success: true,
+  //             error: false,
+  //           },
+  //           messages: {
+  //             ...updatedState[index].messages,
+  //             successDescription: `The answer '${answer}' has been added successfully.`,
+  //           },
+  //         };
+  //         return updatedState;
+  //       });
+  //     })
+  //     .catch((err: any) => {
+  //       console.log("Answer added error", err);
+  //       setLoaderState((prevState: any) => {
+  //         const updatedState = [...prevState]; // Copy state array
+  //         updatedState[index] = {
+  //           ...updatedState[index],
+  //           popupWidth: "450px",
+  //           isLoading: {
+  //             inprogress: false,
+  //             success: false,
+  //             error: true,
+  //           },
+  //           messages: {
+  //             ...updatedState[index].messages,
+  //             errorDescription:
+  //               "An error occurred while adding answer, please try again later.",
+  //           },
+  //         };
+  //         return updatedState;
+  //       });
+  //     });
+  // }
 };

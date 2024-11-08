@@ -15,6 +15,7 @@ export interface IListName {
   HelpDesk_AllTickets: string;
   Calendar_Azure_Group_ID: string;
   HelpDesk_TicketConversations: string;
+  Intranet_QuestionsToCEO: string;
 }
 
 export interface ISPGroupName {
@@ -137,4 +138,5 @@ export interface INavigatePage {
   PTOPage: string;
   ApprovalsPage: string;
   ProjectTemplatePage: string;
+  ShoutOutsPage: string;
 }

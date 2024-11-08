@@ -140,7 +140,7 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,

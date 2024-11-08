@@ -34,6 +34,7 @@ export namespace CONFIG {
     HelpDesk_AllTickets: "HelpDesk_AllTickets",
     Calendar_Azure_Group_ID: "Calendar_Azure_Group_ID",
     HelpDesk_TicketConversations: "HelpDesk_TicketConversations",
+    Intranet_QuestionsToCEO: "Intranet_QuestionsToCEO",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -56,13 +57,13 @@ export namespace CONFIG {
 
   export const QuestionsPageTabsName: string[] = [
     "All questions",
-    "Questions by me",
+    "My questions",
     "Un answered questions",
   ];
 
   export const ShoutOutsPageTabsName: string[] = [
-    "All shout-out",
-    "Shout-out by me",
+    "All shout-outs",
+    "My shout-outs",
   ];
 
   export const RoleDetails: IRoleDetails = {
@@ -128,5 +129,6 @@ export namespace CONFIG {
     ProjectTemplatePage: "/SitePages/ProjectTemplatePage.aspx",
     PTOPage: "/SitePages/PTOPage.aspx",
     QuestionsCEOPage: "/SitePages/QuestionsCEOPage.aspx",
+    ShoutOutsPage: "/SitePages/ShoutOutsPage.aspx",
   };
 }
