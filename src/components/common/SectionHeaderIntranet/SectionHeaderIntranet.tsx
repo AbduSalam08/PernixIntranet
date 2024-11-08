@@ -6,17 +6,20 @@ interface Props {
   label: string;
   headerAction?: () => any | void;
   removeAdd?: boolean;
+  title?: string;
 }
 const SectionHeaderIntranet = ({
   label,
   headerAction,
   removeAdd = false,
+  title,
 }: Props): JSX.Element => {
   return (
     <div className={styles.sectionHeaderWrapper}>
       <p>{label}</p>
       {!removeAdd && (
         <DefaultButton
+          title={title}
           onlyIcon={true}
           btnType="primaryGreen"
           size="medium"

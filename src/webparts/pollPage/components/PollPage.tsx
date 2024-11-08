@@ -3,10 +3,10 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import "../../../assets/styles/Style.css";
 import styles from "./PollPage.module.scss";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
-import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import {
   addPollData,
@@ -31,49 +31,29 @@ import CustomInput from "../../../components/common/CustomInputFields/CustomInpu
 import { Add, Delete } from "@mui/icons-material";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import Popup from "../../../components/common/Popups/Popup";
-import { Avatar } from "primereact/avatar";
-import { AvatarGroup } from "primereact/avatargroup";
-// import dayjs from "dayjs";
+// import { Avatar } from "primereact/avatar";
+// import { AvatarGroup } from "primereact/avatargroup";
+
 interface SearchField {
   selectedDate: Date | any;
   allSearch: string;
 }
+
 let objFilter: SearchField = {
   selectedDate: null,
   allSearch: "",
 };
 
 const PollPage = (props: any): JSX.Element => {
-  const curUser = props.context._pageContext._user.email;
-  const [searchField, setSearchField] = useState<SearchField>({
-    selectedDate: null,
-    allSearch: "",
-  });
-
-  const [selectQuestionId, setSelectQuestionId] = useState<number | any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<any | null>(
-    null
-    // QuestionID: null,
-    // OptionId: null,
-    // VoteId: null,
-    // Title: "",
-    // isValid: true,
-    // errorMsg: "",
-  );
-
-  const [selectedTab, setSelectedTab] = useState<string>("");
   const dispatch = useDispatch();
-  const [currentPoll, setCurrentPoll] = useState<any>([]);
-  const [showcurrentPoll, setShowCurrentPoll] = useState<any>([]);
-
-  const PollIntranetData: any = useSelector((state: any) => {
-    return state.PollIntranetData.value;
-  });
+  const curUser = props.context._pageContext._user.email;
 
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
+  const PollIntranetData: any = useSelector((state: any) => {
+    return state.PollIntranetData.value;
+  });
 
   const initialPopupController = [
     {
@@ -122,10 +102,19 @@ const PollPage = (props: any): JSX.Element => {
     },
   ];
 
+  const [searchField, setSearchField] = useState<SearchField>({
+    selectedDate: null,
+    allSearch: "",
+  });
+  const [selectQuestionId, setSelectQuestionId] = useState<number | any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedOption, setSelectedOption] = useState<any | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>("");
+  const [currentPoll, setCurrentPoll] = useState<any>([]);
+  const [showcurrentPoll, setShowCurrentPoll] = useState<any>([]);
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -147,7 +136,6 @@ const PollPage = (props: any): JSX.Element => {
       validationRule: { required: true, type: "date" },
     },
   });
-
   const [options, setOptions] = useState<any>([
     {
       Id: 1,
@@ -159,8 +147,6 @@ const PollPage = (props: any): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
   ]);
-
-  // console.log("formData", setOptions);
 
   const handleInputChange = (
     field: string,
@@ -248,10 +234,9 @@ const PollPage = (props: any): JSX.Element => {
     });
 
     // Update both formData and options state
-    // setFormData(updatedFormData);
     setOptions(updatedOptions);
-
     setFormData(updatedFormData);
+
     if (!hasErrors) {
       await addPollData(formData, setPopupController, 0, options);
     } else {
@@ -299,7 +284,7 @@ const PollPage = (props: any): JSX.Element => {
             isValid={option.isValid}
             errorMsg={option.errorMsg}
             onChange={(e) => {
-              const value = e;
+              const value = e.trimStart();
               const { isValid, errorMsg } = validateField(
                 "Title",
                 value,
@@ -332,11 +317,6 @@ const PollPage = (props: any): JSX.Element => {
               }
             />
           ) : (
-            // <i
-            //   className="pi pi-plus"
-            //   onClick={handleAddOption}
-            //   style={{ cursor: "pointer" }}
-            // />
             /* Show delete icon for non-last options or if last option is empty */
             index !== options.length - 1 && (
               <DefaultButton
@@ -349,40 +329,26 @@ const PollPage = (props: any): JSX.Element => {
                     sx={{
                       width: "20px",
                       fontSize: "24px",
-                      // color: "#FD3737",
                     }}
                   />
                 }
               />
-              // <i
-              //   className="pi pi-trash"
-              //   onClick={() => handleDeleteOption(index)}
-              //   style={{
-              //     cursor: "pointer",
-              //     color: "#FD3737",
-              //     fontSize: "24px",
-              //   }}
-              // />
             )
           )}
         </div>
       ))
     : [];
 
-  // console.log("mappedItem", mappedItem);
   const popupInputs: any[] = [
     [
-      <div
-        // className={styles.addNewsGrid}
-        key={1}
-      >
+      <div key={1}>
         <CustomInput
           value={formData.Title.value}
           placeholder="Enter Question"
           isValid={formData.Title.isValid}
           errorMsg={formData.Title.errorMsg}
           onChange={(e) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Title",
               value,
@@ -633,10 +599,6 @@ const PollPage = (props: any): JSX.Element => {
     setCurrentPoll([...showcurrentPoll]);
   };
 
-  // useEffect(() => {
-  //   onLoadingFUN();
-  // }, []);
-
   const handleOptionClick = (
     questionId: number,
     optionId: number,
@@ -653,65 +615,34 @@ const PollPage = (props: any): JSX.Element => {
     });
   };
 
-  // const handleSubmitVote = async (): Promise<any> => {
-  //   let hasErrors = false;
-  //   const updatedSelectedOption: any = { ...selectedOption };
+  // const renderAvatarGroup = (members: any) => {
+  //   const maxVisibleAvatars = 4;
+  //   const displayedMembers = members.slice(0, maxVisibleAvatars);
+  //   const additionalCount = members.length - maxVisibleAvatars;
 
-  //   // Validate each question's selected option
-  //   Object.keys(updatedSelectedOption).forEach((questionId) => {
-  //     if (!updatedSelectedOption[questionId].OptionId) {
-  //       hasErrors = true;
-  //       updatedSelectedOption[questionId] = {
-  //         ...updatedSelectedOption[questionId],
-  //         isValid: false,
-  //         errorMsg: "Please select an option",
-  //       };
-  //     }
-  //   });
-
-  //   // Update state with validation results
-  //   setSelectedOption(updatedSelectedOption);
-
-  //   if (!hasErrors) {
-  //     await Promise.all(
-  //       Object.values(updatedSelectedOption).map((optionData: any) =>
-  //         addVote(optionData, setPopupController, 1)
-  //       )
-  //     );
-  //     await resetSelectedItem(updatedSelectedOption, setSelectedOption);
-  //   } else {
-  //     console.log("Vote submission contains errors");
-  //   }
+  //   return (
+  //     <AvatarGroup>
+  //       {displayedMembers?.map((member: any, index: number) => (
+  //         <Avatar
+  //           key={index}
+  //           title={member?.Author?.Title}
+  //           image={
+  //             member.Author
+  //               ? "/_layouts/15/userphoto.aspx?size=L&username=" +
+  //                 member.Author?.EMail
+  //               : ""
+  //           }
+  //           size="normal"
+  //           shape="circle"
+  //           // alt={member.Author?.Title}
+  //         />
+  //       ))}
+  //       {additionalCount > 0 && (
+  //         <Avatar label={`+ ${additionalCount}`} shape="circle" size="normal" />
+  //       )}
+  //     </AvatarGroup>
+  //   );
   // };
-
-  const renderAvatarGroup = (members: any) => {
-    const maxVisibleAvatars = 4;
-    const displayedMembers = members.slice(0, maxVisibleAvatars);
-    const additionalCount = members.length - maxVisibleAvatars;
-
-    return (
-      <AvatarGroup>
-        {displayedMembers?.map((member: any, index: number) => (
-          <Avatar
-            key={index}
-            title={member?.Author?.Title}
-            image={
-              member.Author
-                ? "/_layouts/15/userphoto.aspx?size=L&username=" +
-                  member.Author?.EMail
-                : ""
-            }
-            size="normal"
-            shape="circle"
-            // alt={member.Author?.Title}
-          />
-        ))}
-        {additionalCount > 0 && (
-          <Avatar label={`+ ${additionalCount}`} shape="circle" size="normal" />
-        )}
-      </AvatarGroup>
-    );
-  };
 
   const handleSubmitVote = async (): Promise<any> => {
     let hasErrors = false;
@@ -742,17 +673,6 @@ const PollPage = (props: any): JSX.Element => {
     }
   };
 
-  // const handleChange = (value: any, index: number) => {
-  //   let MData: any = [...currentPoll];
-  //   let tempItem: any = MData[index];
-  //   MData[index] = { ...tempItem, Select: value };
-
-  //   console.log("MData: ", MData);
-
-  //   setCurrentPoll([...MData]);
-  //   debugger;
-  // };
-
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
@@ -770,7 +690,7 @@ const PollPage = (props: any): JSX.Element => {
   return isLoading ? (
     <CircularSpinner />
   ) : (
-    <div>
+    <>
       <div className={styles.newsHeaderContainer}>
         <div className={styles.leftSection}>
           <i
@@ -786,6 +706,7 @@ const PollPage = (props: any): JSX.Element => {
           />
           <p>Poll</p>
         </div>
+
         <div className={styles.rightSection}>
           <CustomInput
             value={searchField.allSearch}
@@ -869,46 +790,42 @@ const PollPage = (props: any): JSX.Element => {
           </div>
         </div>
       </div>
-      <>
-        <div className={styles.tabsContainer}>
-          {CONFIG.TabsName.map((str: string, i: number) => {
-            return currentUserDetails.role !== CONFIG.RoleDetails.user ? (
-              <div
-                key={i}
-                style={{
-                  borderBottom:
-                    selectedTab === str ? "3px solid #e0803d" : "none",
-                }}
-                onClick={(_) => {
-                  setSelectedTab(str);
-                  onLoadingFUN(str);
-                  // prepareNewsData(str);
-                }}
-              >
-                {str}
-              </div>
-            ) : i === 0 ? (
-              <div
-                key={i}
-                style={{
-                  borderBottom:
-                    selectedTab === str ? "3px solid #e0803d" : "none",
-                }}
-                onClick={(_) => {
-                  setSelectedTab(str);
-                  onLoadingFUN(str);
 
-                  // prepareNewsData(str);
-                }}
-              >
-                {str}
-              </div>
-            ) : (
-              ""
-            );
-          })}
-        </div>
-      </>
+      <div className={styles.tabsContainer}>
+        {CONFIG.TabsName.map((str: string, i: number) => {
+          return currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+                onLoadingFUN(str);
+              }}
+            >
+              {str}
+            </div>
+          ) : i === 0 ? (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+                onLoadingFUN(str);
+              }}
+            >
+              {str}
+            </div>
+          ) : (
+            ""
+          );
+        })}
+      </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {currentPoll?.map((val: any, index: number) => (
@@ -938,7 +855,6 @@ const PollPage = (props: any): JSX.Element => {
                       1,
                       "open"
                     );
-
                     setSelectQuestionId(val.Id);
                   }}
                   style={{
@@ -946,8 +862,7 @@ const PollPage = (props: any): JSX.Element => {
                     color: "red",
                     cursor: "pointer",
                   }}
-                  className="pi pi-trash
-"
+                  className="pi pi-trash"
                 />
               ) : (
                 ""
@@ -957,15 +872,20 @@ const PollPage = (props: any): JSX.Element => {
             {val.options?.map((option: any, index: number) => (
               <div key={index}>
                 <div
+                  style={{
+                    cursor:
+                      selectedTab === CONFIG.TabsName[0] ? "pointer" : "auto",
+                  }}
                   className={styles.container}
                   onClick={() => {
-                    // handleChange(option?.Id, index);
-                    handleOptionClick(
-                      val?.Id,
-                      option?.Id,
-                      option?.Title,
-                      val?.resId
-                    );
+                    if (selectedTab === CONFIG.TabsName[0]) {
+                      handleOptionClick(
+                        val?.Id,
+                        option?.Id,
+                        option?.Title,
+                        val?.resId
+                      );
+                    }
                   }}
                 >
                   <div
@@ -985,8 +905,8 @@ const PollPage = (props: any): JSX.Element => {
                   </div>
                 </div>
 
-                {option.Memebers?.length > 0 &&
-                  renderAvatarGroup(option.Memebers)}
+                {/* {option.Memebers?.length > 0 &&
+                  renderAvatarGroup(option.Memebers)} */}
               </div>
             ))}
             <div
@@ -1001,7 +921,13 @@ const PollPage = (props: any): JSX.Element => {
               >{`Total Responses : ${val?.TotlaVotes}`}</p>
 
               {selectedOption?.OptionId !== val.PreviousOption && (
-                <div className={styles.voteButton}>
+                <div
+                  className={styles.voteButton}
+                  style={{
+                    display:
+                      selectedTab === CONFIG.TabsName[0] ? "flex" : "none",
+                  }}
+                >
                   <Button label="Vote" onClick={handleSubmitVote} />
                 </div>
               )}
@@ -1050,53 +976,7 @@ const PollPage = (props: any): JSX.Element => {
           noActionBtn={true}
         />
       ))}
-      {/* 
-      <>
-        {currentPoll?.map((poll: any, pollIndex: number) => (
-          <div key={pollIndex} className={styles.PollContainer}>
-            <div className={styles["poll-header"]}>{poll?.Question}</div>
-
-            <div className={styles["options-container"]}>
-              {poll?.options?.map((option: any, optionIndex: number) => (
-                <div
-                  key={optionIndex}
-                  className={styles.container}
-                  onClick={() =>
-                    handleOptionClick(
-                      poll.Id,
-                      option.Id,
-                      option.Title,
-                      poll.resId
-                    )
-                  }
-                >
-                  <div
-                    className={styles.backgroundfill}
-                    style={{ width: `${option?.Percentage}%` }}
-                  />
-                  <div className={styles.contentSection}>
-                    <div className={styles.content}>
-                      <p>{optionIndex + 1}.</p>
-                      {selectedOption?.OptionId === option?.Id && (
-                        <i className="pi pi-check" />
-                      )}
-                      <p>{option?.Title}</p>
-                    </div>
-                    <p>{`${option?.Percentage}%`}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {selectedOption?.OptionId !== poll?.PreviousOption && (
-              <div className={styles.voteButton}>
-                <Button label="Vote" />
-              </div>
-            )}
-          </div>
-        ))}
-      </> */}
-    </div>
+    </>
   );
 };
 
