@@ -1180,7 +1180,9 @@ const MainBannerPage = (props: any): JSX.Element => {
                 })}
             </div>
           ) : (
-            <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
+            <div className={styles.bodyNoDataFound}>
+              No motivational quote found!
+            </div>
           )}
 
           {/* Pagination section */}
