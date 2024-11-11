@@ -123,7 +123,7 @@ const CommentCard = ({
             {edited && <div className={styles.extraInfo}>Edited</div>}
           </div>
           <div className={styles.hamb}>
-            {role && <span className={styles.roleBadge}>{role}</span>}
+            {/* {role && <span className={styles.roleBadge}>{role}</span>} */}
             {/* {ownComment && (
               <div onClick={handleMenuClick}>
                 <MoreVert
