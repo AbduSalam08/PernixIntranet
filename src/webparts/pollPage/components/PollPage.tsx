@@ -115,6 +115,8 @@ const PollPage = (props: any): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
+  const [curPollID, setCurPollID] = useState<number>(0);
+  const [curIDX, setCurIDX] = useState<number>(0);
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -665,6 +667,8 @@ const PollPage = (props: any): JSX.Element => {
     setSelectedOption(updatedSelectedOption);
     debugger;
     if (!hasErrors) {
+      setCurPollID(0);
+      setCurIDX(0);
       // Submit vote if there are no errors
       await addVote(selectedOption, setPopupController, 0);
       await resetSelectedItem(selectedOption, setSelectedOption);
@@ -684,299 +688,322 @@ const PollPage = (props: any): JSX.Element => {
   }, [dispatch, curUser]);
 
   useEffect(() => {
-    onLoadingFUN(CONFIG.TabsName[0]);
+    onLoadingFUN(selectedTab || CONFIG.TabsName[0]);
   }, [PollIntranetData]);
 
-  return isLoading ? (
-    <CircularSpinner />
-  ) : (
-    <>
-      <div className={styles.newsHeaderContainer}>
-        <div className={styles.leftSection}>
-          <i
-            onClick={() => {
-              window.open(
-                props.context.pageContext.web.absoluteUrl +
-                  CONFIG.NavigatePage.PernixIntranet,
-                "_self"
-              );
-            }}
-            className="pi pi-arrow-circle-left"
-            style={{ fontSize: "1.5rem", color: "#E0803D" }}
-          />
-          <p>Poll</p>
+  return (
+    <div className={styles.masContainer}>
+      {isLoading ? (
+        <div className={styles.LoaderContainer}>
+          <CircularSpinner />
         </div>
-
-        <div className={styles.rightSection}>
-          <CustomInput
-            value={searchField.allSearch}
-            noErrorMsg
-            secWidth="180px"
-            labelText="Search"
-            placeholder="Search"
-            onChange={(e) => {
-              const value = e;
-              objFilter.allSearch = value;
-              setSearchField({ ...searchField, allSearch: value });
-              handleSearch([...showcurrentPoll]);
-            }}
-          />
-
-          <CustomDateInput
-            label="Select date"
-            placeHolder="Date"
-            minWidth="180px"
-            maxWidth="180px"
-            value={searchField.selectedDate ? searchField.selectedDate : null}
-            onChange={(e: any) => {
-              const value: any = e;
-              objFilter.selectedDate = value;
-              setSearchField((prev: any) => ({
-                ...prev,
-                selectedDate: value,
-              }));
-              handleSearch([...showcurrentPoll]);
-            }}
-          />
-
-          <div className={styles.refreshBtn}>
-            <i onClick={handleRefresh} className="pi pi-refresh" />
-          </div>
-          <div
-            style={{
-              display:
-                currentUserDetails.role === CONFIG.RoleDetails.user
-                  ? "none"
-                  : "flex",
-            }}
-            className={styles.addNewbtn}
-            onClick={() => {
-              resetFormData(formData, setFormData);
-              resetOptionsData(options, setOptions);
-              setFormData({
-                Title: {
-                  value: "",
-                  isValid: true,
-                  errorMsg: "Invalid title",
-                  validationRule: { required: true, type: "string" },
-                },
-                StartDate: {
-                  value: new Date(),
-                  isValid: true,
-                  errorMsg: "Invalid input",
-                  validationRule: { required: true, type: "date" },
-                },
-                EndDate: {
-                  value: "",
-                  isValid: true,
-                  errorMsg: "Invalid input",
-                  validationRule: { required: true, type: "date" },
-                },
-              });
-
-              togglePopupVisibility(
-                setPopupController,
-                initialPopupController[0],
-                0,
-                "open"
-              );
-            }}
-          >
-            <i
-              className="pi pi-plus"
-              style={{ fontSize: "1rem", color: "#fff" }}
-            />
-            Add a Poll
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.tabsContainer}>
-        {CONFIG.TabsName.map((str: string, i: number) => {
-          return currentUserDetails.role !== CONFIG.RoleDetails.user ? (
-            <div
-              key={i}
-              style={{
-                borderBottom:
-                  selectedTab === str ? "3px solid #e0803d" : "none",
-              }}
-              onClick={(_) => {
-                setSelectedTab(str);
-                onLoadingFUN(str);
-              }}
-            >
-              {str}
+      ) : (
+        <>
+          <div className={styles.newsHeaderContainer}>
+            <div className={styles.leftSection}>
+              <i
+                onClick={() => {
+                  window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
+                }}
+                className="pi pi-arrow-circle-left"
+                style={{ fontSize: "1.5rem", color: "#E0803D" }}
+              />
+              <p>Poll</p>
             </div>
-          ) : i === 0 ? (
-            <div
-              key={i}
-              style={{
-                borderBottom:
-                  selectedTab === str ? "3px solid #e0803d" : "none",
-              }}
-              onClick={(_) => {
-                setSelectedTab(str);
-                onLoadingFUN(str);
-              }}
-            >
-              {str}
-            </div>
-          ) : (
-            ""
-          );
-        })}
-      </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-        {currentPoll?.map((val: any, index: number) => (
-          <div
-            style={{
-              width: "calc(33.33% - 10px)",
-              boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
-              padding: "15px",
-            }}
-            key={index}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
-              <div className={styles["poll-header"]}>{val?.Question}</div>
+            <div className={styles.rightSection}>
+              <CustomInput
+                value={searchField.allSearch}
+                noErrorMsg
+                secWidth="180px"
+                labelText="Search"
+                placeholder="Search"
+                onChange={(e) => {
+                  const value = e.trimStart();
+                  objFilter.allSearch = value;
+                  setSearchField({ ...searchField, allSearch: value });
+                  handleSearch([...showcurrentPoll]);
+                }}
+              />
 
-              {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+              <CustomDateInput
+                label="Select date"
+                placeHolder="Date"
+                minWidth="180px"
+                maxWidth="180px"
+                value={
+                  searchField.selectedDate ? searchField.selectedDate : null
+                }
+                onChange={(e: any) => {
+                  const value: any = e;
+                  objFilter.selectedDate = value;
+                  setSearchField((prev: any) => ({
+                    ...prev,
+                    selectedDate: value,
+                  }));
+                  handleSearch([...showcurrentPoll]);
+                }}
+              />
+
+              <div className={styles.refreshBtn}>
+                <i onClick={handleRefresh} className="pi pi-refresh" />
+              </div>
+              <div
+                style={{
+                  display:
+                    currentUserDetails.role === CONFIG.RoleDetails.user
+                      ? "none"
+                      : "flex",
+                }}
+                className={styles.addNewbtn}
+                onClick={() => {
+                  resetFormData(formData, setFormData);
+                  resetOptionsData(options, setOptions);
+                  setFormData({
+                    Title: {
+                      value: "",
+                      isValid: true,
+                      errorMsg: "Invalid title",
+                      validationRule: { required: true, type: "string" },
+                    },
+                    StartDate: {
+                      value: new Date(),
+                      isValid: true,
+                      errorMsg: "Invalid input",
+                      validationRule: { required: true, type: "date" },
+                    },
+                    EndDate: {
+                      value: "",
+                      isValid: true,
+                      errorMsg: "Invalid input",
+                      validationRule: { required: true, type: "date" },
+                    },
+                  });
+
+                  togglePopupVisibility(
+                    setPopupController,
+                    initialPopupController[0],
+                    0,
+                    "open"
+                  );
+                }}
+              >
                 <i
-                  onClick={() => {
-                    togglePopupVisibility(
-                      setPopupController,
-                      initialPopupController[1],
-                      1,
-                      "open"
-                    );
-                    setSelectQuestionId(val.Id);
-                  }}
-                  style={{
-                    fontSize: "1.2rem",
-                    color: "red",
-                    cursor: "pointer",
-                  }}
-                  className="pi pi-trash"
+                  className="pi pi-plus"
+                  style={{ fontSize: "1rem", color: "#fff" }}
                 />
+                Add a Poll
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.tabsContainer}>
+            {CONFIG.TabsName.map((str: string, i: number) => {
+              return currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+                <div
+                  key={i}
+                  style={{
+                    borderBottom:
+                      selectedTab === str ? "3px solid #e0803d" : "none",
+                  }}
+                  onClick={(_) => {
+                    setCurPollID(0);
+                    setCurIDX(0);
+                    setSelectedTab(str);
+                    onLoadingFUN(str);
+                  }}
+                >
+                  {str}
+                </div>
+              ) : i === 0 ? (
+                <div
+                  key={i}
+                  style={{
+                    borderBottom:
+                      selectedTab === str ? "3px solid #e0803d" : "none",
+                  }}
+                  onClick={(_) => {
+                    setCurPollID(0);
+                    setCurIDX(0);
+                    setSelectedTab(str);
+                    onLoadingFUN(str);
+                  }}
+                >
+                  {str}
+                </div>
               ) : (
                 ""
-              )}
-            </div>
+              );
+            })}
+          </div>
 
-            {val.options?.map((option: any, index: number) => (
-              <div key={index}>
-                <div
-                  style={{
-                    cursor:
-                      selectedTab === CONFIG.TabsName[0] ? "pointer" : "auto",
-                  }}
-                  className={styles.container}
-                  onClick={() => {
-                    if (selectedTab === CONFIG.TabsName[0]) {
-                      handleOptionClick(
-                        val?.Id,
-                        option?.Id,
-                        option?.Title,
-                        val?.resId
-                      );
-                    }
-                  }}
-                >
-                  <div
-                    style={{ width: `${option?.Percentage}%` }}
-                    className={styles.backgroundfill}
-                  />
-
-                  <div className={styles.contentSection}>
-                    <div className={styles.content}>
-                      <p>{index + 1}.</p>
-                      {selectedOption?.OptionId === option?.Id && (
-                        <i className="pi pi-check" />
-                      )}
-                      <p>{option?.Title}</p>
+          {!currentPoll.length ? (
+            <div className={styles.noDataFound}>No poll found!</div>
+          ) : (
+            <div className={styles.bodyContainer}>
+              {currentPoll?.map((val: any, index: number) => (
+                <div className={styles.cardSection} key={index}>
+                  <div className={styles.pollHeaderSec}>
+                    <div
+                      className={styles["poll-header"]}
+                      title={val?.Question}
+                    >
+                      {val?.Question}
                     </div>
-                    <p>{`${option?.Percentage}%`}</p>
+
+                    {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+                      <i
+                        onClick={() => {
+                          togglePopupVisibility(
+                            setPopupController,
+                            initialPopupController[1],
+                            1,
+                            "open"
+                          );
+                          setSelectQuestionId(val.Id);
+                        }}
+                        className="pi pi-trash"
+                      />
+                    ) : (
+                      ""
+                    )}
+                  </div>
+
+                  <div className={styles.optionsContainer}>
+                    {val?.options?.map((option: any, idx: number) => {
+                      return (
+                        <div
+                          key={idx}
+                          title={option?.Title}
+                          style={{
+                            cursor:
+                              selectedTab === CONFIG.TabsName[0]
+                                ? "pointer"
+                                : "auto",
+                          }}
+                          className={styles.container}
+                          onClick={() => {
+                            if (selectedTab === CONFIG.TabsName[0]) {
+                              setCurPollID(curIDX !== idx + 1 ? val?.Id : 0);
+                              setCurIDX(curIDX !== idx + 1 ? idx + 1 : 0);
+                              // setCurPollID(val?.Id);
+                              handleOptionClick(
+                                val?.Id,
+                                option?.Id,
+                                option?.Title,
+                                val?.resId
+                              );
+                            }
+                          }}
+                        >
+                          <div
+                            style={{ width: `${option?.Percentage}%` }}
+                            className={styles.backgroundfill}
+                          />
+
+                          <div className={styles.contentSection}>
+                            <div className={styles.content}>
+                              <p
+                                style={{
+                                  width: "5%",
+                                }}
+                              >
+                                {idx + 1}.
+                              </p>
+                              {selectedOption?.OptionId === option?.Id &&
+                              curPollID ? (
+                                <i className="pi pi-check" />
+                              ) : (
+                                ""
+                              )}
+                              <p
+                                style={{
+                                  width: "95%",
+                                }}
+                              >
+                                {option?.Title}
+                              </p>
+                            </div>
+
+                            <div>{`${option?.Percentage}%`}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className={styles.cardFooter}>
+                    <p>{`Total Responses : ${val?.TotlaVotes}`}</p>
+
+                    <div
+                      className={styles.voteButton}
+                      style={{
+                        display:
+                          selectedTab === CONFIG.TabsName[0] ? "flex" : "none",
+                      }}
+                    >
+                      <Button
+                        label="Vote"
+                        disabled={
+                          selectedOption?.OptionId === val?.PreviousOption ||
+                          curPollID !== val?.Id
+                        }
+                        onClick={handleSubmitVote}
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {/* {option.Memebers?.length > 0 &&
-                  renderAvatarGroup(option.Memebers)} */}
-              </div>
-            ))}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <p
-                style={{ fontSize: "16px", color: "#cccc", fontWeight: "500" }}
-              >{`Total Responses : ${val?.TotlaVotes}`}</p>
-
-              {selectedOption?.OptionId !== val.PreviousOption && (
-                <div
-                  className={styles.voteButton}
-                  style={{
-                    display:
-                      selectedTab === CONFIG.TabsName[0] ? "flex" : "none",
-                  }}
-                >
-                  <Button label="Vote" onClick={handleSubmitVote} />
-                </div>
-              )}
+              ))}
             </div>
-          </div>
-        ))}
-      </div>
+          )}
 
-      {popupController?.map((popupData: any, index: number) => (
-        <Popup
-          key={index}
-          isLoading={popupData?.isLoading}
-          messages={popupData?.messages}
-          resetPopup={() => {
-            setPopupController((prev: any): any => {
-              resetPopupController(prev, index, true);
-            });
-          }}
-          PopupType={popupData.popupType}
-          onHide={() => {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              index,
-              "close"
-            );
-            resetFormData(formData, setFormData);
-            resetOptionsData(options, setOptions);
-            if (popupData?.isLoading?.success) {
-              setSelectQuestionId(null);
-              fetchPollData(dispatch, curUser);
-            }
-          }}
-          popupTitle={
-            popupData.popupType !== "confimation" && popupData.popupTitle
-          }
-          popupActions={popupActions[index]}
-          visibility={popupData.open}
-          content={popupInputs[index]}
-          popupWidth={popupData.popupWidth}
-          defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={
-            popupData.popupType !== "custom" ? popupData.popupTitle : ""
-          }
-          popupHeight={index === 0 ? true : false}
-          noActionBtn={true}
-        />
-      ))}
-    </>
+          {popupController?.map((popupData: any, index: number) => (
+            <Popup
+              key={index}
+              isLoading={popupData?.isLoading}
+              messages={popupData?.messages}
+              resetPopup={() => {
+                setPopupController((prev: any): any => {
+                  resetPopupController(prev, index, true);
+                });
+              }}
+              PopupType={popupData.popupType}
+              onHide={() => {
+                resetFormData(formData, setFormData);
+                resetOptionsData(options, setOptions);
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[0],
+                  index,
+                  "close"
+                );
+                if (popupData?.isLoading?.success) {
+                  setSelectQuestionId(null);
+                  fetchPollData(dispatch, curUser);
+                }
+              }}
+              popupTitle={
+                popupData.popupType !== "confimation" && popupData.popupTitle
+              }
+              popupActions={popupActions[index]}
+              visibility={popupData.open}
+              content={popupInputs[index]}
+              popupWidth={popupData.popupWidth}
+              defaultCloseBtn={popupData.defaultCloseBtn || false}
+              confirmationTitle={
+                popupData.popupType !== "custom" ? popupData.popupTitle : ""
+              }
+              popupHeight={index === 0 ? true : false}
+              noActionBtn={true}
+            />
+          ))}
+        </>
+      )}
+    </div>
   );
 };
 

@@ -435,12 +435,10 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
           (val: IDocRepository) =>
             val.Content.fileType !== "file" &&
             val.Content.name.toLowerCase() ===
-              formData?.FolderName?.value.toLowerCase()
+              formData?.FolderName?.value?.trim()?.toLowerCase()
         );
         hasErrors = !isValid;
-        errorMsg = !isValid
-          ? `${formData?.FolderName?.value}, this folder name already exists.`
-          : "";
+        errorMsg = !isValid ? "Folder name already exists." : "";
       }
 
       return {
@@ -810,38 +808,40 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                 {curDocDatas?.map((val: IDocRepository, idx: number) => {
                   return (
                     <div key={idx} className={styles.folderSection}>
-                      <div
-                        className={styles.folderItems}
-                        title={val?.Content?.name}
-                        onClick={() => {
-                          if (val?.Content?.fileType !== "file") {
-                            handleSelectFolder(
-                              "add",
-                              val?.Content?.name,
-                              idx + 1,
-                              val?.Content?.ServerRelativeUrl
-                            );
-                          } else {
-                            window.open(
-                              val?.Content?.ServerRelativeUrl + "?web=1"
-                            );
-                          }
-                        }}
-                      >
-                        <img
-                          src={
-                            val?.Content?.fileType !== "file"
-                              ? folderIcon
-                              : fileIcon
-                          }
-                          className={
-                            val?.Content?.fileType !== "file"
-                              ? styles.folderIcon
-                              : styles.fileIcon
-                          }
-                          alt="Doc"
-                        />
-                        <span>{val?.Content?.name}</span>
+                      <div className={styles.folderItems}>
+                        <div
+                          title={val?.Content?.name}
+                          onClick={() => {
+                            if (val?.Content?.fileType !== "file") {
+                              handleSelectFolder(
+                                "add",
+                                val?.Content?.name,
+                                idx + 1,
+                                val?.Content?.ServerRelativeUrl
+                              );
+                            } else {
+                              window.open(
+                                val?.Content?.ServerRelativeUrl + "?web=1"
+                              );
+                            }
+                          }}
+                        >
+                          <img
+                            src={
+                              val?.Content?.fileType !== "file"
+                                ? folderIcon
+                                : fileIcon
+                            }
+                            className={
+                              val?.Content?.fileType !== "file"
+                                ? styles.folderIcon
+                                : styles.fileIcon
+                            }
+                            alt="Doc"
+                          />
+                          <span>{val?.Content?.name}</span>
+                        </div>
+
                         {!val?.Content?.isSubFiles && isAdmin ? (
                           <DeleteIcon
                             className={styles.deleteIcon}

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import styles from "./PollIntranet.module.scss";
 import "../../../assets/styles/style.css";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
-// import { sp } from "@pnp/sp/presets/all";
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
@@ -17,7 +17,6 @@ import {
   validateField,
 } from "../../../utils/commonUtils";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
-// import { useDispatch } from "react-redux";
 import Popup from "../../../components/common/Popups/Popup";
 import {
   addPollData,
@@ -32,6 +31,8 @@ import moment from "moment";
 import { CONFIG } from "../../../config/config";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { RoleAuth } from "../../../services/CommonServices";
+import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+
 const PollIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const curUser = props.context._pageContext._user.email;
@@ -41,6 +42,8 @@ const PollIntranet = (props: any): JSX.Element => {
   );
 
   const [currentPoll, setCurrentPoll] = useState<any>(null);
+  const [isLoader, setIsLoader] = useState<boolean>(true);
+  const [curPollID, setCurPollID] = useState<number>(0);
 
   // popup properties
   const initialPopupController = [
@@ -97,7 +100,6 @@ const PollIntranet = (props: any): JSX.Element => {
   const PollIntranetData: any = useSelector((state: any) => {
     return state.PollIntranetData.value;
   });
-  // console.log(PollIntranetData, "PollIntranetData");
 
   const [formData, setFormData] = useState<any>({
     Title: {
@@ -131,8 +133,6 @@ const PollIntranet = (props: any): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
   ]);
-
-  // console.log("formData", setOptions);
 
   const handleInputChange = (
     field: string,
@@ -437,8 +437,6 @@ const PollIntranet = (props: any): JSX.Element => {
     ],
   ];
 
-  // const [POll, setPoll] = useState<any[]>([]);
-
   const [selectedOption, setSelectedOption] = useState<any | null>({
     QuestionID: null,
     OptionId: null,
@@ -526,99 +524,138 @@ const PollIntranet = (props: any): JSX.Element => {
         OptionId: activePoll[0]?.PreviousOption,
       }));
     }
+    setIsLoader(false);
   }, [PollIntranetData]);
 
   return (
-    <>
-      <div className={styles.PollContainer}>
-        <SectionHeaderIntranet
-          title="Create a new poll"
-          label="Poll"
-          removeAdd={
-            currentUserDetails.role !== CONFIG.RoleDetails.user ? false : true
-          }
-          headerAction={() => {
-            resetFormData(formData, setFormData);
-            resetOptionsData(options, setOptions);
-            setFormData({
-              Title: {
-                value: "",
-                isValid: true,
-                errorMsg: "Invalid title",
-                validationRule: { required: true, type: "string" },
-              },
-              StartDate: {
-                value: new Date(),
-                isValid: true,
-                errorMsg: "Invalid input",
-                validationRule: { required: true, type: "date" },
-              },
-              EndDate: {
-                value: "",
-                isValid: true,
-                errorMsg: "Invalid input",
-                validationRule: { required: true, type: "date" },
-              },
-            });
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              0,
-              "open"
-            );
-          }}
-        />
+    <div className={styles.masContainer}>
+      {isLoader ? (
+        <div className={styles.LoaderContainer}>
+          <CircularSpinner />
+        </div>
+      ) : (
+        <div>
+          <SectionHeaderIntranet
+            title="Create a new poll"
+            label="Poll"
+            removeAdd={
+              currentUserDetails.role !== CONFIG.RoleDetails.user ? false : true
+            }
+            headerAction={() => {
+              resetFormData(formData, setFormData);
+              resetOptionsData(options, setOptions);
+              setFormData({
+                Title: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Invalid title",
+                  validationRule: { required: true, type: "string" },
+                },
+                StartDate: {
+                  value: new Date(),
+                  isValid: true,
+                  errorMsg: "Invalid input",
+                  validationRule: { required: true, type: "date" },
+                },
+                EndDate: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Invalid input",
+                  validationRule: { required: true, type: "date" },
+                },
+              });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open"
+              );
+            }}
+          />
 
-        {currentPoll ? (
-          <>
-            <div className={styles["poll-header"]}>
-              {currentPoll[0]?.Question}
-            </div>
+          {currentPoll ? (
+            <>
+              <div
+                className={styles["poll-header"]}
+                title={currentPoll[0]?.Question}
+              >
+                {currentPoll[0]?.Question}
+              </div>
 
-            {currentPoll[0]?.options?.map((val: any, index: number) => (
-              <div key={index}>
-                <div
-                  className={styles.container}
-                  onClick={() => {
-                    handleOptionClick(
-                      currentPoll[0]?.Id,
-                      val.Id,
-                      val.Title,
-                      currentPoll[0]?.resId
-                    );
-                  }}
-                >
-                  <div
-                    style={{ width: `${val?.Percentage}%` }}
-                    className={styles.backgroundfill}
-                  />
+              <div className={styles.bodyOptions}>
+                {currentPoll[0]?.options?.map((val: any, index: number) => (
+                  <div key={index} title={val?.Title}>
+                    <div
+                      className={styles.container}
+                      onClick={() => {
+                        setCurPollID(curPollID !== index + 1 ? index + 1 : 0);
+                        handleOptionClick(
+                          currentPoll[0]?.Id,
+                          val.Id,
+                          val.Title,
+                          currentPoll[0]?.resId
+                        );
+                      }}
+                    >
+                      <div
+                        style={{ width: `${val?.Percentage}%` }}
+                        className={styles.backgroundfill}
+                      />
 
-                  <div className={styles.contentSection}>
-                    <div className={styles.content}>
-                      <p>{index + 1}.</p>
-                      {selectedOption?.OptionId === val?.Id && (
-                        <i className="pi pi-check" />
-                      )}
-                      <p>{val?.Title}</p>
+                      <div className={styles.contentSection}>
+                        <div className={styles.content}>
+                          <p
+                            style={{
+                              width: "5%",
+                            }}
+                          >
+                            {index + 1}.
+                          </p>
+                          {selectedOption?.OptionId === val?.Id && curPollID ? (
+                            <i className="pi pi-check" />
+                          ) : (
+                            ""
+                          )}
+                          <p
+                            style={{
+                              width: "95%",
+                            }}
+                          >
+                            {val?.Title}
+                          </p>
+                        </div>
+
+                        <div>{`${val?.Percentage}%`}</div>
+                      </div>
                     </div>
-                    <p>{`${val?.Percentage}%`}</p>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </>
+          ) : (
+            <p>No active poll available at the moment.</p>
+          )}
 
-            {selectedOption?.OptionId !== currentPoll[0]?.PreviousOption && (
-              <div className={styles.voteButton}>
-                <Button label="Vote" onClick={handleSubmitVote} />
-              </div>
-            )}
-          </>
-        ) : (
-          <p>No active poll available at the moment.</p>
-        )}
-
-        <ViewAll onClick={handlenavigate} />
-      </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+            }}
+          >
+            <div className={styles.voteButton}>
+              <Button
+                label="Vote"
+                disabled={
+                  selectedOption?.OptionId === currentPoll[0]?.PreviousOption ||
+                  !curPollID
+                }
+                onClick={handleSubmitVote}
+              />
+            </div>
+            <ViewAll onClick={handlenavigate} />
+          </div>
+        </div>
+      )}
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -659,7 +696,8 @@ const PollIntranet = (props: any): JSX.Element => {
           noActionBtn={true}
         />
       ))}
-    </>
+    </div>
   );
 };
+
 export default PollIntranet;

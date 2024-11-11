@@ -1,4 +1,4 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import "~@fluentui/react/dist/sass/References.scss";
 
 .LoaderContainer {
   display: flex;
@@ -9,16 +9,16 @@
 }
 .boxWrapper {
   width: 100%;
-    height: calc(100vh - 128px);
-    background-color: #f0f0f0;
-    padding: 16px 30px;
+  height: calc(100vh - 128px);
+  background-color: #f0f0f0;
+  padding: 16px 30px;
 }
 
 .newsHeaderContainer {
   display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
 
   .leftSection {
     display: flex;
@@ -166,81 +166,99 @@
   flex-wrap: wrap;
   height: calc(100vh - 306px);
   overflow: auto;
-    .cardSection {
+  .cardSection {
+    width: 100%;
+    min-height: 360px;
+    max-height: 360px;
+    overflow: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+
+    .cardBody {
       width: 100%;
-      min-height: 360px;
-      max-height: 360px;
+      // min-height: 306px;
+      // max-height: 306px;
       overflow: auto;
-      background-color: #ffffff;
-      border-radius: 8px;
-      padding: 10px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
-          .cardBody {
-              width: 100%;
-              // min-height: 306px;
-              // max-height: 306px;
-              overflow: auto;
-              line-height: 1.4;
-              padding: 0px 5px;
-            }
-      .questions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-  
-        .imgsection {
-          width: 30px;
-        }
-  
-        .ques {
-          width: calc(100% - 30px);
-          margin: 0;
-          color: #0b4d53;
-          font-size: 16px;
-          font-family: "osSemibold", sans-serif;
-        }
-  
-        .answer {
-          width: calc(100% - 30px);
-          margin: 0;
-          color: #4b4b4b;
-          font-size: 14px;
-          line-height: 21px;
-          font-family: "osRegular", sans-serif;
-        }
+      line-height: 1.4;
+      padding: 0px 5px;
+      &::-webkit-scrollbar {
+        width: 2px !important;
       }
-      .date {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-        color: #878787;
+      &::-webkit-scrollbar-track {
+        background-color: transparent !important;
+      }
+    }
+    .questions {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 10px;
+
+      .imgsection {
+        width: 30px;
+      }
+
+      .ques {
+        width: calc(100% - 30px);
+        margin: 0;
+        color: #0b4d53;
         font-size: 14px;
-        font-family: "osRegular", sans-serif;
-        // font-weight: 500;
-        margin: 5px 0px 15px 0px;
-  
-        i {
-          color: #e0803d;
-        }
+        font-family: "osSemibold", sans-serif;
+        max-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        line-clamp: 3;
+        -webkit-line-clamp: 3;
+        white-space: normal;
       }
-            .cardFooter {
-              width: 100%;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding-top: 10px;
-            }
+
+      .answer {
+        width: calc(100% - 30px);
+        margin: 0;
+        color: #4b4b4b;
+        font-size: 14px;
+        line-height: 21px;
+        font-family: "osRegular", sans-serif;
+      }
+    }
+    .date {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      color: #878787;
+      font-size: 13px;
+      font-family: "osRegular", sans-serif;
+      // font-weight: 500;
+      // margin: 5px 0px 15px 0px;
+      margin: 6px 0;
+
+      i {
+        color: #e0803d;
+      }
+    }
+    .cardFooter {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
     }
   }
-    .bodyContainer {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      /* 4 equal columns */
-      gap: 20px;
-      /* Space between grid items */
-      padding: 10px;
-    }
+}
+.bodyContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  /* 4 equal columns */
+  gap: 20px;
+  /* Space between grid items */
+  padding: 10px;
+}
 
 .activepill {
   padding: 6px;
@@ -309,5 +327,30 @@
       padding: 4px 8px;
       font-size: 12px;
     }
+  }
+}
+.answer {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0;
+  color: #4b4b4b;
+  line-height: 21px;
+  margin: 10px 0;
+  p {
+    font-family: "osRegular", sans-serif;
+    line-height: 23px;
+    font-size: 14px;
+    max-height: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 8;
+    -webkit-line-clamp: 8;
+    white-space: normal;
   }
 }

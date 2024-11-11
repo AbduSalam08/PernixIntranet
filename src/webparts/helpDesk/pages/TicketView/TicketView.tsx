@@ -677,7 +677,7 @@ const TicketView = (): JSX.Element => {
               defaultCloseBtn={popupData.defaultCloseBtn || false}
               confirmationTitle={popupData?.confirmationTitle}
               popupHeight={index === 0 ? true : false}
-              noActionBtn={false}
+              noActionBtn={true}
             />
           ))}
 
