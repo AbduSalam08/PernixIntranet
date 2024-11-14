@@ -211,7 +211,7 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
 
   const productTemplate = (val: any): JSX.Element => {
     return (
-      <div style={{ minHeight: "310px" }}>
+      <div className={styles.Container}>
         <div className={styles.questions}>
           <div className={styles.imgsection}>
             <Avatar
@@ -253,7 +253,7 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
 
           <p className={styles.date}>
             {/* <i className="pi pi-clock" style={{ fontSize: "1rem" }} /> */}
-            Posted on :{val.date}
+            Posted on : {val.date}
           </p>
         </div>
       </div>
@@ -280,18 +280,20 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
         }}
       />
 
-      <div className={styles.contentSection}>
-        <Carousel
-          value={CEOQuestions}
-          numScroll={1}
-          numVisible={1}
-          showIndicators={true}
-          showNavigators={false}
-          circular
-          autoplayInterval={CEOQuestions?.length > 1 ? 3000 : 8.64e7}
-          // responsiveOptions={responsiveOptions}
-          itemTemplate={productTemplate}
-        />
+      <div className={styles.carouselWrapper}>
+        <div className={styles.contentSection}>
+          <Carousel
+            value={CEOQuestions}
+            numScroll={1}
+            numVisible={1}
+            showIndicators={true}
+            showNavigators={false}
+            circular
+            autoplayInterval={CEOQuestions?.length > 1 ? 3000 : 8.64e7}
+            // responsiveOptions={responsiveOptions}
+            itemTemplate={productTemplate}
+          />
+        </div>
       </div>
       <ViewAll onClick={handlenavigate} />
 
