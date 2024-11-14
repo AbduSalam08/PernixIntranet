@@ -330,7 +330,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
           labelText="Shout-out to"
           isValid={formData.SendTowards.isValid}
           errorMsg={formData.SendTowards.errorMsg}
-          selectedItem={formData.SendTowards.value || []}
+          selectedItem={[formData.SendTowards.value]}
           onChange={(item: any) => {
             const value = item[0];
             console.log("value: ", value);

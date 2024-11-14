@@ -146,7 +146,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
           labelText="Shout-out to"
           isValid={formData.SendTowards.isValid}
           errorMsg={formData.SendTowards.errorMsg}
-          selectedItem={formData.SendTowards.value || []}
+          selectedItem={[formData.SendTowards.value]}
           onChange={(item: any) => {
             const value = item[0];
             console.log("value: ", value);
@@ -215,28 +215,28 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
     ],
   ];
 
-  const responsiveOptions = [
-    {
-      breakpoint: "1400px",
-      numVisible: 2,
-      numScroll: 1,
-    },
-    {
-      breakpoint: "1199px",
-      numVisible: 3,
-      numScroll: 1,
-    },
-    {
-      breakpoint: "767px",
-      numVisible: 2,
-      numScroll: 1,
-    },
-    {
-      breakpoint: "575px",
-      numVisible: 1,
-      numScroll: 1,
-    },
-  ];
+  // const responsiveOptions = [
+  //   {
+  //     breakpoint: "1400px",
+  //     numVisible: 2,
+  //     numScroll: 1,
+  //   },
+  //   {
+  //     breakpoint: "1199px",
+  //     numVisible: 3,
+  //     numScroll: 1,
+  //   },
+  //   {
+  //     breakpoint: "767px",
+  //     numVisible: 2,
+  //     numScroll: 1,
+  //   },
+  //   {
+  //     breakpoint: "575px",
+  //     numVisible: 1,
+  //     numScroll: 1,
+  //   },
+  // ];
 
   const shoutOutTemplate = (val: any): any => {
     return (
@@ -335,7 +335,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
               showNavigators={false}
               autoplayInterval={shoutOutsData?.length > 1 ? 3000 : 8.64e7}
               circular
-              responsiveOptions={responsiveOptions}
+              // responsiveOptions={responsiveOptions}
               itemTemplate={shoutOutTemplate}
             />
           )}

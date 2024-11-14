@@ -31,6 +31,13 @@ import {
   IPaginationData,
 } from "../../../interface/interface";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
+import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+import moment from "moment";
+// import { Tooltip } from "primereact/tooltip";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
 interface IReplies {
   avatarUrl: string;
   content: string;
@@ -90,6 +97,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "Invalid answer",
       validationRule: { required: true, type: "string" },
+      permission: false,
+    },
+    assignTo: {
+      ID: null,
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid answer",
+      validationRule: { required: true, type: "array" },
     },
   });
   const [newFormData, setNewFormData] = useState<any>({
@@ -103,12 +118,17 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   const [ceoQuestionsdata, setCeoQuestionsdata] = useState<IQuestion[]>([]);
   const [showCEOQuestions, setShowCEOQuestions] = useState<IQuestion[]>([]);
   const [userDetails, setUserDetails] = useState<any>({});
+  const [assignToUsersList, setAssignToUsersList] = useState<any>([]);
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParamsQusID, setSearchParamsQusID] = useState<any>(null);
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
+  console.log("showCEOQuestions", showCEOQuestions);
+
+  console.log("formData", formData);
+  console.log("assignToUsersList", assignToUsersList);
 
   const totalRecords = showCEOQuestions?.length || 0;
   const onPageChange = (event: any): void => {
@@ -190,15 +210,36 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     isValid: boolean,
     errorMsg: string = ""
   ): void => {
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [field]: {
-        ...prevData[field],
-        value: value,
-        isValid,
-        errorMsg: isValid ? "" : errorMsg,
-      },
-    }));
+    if (field === "answer") {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+      }));
+    } else {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+        answer: {
+          ...prevData.answer,
+          isValid: true,
+          permission: userDetails.email === value?.email ? true : false,
+          validationRule: {
+            required: userDetails.email === value?.email ? true : false,
+            type: "string",
+          },
+        },
+      }));
+    }
   };
 
   const handleNewFormInputChange = (
@@ -252,22 +293,25 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     }
   };
 
-  const handleAnswerSubmit = async () => {
+  const userHandleSubmit = async (submitCondition: boolean) => {
     setSearchParamsQusID(null);
     let hasErrors: boolean = false;
-
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
         key,
-        fieldData.value,
+        key === "assignTo"
+          ? fieldData?.value?.length > 0
+            ? fieldData.value
+            : fieldData.value
+            ? [fieldData.value]
+            : []
+          : fieldData.value,
         fieldData?.validationRule
       );
-
       if (!isValid) {
         hasErrors = true;
       }
-
       return {
         ...acc,
         [key]: {
@@ -281,13 +325,42 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     setFormData(updatedFormData);
 
     if (!hasErrors) {
-      await submitCEOQuestionAnswer(
-        formData,
-        userDetails?.email?.toLowerCase(),
-        setPopupController,
-        0,
-        dispatch
-      );
+      if (submitCondition) {
+        const AdminPayload = {
+          Answer: formData?.answer?.value ? formData?.answer?.value : "",
+          AnswerBy: formData?.answer?.value
+            ? userDetails?.email?.toLowerCase()
+            : "",
+          AnswerDate: formData?.answer?.value
+            ? moment(new Date()).format("DD/MM/YYYY")
+            : "",
+          AssignTo: formData?.assignTo?.value?.email
+            ? formData?.assignTo?.value?.email
+            : formData?.assignTo?.value,
+        };
+        await submitCEOQuestionAnswer(
+          formData,
+          AdminPayload,
+          setPopupController,
+          0,
+          dispatch
+        );
+      } else {
+        const userPayload = {
+          Answer: formData?.answer?.value,
+          AnswerBy: userDetails?.email?.toLowerCase(),
+          AnswerDate: moment(new Date()).format("DD/MM/YYYY"),
+        };
+        await submitCEOQuestionAnswer(
+          formData,
+          userPayload,
+          setPopupController,
+          0,
+          dispatch
+        );
+      }
+    } else {
+      console.log("err");
     }
   };
 
@@ -295,45 +368,112 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     [
       <div className={styles.addNewsGrid} key={1}>
         <div>
-          <p className={styles.question}>{formData.qustion.value}</p>
+          <p className={styles.question}>{formData?.qustion?.value}</p>
         </div>
-        <div className={styles.r4}>
-          <div className={styles.item5}>
-            <FloatingLabelTextarea
-              value={formData.answer.value}
-              placeholder="answer"
-              rows={5}
-              isValid={formData.answer.isValid}
-              errorMsg={formData.answer.errorMsg}
-              onChange={(e: any) => {
-                const value = e.trimStart();
+        {userDetails.email === formData?.assignTo?.value ||
+        userDetails.email === formData?.assignTo?.value?.email ||
+        formData?.answer?.value !== "" ? (
+          <div className={styles.r4}>
+            <div className={styles.item5}>
+              <FloatingLabelTextarea
+                value={formData?.answer?.value}
+                placeholder="answer"
+                rows={5}
+                isValid={formData?.answer?.isValid}
+                errorMsg={formData?.answer?.errorMsg}
+                disabled={!formData?.answer?.permission}
+                onChange={(e: any) => {
+                  const value = e.trimStart();
+                  const { isValid, errorMsg } = validateField(
+                    "answer",
+                    value,
+                    formData?.answer?.validationRule
+                  );
+                  handleInputChange("answer", value, isValid, errorMsg);
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+        {userDetails.role === "Admin" && (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <CustomPeoplePicker
+              labelText="Assign to"
+              isValid={formData?.assignTo?.isValid}
+              errorMsg={formData?.assignTo?.errorMsg}
+              selectedItem={[formData?.assignTo?.value]}
+              readOnly={
+                userDetails.email === formData?.assignTo?.value &&
+                formData?.answer?.value !== ""
+              }
+              groupName="QuestionCEO"
+              onChange={(item: any) => {
+                const value = item[0];
+                console.log("value: ", value);
                 const { isValid, errorMsg } = validateField(
-                  "answer",
-                  value,
-                  formData.answer.validationRule
+                  "assignTo",
+                  item,
+                  formData?.assignTo?.validationRule
                 );
-                handleInputChange("answer", value, isValid, errorMsg);
+                handleInputChange("assignTo", value, isValid, errorMsg);
               }}
             />
+            <Tooltip
+              title={
+                <div
+                  style={{
+                    padding: "8px",
+                    textAlign: "center",
+                    minHeight: "50px",
+                    maxHeight: "85px",
+                    overflow: "auto",
+                  }}
+                >
+                  {assignToUsersList?.map((user: any, index: number) => {
+                    return (
+                      <p
+                        style={{
+                          padding:
+                            assignToUsersList.length - 1 === index
+                              ? "0px"
+                              : "0px 0px 5px 0px",
+                        }}
+                        key={index}
+                      >
+                        {user?.Title}
+                      </p>
+                    );
+                  })}
+                </div>
+              }
+              placement="right"
+              arrow
+            >
+              <IconButton>
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
           </div>
-        </div>
+        )}
       </div>,
     ],
     [
       <div key={2}>
         <FloatingLabelTextarea
-          value={newFormData.Description.value}
+          value={newFormData?.Description.value}
           size="XL"
           placeholder="Enter question"
           rows={5}
-          isValid={newFormData.Description.isValid}
-          errorMsg={newFormData.Description.errorMsg}
+          isValid={newFormData?.Description.isValid}
+          errorMsg={newFormData?.Description.errorMsg}
           onChange={(e: any) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
-              newFormData.Description.validationRule
+              newFormData?.Description.validationRule
             );
             handleNewFormInputChange("Description", value, isValid, errorMsg);
           }}
@@ -368,7 +508,16 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         disabled: false,
         size: "large",
         onClick: async () => {
-          await handleAnswerSubmit();
+          if (userDetails.email === formData?.assignTo?.value) {
+            if (userDetails.role === "Admin") {
+              userHandleSubmit(true);
+            } else {
+              userHandleSubmit(false);
+            }
+          } else if (userDetails.role === "Admin") {
+            userHandleSubmit(true);
+          }
+          // await handleAnswerSubmit();
         },
       },
     ],
@@ -408,7 +557,10 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   const onLoadingFUN = async (curTab: any): Promise<void> => {
     setIsLoading(true);
     let filteredData: any[] = [];
-    const userDetails = await questionsCurrentUserRole(setUserDetails);
+    const userDetails = await questionsCurrentUserRole(
+      setUserDetails,
+      setAssignToUsersList
+    );
     console.log(userDetails);
 
     if (QuestionCEOIntranetData?.data?.length && userDetails?.role === "CEO") {
@@ -464,7 +616,48 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       if (curTab === CONFIG.QuestionsPageTabsName[0]) {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
-            return newsItem?.replies.length > 0;
+            // return newsItem?.replies.length > 0;
+            if (
+              newsItem?.assignTo === userDetails?.email &&
+              newsItem.ID === searchParamsQusID &&
+              !newsItem?.isActive
+            ) {
+              setFormData({
+                qustion: {
+                  ...formData.qustion,
+                  isValid: true,
+                  value: newsItem.title || "",
+                  ID: newsItem.ID,
+                },
+                answer: {
+                  ...formData.answer,
+                  isValid: true,
+                  value: newsItem?.replies[0]?.content || "",
+                  permission:
+                    userDetails.email === newsItem?.assignTo ? true : false,
+                  ID: newsItem?.ID,
+                  validationRule: {
+                    required:
+                      userDetails.email === newsItem?.assignTo ? true : false,
+                    type: "string",
+                  },
+                },
+                assignTo: {
+                  ...formData.assignTo,
+                  isValid: true,
+                  value: newsItem?.assignTo || "",
+                  ID: newsItem?.ID,
+                },
+              });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open",
+                "Submit answer"
+              );
+            }
+            return newsItem;
           }
         );
       } else {
@@ -472,8 +665,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           (newsItem: any) => {
             return (
               newsItem?.avatarUrl?.toLowerCase() ===
-                userDetails?.email?.toLowerCase() &&
-              newsItem?.replies.length > 0
+              userDetails?.email?.toLowerCase()
             );
           }
         );
@@ -482,7 +674,49 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       if (curTab === CONFIG.QuestionsPageTabsName[0]) {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
-            return newsItem?.isActive;
+            if (
+              newsItem?.assignTo === userDetails?.email &&
+              newsItem.ID === searchParamsQusID &&
+              !newsItem?.isActive
+            ) {
+              setFormData({
+                qustion: {
+                  ...formData.qustion,
+                  isValid: true,
+                  value: newsItem.title || "",
+                  ID: newsItem.ID,
+                },
+                answer: {
+                  ...formData.answer,
+                  isValid: true,
+                  value: newsItem?.replies[0]?.content || "",
+                  permission:
+                    userDetails.email === newsItem?.assignTo ? true : false,
+                  ID: newsItem?.ID,
+                  validationRule: {
+                    required:
+                      userDetails.email === newsItem?.assignTo ? true : false,
+                    type: "string",
+                  },
+                },
+                assignTo: {
+                  ...formData.assignTo,
+                  isValid: true,
+                  value: newsItem?.assignTo || "",
+                  ID: newsItem?.ID,
+                },
+              });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open",
+                "Submit answer"
+              );
+            }
+            return (
+              newsItem?.isActive || newsItem?.assignTo === userDetails.email
+            );
           }
         );
       } else {
@@ -490,7 +724,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           (newsItem: any) => {
             return (
               newsItem?.avatarUrl?.toLowerCase() ===
-                userDetails?.email?.toLowerCase() && newsItem?.isActive
+              userDetails?.email?.toLowerCase()
             );
           }
         );
@@ -511,10 +745,11 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   useEffect(() => {
     const urlObj = new URL(window.location.href);
     const params = new URLSearchParams(urlObj.search);
-    const ID = params.get("ID");
+    const ID = params.get("questionID");
     setSearchParamsQusID(Number(ID));
     // questionsCurrentUserRole(setUserDetails);
     getQuestionCeo(dispatch);
+    dispatch(setMainSPContext(props?.context));
   }, [dispatch]);
 
   return isLoading ? (
@@ -704,9 +939,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   <div
                     style={{
                       minHeight:
-                        userDetails.role !== "User" ? "306px" : "340px",
+                        userDetails.role !== "User" ? "306px" : "306px",
                       maxHeight:
-                        userDetails.role !== "User" ? "306px" : "340px",
+                        userDetails.role !== "User" ? "306px" : "306px",
                     }}
                     className={styles.cardBody}
                   >
@@ -755,76 +990,92 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                       </p> */}
                     </div>
                   </div>
-                  {userDetails.role !== "User" && (
-                    <div className={styles.cardFooter}>
-                      {userDetails.role === "Admin" ? (
-                        <div
-                          className={
-                            val.isActive
-                              ? styles.activepill
-                              : styles.inactivepill
-                          }
-                        >
-                          {val.isActive ? "Active" : "In Active"}
-                        </div>
-                      ) : (
-                        <div />
+                  {/* {userDetails.role !== "User" && ( */}
+                  <div className={styles.cardFooter}>
+                    {userDetails.role === "Admin" ? (
+                      <div
+                        className={
+                          val.isActive ? styles.activepill : styles.inactivepill
+                        }
+                      >
+                        {val.isActive ? "Active" : "In Active"}
+                      </div>
+                    ) : (
+                      <div />
+                    )}
+                    <div className={styles.actionBtns}>
+                      {((userDetails.role === "Admin" && !val.isActive) ||
+                        (userDetails.email === val?.assignTo &&
+                          !val.isActive)) && (
+                        <i
+                          onClick={() => {
+                            setFormData({
+                              qustion: {
+                                ...formData.qustion,
+                                isValid: true,
+                                value: val.title || "",
+                                ID: val.ID,
+                              },
+                              answer: {
+                                ...formData.answer,
+                                isValid: true,
+                                value: val?.replies[0]?.content || "",
+                                permission:
+                                  userDetails.email === val?.assignTo
+                                    ? true
+                                    : false,
+                                ID: val?.ID,
+                                validationRule: {
+                                  required:
+                                    userDetails.email === val?.assignTo
+                                      ? true
+                                      : false,
+                                  type: "string",
+                                },
+                              },
+                              assignTo: {
+                                ...formData.assignTo,
+                                isValid: true,
+                                value: val?.assignTo || "",
+                                ID: val?.ID,
+                              },
+                            });
+                            togglePopupVisibility(
+                              setPopupController,
+                              initialPopupController[0],
+                              0,
+                              "open",
+                              "Submit answer"
+                            );
+                          }}
+                          style={{
+                            color: "#adadad",
+                            fontSize: "1.2rem",
+                            cursor: "pointer",
+                          }}
+                          className="pi pi-pen-to-square"
+                        />
                       )}
-                      {userDetails.role !== "User" && (
-                        <div className={styles.actionBtns}>
-                          {userDetails.role === "Admin" && (
-                            <InputSwitch
-                              checked={val.isActive}
-                              className="sectionToggler"
-                              onChange={(e) => {
-                                setShowCEOQuestions((prevItems) =>
-                                  prevItems.map((item: any, idx: number) =>
-                                    val?.ID === item?.ID
-                                      ? { ...item, isActive: e.value }
-                                      : item
-                                  )
-                                );
-                                changeQuestionActiveStatus(val.ID, e.value);
-                              }}
-                            />
-                          )}
-                          {userDetails.role !== "Admin" && (
-                            <i
-                              onClick={() => {
-                                setFormData({
-                                  qustion: {
-                                    ...formData.qustion,
-                                    isValid: true,
-                                    value: val.title || "",
-                                    ID: val.ID,
-                                  },
-                                  answer: {
-                                    ...formData.answer,
-                                    isValid: true,
-                                    value: val?.replies[0]?.content || null,
-                                    ID: val?.replies[0]?.ID || null,
-                                  },
-                                });
-                                togglePopupVisibility(
-                                  setPopupController,
-                                  initialPopupController[0],
-                                  0,
-                                  "open",
-                                  "Submit answer"
-                                );
-                              }}
-                              style={{
-                                color: "#adadad",
-                                fontSize: "1.2rem",
-                                cursor: "pointer",
-                              }}
-                              className="pi pi-pen-to-square"
-                            />
-                          )}
-                        </div>
-                      )}
+                      {userDetails.role === "Admin" &&
+                        val?.replies?.length > 0 && (
+                          <InputSwitch
+                            checked={val.isActive}
+                            className="sectionToggler"
+                            onChange={(e) => {
+                              setShowCEOQuestions((prevItems) =>
+                                prevItems.map((item: any, idx: number) =>
+                                  val?.ID === item?.ID
+                                    ? { ...item, isActive: e.value }
+                                    : item
+                                )
+                              );
+                              changeQuestionActiveStatus(val.ID, e.value);
+                            }}
+                          />
+                        )}
                     </div>
-                  )}
+                  </div>
+                  {/* )} */}
                 </div>
               );
             })}

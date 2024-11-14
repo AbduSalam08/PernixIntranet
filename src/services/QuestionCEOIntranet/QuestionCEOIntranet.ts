@@ -68,7 +68,8 @@ import { CONFIG } from "../../config/config";
 // };
 
 export const questionsCurrentUserRole = async (
-  setUserRole: any
+  setUserDetails: any,
+  setAssignToUsersList: any
 ): Promise<any> => {
   let userDetails = {};
   const currentUser: any = await sp.web.currentUser.get();
@@ -80,6 +81,7 @@ export const questionsCurrentUserRole = async (
   const questionCEOData: any = await sp.web.siteGroups
     .getByName(CONFIG.SPGroupName.QuestionCEO)
     .users.get();
+  setAssignToUsersList([...questionCEOData]);
 
   const isAdmin = questionCEOAdminData?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
@@ -87,14 +89,22 @@ export const questionsCurrentUserRole = async (
   const isCEO = questionCEOData?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
-  if (isCEO) {
-    setUserRole({ role: "CEO", email: currentUserEmail });
-    userDetails = { role: "CEO", email: currentUserEmail };
-  } else if (isAdmin) {
-    setUserRole({ role: "Admin", email: currentUserEmail });
+  if (isAdmin) {
+    // setUserDetails({ role: "CEO", email: currentUserEmail });
+    // userDetails = { role: "CEO", email: currentUserEmail };
+    setUserDetails({ role: "Admin", email: currentUserEmail });
     userDetails = { role: "Admin", email: currentUserEmail };
+    // setUserDetails({ role: "User", email: "thenmozhi@technorucs.com" });
+    // userDetails = { role: "User", email: "thenmozhi@technorucs.com" };
+  } else if (isCEO) {
+    // setUserDetails({ role: "Admin", email: currentUserEmail });
+    // userDetails = { role: "Admin", email: currentUserEmail };
+    setUserDetails({ role: "User", email: currentUserEmail });
+    userDetails = { role: "User", email: currentUserEmail };
+    // setUserDetails({ role: "User", email: "thenmozhi@technorucs.com" });
+    // userDetails = { role: "User", email: "thenmozhi@technorucs.com" };
   } else {
-    setUserRole({ role: "User", email: currentUserEmail });
+    setUserDetails({ role: "User", email: currentUserEmail });
     userDetails = { role: "User", email: currentUserEmail };
   }
   return userDetails;
@@ -123,6 +133,8 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
 
     // Prepare the final structured data by filtering responses for each question
     const questionCeoData = questionsResponse.map((question: any) => {
+      console.log(question);
+
       // Filter responses that match the current question ID
       // const filteredResponses = responsesResponse.filter(
       //   (response: any) => response.Questionceo?.ID === question?.ID
@@ -159,8 +171,10 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
           question.Author?.EMail ||
           "https://randomuser.me/api/portraits/placeholder.jpg", // Author's email or placeholder
         replies: replies, // Attach filtered responses
+        assignTo: question?.AssignTo || "",
       };
     });
+    console.log(questionCeoData);
 
     // Dispatch the data
     dispatch?.(
@@ -289,16 +303,11 @@ export const changeQuestionActiveStatus = async (
 
 export const submitCEOQuestionAnswer = async (
   formData: any,
-  answeUser: string,
+  payloadJson: object,
   setLoaderState: any,
   index: number,
   dispatch: any
 ): Promise<void> => {
-  const payloadJson = {
-    Answer: formData?.answer?.value,
-    AnswerBy: answeUser,
-    AnswerDate: moment(new Date()).format("DD/MM/YYYY"),
-  };
   setLoaderState((prevState: any) => {
     const updatedState = [...prevState]; // Create a copy of the array
     updatedState[index] = {
