@@ -1,10 +1,14 @@
+/* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast } from "react-toastify";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { sp } from "@pnp/sp";
 
-export const addComment = async (formData: any): Promise<any> => {
+export const addComment = async (
+  formData: any,
+  alltaggedPersons: any
+): Promise<any> => {
   const toastId = toast.loading("Creating ticket...");
   try {
     await SpServices.SPAddItem({
@@ -16,15 +20,32 @@ export const addComment = async (formData: any): Promise<any> => {
         TicketDetailsId: formData?.TicketDetailsId,
       },
     })
-      .then((res: any) => {
-        console.log("res: ", res);
-        toast.update(toastId, {
-          render: "Comment added successfully!",
-          type: "success",
-          isLoading: false,
-          autoClose: 5000,
-          hideProgressBar: false,
-        });
+      .then(async (res: any) => {
+        await SpServices.SPUpdateItem({
+          Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+          ID: formData?.TicketDetailsId,
+          RequestJSON: {
+            TaggedPersonId: {
+              results: [
+                ...alltaggedPersons,
+                ...formData?.TaggedPersonId?.results,
+              ],
+            },
+          },
+        })
+          .then((res: any) => {
+            console.log("res: ", res);
+            toast.update(toastId, {
+              render: "Comment added successfully!",
+              type: "success",
+              isLoading: false,
+              autoClose: 5000,
+              hideProgressBar: false,
+            });
+          })
+          .catch((err: any) => {
+            console.log("err: ", err);
+          });
       })
       .catch((err: any) => {
         console.log("err: ", err);

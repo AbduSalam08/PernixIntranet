@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import styles from "./InfoCard.module.scss";
 import Skeleton from "@mui/material/Skeleton";
 
@@ -8,16 +9,26 @@ interface InfoCardProps {
     cardValues: string;
   };
   idx: number;
+  infoCardClick?: any;
   isLoading?: boolean; // Add isLoading prop
 }
 
 const InfoCard = ({
   item,
   idx,
+  infoCardClick,
   isLoading = false,
 }: InfoCardProps): JSX.Element => {
   return (
-    <div key={idx} className={styles.card}>
+    <div
+      key={idx}
+      className={styles.card}
+      onClick={() => {
+        if (!isLoading) {
+          infoCardClick();
+        }
+      }}
+    >
       {isLoading ? (
         <div className={styles.cardContent}>
           <Skeleton variant="text" width={100} height={24} />
@@ -37,7 +48,14 @@ const InfoCard = ({
         </div>
       )}
 
-      <div className={styles.cardImg}>
+      <div
+        className={styles.cardImg}
+        onClick={() => {
+          if (!isLoading) {
+            infoCardClick();
+          }
+        }}
+      >
         {isLoading ? (
           <Skeleton variant="circular" width={40} height={40} />
         ) : (

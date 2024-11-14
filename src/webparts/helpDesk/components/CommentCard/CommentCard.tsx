@@ -119,7 +119,7 @@ const CommentCard = ({
         >
           <div className={styles.texts}>
             <div className={styles.author}>{author} </div>
-            <div className={styles.info}>Comment on {date}</div>
+            <div className={styles.info}>Commented on {date}</div>
             {edited && <div className={styles.extraInfo}>Edited</div>}
           </div>
           <div className={styles.hamb}>

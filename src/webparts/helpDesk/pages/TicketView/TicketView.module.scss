@@ -32,10 +32,12 @@
   width: 100%;
   padding: 15px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
   background-color: #fff;
   border-radius: 8px;
+  gap: 10px;
   cursor: pointer;
   .ticketName {
     @extend .flxCtr;
@@ -137,16 +139,23 @@
     background: transparent !important;
   }
 }
-
+.headerTopRowWraper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .heading {
-  width: 97%;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
-  padding: 20px 0;
-  padding-top: 10px;
-  border-bottom: 1px solid #eee;
+  padding: 10px 15px;
+  // padding-top: 10px;
+  // border-bottom: 1px solid #eee;
   color: #2d4b51;
+  background-color: #2d4b5110;
   font-size: 16px;
+  border-radius: 4px;
   text-align: left;
   font-family: "osSemiBold", sans-serif;
 }
@@ -224,10 +233,12 @@
   justify-content: flex-start;
   flex-direction: column;
   padding: 0 10px;
+  margin-top: 10px;
 }
 .errorMsg {
   margin-top: 5px;
   // margin-bottom: 16px;
+  height: 19px;
   color: red;
   font-family: "osMedium", sans-serif;
   font-size: 13px;
@@ -312,6 +323,58 @@
   span {
     font-size: 14px;
     color: #0a3622;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 260px;
+    white-space: nowrap;
+    height: 20px;
     font-family: "osMedium", sans-serif !important;
+  }
+}
+.attachmentsWrapper {
+  max-height: 250px;
+  display: flex;
+  overflow: auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+
+  &::-webkit-scrollbar {
+    width: 2px !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+}
+.headerDetailsLabel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 0px;
+  cursor: pointer;
+  label {
+    margin-left: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+
+    span {
+      color: #adadad;
+      font-size: 14px;
+      margin-left: 5px;
+      font-family: "osMedium", sans-serif;
+    }
+  }
+  span {
+    font-size: 14px;
+    color: #0a3622;
+    font-family: "osMedium", sans-serif;
+    line-height: 22px;
   }
 }

@@ -29,11 +29,14 @@ export const mapRowDataToFormData = (
     },
     ITOwnerId: {
       ...initialData.ITOwnerId,
-      value: {
-        id: currentRowData?.ITOwner?.ID,
-        name: currentRowData?.ITOwner?.Title,
-        email: currentRowData?.ITOwner?.EMail,
-      },
+      value:
+        currentRowData?.ITOwnerId !== null
+          ? {
+              id: currentRowData?.ITOwner?.ID,
+              name: currentRowData?.ITOwner?.Title,
+              email: currentRowData?.ITOwner?.EMail,
+            }
+          : null,
     },
     TicketManagerId: {
       ...initialData.TicketManagerId,
@@ -65,7 +68,13 @@ export const mapRowDataToFormData = (
     },
     Status: {
       ...initialData.Status,
-      value: currentRowData?.Status ?? "Open",
+      value: currentRowData?.Status
+        ? currentRowData?.Status === "Open" &&
+          isTicketManager &&
+          currentRowData?.ITOwnerId === null
+          ? "In Progress"
+          : currentRowData?.Status
+        : "Open",
     },
     // Add any other fields that need to be mapped.
   };

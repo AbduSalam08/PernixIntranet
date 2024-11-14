@@ -165,6 +165,7 @@
 
 .errorMsg {
   margin-top: 5px;
+  height: 19px;
   // margin-bottom: 16px;
   color: red;
   font-family: "osMedium", sans-serif;
@@ -458,6 +459,7 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       padding: 6px;
+      max-width: 370px;
     }
 
     div:nth-child(2) {

@@ -194,3 +194,14 @@ export const RoleAuth = async (
     console.log("Error fetching user roles: ", err);
   }
 };
+
+export const getUsersByGroup = async (groupName: string): Promise<any> => {
+  try {
+    const res = await sp.web.siteGroups.getByName(groupName).users.get();
+    console.log("res: ", res);
+    return res; // Ensure that the resolved data is returned
+  } catch (err) {
+    console.log("err: ", err);
+    throw err; // Rethrow the error if needed or return a default value
+  }
+};

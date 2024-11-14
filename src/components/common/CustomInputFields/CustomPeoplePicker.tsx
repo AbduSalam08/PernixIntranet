@@ -24,6 +24,7 @@ const CustomPeoplePicker: React.FC<any> = ({
   noErrorMsg = false,
   mandatory,
   multiUsers = false,
+  groupName,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const mainContext: any = useSelector(
@@ -31,7 +32,10 @@ const CustomPeoplePicker: React.FC<any> = ({
   );
   console.log("mainContext: ", mainContext);
 
-  const selectedUserItem = selectedItem ? [...selectedItem] : [];
+  const selectedUserItem = selectedItem
+    ? selectedItem?.filter((item: any) => item !== undefined && item !== null)
+    : [];
+  console.log("selectedUserItem: ", selectedUserItem);
 
   const handleChange = (items: any[]): void => {
     console.log("items: ", items);
@@ -45,7 +49,7 @@ const CustomPeoplePicker: React.FC<any> = ({
   };
 
   useEffect(() => {
-    if (selectedUserItem.length) {
+    if (selectedUserItem?.length) {
       setIsFocused(true);
     }
   }, [selectedItem, isFocused]);
@@ -89,6 +93,7 @@ const CustomPeoplePicker: React.FC<any> = ({
               outline: "0 !important",
             },
           }}
+          groupName={groupName ?? null}
           principalTypes={[PrincipalType.User]}
           defaultSelectedUsers={selectedUserItem}
           disabled={readOnly}

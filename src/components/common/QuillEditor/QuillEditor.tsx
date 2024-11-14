@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useEffect } from "react";
 import Quill from "quill";
@@ -9,6 +10,7 @@ import styles from "./QuillEditor.module.scss";
 import { Persona, PersonaSize } from "office-ui-fabric-react";
 import ReactDOM from "react-dom";
 import { Avatar } from "primereact/avatar";
+import { useSelector } from "react-redux";
 
 const QuillEditor = ({
   onChange,
@@ -21,13 +23,29 @@ const QuillEditor = ({
   //   const [mentionedUsers, setMentionedUsers] = useState([]);
   const [content, setContent] = useState(defaultValue || "");
   const quillRef = useRef<any>(null);
-  const suggestionItems: any = suggestionList?.map((e: any) => {
-    return {
-      id: e?.id,
-      value: e?.name,
-      email: e?.email,
-    };
-  });
+  const AllUsersData = useSelector((state: any) => state.AllUsersData?.value);
+  // const suggestionItems: any = suggestionList?.map((e: any) => {
+  //   return {
+  //     id: e?.id,
+  //     value: e?.name,
+  //     email: e?.email,
+  //   };
+  // // });
+  // useEffect(() => {
+  //   if (suggestionList?.length > 0) {
+  //     const suggestionItems: any = suggestionList?.map(
+  //       (e: any, index: number) => {
+  //         return {
+  //           id: e?.id || index + 1,
+  //           value: e?.name,
+  //           email: e?.email || "email" + index,
+  //         };
+  //       }
+  //     );
+  //     setSObjList(suggestionItems);
+  //   }
+  // }, [suggestionList]);
+  // console.log("suggestionItems: ", suggestionItems);
 
   function suggestPeople(searchTerm: any): any {
     // const allPeople = [
@@ -42,7 +60,7 @@ const QuillEditor = ({
     //     email: "abc@erf.com",
     //   },
     // ];
-    return suggestionItems?.filter((person: any) =>
+    return AllUsersData?.filter((person: any) =>
       person.value?.toLowerCase().includes(searchTerm?.toLowerCase())
     );
   }
@@ -79,9 +97,13 @@ const QuillEditor = ({
   const [searchTerm, setSearchTerm] = useState("");
   const mentionValues = getMentionValues("mention");
 
-  const uniqueEmails = filterPeopleByMentions(suggestionItems, mentionValues);
+  const uniqueEmails = filterPeopleByMentions(
+    AllUsersData || [],
+    mentionValues
+  );
 
   let quill: any;
+
   useEffect(() => {
     // Initialize Quill with the mention module
     quill = new Quill("#quill-editor", {
@@ -101,9 +123,7 @@ const QuillEditor = ({
             renderList: any,
             mentionsChar: any
           ) {
-            console.log("searchTerm: ", searchTerm);
             const matchedPeople = suggestPeople(searchTerm);
-            console.log("matchedPeople: ", matchedPeople);
             setSearchTerm(searchTerm);
             renderList(matchedPeople, searchTerm);
           },
@@ -123,7 +143,6 @@ const QuillEditor = ({
     const mentionListItems = document.getElementsByClassName(
       "ql-mention-list-item"
     );
-
     const matchedPeople = suggestPeople(searchTerm);
 
     if (mentionListItems.length > 0) {
@@ -138,8 +157,8 @@ const QuillEditor = ({
                 size={PersonaSize.size32}
               />
               <div className={styles.userDetails}>
-                <p>{matchedPeople[i].value}</p>
-                <span>{matchedPeople[i].email}</span>
+                <p>{matchedPeople[i]?.value}</p>
+                <span>{matchedPeople[i]?.email}</span>
               </div>
             </div>,
             element
@@ -172,48 +191,36 @@ const QuillEditor = ({
       "ql-mention-list-item"
     );
 
-    const liIcon = document.getElementsByClassName("ql-list");
-    if (liIcon.length > 0) {
-      for (let i = 0; i < liIcon.length; i++) {
-        const element = liIcon.item(i);
-        if (element instanceof HTMLElement) {
-          ReactDOM.render(<i className="pi pi-list" />, element);
-        }
-      }
-    }
-
     const matchedPeople = suggestPeople(searchTerm);
+
     if (mentionListItems.length > 0) {
       for (let i = 0; i < mentionListItems.length; i++) {
-        const element = mentionListItems.item(i);
-        if (element instanceof HTMLElement) {
-          ReactDOM.render(
-            <div key={matchedPeople[i].id} className={styles.suggestionItem}>
-              {/* <Persona
-                title={matchedPeople[i]?.email}
-                imageUrl={`/_layouts/15/userphoto.aspx?username=${matchedPeople[i]?.email}`}
-                size={PersonaSize.size32}
-              /> */}
-              <Avatar
-                image={`/_layouts/15/userphoto.aspx?size=S&username=${matchedPeople[i]?.email}`}
-                shape="circle"
-                size="normal"
-                title={matchedPeople[i]?.email}
-                style={{
-                  margin: "0 !important",
-                  // border: "1px solid #adadad70",
-                  width: "30px",
-                  height: "30px",
-                  marginRight: "10px",
-                }}
-              />
-              <div className={styles.userDetails}>
-                <p>{matchedPeople[i].value}</p>
-                <span>{matchedPeople[i].email}</span>
-              </div>
-            </div>,
-            element
-          );
+        if (matchedPeople.length > i) {
+          // Ensure matchedPeople[i] exists
+          const element = mentionListItems.item(i);
+          if (element instanceof HTMLElement) {
+            ReactDOM.render(
+              <div key={matchedPeople[i]?.id} className={styles.suggestionItem}>
+                <Avatar
+                  image={`/_layouts/15/userphoto.aspx?size=S&username=${matchedPeople[i]?.email}`}
+                  shape="circle"
+                  size="normal"
+                  title={matchedPeople[i]?.email || "Unknown Email"}
+                  style={{
+                    margin: "0 !important",
+                    width: "30px",
+                    height: "30px",
+                    marginRight: "10px",
+                  }}
+                />
+                <div className={styles.userDetails}>
+                  <p>{matchedPeople[i]?.value || "Unknown Name"}</p>
+                  <span>{matchedPeople[i]?.email || "Unknown Email"}</span>
+                </div>
+              </div>,
+              element
+            );
+          }
         }
       }
     }

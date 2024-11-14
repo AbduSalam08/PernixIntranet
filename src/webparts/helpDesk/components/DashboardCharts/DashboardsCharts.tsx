@@ -1,11 +1,12 @@
 /* eslint-disable dot-notation */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import MainChart from "../../../../components/common/Charts/MainChart";
 import {
   getTicketsByKeyValue,
   groupTicketsByPeriod,
 } from "../../../../utils/commonUtils";
+
 interface AllticketsDataProps {
   AllTickets: {
     data: any[];
@@ -424,9 +425,243 @@ const TicketsByPriority = memo(
   }
 );
 
+const TicketsCreatedByUserBasis = memo(
+  ({
+    AllTickets,
+    Term,
+    isLoading,
+    helpdeskManagers,
+    itOwners,
+  }: {
+    AllTickets: {
+      data: any[];
+      role: string;
+      isLoading: boolean;
+    };
+    itOwners: string[]; // Assuming it's an array of emails
+    helpdeskManagers: string[]; // Assuming it's an array of emails
+    isLoading: boolean;
+    Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
+  }): JSX.Element => {
+    console.log("itOwners: ", itOwners);
+    console.log("helpdeskManagers: ", helpdeskManagers);
+    // Group tickets by the specified time period
+    const TicketsDataByTerm = useMemo(
+      () => groupTicketsByPeriod(AllTickets?.data, Term, "Created"),
+      [AllTickets?.data, Term]
+    );
+
+    // Flatten the grouped tickets data
+    const allTicketsFlattened = useMemo(
+      () =>
+        Object.keys(TicketsDataByTerm)?.flatMap(
+          (key: string) => TicketsDataByTerm[key]?.data || []
+        ),
+      [TicketsDataByTerm]
+    );
+
+    // Filter tickets based on roles
+    const itownersTickets = useMemo(
+      () =>
+        allTicketsFlattened.filter((res) =>
+          itOwners.includes(res?.EmployeeName?.EMail)
+        ),
+      [allTicketsFlattened, itOwners]
+    );
+
+    const heldeskManagersTickets = useMemo(
+      () =>
+        allTicketsFlattened.filter((res) =>
+          helpdeskManagers.includes(res?.EmployeeName?.EMail)
+        ),
+      [allTicketsFlattened, helpdeskManagers]
+    );
+
+    const otherUsersTickets = useMemo(
+      () =>
+        allTicketsFlattened.filter(
+          (res) =>
+            !helpdeskManagers.includes(res?.EmployeeName?.EMail) &&
+            !itOwners.includes(res?.EmployeeName?.EMail)
+        ),
+      [allTicketsFlattened, helpdeskManagers, itOwners]
+    );
+
+    // Aggregate the counts for each role
+    const ticketsCreatedByUserBasis = useMemo(
+      () => [
+        heldeskManagersTickets.length,
+        itownersTickets.length,
+        otherUsersTickets.length,
+      ],
+      [heldeskManagersTickets, itownersTickets, otherUsersTickets]
+    );
+
+    // Chart data configuration
+    const ticketsByPriority = useMemo(
+      () => ({
+        labels: ["Helpdesk managers", "IT/Business owners", "Users"],
+        datasets: [
+          {
+            label: "Tickets",
+            data: ticketsCreatedByUserBasis,
+            backgroundColor: ["#F9C74F", "#0B4D53", "#4F9DF9"],
+          },
+        ],
+      }),
+      [ticketsCreatedByUserBasis]
+    );
+
+    // Chart options
+    const ticketsByPriorityOptions = useMemo(
+      () => ({
+        indexAxis: "y",
+        plugins: {
+          legend: { display: false, position: "bottom" },
+          datalabels: {
+            color: "white",
+            formatter: (value: number) => (value > 0 ? value : ""),
+          },
+        },
+        barThickness: 60,
+        scales: {
+          x: { title: { display: true, text: "Ticket count" } },
+          y: { title: { display: true, text: "Roles" } },
+        },
+      }),
+      []
+    );
+
+    // Render the chart using the MainChart component or display empty message
+    return ticketsCreatedByUserBasis.every((item) => item === 0) ? (
+      emptyMessageText()
+    ) : (
+      <MainChart
+        isLoading={isLoading}
+        chartType="Bar"
+        data={ticketsByPriority}
+        options={ticketsByPriorityOptions}
+      />
+    );
+  }
+);
+
+const TicketsCreatedByStatsForITOwner = memo(
+  ({
+    AllTickets,
+    Term,
+    isLoading,
+    helpdeskManagers,
+    itOwners,
+    currentUserEmail,
+  }: {
+    AllTickets: {
+      data: any[];
+      role: string;
+      isLoading: boolean;
+    };
+    currentUserEmail: string;
+    itOwners: string[]; // Assuming it's an array of emails
+    helpdeskManagers: string[]; // Assuming it's an array of emails
+    isLoading: boolean;
+    Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
+  }): JSX.Element => {
+    console.log("itOwners: ", itOwners);
+    console.log("helpdeskManagers: ", helpdeskManagers);
+    // Group tickets by the specified time period
+    const TicketsDataByTerm = useMemo(
+      () => groupTicketsByPeriod(AllTickets?.data, Term, "Created"),
+      [AllTickets?.data, Term]
+    );
+
+    // Flatten the grouped tickets data
+    const allTicketsFlattened = useMemo(
+      () =>
+        Object.keys(TicketsDataByTerm)?.flatMap(
+          (key: string) => TicketsDataByTerm[key]?.data || []
+        ),
+      [TicketsDataByTerm]
+    );
+
+    // Filter tickets based on roles
+    const itownersTickets = useMemo(
+      () =>
+        allTicketsFlattened.filter(
+          (res) => currentUserEmail === res?.EmployeeName?.EMail
+        ),
+      [allTicketsFlattened, itOwners]
+    );
+
+    const otherUsersTickets = useMemo(
+      () =>
+        allTicketsFlattened.filter(
+          (res) =>
+            !helpdeskManagers.includes(res?.EmployeeName?.EMail) &&
+            !itOwners.includes(res?.EmployeeName?.EMail)
+        ),
+      [allTicketsFlattened, helpdeskManagers, itOwners]
+    );
+
+    // Aggregate the counts for each role
+    const ticketsCreatedByUserBasis = useMemo(
+      () => [itownersTickets.length, otherUsersTickets.length],
+      [itownersTickets, otherUsersTickets]
+    );
+
+    // Chart data configuration
+    const ticketsByPriority = useMemo(
+      () => ({
+        labels: ["IT/Business owners (Me)", "Users"],
+        datasets: [
+          {
+            label: "Tickets",
+            data: ticketsCreatedByUserBasis,
+            backgroundColor: ["#F9C74F", "#0B4D53"],
+          },
+        ],
+      }),
+      [ticketsCreatedByUserBasis]
+    );
+
+    // Chart options
+    const ticketsByPriorityOptions = useMemo(
+      () => ({
+        indexAxis: "y",
+        plugins: {
+          legend: { display: false, position: "bottom" },
+          datalabels: {
+            color: "white",
+            formatter: (value: number) => (value > 0 ? value : ""),
+          },
+        },
+        barThickness: 60,
+        scales: {
+          x: { title: { display: true, text: "Ticket count" } },
+          y: { title: { display: true, text: "Roles" } },
+        },
+      }),
+      []
+    );
+
+    // Render the chart using the MainChart component or display empty message
+    return ticketsCreatedByUserBasis.every((item) => item === 0) ? (
+      emptyMessageText()
+    ) : (
+      <MainChart
+        isLoading={isLoading}
+        chartType="Bar"
+        data={ticketsByPriority}
+        options={ticketsByPriorityOptions}
+      />
+    );
+  }
+);
+
 export {
   TicketByStatusChart,
   TicketBySource,
   CreatedClosedTickets,
   TicketsByPriority,
+  TicketsCreatedByUserBasis,
+  TicketsCreatedByStatsForITOwner,
 };

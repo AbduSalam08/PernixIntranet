@@ -600,7 +600,7 @@ span[data-denotation-char="@"] {
   border: 1px solid #eee !important;
   border-radius: 6px !important;
   background-color: white !important;
-  max-height: 200px !important;
+  max-height: 110px !important;
   overflow-y: auto !important;
   z-index: 99 !important;
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.05) !important;
@@ -680,7 +680,10 @@ strong {
 em {
   font-style: italic !important;
 }
-
+.ql-mention-list-item {
+  list-style-type: none !important;
+  margin-left: 0 !important;
+}
 .basicSMInput {
   width: auto;
   padding: 7px 10px;
