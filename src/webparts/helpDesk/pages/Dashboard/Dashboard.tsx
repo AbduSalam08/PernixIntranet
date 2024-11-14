@@ -8,6 +8,8 @@ import {
   TicketBySource,
   TicketByStatusChart,
   TicketsByPriority,
+  TicketsCreatedByStatsForITOwner,
+  TicketsCreatedByUserBasis,
 } from "../../components/DashboardCharts/DashboardsCharts";
 import InfoCard from "../../components/InfoCard/InfoCard";
 // images
@@ -24,17 +26,30 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   currentRoleBasedDataUtil,
   filterTicketsByTimePeriod,
+  getCurrentRoleForTicketsRoute,
   getTicketsByKeyValue,
 } from "../../../../utils/commonUtils";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
+import { getUsersByGroup } from "../../../../services/CommonServices";
+import { CONFIG } from "../../../../config/config";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = (): JSX.Element => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
   );
   console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
+
+  const [usersByType, setUsersByType] = useState<{
+    it_owners: any[];
+    helpdesk_managers: any[];
+  }>({
+    it_owners: [],
+    helpdesk_managers: [],
+  });
 
   const filterTerms = [
     "This Week",
@@ -46,15 +61,15 @@ const Dashboard = (): JSX.Element => {
   const [filters, setFilters] = useState({
     TicketByStatus: {
       options: filterTerms,
-      selectedValue: "This Week",
+      selectedValue: "This Month",
     },
     TicketBySource: {
       options: filterTerms,
-      selectedValue: "This Week",
+      selectedValue: "This Month",
     },
     CreatedClosedTickets: {
       options: filterTerms,
-      selectedValue: "This Week",
+      selectedValue: "This Month",
     },
     TicketByPriority: {
       termsOptions: filterTerms,
@@ -66,8 +81,12 @@ const Dashboard = (): JSX.Element => {
         "Un assigned",
         "In Progress",
       ],
-      termsSelectedValue: "This Week",
+      termsSelectedValue: "This Month",
       statusSelectedValue: "Open",
+    },
+    TicketsCreatedByUserBasis: {
+      termsOptions: filterTerms,
+      termsSelectedValue: "This Month",
     },
   });
 
@@ -83,6 +102,8 @@ const Dashboard = (): JSX.Element => {
 
   console.log("currentRoleBasedData: ", currentRoleBasedData);
 
+  const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
+
   // Info cards array
   const infoCards: any[] = [
     {
@@ -93,6 +114,9 @@ const Dashboard = (): JSX.Element => {
           : "My tickets",
       cardImg: myTickets,
       cardValues: currentRoleBasedData?.data?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/all_tickets`);
+      },
     },
     {
       // cardName: "Open",
@@ -102,6 +126,9 @@ const Dashboard = (): JSX.Element => {
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Open")
           ?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/open`);
+      },
     },
     {
       // cardName: "Closed",
@@ -113,6 +140,9 @@ const Dashboard = (): JSX.Element => {
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Closed")
           ?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/closed`);
+      },
     },
     {
       cardName:
@@ -127,6 +157,13 @@ const Dashboard = (): JSX.Element => {
             )?.length
           : filterTicketsByTimePeriod(currentRoleBasedData?.data, "thisWeek")
               ?.length || 0,
+      onclick: () => {
+        if (currentRoleBasedData?.role === "ticket_manager") {
+          navigate(`${currentRole}/all_tickets/unassigned`);
+        } else {
+          navigate(`${currentRole}/all_tickets/recent`);
+        }
+      },
     },
     {
       cardName: "Tickets on hold",
@@ -134,11 +171,44 @@ const Dashboard = (): JSX.Element => {
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "On Hold")
           ?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/onhold`);
+      },
     },
   ];
 
   useEffect(() => {
+    // Trigger any required actions on mount
     getAllTickets(dispatch);
+
+    // IIFE to handle async logic
+    (async () => {
+      try {
+        // Fetch IT Owners
+        const itOwners = await getUsersByGroup(
+          CONFIG.SPGroupName.HelpDesk_IT_Owners
+        );
+        console.log("itOwners: ", itOwners);
+
+        setUsersByType((prev: any) => ({
+          ...prev,
+          it_owners: itOwners,
+        }));
+
+        // Fetch Helpdesk Managers
+        const helpdeskManagers = await getUsersByGroup(
+          CONFIG.SPGroupName.HelpDesk_Ticket_Managers
+        );
+        console.log("helpdesk_managers: ", helpdeskManagers);
+
+        setUsersByType((prev: any) => ({
+          ...prev,
+          helpdesk_managers: helpdeskManagers,
+        }));
+      } catch (err: any) {
+        console.error("Error fetching users: ", err);
+      }
+    })();
   }, []);
 
   return (
@@ -154,6 +224,7 @@ const Dashboard = (): JSX.Element => {
             item={item}
             isLoading={HelpDeskTicktesData?.isLoading}
             key={idx}
+            infoCardClick={item?.onclick}
           />
         ))}
       </div>
@@ -304,6 +375,63 @@ const Dashboard = (): JSX.Element => {
               Term={filters.TicketByPriority.termsSelectedValue}
               Status={filters.TicketByPriority.statusSelectedValue}
             />
+          </div>
+        </div>
+
+        <div className={styles.metricCard}>
+          <div className={styles.chartDetails}>
+            <span>
+              {currentRoleBasedData?.role ===
+                CONFIG.SPGroupName.HelpDesk_Ticket_Managers ||
+              currentRoleBasedData?.role === "Super Admin"
+                ? "Tickets created by (user basis)"
+                : "Tickets created by users & myself"}
+            </span>
+            <div className={styles.filters}>
+              <CustomDropDown
+                floatingLabel={false}
+                size="SM"
+                width={"150px"}
+                value={filters.TicketByPriority.termsSelectedValue}
+                options={filters.TicketByPriority.termsOptions}
+                noErrorMsg
+                placeholder="select term"
+                onChange={(value) => {
+                  setFilters((prev: any) => ({
+                    ...prev,
+                    TicketByPriority: {
+                      ...prev.TicketByPriority,
+                      termsSelectedValue: value,
+                    },
+                  }));
+                }}
+              />
+            </div>
+          </div>
+          <div className={styles.chart}>
+            {currentRoleBasedData?.role === "ticket_manager" ||
+            currentRoleBasedData?.role === "Super Admin" ? (
+              <TicketsCreatedByUserBasis
+                isLoading={HelpDeskTicktesData?.isLoading}
+                AllTickets={currentRoleBasedData}
+                Term={filters.TicketsCreatedByUserBasis.termsSelectedValue}
+                helpdeskManagers={usersByType.helpdesk_managers?.map(
+                  (res: any) => res?.Email
+                )}
+                itOwners={usersByType.it_owners?.map((res: any) => res?.Email)}
+              />
+            ) : (
+              <TicketsCreatedByStatsForITOwner
+                currentUserEmail={currentUserDetails?.email}
+                isLoading={HelpDeskTicktesData?.isLoading}
+                AllTickets={HelpDeskTicktesData}
+                Term={filters.TicketsCreatedByUserBasis.termsSelectedValue}
+                helpdeskManagers={usersByType.helpdesk_managers?.map(
+                  (res: any) => res?.Email
+                )}
+                itOwners={usersByType.it_owners?.map((res: any) => res?.Email)}
+              />
+            )}
           </div>
         </div>
       </div>

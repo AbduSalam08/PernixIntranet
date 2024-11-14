@@ -16,6 +16,7 @@ const TicketView = lazy(() => import("../pages/TicketView/TicketView"));
 const Dashboard = lazy(() => import("../pages/Dashboard/Dashboard"));
 const MyTickets = lazy(() => import("../pages/MyTickets/MyTickets"));
 import ErrorElement from "../../../components/common/ErrorElement/ErrorElement";
+import { getAllUsersList } from "../../../services/HelpDeskMainServices/ticketServices";
 // Define the Props interface explicitly
 interface HelpDeskProps {
   [key: string]: any; // If you expect additional dynamic props, otherwise refine this based on expected props
@@ -32,6 +33,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
   // Effect for handling role-based authentication
   useEffect(() => {
     dispatch(setMainSPContext(props?.context));
+    getAllUsersList(dispatch);
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
       {
@@ -61,6 +63,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
           <Route path="/helpdesk_manager" Component={MainLayout}>
             <Route index Component={Dashboard} />
             <Route path="dashboard" Component={Dashboard} />
+            <Route path="mentions" Component={MyTickets} />
 
             <Route
               path="all_tickets/:ticketid/view_ticket"
@@ -96,7 +99,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
           <Route path="/user" Component={MainLayout}>
             {/* <Route index Component={Dashboard} /> */}
             {/* <Route path="dashboard" Component={Dashboard} /> */}
-
+            <Route path="mentions" Component={MyTickets} />
             <Route index Component={MyTickets} />
             <Route path="tickets" Component={MyTickets}>
               <Route index Component={MyTickets} />
@@ -130,6 +133,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
           <Route path="/it_owner" Component={MainLayout}>
             <Route index Component={Dashboard} />
             <Route path="dashboard" Component={Dashboard} />
+            <Route path="mentions" Component={MyTickets} />
 
             <Route index Component={MyTickets} />
             <Route path="tickets" Component={MyTickets}>

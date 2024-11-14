@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -13,7 +14,7 @@ const infoRed: any = require("../../../helpDesk/assets/images/svg/infoRed.svg");
 
 import styles from "./MyTickets.module.scss";
 import { useEffect, useMemo, useState } from "react";
-import { Add, RestartAlt } from "@mui/icons-material";
+import { Add, OpenInNew, RestartAlt } from "@mui/icons-material";
 import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
 import {
   currentRoleBasedDataUtil,
@@ -24,6 +25,7 @@ import {
   // filterTicketsByTimePeriod,
   generateTicketNumber,
   getCurrentRoleForTicketsRoute,
+  getLastTicketNumber,
   getTicketsByKeyValue,
   // sortByCreatedDate,
   sortTickets,
@@ -32,7 +34,7 @@ import {
 } from "../../../../utils/commonUtils";
 import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
-import CustomFileUpload from "../../../../components/common/CustomInputFields/CustomFileUpload";
+// import CustomFileUpload from "../../../../components/common/CustomInputFields/CustomFileUpload";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import InfoCard from "../../components/InfoCard/InfoCard";
@@ -56,6 +58,7 @@ import { togglePopupVisibility } from "../../../../utils/popupUtils";
 import Popup from "../../../../components/common/Popups/Popup";
 import dayjs from "dayjs";
 import { getAttachmentofTicket } from "../../../../services/HelpDeskMainServices/ticketViewServices";
+import CustomMultipleFileUpload from "../../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 // Import SVGs
 const myTickets: any = require("../../assets/images/svg/myTickets.svg");
 const openTickets: any = require("../../assets/images/svg/openTickets.svg");
@@ -111,11 +114,13 @@ const MyTickets = (): JSX.Element => {
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
   );
+  console.log("currentUserDetails: ", currentUserDetails);
 
   const isTicketManager: boolean =
     currentUserDetails?.role === "HelpDesk_Ticket_Managers" ||
     currentUserDetails?.role === "Super Admin";
 
+  console.log("isTicketManager: ", isTicketManager);
   const isITOwner: boolean =
     currentUserDetails?.role === "HelpDesk_IT_Owners" ||
     currentUserDetails?.role === "Super Admin";
@@ -124,12 +129,15 @@ const MyTickets = (): JSX.Element => {
     (state: any) => state.HelpDeskTicktesData.value
   );
 
+  const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
+
   const currentRoleBasedData = currentRoleBasedDataUtil(
     currentUserDetails,
-    HelpDeskTicktesData
+    HelpDeskTicktesData,
+    `${currentRole}${location.pathname}`
   );
 
-  const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
+  console.log("currentRoleBasedData: ", currentRoleBasedData);
 
   const initialData = {
     TicketNumber: {
@@ -184,14 +192,21 @@ const MyTickets = (): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
     TicketSource: {
-      value: "Web",
+      value: "Web portal",
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: false, type: "string" },
     },
     Status: {
       // value: isTicketManager || isITOwner ? "" : "Open",
-      value: "Open",
+      // value: "Open",
+      value:
+        openNewTicketSlide?.data?.Status === "Open" &&
+        isTicketManager &&
+        openNewTicketSlide?.data?.ITOwnerId === null &&
+        openNewTicketSlide?.type === "update"
+          ? "In Progress"
+          : "Open",
       isValid: true,
       errorMsg: "This field is required",
       validationRule: {
@@ -232,10 +247,10 @@ const MyTickets = (): JSX.Element => {
   };
 
   const [formData, setFormData] = useState<any>(initialData);
+  console.log("formData: ", formData);
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
-  console.log("loadingSubmit: ", loadingSubmit);
 
   const popupActions: any = [
     [
@@ -414,86 +429,106 @@ const MyTickets = (): JSX.Element => {
       width: 200,
       renderCell: (params: any) => (
         <div className={styles.actionButtons}>
-          <button
-            title="Repeat this ticket"
-            onClick={() => {
-              const ticketNumber = params?.row?.ticket_number;
-              const currentRowData: any = HelpDeskTicktesData?.AllData?.filter(
-                (item: any) => item?.TicketNumber === ticketNumber
-              )?.[0];
-              togglePopupVisibility(
-                setPopupController,
-                initialPopupController[0],
-                0,
-                "open",
-                "",
-                currentRowData,
-                `Are you sure want to repeat this ticket "${ticketNumber}" ?`
-              );
-            }}
-            className={styles.reopenTicket}
-          >
-            <img src={reopenTicket} />
-          </button>
-          <button
-            title="Edit this ticket"
-            onClick={async () => {
-              const ticketNumber = params?.row?.ticket_number;
-              const currentRowData: any = HelpDeskTicktesData?.AllData?.filter(
-                (item: any) => item?.TicketNumber === ticketNumber
-              )?.[0];
+          {!`${currentRole}${location.pathname}`?.includes("mentions") ? (
+            <>
+              <button
+                title="Repeat this ticket"
+                onClick={() => {
+                  const ticketNumber = params?.row?.ticket_number;
+                  const currentRowData: any =
+                    HelpDeskTicktesData?.AllData?.filter(
+                      (item: any) => item?.TicketNumber === ticketNumber
+                    )?.[0];
+                  togglePopupVisibility(
+                    setPopupController,
+                    initialPopupController[0],
+                    0,
+                    "open",
+                    "",
+                    currentRowData,
+                    `Are you sure want to repeat this ticket "${ticketNumber}" ?`
+                  );
+                }}
+                className={styles.reopenTicket}
+              >
+                <img src={reopenTicket} />
+              </button>
+              <button
+                title="Edit this ticket"
+                onClick={async () => {
+                  const ticketNumber = params?.row?.ticket_number;
+                  const currentRowData: any =
+                    HelpDeskTicktesData?.AllData?.filter(
+                      (item: any) => item?.TicketNumber === ticketNumber
+                    )?.[0];
 
-              const currentAttachment = await getAttachmentofTicket(
-                currentRowData?.ID
-              );
+                  const currentAttachment = await getAttachmentofTicket(
+                    currentRowData?.ID
+                  );
 
-              console.log("currentRowData: ", currentRowData);
-              setLoadingSubmit(false);
-              setSubmitClicked(false);
-              setOpenNewTicketSlide({
-                open: true,
-                type: "update",
-                data: currentRowData,
-              });
+                  setLoadingSubmit(false);
+                  setSubmitClicked(false);
+                  setOpenNewTicketSlide({
+                    open: true,
+                    type: "update",
+                    data: currentRowData,
+                  });
 
-              console.log(
-                "currentaAttachment: ",
-                currentAttachment[0]?.FileName
-              );
+                  setFormData((prev: any) =>
+                    mapRowDataToFormData(
+                      currentRowData,
+                      prev,
+                      isTicketManager,
+                      currentUserDetails,
+                      isITOwner
+                    )
+                  );
 
-              setFormData((prev: any) =>
-                mapRowDataToFormData(
-                  currentRowData,
-                  prev,
-                  isTicketManager,
-                  currentUserDetails,
-                  isITOwner
-                )
-              );
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    Attachment: {
+                      ...prev?.Attachment,
+                      value: [
+                        ...currentAttachment?.map((attachment: any) => ({
+                          ...attachment,
+                          name: attachment?.FileName,
+                        })),
+                      ],
+                    },
+                  }));
 
-              setFormData((prev: any) => ({
-                ...prev,
-                Attachment: {
-                  ...prev?.Attachment,
-                  value: currentAttachment?.[0]
-                    ? {
-                        ...currentAttachment?.[0],
-                        name: currentAttachment[0]?.FileName,
-                      }
-                    : null,
-                },
-              }));
-              // handleView(params);
-            }}
-            className={styles.reopenTicket}
-          >
-            <EditIcon
-              sx={{
-                color: "#2b4d51",
-                fontSize: "16px",
+                  // handleView(params);
+                }}
+                className={styles.reopenTicket}
+              >
+                <EditIcon
+                  sx={{
+                    color: "#2b4d51",
+                    fontSize: "16px",
+                  }}
+                />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                navigate(
+                  `${currentRole}/all_tickets/${params?.row?.ticket_number}/view_ticket`,
+                  {
+                    state: params?.row,
+                  }
+                );
               }}
-            />
-          </button>
+              className={styles.reopenTicket}
+            >
+              <OpenInNew
+                sx={{
+                  fontSize: "18px",
+                  color: "#0a3622",
+                }}
+              />
+            </button>
+          )}
         </div>
       ),
     },
@@ -572,17 +607,19 @@ const MyTickets = (): JSX.Element => {
       console.log("formData: ", formData);
       setLoadingSubmit(true);
       setSubmitClicked(true);
+      debugger;
       console.log("oadingSubmit: ", loadingSubmit);
       if (openNewTicketSlide.type === "add") {
         await Promise.all([addNewTicket(formData, ["Attachment"])])
           .then(async (res: any) => {
             await getAllTickets(dispatch);
             navigate(`${currentRole}/all_tickets`);
-            setOpenNewTicketSlide({
+            setFormData(initialData);
+            setOpenNewTicketSlide((prev: any) => ({
+              ...prev,
               open: false,
               type: "add",
-            });
-            setFormData(initialData);
+            }));
           })
           ?.catch((err: any) => {
             console.log("err: ", err);
@@ -594,11 +631,12 @@ const MyTickets = (): JSX.Element => {
           .then(async (res: any) => {
             await getAllTickets(dispatch);
             navigate(`${currentRole}/all_tickets`);
-            setOpenNewTicketSlide({
+            setFormData(initialData);
+            setOpenNewTicketSlide((prev: any) => ({
+              ...prev,
               open: false,
               type: "add",
-            });
-            setFormData(initialData);
+            }));
           })
           ?.catch((err: any) => {
             console.log("err: ", err);
@@ -623,6 +661,9 @@ const MyTickets = (): JSX.Element => {
       cardName: "My tickets",
       cardImg: myTickets,
       cardValues: currentRoleBasedData?.data?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/all_tickets`);
+      },
     },
     {
       cardName: "My open",
@@ -630,6 +671,9 @@ const MyTickets = (): JSX.Element => {
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Open")
           ?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/open`);
+      },
     },
     {
       cardName: "My closed",
@@ -637,6 +681,9 @@ const MyTickets = (): JSX.Element => {
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "Closed")
           ?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/closed`);
+      },
     },
     {
       cardName: "Tickets on hold",
@@ -644,6 +691,9 @@ const MyTickets = (): JSX.Element => {
       cardValues:
         getTicketsByKeyValue(currentRoleBasedData?.data, "Status", "On Hold")
           ?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/onhold`);
+      },
     },
     {
       cardName: "Tickets in progress",
@@ -654,6 +704,9 @@ const MyTickets = (): JSX.Element => {
           "Status",
           "In Progress"
         )?.length || 0,
+      onclick: () => {
+        navigate(`${currentRole}/tickets/status/inprogress`);
+      },
     },
   ];
 
@@ -689,6 +742,7 @@ const MyTickets = (): JSX.Element => {
     ticketsFilter(
       `${currentRole}${location.pathname}`,
       HelpDeskTicktesData,
+      currentUserDetails,
       dispatch
     );
     navigate(location.pathname, { state: null });
@@ -702,7 +756,7 @@ const MyTickets = (): JSX.Element => {
     ) {
       setLoadingSubmit(false);
     }
-    console.log("submitClicked: ", submitClicked);
+
     if (submitClicked) {
       setLoadingSubmit(true);
     }
@@ -795,13 +849,17 @@ const MyTickets = (): JSX.Element => {
                 open: true,
                 type: "add",
               });
-              const lastTicketID: number = Math.max(
-                0,
-                ...(HelpDeskTicktesData?.data ?? [])
-                  ?.map((item: any) => item?.ID)
-                  ?.filter(
-                    (id: number | undefined) => id !== undefined && id !== null
-                  )
+              // const lastTicketID: number = Math.max(
+              //   0,
+              //   ...(HelpDeskTicktesData?.data ?? [])
+              //     ?.map((item: any) => item?.ID)
+              //     ?.filter(
+              //       (id: number | undefined) => id !== undefined && id !== null
+              //     )
+              // );
+
+              const lastTicketID = getLastTicketNumber(
+                HelpDeskTicktesData?.data
               );
 
               const newTicketNumber = generateTicketNumber(lastTicketID + 1);
@@ -836,6 +894,7 @@ const MyTickets = (): JSX.Element => {
               item={item}
               isLoading={HelpDeskTicktesData?.isLoading}
               key={idx}
+              infoCardClick={item?.onclick}
             />
           ))}
         </div>
@@ -929,6 +988,7 @@ const MyTickets = (): JSX.Element => {
                 {isTicketManager && (
                   <CustomPeoplePicker
                     labelText="IT Owner"
+                    groupName={"HelpDesk_IT_Owners"}
                     isValid={formData?.ITOwnerId?.isValid}
                     errorMsg={formData?.ITOwnerId?.errorMsg}
                     selectedItem={[formData?.ITOwnerId?.value?.email]}
@@ -995,7 +1055,8 @@ const MyTickets = (): JSX.Element => {
                 </div>
 
                 {(isTicketManager || isITOwner) &&
-                  openNewTicketSlide?.type === "update" && (
+                  openNewTicketSlide?.type === "update" &&
+                  openNewTicketSlide?.data?.ITOwnerId !== null && (
                     <CustomDropDown
                       disabled={
                         openNewTicketSlide?.data?.Status === "Closed" &&
@@ -1044,37 +1105,64 @@ const MyTickets = (): JSX.Element => {
                 (openNewTicketSlide?.type === "update" &&
                   openNewTicketSlide?.data?.EmployeeName?.EMail ===
                     currentUserDetails?.email) ? (
-                  <CustomFileUpload
-                    accept="image/png,image/svg"
-                    value={formData?.Attachment?.value?.name}
+                  // <CustomFileUpload
+                  //   accept="image/png,image/svg"
+                  //   value={formData?.Attachment?.value?.name}
+                  //   onFileSelect={(file) => {
+                  //     console.log("file: ", file);
+                  //     const { isValid, errorMsg } = validateField(
+                  //       "Attachment",
+                  //       file ? file.name : "",
+                  //       formData?.Attachment
+                  //     );
+                  //     handleInputChange("Attachment", file, isValid, errorMsg);
+                  //   }}
+                  //   placeholder="Attachment"
+                  //   isValid={formData?.Attachment?.isValid}
+                  //   errMsg={formData?.Attachment?.errorMsg}
+                  // />
+                  <CustomMultipleFileUpload
+                    accept="image/svg, image/png, image/jpg"
+                    placeholder="Upload attachments"
+                    multiple
+                    // value={formData?.Attachment?.value?.name || null}
+                    value={formData?.Attachment?.value ?? []}
                     onFileSelect={(file) => {
                       console.log("file: ", file);
                       const { isValid, errorMsg } = validateField(
                         "Attachment",
-                        file ? file.name : "",
+                        file ? file?.[0]?.name : "",
                         formData?.Attachment
                       );
                       handleInputChange("Attachment", file, isValid, errorMsg);
                     }}
-                    placeholder="Attachment"
-                    isValid={formData?.Attachment?.isValid}
-                    errMsg={formData?.Attachment?.errorMsg}
+                    isValid={formData.Attachment.isValid}
+                    errMsg={formData.Attachment.errorMsg}
                   />
-                ) : formData?.Attachment?.value !== null ? (
-                  <span
-                    className={styles.fileSource}
-                    onClick={() => {
-                      window.open(
-                        `${window.location.origin}${formData?.Attachment?.value?.ServerRelativeUrl}?web=1`
-                      );
-                    }}
-                  >
-                    <p>Attachment</p>
-                    <div className={styles.fileName}>
-                      <img src={fileIcon} />
-                      <span>{formData?.Attachment?.value?.name}</span>
+                ) : formData?.Attachment?.value?.length > 0 ? (
+                  <>
+                    <p>Attachment(s)</p>
+                    <div className={styles.attachmentsWrapper}>
+                      {formData?.Attachment?.value?.map(
+                        (item: any, idx: number) => (
+                          <span
+                            key={idx}
+                            className={styles.fileSource}
+                            onClick={() => {
+                              window.open(
+                                `${window.location.origin}${item?.ServerRelativeUrl}?web=1`
+                              );
+                            }}
+                          >
+                            <div className={styles.fileName} title={item?.name}>
+                              <img src={fileIcon} />
+                              <span>{item?.name}</span>
+                            </div>
+                          </span>
+                        )
+                      )}
                     </div>
-                  </span>
+                  </>
                 ) : (
                   <span className={styles.fileSource}>
                     <p>Attachment</p>

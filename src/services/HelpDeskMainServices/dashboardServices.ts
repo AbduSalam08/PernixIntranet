@@ -16,8 +16,9 @@ export const getAllTickets = async (
   await SpServices.SPReadItems({
     Listname: CONFIG.ListNames.HelpDesk_AllTickets,
     Select:
-      "*, EmployeeName/ID, EmployeeName/Title, EmployeeName/EMail, ITOwner/ID, ITOwner/Title, ITOwner/EMail, TicketManager/ID, TicketManager/Title, TicketManager/EMail, RepeatedTicketSource/ID",
-    Expand: "EmployeeName,ITOwner,TicketManager,RepeatedTicketSource",
+      "*, EmployeeName/ID, EmployeeName/Title, EmployeeName/EMail, ITOwner/ID, ITOwner/Title, ITOwner/EMail, TicketManager/ID, TicketManager/Title, TicketManager/EMail, RepeatedTicketSource/ID,TaggedPerson/Title, TaggedPerson/EMail, TaggedPerson/ID",
+    Expand:
+      "EmployeeName,ITOwner,TicketManager,RepeatedTicketSource, TaggedPerson",
   })
     ?.then((res: any) => {
       console.log("res: ", res);

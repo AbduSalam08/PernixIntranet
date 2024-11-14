@@ -61,6 +61,16 @@ const LeftBar: React.FC = (): JSX.Element => {
               ],
             },
             {
+              label: "Mentioned tickets",
+              path: `${currentRole}/mentions`,
+              // children: [
+              //   {
+              //     label: "My tickets in last 7 days",
+              //     path: `${currentRole}/all_tickets/recent`,
+              //   },
+              // ],
+            },
+            {
               label: "Status",
               path: `${currentRole}/tickets/status/open`,
               children: [
@@ -119,6 +129,16 @@ const LeftBar: React.FC = (): JSX.Element => {
                   path: `${currentRole}/all_tickets/recent`,
                 },
               ],
+            },
+            {
+              label: "Mentioned tickets",
+              path: `${currentRole}/mentions`,
+              // children: [
+              //   {
+              //     label: "My tickets in last 7 days",
+              //     path: `${currentRole}/all_tickets/recent`,
+              //   },
+              // ],
             },
             {
               label: "Status",
@@ -182,6 +202,16 @@ const LeftBar: React.FC = (): JSX.Element => {
                   path: `${currentRole}/all_tickets/recent`,
                 },
               ],
+            },
+            {
+              label: "Mentioned tickets",
+              path: `${currentRole}/mentions`,
+              // children: [
+              //   {
+              //     label: "My tickets in last 7 days",
+              //     path: `${currentRole}/all_tickets/recent`,
+              //   },
+              // ],
             },
             {
               label: "Status",

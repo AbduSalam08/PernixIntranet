@@ -348,7 +348,8 @@ export const groupTicketsByPeriod = (
 
 export const currentRoleBasedDataUtil: any = (
   currentUserDetails: any,
-  HelpDeskTicktesData: any
+  HelpDeskTicktesData: any,
+  currentPath?: any
 ) => {
   if (
     currentUserDetails?.role === "Pernix_Admin" ||
@@ -367,7 +368,9 @@ export const currentRoleBasedDataUtil: any = (
     );
     console.log("isItOwner: ", isItOwner);
     return {
-      data: isItOwner,
+      data: !currentPath?.includes("mentions")
+        ? isItOwner
+        : HelpDeskTicktesData?.data,
       role: "it_owner",
     };
   } else {
@@ -376,7 +379,9 @@ export const currentRoleBasedDataUtil: any = (
     );
 
     return {
-      data: isUser,
+      data: !currentPath?.includes("mentions")
+        ? isUser
+        : HelpDeskTicktesData?.data,
       role: "user",
     };
   }
@@ -396,6 +401,7 @@ export const generateTicketNumber = (number: number): string => {
 export const ticketsFilter = async (
   currentPath: string,
   helpDeskTicketsData: any,
+  currentUserDetails: any,
   dispatch: any
 ): Promise<void> => {
   if (currentPath.split("/").pop() === "all_tickets") {
@@ -538,6 +544,23 @@ export const ticketsFilter = async (
       })
     );
   }
+  if (currentPath?.includes("mentions")) {
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) =>
+        item?.TaggedPerson?.some(
+          (person: any) => person?.EMail === currentUserDetails?.email
+        )
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Last 7 days",
+      })
+    );
+  }
 };
 
 export const getCurrentRoleForTicketsRoute = (
@@ -639,4 +662,20 @@ export const sortTickets = (
   }
 
   return sortedTickets;
+};
+
+export const getLastTicketNumber = (data: any): any => {
+  return Math.max(
+    0,
+    ...(data ?? [])
+      .map((item: any) => {
+        const ticketNumber = item?.TicketNumber;
+        // Extract number part after underscore and parse as an integer
+        const ticketNum = ticketNumber
+          ? parseInt(ticketNumber.split("_")[1], 10)
+          : 0;
+        return ticketNum;
+      })
+      .filter((num: number) => !isNaN(num))
+  );
 };

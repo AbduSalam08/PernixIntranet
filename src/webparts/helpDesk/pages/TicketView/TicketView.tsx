@@ -25,9 +25,13 @@ import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 import Popup from "../../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../../utils/popupUtils";
-import { updateTicket } from "../../../../services/HelpDeskMainServices/ticketServices";
+import {
+  // getAllUsersList,
+  updateTicket,
+} from "../../../../services/HelpDeskMainServices/ticketServices";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import ErrorElement from "../../../../components/common/ErrorElement/ErrorElement";
+import { ArrowRight } from "@mui/icons-material";
 // import { getTicketByTicketNumber } from "../../../../services/HelpDeskMainServices/dashboardServices";
 const leftArrow = require("../../../../assets/images/svg/headerBack.svg");
 const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
@@ -78,12 +82,15 @@ const TicketView = (): JSX.Element => {
     isLoading: true,
     data: [],
   });
+  console.log("conversationData: ", conversationData);
 
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
   );
+  const AllUsersData = useSelector((state: any) => state.AllUsersData?.value);
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
+  console.log("currentRole: ", currentRole);
 
   const currentTicketsDataMain: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
@@ -92,8 +99,12 @@ const TicketView = (): JSX.Element => {
   const currentTicketsData = currentTicketsDataMain?.AllData?.filter(
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
+  console.log("currentTicketsData: ", currentTicketsData);
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
+  const [toggles, setToggles] = useState({
+    showDescription: true,
+  });
 
   const popupActions: any = [
     [
@@ -156,30 +167,42 @@ const TicketView = (): JSX.Element => {
     results: [],
   });
 
-  const uniqueUsers = new Set();
-  const usersToTag: any = [
-    currentTicketsData?.EmployeeName,
-    currentTicketsData?.ITOwner,
-    currentTicketsData?.TicketManager,
-  ]
-    ?.map((user: any) => ({
-      id: user?.ID,
-      name: user?.Title,
-      email: user?.EMail,
-    }))
-    .filter((user) => {
-      if (user && !uniqueUsers.has(user.email)) {
-        uniqueUsers.add(user.email);
-        return true;
-      }
-      return false;
-    });
+  // const uniqueUsers = new Set();
+
+  // const usersToTag: any = [
+  //   ...AllUsersData,
+  //   currentTicketsData?.EmployeeName,
+  //   currentTicketsData?.ITOwner,
+  //   currentTicketsData?.TicketManager,
+  // ]?.map((user: any) => ({
+  //   id: user?.Id || user?.id,
+  //   name: user?.Title || user?.name,
+  //   email: user?.Email || user?.email,
+  // }));
+  // .filter((user) => {
+  //   if (user && !uniqueUsers?.has(user.email)) {
+  //     uniqueUsers.add(user.email);
+  //     return true;
+  //   }
+  //   return false;
+  // });
+  // console.log("usersToTag: ", usersToTag);
 
   const repeatedTicketNumber = currentTicketsDataMain?.AllData?.filter(
     (item: any) => item?.ID === currentTicketsData?.RepeatedTicketSourceId
   )[0]?.TicketNumber;
   console.log("repeatedTicketNumber: ", repeatedTicketNumber);
+  const combinedUsers = [
+    currentTicketsData?.EmployeeName,
+    currentTicketsData?.ITOwner,
+    currentTicketsData?.TicketManager,
+  ];
+  console.log("combinedUsers: ", combinedUsers);
 
+  const isUserTagged = combinedUsers.some(
+    (user: any) => user?.EMail === currentUserDetails?.email
+  );
+  console.log("isUserTagged: ", isUserTagged);
   useEffect(() => {
     getAllComments(currentTicketsData?.ID, setConversationData, false);
 
@@ -188,64 +211,102 @@ const TicketView = (): JSX.Element => {
       setCurrentAttachment(res || null);
     });
   }, []);
-
-  console.log("currentAttachment: ", currentAttachment);
   return (
     <>
       {location?.state !== null ? (
         <>
           <div className={styles.tcLhs}>
             <div className={styles.ticketHeader}>
-              <div className={styles.ticketHeaderMain}>
-                <div
-                  className={styles.ticketName}
-                  onClick={() => {
-                    navigate(`${currentRole}/all_tickets`, { state: null });
-                  }}
-                >
-                  <img src={leftArrow} />
-                  <span>{ticketNumber}</span>
+              <div className={styles.headerTopRowWraper}>
+                <div className={styles.ticketHeaderMain}>
+                  <div
+                    className={styles.ticketName}
+                    onClick={() => {
+                      navigate(`${currentRole}/all_tickets`, { state: null });
+                    }}
+                  >
+                    <img src={leftArrow} />
+                    <span>{ticketNumber}</span>
+                  </div>
+
+                  <div className={styles.ticketOneLine}>
+                    {currentTicketsData?.EmployeeName?.Title} raised this ticket
+                    on{" "}
+                    {dayjs(currentTicketsData?.Created)?.format("DD MMM YYYY")}
+
+                    <span className={styles.splitterDot} />
+                    {conversationData?.data?.length} comments
+                    {currentTicketsData?.TicketClosedOn !== null && (
+                      <span className={styles.splitterDot} />
+                    )}
+                    {currentTicketsData?.TicketClosedOn !== null &&
+                      `closed on ${dayjs(
+                        currentTicketsData?.TicketClosedOn
+                      )?.format("DD MMM YYYY")}`}
+                  </div>
                 </div>
 
-                <div className={styles.ticketOneLine}>
-                  {currentTicketsData?.EmployeeName?.Title} raised this ticket
-                  on {dayjs(currentTicketsData?.Created)?.format("DD MMM YYYY HH:MM")}
-                  <span className={styles.splitterDot} />
-                  {conversationData?.data?.length} comments
-                  {currentTicketsData?.TicketClosedOn !== null && (
-                    <span className={styles.splitterDot} />
-                  )}
-                  {currentTicketsData?.TicketClosedOn !== null &&
-                    `closed on ${dayjs(
-                      currentTicketsData?.TicketClosedOn
-                    )?.format("DD MMM YYYY")}`}
-                </div>
+                {currentTicketsData?.Status !== "Closed" && isUserTagged ? (
+                  <CustomDropDown
+                    value={currentTicketsData?.Status}
+                    options={
+                      currentRole === "/user"
+                        ? [currentTicketsData?.Status, "Closed"]
+                        : TicketStatus
+                    }
+                    placeholder="Update status"
+                    noErrorMsg
+                    width={"180px"}
+                    highlightDropdown
+                    onChange={(value) => {
+                      console.log("value: ", value);
+                      togglePopupVisibility(
+                        setPopupController,
+                        initialPopupController[0],
+                        0,
+                        "open",
+                        "Confimation",
+                        value,
+                        `Are you sure want to change the ticket's status to "${value}"?`
+                      );
+                    }}
+                  />
+                ) : (
+                  <StatusPill size="MD" status={currentTicketsData?.Status} />
+                )}
               </div>
 
-              {currentTicketsData?.Status !== "Closed" ? (
-                <CustomDropDown
-                  value={currentTicketsData?.Status}
-                  options={TicketStatus}
-                  placeholder="Update status"
-                  noErrorMsg
-                  width={"180px"}
-                  highlightDropdown
-                  onChange={(value) => {
-                    console.log("value: ", value);
-                    togglePopupVisibility(
-                      setPopupController,
-                      initialPopupController[0],
-                      0,
-                      "open",
-                      "Confimation",
-                      value,
-                      `Are you sure want to change the ticket's status to "${value}"?`
-                    );
+              <div className={styles.headerDetailsLabel}>
+                <label
+                  onClick={() => {
+                    setToggles((prev: any) => ({
+                      ...prev,
+                      showDescription: !prev.showDescription,
+                    }));
                   }}
-                />
-              ) : (
-                <StatusPill size="MD" status={currentTicketsData?.Status} />
-              )}
+                >
+                  <ArrowRight
+                    sx={{
+                      color: "#adadad",
+                      fontSize: "22px",
+                      transition: "all .2s",
+                      transform: toggles?.showDescription
+                        ? `rotate(90deg)`
+                        : `rotate(0deg)`,
+                    }}
+                  />
+                  <span>Description</span>
+                </label>
+                <span
+                  style={{
+                    transition: "all .2s",
+                    height: toggles.showDescription ? `100%` : `0px`,
+                    overflow: "hidden",
+                  }}
+                >
+                  {currentTicketsData?.TicketDescription ?? "-"}
+                </span>
+              </div>
             </div>
             <div className={styles.ticketChats}>
               <div className={styles.heading}>Conversations</div>
@@ -316,7 +377,7 @@ const TicketView = (): JSX.Element => {
                             : ""
                         }
                         author={item?.Author?.Title}
-                        date={dayjs(item?.Created).format("DD MMM YYYY")}
+                        date={dayjs(item?.Created).format("DD MMM YYYY HH:mm")}
                         edited={item?.IsEdited}
                         content={item?.Comment}
                         avatarSrc={`/_layouts/15/userphoto.aspx?size=S&username=${item?.Author?.EMail}`}
@@ -355,8 +416,9 @@ const TicketView = (): JSX.Element => {
                       }}
                       placeHolder={"Enter Comments and @ to mention..."}
                       defaultValue={commentText.value}
-                      suggestionList={usersToTag}
+                      suggestionList={AllUsersData ?? []}
                       getMentionedEmails={(e: any) => {
+                        console.log("e: ", e);
                         setTaggedPerson((prev: any) => ({
                           ...prev,
                           results: e?.map((item: any) => item?.id),
@@ -389,7 +451,13 @@ const TicketView = (): JSX.Element => {
                           TicketDetailsId: currentTicketsData?.ID,
                           IsEdited: commentText.isEdited,
                         };
-                        await Promise.all([addComment(formData)])
+                        const alltaggedPersons =
+                          conversationData?.data?.flatMap((item: any) =>
+                            item?.TaggedPersonId?.map((ID: any) => ID)
+                          );
+                        await Promise.all([
+                          addComment(formData, alltaggedPersons),
+                        ])
                           .then(async (res: any) => {
                             setCommentText((prev: any) => ({
                               ...prev,
@@ -406,7 +474,6 @@ const TicketView = (): JSX.Element => {
                           .catch((err: any) => {
                             console.log("err: ", err);
                           });
-                        console.log("success");
                       }
                     }}
                     disabled={commentText.value?.trim() === ""}
@@ -425,7 +492,7 @@ const TicketView = (): JSX.Element => {
                   <span>{ticketNumber ?? "-"}</span>
                 </div>
 
-                <div className={styles.detailsLabel}>
+                {/* <div className={styles.detailsLabel}>
                   <label>Created at</label>
                   <span>
                     {dayjs(currentTicketsData?.Created).format("DD MMM YYYY") ??
@@ -440,7 +507,7 @@ const TicketView = (): JSX.Element => {
                       "DD MMM YYYY"
                     ) ?? "-"}
                   </span>
-                </div>
+                </div> */}
 
                 <div className={styles.detailsLabel}>
                   <label>Status</label>
@@ -464,15 +531,15 @@ const TicketView = (): JSX.Element => {
                   <span>{currentTicketsData?.TicketSource ?? "-"}</span>
                 </div>
 
-                <div className={styles.detailsLabel}>
-                  <label>Repeated ticket</label>
-                  <span>
-                    {currentTicketsData?.RepeatedTicket ? "Yes" : "No"}
-                  </span>
-                </div>
-
                 {currentTicketsData?.RepeatedTicket && (
                   <>
+                    <div className={styles.detailsLabel}>
+                      <label>Repeated ticket</label>
+                      <span>
+                        {currentTicketsData?.RepeatedTicket ? "Yes" : "No"}
+                      </span>
+                    </div>
+
                     <div className={styles.detailsLabel}>
                       <label>Repeated ticket from</label>
                       <span>{repeatedTicketNumber ?? "-"}</span>
@@ -489,10 +556,10 @@ const TicketView = (): JSX.Element => {
                   </>
                 )}
 
-                <div className={styles.detailsLabel}>
+                {/* <div className={styles.detailsLabel}>
                   <label>Ticket description</label>
                   <span>{currentTicketsData?.TicketDescription ?? "-"}</span>
-                </div>
+                </div> */}
 
                 <div className={styles.detailsLabel}>
                   <label>Last commented on</label>
@@ -508,23 +575,25 @@ const TicketView = (): JSX.Element => {
                 </div>
 
                 <div className={styles.detailsLabel}>
-                  <label>Attachment</label>
-                  <span>
-                    {currentAttachment?.[0] !== null &&
-                    currentAttachment?.[0] !== undefined ? (
-                      <div
-                        className={styles.fileName}
-                        onClick={() => {
-                          if (currentAttachment) {
-                            window.open(
-                              `${window.location.origin}${currentAttachment?.[0]?.ServerRelativeUrl}?web=1`
-                            );
-                          }
-                        }}
-                      >
-                        <img src={fileIcon} />
-                        <span>{currentAttachment?.[0]?.FileName}</span>
-                      </div>
+                  <label>Attachment(s)</label>
+                  <span className={styles.attachmentsWrapper}>
+                    {currentAttachment?.length > 0 ? (
+                      currentAttachment?.map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className={styles.fileName}
+                          onClick={() => {
+                            if (currentAttachment) {
+                              window.open(
+                                `${window.location.origin}${item?.ServerRelativeUrl}?web=1`
+                              );
+                            }
+                          }}
+                        >
+                          <img src={fileIcon} />
+                          <span>{item?.FileName}</span>
+                        </div>
+                      ))
                     ) : (
                       <div className={styles.fileName}>
                         <span>No attachment</span>

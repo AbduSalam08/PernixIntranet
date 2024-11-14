@@ -103,7 +103,7 @@ const prepareRecords = async (res: any): Promise<IQuoteDatas[]> => {
   try {
     preparedArray = await Promise.all(
       res?.map(async (val: any) => {
-        let arrGetAttach: IAttachDetails[] = [];
+        const arrGetAttach: IAttachDetails[] = [];
 
         await val?.AttachmentFiles?.forEach((attach: any) => {
           arrGetAttach.push({

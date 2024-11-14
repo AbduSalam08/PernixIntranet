@@ -3,9 +3,15 @@
 import { sp } from "@pnp/sp";
 import { toast } from "react-toastify";
 import { CONFIG } from "../../config/config";
-import { generateTicketNumber } from "../../utils/commonUtils";
+import {
+  generateTicketNumber,
+  getLastTicketNumber,
+} from "../../utils/commonUtils";
 import SpServices from "../SPServices/SpServices";
 import dayjs from "dayjs";
+import { setAllUsersData } from "../../redux/features/AllUsersDataSlice";
+
+// const fetchLastTicketNumber = async (): Promise<string> => {
 
 const fetchLastTicketNumber = async (): Promise<string> => {
   try {
@@ -14,19 +20,35 @@ const fetchLastTicketNumber = async (): Promise<string> => {
       .items.select("*")
       .get();
 
-    const lastTicketID = Math.max(
-      0,
-      ...(res ?? [])
-        .map((item: any) => item?.ID)
-        .filter((id: number | undefined) => id !== undefined && id !== null)
-    );
+    const lastTicketID = getLastTicketNumber(res);
 
+    // Pass the incremented ticket number to the generator function
     return generateTicketNumber(lastTicketID + 1);
   } catch (error) {
     console.error("Error fetching tickets:", error);
     return "";
   }
 };
+
+//   try {
+//     const res = await sp.web.lists
+//       .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+//       .items.select("*")
+//       .get();
+
+//     const lastTicketID = Math.max(
+//       0,
+//       ...(res ?? [])
+//         .map((item: any) => item?.ID)
+//         .filter((id: number | undefined) => id !== undefined && id !== null)
+//     );
+
+//     return generateTicketNumber(lastTicketID + 1);
+//   } catch (error) {
+//     console.error("Error fetching tickets:", error);
+//     return "";
+//   }
+// };
 
 export const extractPayload = async (
   formData: any,
@@ -59,17 +81,51 @@ export const extractPayload = async (
   }, {});
 };
 
-const addAttachmentToTicket = async (
+// const addAttachmentToTicket = async (
+//   ticketId: number,
+//   attachment: File,
+//   prevToastID: any
+// ): Promise<void> => {
+//   const toastId = prevToastID || toast.loading("Creating ticket...");
+//   try {
+//     await sp.web.lists
+//       .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+//       .items.getById(ticketId)
+//       .attachmentFiles.add(attachment.name, attachment);
+
+//     toast.update(toastId, {
+//       render: "Ticket added successfully!",
+//       type: "success",
+//       isLoading: false,
+//       autoClose: 5000,
+//       hideProgressBar: false,
+//     });
+//   } catch (error) {
+//     console.error("Error adding attachment:", error);
+//     toast.update(toastId, {
+//       render: "Error adding attachment. Please try again.",
+//       type: "error",
+//       isLoading: false,
+//       autoClose: 5000,
+//       hideProgressBar: false,
+//     });
+//     throw error;
+//   }
+// };
+
+const addAttachmentsToTicket = async (
   ticketId: number,
-  attachment: File,
+  attachments: File[],
   prevToastID: any
 ): Promise<void> => {
   const toastId = prevToastID || toast.loading("Creating ticket...");
   try {
-    await sp.web.lists
-      .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-      .items.getById(ticketId)
-      .attachmentFiles.add(attachment.name, attachment);
+    for (const attachment of attachments) {
+      await sp.web.lists
+        .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+        .items.getById(ticketId)
+        .attachmentFiles.add(attachment.name, attachment);
+    }
 
     toast.update(toastId, {
       render: "Ticket added successfully!",
@@ -79,9 +135,9 @@ const addAttachmentToTicket = async (
       hideProgressBar: false,
     });
   } catch (error) {
-    console.error("Error adding attachment:", error);
+    console.error("Error adding attachments:", error);
     toast.update(toastId, {
-      render: "Error adding attachment. Please try again.",
+      render: "Error adding attachments. Please try again.",
       type: "error",
       isLoading: false,
       autoClose: 5000,
@@ -127,12 +183,62 @@ export const copyAttachment = async (
   }
 };
 
+// export const addNewTicket = async (
+//   formData: any,
+//   excludeKeys: string[],
+//   repeatTicket?: boolean
+// ): Promise<any> => {
+//   console.log("formData: ", formData);
+//   const payload = await extractPayload(formData, excludeKeys, false);
+//   const extraPayload = {
+//     TicketClosedOn: payload?.Status === "Closed" ? dayjs(new Date()) : null,
+//   };
+
+//   const toastId = toast.loading("Creating ticket...");
+//   try {
+//     const response = await sp.web.lists
+//       .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+//       .items.add({ ...payload, ...extraPayload });
+
+//     const ticketId = response.data.Id;
+
+//     if (formData?.Attachment?.value) {
+//       await s(ticketId, formData.Attachment.value, toastId);
+//     } else {
+//       toast.update(toastId, {
+//         render: "Ticket added successfully!",
+//         type: "success",
+//         isLoading: false,
+//         autoClose: 5000,
+//         hideProgressBar: false,
+//       });
+//     }
+
+//     if (repeatTicket) {
+//       await copyAttachment(
+//         payload?.RepeatedTicketSourceId,
+//         ticketId,
+//         CONFIG.ListNames.HelpDesk_AllTickets
+//       );
+//     }
+//   } catch (error) {
+//     console.error("Error adding ticket:", error);
+//     toast.update(toastId, {
+//       render: "Error adding ticket. Please try again.",
+//       type: "error",
+//       isLoading: false,
+//       autoClose: 5000,
+//       hideProgressBar: false,
+//     });
+//     throw error;
+//   }
+// };
+
 export const addNewTicket = async (
   formData: any,
   excludeKeys: string[],
   repeatTicket?: boolean
 ): Promise<any> => {
-  console.log("formData: ", formData);
   const payload = await extractPayload(formData, excludeKeys, false);
   const extraPayload = {
     TicketClosedOn: payload?.Status === "Closed" ? dayjs(new Date()) : null,
@@ -146,8 +252,15 @@ export const addNewTicket = async (
 
     const ticketId = response.data.Id;
 
-    if (formData?.Attachment?.value) {
-      await addAttachmentToTicket(ticketId, formData.Attachment.value, toastId);
+    if (
+      formData?.Attachment?.value &&
+      Array.isArray(formData.Attachment.value)
+    ) {
+      await addAttachmentsToTicket(
+        ticketId,
+        formData.Attachment.value,
+        toastId
+      );
     } else {
       toast.update(toastId, {
         render: "Ticket added successfully!",
@@ -178,14 +291,128 @@ export const addNewTicket = async (
   }
 };
 
+// export const updateTicket = async (
+//   ticketID: any,
+//   formData: any,
+//   excludeKeys: any
+// ): Promise<any> => {
+//   console.log("formData: ", formData);
+//   const payload = await extractPayload(formData, excludeKeys, true);
+//   console.log("payload: ", payload);
+//   const extraPayload = {
+//     TicketClosedOn: payload?.Status === "Closed" ? dayjs(new Date()) : null,
+//   };
+
+//   const toastId = toast.loading("Updating ticket...");
+//   try {
+//     await SpServices.SPUpdateItem({
+//       Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+//       ID: ticketID,
+//       RequestJSON: { ...payload, ...extraPayload },
+//     })
+//       .then(async (res: any) => {
+//         console.log("res: ", res);
+
+//         // updation of attachment
+//         const attachments = await sp.web.lists
+//           .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+//           .items.getById(ticketID)
+//           .attachmentFiles();
+
+//         if (formData?.Attachment?.value !== null) {
+//           try {
+//             // Check if an attachment was provided and if it's different from the existing one
+//             if (formData?.Attachment?.value?.name) {
+//               if (
+//                 attachments.length === 0 ||
+//                 (attachments.length > 0 &&
+//                   attachments[0]?.FileName !==
+//                     formData?.Attachment?.value?.name)
+//               ) {
+//                 // Delete existing attachments if there are any
+//                 if (attachments.length !== 0) {
+//                   await SpServices.SPDeleteAttachments({
+//                     ListName: CONFIG.ListNames.HelpDesk_AllTickets,
+//                     ListID: ticketID,
+//                     AttachmentName: attachments[0]?.FileName,
+//                   });
+//                 }
+
+//                 // Add the new attachment if a valid one is provided
+//                 if (formData?.Attachment.value?.type) {
+//                   await sp.web.lists
+//                     .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+//                     .items.getById(ticketID)
+//                     .attachmentFiles.add(
+//                       formData?.Attachment.value.name,
+//                       formData?.Attachment.value
+//                     );
+
+//                   console.log("Attachment updated successfully.");
+//                 }
+//               } else {
+//                 console.log("No changes detected in the attachment.");
+//               }
+//             }
+//           } catch (err) {
+//             console.error("Error handling attachments: ", err);
+//           }
+//         } else {
+//           // Handle case when `Attachment` is null (indicating a removal)
+//           if (attachments.length !== 0) {
+//             try {
+//               await SpServices.SPDeleteAttachments({
+//                 ListName: CONFIG.ListNames.HelpDesk_AllTickets,
+//                 ListID: ticketID,
+//                 AttachmentName: attachments[0]?.FileName,
+//               });
+
+//               console.log("Attachment removed!");
+//             } catch (err) {
+//               console.error("Error removing attachments: ", err);
+//             }
+//           } else {
+//             console.log("No attachments to remove.");
+//           }
+//         }
+//       })
+//       .catch((err: any) => {
+//         console.log("err: ", err);
+//         toast.update(toastId, {
+//           render: "Error while updating ticket. Please try again.",
+//           type: "error",
+//           isLoading: false,
+//           autoClose: 5000,
+//           hideProgressBar: false,
+//         });
+//       });
+
+//     toast.update(toastId, {
+//       render: "Ticket updated!",
+//       type: "success",
+//       isLoading: false,
+//       autoClose: 5000,
+//       hideProgressBar: false,
+//     });
+//   } catch (error) {
+//     console.error("Error while updating ticket:", error);
+//     toast.update(toastId, {
+//       render: "Error while updating ticket. Please try again.",
+//       type: "error",
+//       isLoading: false,
+//       autoClose: 5000,
+//       hideProgressBar: false,
+//     });
+//     throw error;
+//   }
+// };
+
 export const updateTicket = async (
   ticketID: any,
   formData: any,
   excludeKeys: any
 ): Promise<any> => {
-  console.log("formData: ", formData);
   const payload = await extractPayload(formData, excludeKeys, true);
-  console.log("payload: ", payload);
   const extraPayload = {
     TicketClosedOn: payload?.Status === "Closed" ? dayjs(new Date()) : null,
   };
@@ -198,70 +425,62 @@ export const updateTicket = async (
       RequestJSON: { ...payload, ...extraPayload },
     })
       .then(async (res: any) => {
-        console.log("res: ", res);
-
-        // updation of attachment
         const attachments = await sp.web.lists
           .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
           .items.getById(ticketID)
           .attachmentFiles();
 
-        if (formData?.Attachment?.value !== null) {
-          try {
-            // Check if an attachment was provided and if it's different from the existing one
-            if (formData?.Attachment?.value?.name) {
-              if (
-                attachments.length === 0 ||
-                (attachments.length > 0 &&
-                  attachments[0]?.FileName !==
-                    formData?.Attachment?.value?.name)
-              ) {
-                // Delete existing attachments if there are any
-                if (attachments.length !== 0) {
-                  await SpServices.SPDeleteAttachments({
-                    ListName: CONFIG.ListNames.HelpDesk_AllTickets,
-                    ListID: ticketID,
-                    AttachmentName: attachments[0]?.FileName,
-                  });
-                }
+        if (
+          formData?.Attachment?.value &&
+          Array.isArray(formData.Attachment.value)
+        ) {
+          // Add new attachments and remove outdated ones if necessary
+          const newAttachments = formData.Attachment.value;
 
-                // Add the new attachment if a valid one is provided
-                if (formData?.Attachment.value?.type) {
-                  await sp.web.lists
-                    .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-                    .items.getById(ticketID)
-                    .attachmentFiles.add(
-                      formData?.Attachment.value.name,
-                      formData?.Attachment.value
-                    );
-
-                  console.log("Attachment updated successfully.");
-                }
-              } else {
-                console.log("No changes detected in the attachment.");
-              }
-            }
-          } catch (err) {
-            console.error("Error handling attachments: ", err);
-          }
-        } else {
-          // Handle case when `Attachment` is null (indicating a removal)
-          if (attachments.length !== 0) {
-            try {
+          // Delete existing attachments if they don't match any in `newAttachments`
+          for (const existing of attachments) {
+            if (
+              !newAttachments.some(
+                (file: any) => file.name === existing.FileName
+              )
+            ) {
               await SpServices.SPDeleteAttachments({
                 ListName: CONFIG.ListNames.HelpDesk_AllTickets,
                 ListID: ticketID,
-                AttachmentName: attachments[0]?.FileName,
+                AttachmentName: existing.FileName,
               });
-
-              console.log("Attachment removed!");
-            } catch (err) {
-              console.error("Error removing attachments: ", err);
             }
-          } else {
-            console.log("No attachments to remove.");
+          }
+
+          // Add each new attachment if not already present
+          for (const file of newAttachments) {
+            if (
+              !attachments.some((existing) => existing.FileName === file.name)
+            ) {
+              await sp.web.lists
+                .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
+                .items.getById(ticketID)
+                .attachmentFiles.add(file.name, file);
+            }
+          }
+        } else if (attachments.length !== 0) {
+          // Handle case when `Attachment` is null (indicating a removal)
+          for (const existing of attachments) {
+            await SpServices.SPDeleteAttachments({
+              ListName: CONFIG.ListNames.HelpDesk_AllTickets,
+              ListID: ticketID,
+              AttachmentName: existing.FileName,
+            });
           }
         }
+
+        toast.update(toastId, {
+          render: "Ticket updated!",
+          type: "success",
+          isLoading: false,
+          autoClose: 5000,
+          hideProgressBar: false,
+        });
       })
       .catch((err: any) => {
         console.log("err: ", err);
@@ -273,14 +492,6 @@ export const updateTicket = async (
           hideProgressBar: false,
         });
       });
-
-    toast.update(toastId, {
-      render: "Ticket updated!",
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
   } catch (error) {
     console.error("Error while updating ticket:", error);
     toast.update(toastId, {
@@ -292,4 +503,23 @@ export const updateTicket = async (
     });
     throw error;
   }
+};
+
+export const getAllUsersList = async (dispatch: any): Promise<any> => {
+  await SpServices.getAllUsers()
+    .then((res: any) => {
+      console.log("res: ", res);
+      const allUsers: any = res
+        ?.map((user: any) => ({
+          id: user?.Id,
+          value: user?.Title,
+          email: user?.Email,
+        }))
+        ?.filter((item: any) => item?.Email?.trim() !== "");
+      console.log("allUsers: ", allUsers);
+      dispatch(setAllUsersData(allUsers));
+    })
+    .catch((err: any) => {
+      console.log("err: ", err);
+    });
 };
