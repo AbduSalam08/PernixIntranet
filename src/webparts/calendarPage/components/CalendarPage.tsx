@@ -28,6 +28,7 @@ import FloatingLabelTextarea from "../../../components/common/CustomInputFields/
 import Popup from "../../../components/common/Popups/Popup";
 import dayjs from "dayjs";
 import { RoleAuth } from "../../../services/CommonServices";
+import CustomTimePicker from "../../../components/common/CustomInputFields/CustomTimePicker";
 interface IEvent {
   title: string;
   description: string;
@@ -40,10 +41,12 @@ interface SearchField {
   selectedDate: Date | any;
   allSearch: string;
 }
+
 let objFilter: SearchField = {
   selectedDate: null,
   allSearch: "",
 };
+
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 let isAdmin: boolean = false;
 
@@ -60,6 +63,7 @@ const CalendarPage = (props: any): JSX.Element => {
     selectedDate: null,
     allSearch: "",
   });
+
   const dispatch = useDispatch();
 
   const calenderIntranetData: any = useSelector((state: any) => {
@@ -158,23 +162,17 @@ const CalendarPage = (props: any): JSX.Element => {
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
     },
-    // EndDate: {
-    //   value: "",
-    //   isValid: true,
-    //   errorMsg: "Invalid input",
-    //   validationRule: { required: true, type: "date" },
-    // },
     StartTime: {
       value: "",
       isValid: true,
       errorMsg: "StartTime is required",
-      validationRule: { required: true, type: "number" },
+      validationRule: { required: true, type: "string" },
     },
     EndTime: {
-      value: null,
+      value: "",
       isValid: true,
       errorMsg: "EndTime is required",
-      validationRule: { required: true, type: "number" },
+      validationRule: { required: true, type: "string" },
     },
     Description: {
       value: "",
@@ -190,17 +188,55 @@ const CalendarPage = (props: any): JSX.Element => {
     isValid: boolean,
     errorMsg: string = ""
   ): void => {
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [field]: {
-        ...prevData[field],
-        value: value,
-        isValid,
-        errorMsg: isValid ? "" : errorMsg,
-      },
-    }));
-
-    console.log(formData, "formData");
+    if (field === "StartDate") {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+        ["StartTime"]: {
+          ...prevData["StartTime"],
+          value: null,
+          isValid: true,
+          errorMsg: "",
+        },
+        ["EndTime"]: {
+          ...prevData["EndTime"],
+          value: null,
+          isValid: true,
+          errorMsg: "",
+        },
+      }));
+    } else if (field === "StartTime") {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+        ["EndTime"]: {
+          ...prevData["EndTime"],
+          value: null,
+          isValid: true,
+          errorMsg: "",
+        },
+      }));
+    } else {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+      }));
+    }
   };
 
   const handleSubmit = async (): Promise<any> => {
@@ -209,7 +245,7 @@ const CalendarPage = (props: any): JSX.Element => {
     // Validate each field and update the state with error messages
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
-      const { isValid, errorMsg } = validateField(
+      let { isValid, errorMsg } = validateField(
         key,
         fieldData.value,
         fieldData?.validationRule
@@ -217,6 +253,17 @@ const CalendarPage = (props: any): JSX.Element => {
 
       if (!isValid) {
         hasErrors = true;
+      } else if (key === "EndTime") {
+        isValid =
+          Number(
+            formData?.StartTime?.value?.split(":")[0] +
+              formData?.StartTime?.value?.split(":")[1]
+          ) <
+          Number(
+            fieldData?.value?.split(":")[0] + fieldData?.value?.split(":")[1]
+          );
+        hasErrors = !isValid;
+        errorMsg = !isValid ? "Please select a valid time." : "";
       }
 
       return {
@@ -231,123 +278,19 @@ const CalendarPage = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      (await selectvalue.isEdit)
-        ? updateOutlookEvent(selectvalue.id, formData, setPopupController, 1)
-        : createOutlookEvent(formData, setPopupController, 0, dispatch);
+      selectvalue.isEdit
+        ? await updateOutlookEvent(
+            selectvalue.id,
+            formData,
+            setPopupController,
+            1
+          )
+        : await createOutlookEvent(formData, setPopupController, 0, dispatch);
     } else {
       console.log("Form contains errors");
     }
   };
   const popupInputs: any[] = [
-    // [
-    //   <div key={1}>
-    //     <CustomInput
-    //       value={formData.Title.value}
-    //       placeholder="Enter title"
-    //       secWidth="100%"
-    //       isValid={formData.Title.isValid}
-    //       errorMsg={formData.Title.errorMsg}
-    //       onChange={(e) => {
-    //         const value = e;
-    //         const { isValid, errorMsg } = validateField(
-    //           "Title",
-    //           value,
-    //           formData.Title.validationRule
-    //         );
-    //         handleInputChange("Title", value, isValid, errorMsg);
-    //       }}
-    //     />
-    //     <div
-    //       style={{
-    //         display: "flex",
-    //         gap: "20px",
-    //         alignItems: "center",
-    //         margin: "20px 0px",
-    //       }}
-    //     >
-    //       <CustomDateInput
-    //         value={formData.StartDate.value}
-    //         label="Start date"
-    //         error={!formData.StartDate.isValid}
-    //         errorMsg={formData.StartDate.errorMsg}
-    //         onChange={(date: any) => {
-    //           const { isValid, errorMsg } = validateField(
-    //             "StartDate",
-    //             date,
-    //             formData.StartDate.validationRule
-    //           );
-    //           handleInputChange("StartDate", date, isValid, errorMsg);
-    //         }}
-    //       />
-
-    //       {/* <CustomDateInput
-    //       value={formData.EndDate.value}
-    //       label="End date"
-    //       error={!formData.EndDate.isValid}
-    //       errorMsg={formData.EndDate.errorMsg}
-    //       onChange={(date: any) => {
-    //         const { isValid, errorMsg } = validateField("EndDate", date, {
-    //           required: true,
-    //           type: "date",
-    //         });
-    //         handleInputChange("EndDate", date, isValid, errorMsg);
-    //       }}
-    //     /> */}
-
-    //       <CustomInput
-    //         value={formData.StartTime.value}
-    //         placeholder="Enter start time"
-    //         isValid={formData.StartTime.isValid}
-    //         errorMsg={formData.StartTime.errorMsg}
-    //         type="number"
-    //         onChange={(e) => {
-    //           const value = e.toString();
-    //           const { isValid, errorMsg } = validateField(
-    //             "StartTime",
-    //             value,
-    //             formData.StartTime.validationRule
-    //           );
-    //           handleInputChange("StartTime", value, isValid, errorMsg);
-    //         }}
-    //       />
-
-    //       <CustomInput
-    //         value={formData.EndTime.value}
-    //         placeholder="Enter end time"
-    //         type="number"
-    //         isValid={formData.EndTime.isValid}
-    //         errorMsg={formData.EndTime.errorMsg}
-    //         onChange={(e) => {
-    //           const value = e.toString();
-    //           const { isValid, errorMsg } = validateField(
-    //             "EndTime",
-    //             value,
-    //             formData.EndTime.validationRule
-    //           );
-    //           handleInputChange("EndTime", value, isValid, errorMsg);
-    //         }}
-    //       />
-    //     </div>
-
-    //     <FloatingLabelTextarea
-    //       value={formData.Description.value}
-    //       placeholder="Description"
-    //       rows={5}
-    //       isValid={formData.Description.isValid}
-    //       errorMsg={formData.Description.errorMsg}
-    //       onChange={(e: any) => {
-    //         const value = e;
-    //         const { isValid, errorMsg } = validateField(
-    //           "Description",
-    //           value,
-    //           formData.Description.validationRule
-    //         );
-    //         handleInputChange("Description", value, isValid, errorMsg);
-    //       }}
-    //     />
-    //   </div>,
-    // ],
-
     [
       <div key={1}>
         <CustomInput
@@ -391,15 +334,11 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           />
 
-          <CustomDateInput
+          <CustomTimePicker
+            disabled={!formData.StartDate.value}
+            placeholder="Select start time"
             value={formData.StartTime.value}
-            disabledInput={!formData.StartDate.value}
-            timeOnly
-            isDateController={true}
-            minimumDate={new Date()}
-            showIcon={false}
-            label="Start Time"
-            error={!formData.StartTime.isValid}
+            isValid={formData.StartTime.isValid}
             errorMsg={formData.StartTime.errorMsg}
             onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
@@ -411,21 +350,11 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           />
 
-          <CustomDateInput
+          <CustomTimePicker
+            disabled={!formData.StartTime.value}
+            placeholder="Select end time"
             value={formData.EndTime.value}
-            disabledInput={
-              formData.StartDate.value
-                ? formData.StartTime.value
-                  ? false
-                  : true
-                : true
-            }
-            timeOnly
-            isDateController={true}
-            minimumDate={new Date()}
-            showIcon={false}
-            label="End Time"
-            error={!formData.EndTime.isValid}
+            isValid={formData.EndTime.isValid}
             errorMsg={formData.EndTime.errorMsg}
             onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
@@ -456,117 +385,8 @@ const CalendarPage = (props: any): JSX.Element => {
         />
       </div>,
     ],
-    // [
-    //   <div key={2}>
-    //     <CustomInput
-    //       value={formData.Title.value}
-    //       placeholder="Enter title"
-    //       secWidth="100%"
-    //       isValid={formData.Title.isValid}
-    //       errorMsg={formData.Title.errorMsg}
-    //       onChange={(e) => {
-    //         const value = e;
-    //         const { isValid, errorMsg } = validateField(
-    //           "Title",
-    //           value,
-    //           formData.Title.validationRule
-    //         );
-    //         handleInputChange("Title", value, isValid, errorMsg);
-    //       }}
-    //     />
-    //     <div
-    //       style={{
-    //         display: "flex",
-    //         gap: "20px",
-    //         alignItems: "center",
-    //         margin: "20px 0px",
-    //       }}
-    //     >
-    //       <CustomDateInput
-    //         value={formData.StartDate.value}
-    //         label="Start date"
-    //         error={!formData.StartDate.isValid}
-    //         errorMsg={formData.StartDate.errorMsg}
-    //         onChange={(date: any) => {
-    //           const { isValid, errorMsg } = validateField(
-    //             "StartDate",
-    //             date,
-    //             formData.StartDate.validationRule
-    //           );
-    //           handleInputChange("StartDate", date, isValid, errorMsg);
-    //         }}
-    //       />
-
-    //       {/* <CustomDateInput
-    //       value={formData.EndDate.value}
-    //       label="End date"
-    //       error={!formData.EndDate.isValid}
-    //       errorMsg={formData.EndDate.errorMsg}
-    //       onChange={(date: any) => {
-    //         const { isValid, errorMsg } = validateField("EndDate", date, {
-    //           required: true,
-    //           type: "date",
-    //         });
-    //         handleInputChange("EndDate", date, isValid, errorMsg);
-    //       }}
-    //     /> */}
-
-    //       <CustomInput
-    //         value={formData.StartTime.value}
-    //         placeholder="Enter start time"
-    //         isValid={formData.StartTime.isValid}
-    //         errorMsg={formData.StartTime.errorMsg}
-    //         type="number"
-    //         onChange={(e) => {
-    //           const value = e.toString();
-    //           const { isValid, errorMsg } = validateField(
-    //             "StartTime",
-    //             value,
-    //             formData.StartTime.validationRule
-    //           );
-    //           handleInputChange("StartTime", value, isValid, errorMsg);
-    //         }}
-    //       />
-
-    //       <CustomInput
-    //         value={formData.EndTime.value}
-    //         placeholder="Enter end time"
-    //         type="number"
-    //         isValid={formData.EndTime.isValid}
-    //         errorMsg={formData.EndTime.errorMsg}
-    //         onChange={(e) => {
-    //           const value = e.toString();
-    //           const { isValid, errorMsg } = validateField(
-    //             "EndTime",
-    //             value,
-    //             formData.EndTime.validationRule
-    //           );
-    //           handleInputChange("EndTime", value, isValid, errorMsg);
-    //         }}
-    //       />
-    //     </div>
-
-    //     <FloatingLabelTextarea
-    //       value={formData.Description.value}
-    //       placeholder="Description"
-    //       rows={5}
-    //       isValid={formData.Description.isValid}
-    //       errorMsg={formData.Description.errorMsg}
-    //       onChange={(e: any) => {
-    //         const value = e;
-    //         const { isValid, errorMsg } = validateField(
-    //           "Description",
-    //           value,
-    //           formData.Description.validationRule
-    //         );
-    //         handleInputChange("Description", value, isValid, errorMsg);
-    //       }}
-    //     />
-    //   </div>,
-    // ],
-
     [
-      <div key={1}>
+      <div key={2}>
         <CustomInput
           value={formData.Title.value}
           placeholder="Enter title"
@@ -608,15 +428,11 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           />
 
-          <CustomDateInput
+          <CustomTimePicker
+            disabled={!formData.StartDate.value}
+            placeholder="Select start time"
             value={formData.StartTime.value}
-            disabledInput={!formData.StartDate.value}
-            timeOnly
-            isDateController={true}
-            minimumDate={new Date()}
-            showIcon={false}
-            label="Start Time"
-            error={!formData.StartTime.isValid}
+            isValid={formData.StartTime.isValid}
             errorMsg={formData.StartTime.errorMsg}
             onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
@@ -628,21 +444,11 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
           />
 
-          <CustomDateInput
+          <CustomTimePicker
+            disabled={!formData.StartTime.value}
+            placeholder="Select end time"
             value={formData.EndTime.value}
-            disabledInput={
-              formData.StartDate.value
-                ? formData.StartTime.value
-                  ? false
-                  : true
-                : true
-            }
-            timeOnly
-            isDateController={true}
-            minimumDate={new Date()}
-            showIcon={false}
-            label="End Time"
-            error={!formData.EndTime.isValid}
+            isValid={formData.EndTime.isValid}
             errorMsg={formData.EndTime.errorMsg}
             onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
@@ -716,7 +522,6 @@ const CalendarPage = (props: any): JSX.Element => {
         },
       },
     ],
-
     [
       {
         text: "Cancel",
@@ -746,7 +551,6 @@ const CalendarPage = (props: any): JSX.Element => {
         },
       },
     ],
-
     [
       {
         text: "Cancel",
@@ -831,7 +635,6 @@ const CalendarPage = (props: any): JSX.Element => {
     let filteredResults = [...val];
 
     // Apply common text search for title, status, and description
-
     if (objFilter.allSearch) {
       const searchValue = objFilter.allSearch.trimStart().toLowerCase();
       filteredResults = filteredResults.filter(
@@ -867,8 +670,14 @@ const CalendarPage = (props: any): JSX.Element => {
   };
 
   const handleEdit = (item: any): any => {
-    // const startTime = item?.start.split("T")[1].split(":")[0];
-    // const endTime = item?.end.split("T")[1].split(":")[0];
+    // setSelectTimeData({
+    //   startTime: `${moment(item?.start).format("HH")}:${moment(
+    //     item?.start
+    //   ).format("mm")}`,
+    //   endTime: `${moment(item?.end).format("HH")}:${moment(item?.end).format(
+    //     "mm"
+    //   )}`,
+    // });
     setFormData({
       Title: {
         ...formData.Title,
@@ -883,14 +692,21 @@ const CalendarPage = (props: any): JSX.Element => {
       StartTime: {
         ...formData.StartTime,
         isValid: true,
-        value: new Date(item.start) || "",
+        value: item?.start
+          ? `${moment(item?.start).format("HH")}:${moment(item?.start).format(
+              "mm"
+            )}`
+          : "",
       },
       EndTime: {
         ...formData.EndTime,
         isValid: true,
-        value: new Date(item.end) || "",
+        value: item?.end
+          ? `${moment(item?.end).format("HH")}:${moment(item?.end).format(
+              "mm"
+            )}`
+          : "",
       },
-
       Description: {
         ...formData.Description,
         isValid: true,
@@ -918,7 +734,6 @@ const CalendarPage = (props: any): JSX.Element => {
   };
   useEffect(() => {
     getEvents(dispatch, "viewall");
-
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
       { highPriorityGroups: [CONFIG.SPGroupName.Calendar_Admin] },
@@ -928,7 +743,7 @@ const CalendarPage = (props: any): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    onLoadingFUN(CONFIG.TabsName[0]);
+    onLoadingFUN(selectedTab ? selectedTab : CONFIG.TabsName[0]);
   }, [calenderIntranetData]);
 
   return (
@@ -962,16 +777,6 @@ const CalendarPage = (props: any): JSX.Element => {
               handleSearch([...calendardata]);
             }}
           />
-          {/* <InputText
-            value={searchField.allSearch}
-            style={{ width: "150px" }}
-            placeholder="Search"
-            onChange={(e) => {
-              objFilter.allSearch = e.target.value;
-              setSearchField({ ...searchField, allSearch: e.target.value });
-              handleSearch([...shownewsData]);
-            }}
-          /> */}
           <CustomDateInput
             label="Select date"
             placeHolder="Date"
@@ -1000,6 +805,7 @@ const CalendarPage = (props: any): JSX.Element => {
             }}
             className={styles.addNewbtn}
             onClick={() => {
+              setSelectvalue({ ...selectvalue, id: null, isEdit: false });
               resetFormData(formData, setFormData);
               setFormData({
                 Title: {
@@ -1014,23 +820,17 @@ const CalendarPage = (props: any): JSX.Element => {
                   errorMsg: "Invalid input",
                   validationRule: { required: true, type: "date" },
                 },
-                // EndDate: {
-                //   value: "",
-                //   isValid: true,
-                //   errorMsg: "Invalid input",
-                //   validationRule: { required: true, type: "date" },
-                // },
                 StartTime: {
                   value: "",
                   isValid: true,
                   errorMsg: "StartTime is required",
-                  validationRule: { required: true, type: "number" },
+                  validationRule: { required: true, type: "string" },
                 },
                 EndTime: {
-                  value: null,
+                  value: "",
                   isValid: true,
                   errorMsg: "EndTime is required",
-                  validationRule: { required: true, type: "number" },
+                  validationRule: { required: true, type: "string" },
                 },
                 Description: {
                   value: "",
@@ -1039,17 +839,12 @@ const CalendarPage = (props: any): JSX.Element => {
                   validationRule: { required: true, type: "string" },
                 },
               });
-
-              // setisDelete(false);
-              // setIsEdit(false);
-              // setID(null);
               togglePopupVisibility(
                 setPopupController,
                 initialPopupController[0],
                 0,
                 "open"
               );
-              debugger;
             }}
           >
             <i
@@ -1121,7 +916,7 @@ const CalendarPage = (props: any): JSX.Element => {
               fontFamily: "osMedium, sans-serif",
             }}
           >
-            No events found.
+            No events found!
           </div>
         ) : (
           <div className={styles.eventWrapper}>
@@ -1147,21 +942,22 @@ const CalendarPage = (props: any): JSX.Element => {
 
                 {isAdmin && (
                   <div className={styles.icons}>
-                    <i
-                      onClick={() => handleEdit(val)}
-                      style={{ color: "#adadad", fontSize: "1.2rem" }}
-                      className="pi pi-pen-to-square
-
-"
-                    />
+                    {selectedTab !== CONFIG.TabsName[2] ? (
+                      <i
+                        onClick={() => {
+                          handleEdit(val);
+                        }}
+                        style={{ color: "#adadad", fontSize: "1.2rem" }}
+                        className="pi pi-pen-to-square"
+                      />
+                    ) : (
+                      ""
+                    )}
                     <i
                       onClick={() => handleDelete(val)}
                       style={{ color: "red", fontSize: "1.2rem" }}
-                      className="pi pi-trash
-
-
-"
-                    />{" "}
+                      className="pi pi-trash"
+                    />
                   </div>
                 )}
               </div>
@@ -1182,13 +978,13 @@ const CalendarPage = (props: any): JSX.Element => {
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(formData, setFormData);
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               index,
               "close"
             );
-            resetFormData(formData, setFormData);
 
             if (popupData?.isLoading?.success) {
               getEvents(dispatch);

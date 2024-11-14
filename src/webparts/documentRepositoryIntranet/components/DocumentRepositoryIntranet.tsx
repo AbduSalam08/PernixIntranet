@@ -141,13 +141,14 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
       masterRes?.filter(
         (val: any) =>
           val.FileSystemObjectType === 1 &&
-          `${CONFIG.fileFlowPath}/${val.FileLeafRef}` === val.FileRef
+          `${CONFIG.fileFlowPath}/${val.FileLeafRef}` === val.FileRef &&
+          val.IsActive
       )
     );
 
     masterDocDatas = await Promise.all(
       filMasterFolder?.map(async (val: any) => {
-        let masObjAttach: IAttachObj = {
+        const masObjAttach: IAttachObj = {
           isSubFiles: await curItemDatasFilter(val.FileRef),
           name: val?.FileLeafRef,
           content: [],
@@ -158,8 +159,21 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
         return {
           ID: val?.ID || null,
           Content: masObjAttach,
-          IsDelete: false,
+          Priority: val?.Priority || "",
+          IsActive: val?.IsActive || false,
         };
+      })
+    );
+
+    await Promise.all(
+      masterDocDatas?.sort((a: IDocRepository, b: IDocRepository) => {
+        const priorityComparison = Number(a?.Priority) - Number(b?.Priority);
+
+        if (priorityComparison === 0) {
+          return a?.Content?.name.localeCompare(b?.Content?.name);
+        }
+
+        return priorityComparison;
       })
     );
 
@@ -172,7 +186,13 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
     folderPath: string = CONFIG.fileFlowPath,
     idx: number
   ): Promise<void> => {
-    await addDocRepository(data, folderPath, setPopupController, idx);
+    await addDocRepository(
+      data,
+      folderPath,
+      setPopupController,
+      idx,
+      "master_folder"
+    );
 
     await getDocRepository().then(async (val: any[]) => {
       masterRes = [...val];
@@ -268,7 +288,7 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
             accept="application/*"
             placeholder="Click to upload a file"
             multiple
-            value={formData?.Content?.value?.name || null}
+            value={formData?.Content?.value ?? []}
             onFileSelect={(e: any) => {
               const value: any = e;
               const { isValid, errorMsg } = validateField(
@@ -368,6 +388,7 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
         <>
           <SectionHeaderIntranet
             label="Document Repository"
+            title="Create a new document"
             removeAdd={!isAdmin}
             headerAction={() => {
               resetFormData(formData, setFormData);

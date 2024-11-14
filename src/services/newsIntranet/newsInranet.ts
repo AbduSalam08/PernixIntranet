@@ -30,7 +30,6 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
       Orderby: "Created",
       Orderbydecorasc: false,
     });
-    console.log("response: ", response);
 
     const attachmentPromises = response?.map(async (item: any) => {
       const attachments = await SpServices.SPGetAttachments({
@@ -68,7 +67,6 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
     // Wait for all attachment fetching promises to complete
     const newsData = await Promise.all(attachmentPromises);
 
-    console.log("newsData: ", newsData);
     // Dispatch the data
     dispatch?.(
       setNewsIntranetData({
@@ -109,7 +107,6 @@ export const addNews = async (
     return updatedState;
   });
   try {
-    debugger;
     // Prepare payload by omitting thumbnail
     const payload = Object.keys(formData).reduce((acc: any, key: string) => {
       if (key.toLowerCase() !== "thumbnail") {
@@ -187,7 +184,6 @@ export const editNews = async (
   itemId: number,
   isfile: boolean
 ): Promise<any> => {
-  debugger;
   // Start loader for the specific item at the given index
   setLoaderState((prevState: any) => {
     const updatedState = [...prevState];
@@ -236,7 +232,6 @@ export const editNews = async (
             .attachmentFiles.getByName(attachment.FileName)
             .delete();
         }
-        debugger;
         await sp.web.lists
           .getByTitle(CONFIG.ListNames.Intranet_News)
           .items.getById(itemId)
