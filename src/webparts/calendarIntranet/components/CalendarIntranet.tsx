@@ -41,6 +41,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
+import CustomTimePicker from "../../../components/common/CustomInputFields/CustomTimePicker";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -98,23 +99,17 @@ const CalendarIntranet = (props: any): JSX.Element => {
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
     },
-    // EndDate: {
-    //   value: "",
-    //   isValid: true,
-    //   errorMsg: "Invalid input",
-    //   validationRule: { required: true, type: "date" },
-    // },
     StartTime: {
       value: "",
       isValid: true,
       errorMsg: "StartTime is required",
-      validationRule: { required: true, type: "number" },
+      validationRule: { required: true, type: "string" },
     },
     EndTime: {
-      value: null,
+      value: "",
       isValid: true,
       errorMsg: "EndTime is required",
-      validationRule: { required: true, type: "number" },
+      validationRule: { required: true, type: "string" },
     },
     Description: {
       value: "",
@@ -130,17 +125,55 @@ const CalendarIntranet = (props: any): JSX.Element => {
     isValid: boolean,
     errorMsg: string = ""
   ): void => {
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [field]: {
-        ...prevData[field],
-        value: value,
-        isValid,
-        errorMsg: isValid ? "" : errorMsg,
-      },
-    }));
-
-    console.log(formData, "formData");
+    if (field === "StartDate") {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+        ["StartTime"]: {
+          ...prevData["StartTime"],
+          value: null,
+          isValid: true,
+          errorMsg: "",
+        },
+        ["EndTime"]: {
+          ...prevData["EndTime"],
+          value: null,
+          isValid: true,
+          errorMsg: "",
+        },
+      }));
+    } else if (field === "StartTime") {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+        ["EndTime"]: {
+          ...prevData["EndTime"],
+          value: null,
+          isValid: true,
+          errorMsg: "",
+        },
+      }));
+    } else {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+      }));
+    }
   };
 
   const handleSubmit = async (): Promise<any> => {
@@ -149,7 +182,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
     // Validate each field and update the state with error messages
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
-      const { isValid, errorMsg } = validateField(
+      let { isValid, errorMsg } = validateField(
         key,
         fieldData.value,
         fieldData?.validationRule
@@ -157,6 +190,17 @@ const CalendarIntranet = (props: any): JSX.Element => {
 
       if (!isValid) {
         hasErrors = true;
+      } else if (key === "EndTime") {
+        isValid =
+          Number(
+            formData?.StartTime?.value?.split(":")[0] +
+              formData?.StartTime?.value?.split(":")[1]
+          ) <
+          Number(
+            fieldData?.value?.split(":")[0] + fieldData?.value?.split(":")[1]
+          );
+        hasErrors = !isValid;
+        errorMsg = !isValid ? "Please select a valid time." : "";
       }
 
       return {
@@ -220,15 +264,11 @@ const CalendarIntranet = (props: any): JSX.Element => {
             }}
           />
 
-          <CustomDateInput
+          <CustomTimePicker
+            disabled={!formData.StartDate.value}
+            placeholder="Select start time"
             value={formData.StartTime.value}
-            disabledInput={!formData.StartDate.value}
-            timeOnly
-            isDateController={true}
-            minimumDate={new Date()}
-            showIcon={false}
-            label="Start Time"
-            error={!formData.StartTime.isValid}
+            isValid={formData.StartTime.isValid}
             errorMsg={formData.StartTime.errorMsg}
             onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
@@ -240,21 +280,11 @@ const CalendarIntranet = (props: any): JSX.Element => {
             }}
           />
 
-          <CustomDateInput
+          <CustomTimePicker
+            disabled={!formData.StartTime.value}
+            placeholder="Select end time"
             value={formData.EndTime.value}
-            disabledInput={
-              formData.StartDate.value
-                ? formData.StartTime.value
-                  ? false
-                  : true
-                : true
-            }
-            timeOnly
-            isDateController={true}
-            minimumDate={new Date()}
-            showIcon={false}
-            label="End Time"
-            error={!formData.EndTime.isValid}
+            isValid={formData.EndTime.isValid}
             errorMsg={formData.EndTime.errorMsg}
             onChange={(date: any) => {
               const { isValid, errorMsg } = validateField(
@@ -320,6 +350,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
   ];
 
   const BindCalender = (data: any): any => {
+    const today = Number(moment().format("YYYYMMDDHHmm"));
     const calendarEl: any = document.getElementById("myCalendar");
     const _Calendar = new Calendar(calendarEl, {
       plugins: [
@@ -396,7 +427,11 @@ const CalendarIntranet = (props: any): JSX.Element => {
     _Calendar.updateSize();
     _Calendar.render();
 
-    setShowcalendardata(data);
+    let temp: any = data?.filter((newsItem: any) => {
+      const startDate = Number(moment(newsItem.end).format("YYYYMMDDHHmm"));
+      return today <= startDate;
+    });
+    setShowcalendardata(temp);
   };
 
   useEffect(() => {
@@ -422,13 +457,45 @@ const CalendarIntranet = (props: any): JSX.Element => {
             currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
           }
           headerAction={() => {
+            resetFormData(formData, setFormData);
+            setFormData({
+              Title: {
+                value: "",
+                isValid: true,
+                errorMsg: "Invalid name",
+                validationRule: { required: true, type: "string" },
+              },
+              StartDate: {
+                value: new Date(),
+                isValid: true,
+                errorMsg: "Invalid input",
+                validationRule: { required: true, type: "date" },
+              },
+              StartTime: {
+                value: "",
+                isValid: true,
+                errorMsg: "StartTime is required",
+                validationRule: { required: true, type: "string" },
+              },
+              EndTime: {
+                value: "",
+                isValid: true,
+                errorMsg: "EndTime is required",
+                validationRule: { required: true, type: "string" },
+              },
+              Description: {
+                value: "",
+                isValid: true,
+                errorMsg: "This field is required",
+                validationRule: { required: true, type: "string" },
+              },
+            });
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               0,
               "open"
             );
-            resetFormData(formData, setFormData);
           }}
         />
         {/* <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} /> */}
@@ -448,7 +515,20 @@ const CalendarIntranet = (props: any): JSX.Element => {
               </span>
             </div>
           ) : showcalendardata?.length === 0 ? (
-            <div>No Events Founds</div>
+            <div
+              style={{
+                width: "100%",
+                height: "310px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontSize: "14px",
+                color: "#adadad",
+                fontFamily: "osMedium, sans-serif",
+              }}
+            >
+              No events found!
+            </div>
           ) : (
             showcalendardata?.slice(0, 3).map((val: IEvent, index: number) => (
               <div className={styles.eventSection} key={index}>

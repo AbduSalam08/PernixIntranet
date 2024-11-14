@@ -121,11 +121,23 @@
         text-overflow: ellipsis;
       }
 
-      i {
-        font-size: 16px;
-        color: red;
-        cursor: pointer;
-        font-weight: 500;
+      .iconsContainer {
+        display: flex;
+        gap: 6px;
+
+        i:nth-child(1) {
+          font-size: 16px;
+          color: #adadad;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        i:nth-child(2) {
+          font-size: 16px;
+          color: #ff1c1c;
+          cursor: pointer;
+          font-weight: 500;
+        }
       }
     }
 

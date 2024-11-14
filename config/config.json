@@ -201,6 +201,38 @@
           "manifest": "./src/webparts/blogsPage/BlogsPageWebPart.manifest.json"
         }
       ]
+    },
+    "feed-back-form-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/feedBackFormPage/FeedBackFormPageWebPart.js",
+          "manifest": "./src/webparts/feedBackFormPage/FeedBackFormPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "new-hires-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newHiresPage/NewHiresPageWebPart.js",
+          "manifest": "./src/webparts/newHiresPage/NewHiresPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "birthday-page-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/birthdayPage/BirthdayPageWebPart.js",
+          "manifest": "./src/webparts/birthdayPage/BirthdayPageWebPart.manifest.json"
+        }
+      ]
+    },
+    "flexiple-sections-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/flexipleSectionsIntranet/FlexipleSectionsIntranetWebPart.js",
+          "manifest": "./src/webparts/flexipleSectionsIntranet/FlexipleSectionsIntranetWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -230,6 +262,10 @@
     "ApprovalsPageWebPartStrings": "lib/webparts/approvalsPage/loc/{locale}.js",
     "ProjectTemplatePageWebPartStrings": "lib/webparts/projectTemplatePage/loc/{locale}.js",
     "ShoutOutsPageWebPartStrings": "lib/webparts/shoutOutsPage/loc/{locale}.js",
-    "BlogsPageWebPartStrings": "lib/webparts/blogsPage/loc/{locale}.js"
+    "BlogsPageWebPartStrings": "lib/webparts/blogsPage/loc/{locale}.js",
+    "FeedBackFormPageWebPartStrings": "lib/webparts/feedBackFormPage/loc/{locale}.js",
+    "NewHiresPageWebPartStrings": "lib/webparts/newHiresPage/loc/{locale}.js",
+    "BirthdayPageWebPartStrings": "lib/webparts/birthdayPage/loc/{locale}.js",
+    "FlexipleSectionsIntranetWebPartStrings": "lib/webparts/flexipleSectionsIntranet/loc/{locale}.js"
   }
 }
