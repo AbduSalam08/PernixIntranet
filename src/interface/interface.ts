@@ -16,6 +16,10 @@ export interface IListName {
   Calendar_Azure_Group_ID: string;
   HelpDesk_TicketConversations: string;
   Intranet_QuestionsToCEO: string;
+  Intranet_PollQuestion: string;
+  Intranet_PollOptions: string;
+  Intranet_PollResponse: string;
+  Intranet_Blogs: string;
 }
 
 export interface ISPGroupName {
@@ -76,12 +80,16 @@ export interface IAttachObj {
 export interface IDocRepository {
   ID: number;
   Content: IAttachObj;
+  Priority: string;
+  IsActive: boolean;
 }
 
 export interface IDocRepositoryColumn {
   ID: string;
   FolderName: string;
   Content: string;
+  Priority: string;
+  IsActive: string;
 }
 
 export interface IPaginationData {

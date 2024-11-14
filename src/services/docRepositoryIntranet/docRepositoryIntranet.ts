@@ -39,11 +39,38 @@ export const getDocRepository = async (): Promise<any[]> => {
   }
 };
 
+export const pathFileORFolderCheck = async (path: string): Promise<any[]> => {
+  try {
+    const items: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_DocumentRepository,
+      Select:
+        "*, FileLeafRef, FileRef, FileDirRef, Author/Title, Author/EMail, Author/Id",
+      Expand: "File, Author",
+      Filter: [
+        {
+          FilterKey: "FileDirRef",
+          Operator: "eq",
+          FilterValue: path,
+        },
+      ],
+      Topcount: 5000,
+      Orderby: "Created",
+      Orderbydecorasc: false,
+    });
+
+    return [...items];
+  } catch (err) {
+    console.error("Error fetching Document:", err);
+    return [];
+  }
+};
+
 export const addDocRepository = async (
   formData: IFormData,
   curPath: string,
   setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
+  index: number,
+  folderType: string
 ): Promise<void> => {
   setLoaderState((prevState) => {
     const updatedState = [...prevState];
@@ -67,6 +94,25 @@ export const addDocRepository = async (
       const path: IFolderAddResult = await sp.web
         .getFolderByServerRelativePath(curPath)
         .folders.addUsingPath(newFolderName, true);
+
+      if (folderType === "master_folder") {
+        const list: any = await sp.web.lists.getByTitle(
+          CONFIG.ListNames.Intranet_DocumentRepository
+        );
+
+        const items: any = await list.items
+          .filter(`FileRef eq '${path?.data?.ServerRelativeUrl}'`)
+          .get();
+
+        await SpServices.SPUpdateItem({
+          Listname: CONFIG.ListNames.Intranet_DocumentRepository,
+          ID: items[0]?.ID,
+          RequestJSON: {
+            Priority: "1",
+            IsActive: false,
+          },
+        });
+      }
 
       if (arrMasterFiles.length) {
         for (let i: number = 0; arrMasterFiles.length > i; i++) {
@@ -133,6 +179,14 @@ export const addDocRepository = async (
       return updatedState;
     });
   }
+};
+
+export const updateDocRepositoryData = async (data: any): Promise<void> => {
+  await SpServices.SPUpdateItem({
+    Listname: CONFIG.ListNames.Intranet_DocumentRepository,
+    ID: data?.ID,
+    RequestJSON: { ...data },
+  });
 };
 
 export const deleteDocRepository = async (

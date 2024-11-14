@@ -13,6 +13,7 @@ import {
   addVote,
   deletePollData,
   fetchPollData,
+  updatePollData,
 } from "../../../services/PollIntranet/PollIntranet";
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
@@ -43,6 +44,8 @@ let objFilter: SearchField = {
   selectedDate: null,
   allSearch: "",
 };
+
+let curMasterOptions: any[] = [];
 
 const PollPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -100,6 +103,28 @@ const PollPage = (props: any): JSX.Element => {
         inprogress: "Deleting PollQuestion, please wait...",
       },
     },
+    {
+      open: false,
+      popupTitle: "Update",
+      popupWidth: "900px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "PollQuestion updated successfully!",
+        error: "Something went wrong!",
+        successDescription:
+          "The new PollQuestion 'ABC' has been updated successfully.",
+        errorDescription:
+          "An error occured while updating PollQuestion, please try again later.",
+        inprogress: "Updating new PollQuestion, please wait...",
+      },
+    },
   ];
 
   const [searchField, setSearchField] = useState<SearchField>({
@@ -120,19 +145,21 @@ const PollPage = (props: any): JSX.Element => {
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
+      Id: null,
       isValid: true,
       errorMsg: "Invalid title",
       validationRule: { required: true, type: "string" },
     },
-
     StartDate: {
       value: "",
+      Id: null,
       isValid: true,
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
     },
     EndDate: {
       value: "",
+      Id: null,
       isValid: true,
       errorMsg: "Invalid input",
       validationRule: { required: true, type: "date" },
@@ -141,6 +168,7 @@ const PollPage = (props: any): JSX.Element => {
   const [options, setOptions] = useState<any>([
     {
       Id: 1,
+      itemId: null,
       Title: "",
       value: "",
       Percentage: 0,
@@ -163,7 +191,6 @@ const PollPage = (props: any): JSX.Element => {
       if (match) {
         const index = parseInt(match[1]);
         const optionField = match[2];
-
         // Update the specific option in the options array
         setOptions((prevOptions: any[]) =>
           prevOptions.map((option, i) =>
@@ -240,7 +267,15 @@ const PollPage = (props: any): JSX.Element => {
     setFormData(updatedFormData);
 
     if (!hasErrors) {
-      await addPollData(formData, setPopupController, 0, options);
+      formData?.Title?.Id
+        ? await updatePollData(
+            formData,
+            setPopupController,
+            2,
+            options,
+            curMasterOptions
+          )
+        : await addPollData(formData, setPopupController, 0, options);
     } else {
       console.log("Form contains errors");
     }
@@ -275,7 +310,7 @@ const PollPage = (props: any): JSX.Element => {
   };
 
   const mappedItem: any = options?.length
-    ? options.map((option: any, index: number) => (
+    ? options?.map((option: any, index: number) => (
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           key={index}
@@ -302,22 +337,55 @@ const PollPage = (props: any): JSX.Element => {
           />
 
           {/* Show plus icon for the last option if it's not empty */}
-          {index === options.length - 1 && option.Title.trim() !== "" ? (
-            <DefaultButton
-              onlyIcon={true}
-              btnType="primaryGreen"
-              size="medium"
-              onClick={handleAddOption}
-              text={
-                <Add
-                  sx={{
-                    width: "20px",
-                    fontSize: "24px",
-                    color: "#fff",
-                  }}
-                />
-              }
-            />
+          {index === options.length - 1 ? (
+            <>
+              <DefaultButton
+                onlyIcon={true}
+                btnType="primaryGreen"
+                size="medium"
+                onClick={() => {
+                  const { isValid, errorMsg } = validateField(
+                    "Title",
+                    option.Title,
+                    option.validationRule
+                  );
+                  isValid
+                    ? handleAddOption()
+                    : handleInputChange(
+                        `options[${index}].Title`,
+                        option.Title,
+                        isValid,
+                        errorMsg
+                      );
+                }}
+                text={
+                  <Add
+                    sx={{
+                      width: "20px",
+                      fontSize: "24px",
+                      color: "#fff",
+                    }}
+                  />
+                }
+              />
+              <DefaultButton
+                style={{
+                  display: options.length !== 1 ? "flex" : "none",
+                }}
+                onlyIcon={true}
+                btnType="secondaryRed"
+                size="medium"
+                onClick={() => handleDeleteOption(index)}
+                text={
+                  <Delete
+                    sx={{
+                      width: "20px",
+                      fontSize: "24px",
+                    }}
+                  />
+                }
+              />
+            </>
           ) : (
             /* Show delete icon for non-last options or if last option is empty */
             index !== options.length - 1 && (
@@ -420,8 +488,83 @@ const PollPage = (props: any): JSX.Element => {
     ],
     [
       <div key={2}>
-        <p>Are you sure want to Delete This poll?.</p>
+        <p>Are you sure want to Delete This poll?</p>
       </div>,
+    ],
+    [
+      <div key={1}>
+        <CustomInput
+          value={formData.Title.value}
+          placeholder="Enter Question"
+          isValid={formData.Title.isValid}
+          errorMsg={formData.Title.errorMsg}
+          onChange={(e) => {
+            const value = e.trimStart();
+            const { isValid, errorMsg } = validateField(
+              "Title",
+              value,
+              formData.Title.validationRule
+            );
+            handleInputChange("Title", value, isValid, errorMsg);
+          }}
+        />
+      </div>,
+      <div
+        key={2}
+        style={{
+          display: "flex",
+          gap: "20px",
+          alignItems: "center",
+          margin: "20px 0px",
+        }}
+      >
+        <div style={{ width: "50%" }}>
+          <CustomDateInput
+            value={formData.StartDate.value}
+            label="Start Date"
+            isDateController={true}
+            minimumDate={new Date()}
+            maximumDate={
+              formData?.EndDate?.value
+                ? new Date(formData?.EndDate?.value)
+                : null
+            }
+            error={!formData.StartDate.isValid}
+            errorMsg={formData.StartDate.errorMsg}
+            onChange={(date: any) => {
+              const { isValid, errorMsg } = validateField(
+                "StartDate",
+                date,
+                formData.StartDate.validationRule
+              );
+              handleInputChange("StartDate", date, isValid, errorMsg);
+            }}
+          />
+        </div>
+        <div style={{ width: "50%" }}>
+          <CustomDateInput
+            value={formData.EndDate.value}
+            label="End Date"
+            isDateController={true}
+            minimumDate={
+              formData?.StartDate?.value
+                ? new Date(formData?.StartDate?.value)
+                : null
+            }
+            maximumDate={null}
+            error={!formData.EndDate.isValid}
+            errorMsg={formData.EndDate.errorMsg}
+            onChange={(date: any) => {
+              const { isValid, errorMsg } = validateField("EndDate", date, {
+                required: true,
+                type: "date",
+              });
+              handleInputChange("EndDate", date, isValid, errorMsg);
+            }}
+          />
+        </div>
+      </div>,
+      mappedItem,
     ],
   ];
 
@@ -455,7 +598,6 @@ const PollPage = (props: any): JSX.Element => {
         },
       },
     ],
-
     [
       {
         text: "Cancel",
@@ -484,6 +626,35 @@ const PollPage = (props: any): JSX.Element => {
         onClick: async () => {
           deletePollData(selectQuestionId, setPopupController, 1);
           // await handleSubmit();
+        },
+      },
+    ],
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[2],
+            2,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit();
         },
       },
     ],
@@ -617,35 +788,6 @@ const PollPage = (props: any): JSX.Element => {
     });
   };
 
-  // const renderAvatarGroup = (members: any) => {
-  //   const maxVisibleAvatars = 4;
-  //   const displayedMembers = members.slice(0, maxVisibleAvatars);
-  //   const additionalCount = members.length - maxVisibleAvatars;
-
-  //   return (
-  //     <AvatarGroup>
-  //       {displayedMembers?.map((member: any, index: number) => (
-  //         <Avatar
-  //           key={index}
-  //           title={member?.Author?.Title}
-  //           image={
-  //             member.Author
-  //               ? "/_layouts/15/userphoto.aspx?size=L&username=" +
-  //                 member.Author?.EMail
-  //               : ""
-  //           }
-  //           size="normal"
-  //           shape="circle"
-  //           // alt={member.Author?.Title}
-  //         />
-  //       ))}
-  //       {additionalCount > 0 && (
-  //         <Avatar label={`+ ${additionalCount}`} shape="circle" size="normal" />
-  //       )}
-  //     </AvatarGroup>
-  //   );
-  // };
-
   const handleSubmitVote = async (): Promise<any> => {
     let hasErrors = false;
 
@@ -665,7 +807,6 @@ const PollPage = (props: any): JSX.Element => {
 
     // Update state with validation result
     setSelectedOption(updatedSelectedOption);
-    debugger;
     if (!hasErrors) {
       setCurPollID(0);
       setCurIDX(0);
@@ -675,6 +816,51 @@ const PollPage = (props: any): JSX.Element => {
     } else {
       console.log("Vote submission contains errors");
     }
+  };
+
+  const handleData = async (data: any): Promise<void> => {
+    curMasterOptions = [];
+
+    setFormData((prev: any) => ({
+      ...prev,
+      Title: {
+        ...prev["Title"],
+        value: data?.Question,
+        Id: data?.Id,
+      },
+      StartDate: {
+        ...prev["StartDate"],
+        value: new Date(data?.StartDate),
+        Id: data?.Id,
+      },
+      EndDate: {
+        ...prev["EndDate"],
+        value: new Date(data?.EndDate),
+        Id: data?.Id,
+      },
+    }));
+
+    curMasterOptions = await Promise.all(
+      data?.options?.map((val: any, idx: number) => ({
+        ...val,
+        Id: idx + 1,
+        Title: val?.Title,
+        itemId: val?.Id,
+        value: "",
+        Percentage: 0,
+        isValid: true,
+        errorMsg: "Invalid title",
+        validationRule: { required: true, type: "string" },
+      })) || []
+    );
+
+    setOptions(curMasterOptions);
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[2],
+      2,
+      "open"
+    );
   };
 
   useEffect(() => {
@@ -766,23 +952,38 @@ const PollPage = (props: any): JSX.Element => {
                   setFormData({
                     Title: {
                       value: "",
+                      Id: null,
                       isValid: true,
                       errorMsg: "Invalid title",
                       validationRule: { required: true, type: "string" },
                     },
                     StartDate: {
                       value: new Date(),
+                      Id: null,
                       isValid: true,
                       errorMsg: "Invalid input",
                       validationRule: { required: true, type: "date" },
                     },
                     EndDate: {
                       value: "",
+                      Id: null,
                       isValid: true,
                       errorMsg: "Invalid input",
                       validationRule: { required: true, type: "date" },
                     },
                   });
+                  setOptions([
+                    {
+                      Id: 1,
+                      itemId: null,
+                      Title: "",
+                      value: "",
+                      Percentage: 0,
+                      isValid: true,
+                      errorMsg: "Invalid title",
+                      validationRule: { required: true, type: "string" },
+                    },
+                  ]);
 
                   togglePopupVisibility(
                     setPopupController,
@@ -856,18 +1057,34 @@ const PollPage = (props: any): JSX.Element => {
                     </div>
 
                     {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
-                      <i
-                        onClick={() => {
-                          togglePopupVisibility(
-                            setPopupController,
-                            initialPopupController[1],
-                            1,
-                            "open"
-                          );
-                          setSelectQuestionId(val.Id);
-                        }}
-                        className="pi pi-trash"
-                      />
+                      <div className={styles.iconsContainer}>
+                        <i
+                          style={{
+                            display:
+                              selectedTab !== CONFIG.TabsName[2]
+                                ? "flex"
+                                : "none",
+                          }}
+                          className="pi pi-pen-to-square"
+                          onClick={() => {
+                            resetFormData(formData, setFormData);
+                            resetOptionsData(options, setOptions);
+                            handleData(val);
+                          }}
+                        />
+                        <i
+                          className="pi pi-trash"
+                          onClick={() => {
+                            togglePopupVisibility(
+                              setPopupController,
+                              initialPopupController[1],
+                              1,
+                              "open"
+                            );
+                            setSelectQuestionId(val.Id);
+                          }}
+                        />
+                      </div>
                     ) : (
                       ""
                     )}

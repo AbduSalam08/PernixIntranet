@@ -35,6 +35,10 @@ export namespace CONFIG {
     Calendar_Azure_Group_ID: "Calendar_Azure_Group_ID",
     HelpDesk_TicketConversations: "HelpDesk_TicketConversations",
     Intranet_QuestionsToCEO: "Intranet_QuestionsToCEO",
+    Intranet_PollQuestion: "Intranet_PollQuestion",
+    Intranet_PollOptions: "Intranet_PollOptions",
+    Intranet_PollResponse: "Intranet_PollResponse",
+    Intranet_Blogs: "Intranet_Blogs",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -111,6 +115,8 @@ export namespace CONFIG {
     ID: "ID",
     FolderName: "FolderName",
     Content: "Content",
+    Priority: "Priority",
+    IsActive: "IsActive",
   };
 
   export const selMasterFolder: string = "selMasterFolder";

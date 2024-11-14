@@ -268,8 +268,6 @@ const NewsPage = (props: any): JSX.Element => {
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
 
-  console.log("News_Admin currentUserDetails: ", currentUserDetails);
-
   const handleInputChange = (
     field: string,
     value: any,
@@ -285,8 +283,6 @@ const NewsPage = (props: any): JSX.Element => {
         errorMsg: isValid ? "" : errorMsg,
       },
     }));
-
-    debugger;
   };
 
   const handleSubmit = async (): Promise<any> => {
@@ -884,7 +880,6 @@ const NewsPage = (props: any): JSX.Element => {
   };
 
   const handleEditClick = async (item: any): Promise<any> => {
-    console.log("item: ", item);
     setIsile(false);
     setID(item.ID);
     setFormData({
@@ -932,7 +927,6 @@ const NewsPage = (props: any): JSX.Element => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
       { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
-
       dispatch
     );
     getAllNewsData(dispatch);
@@ -940,7 +934,6 @@ const NewsPage = (props: any): JSX.Element => {
 
   const handleSearch = (val: any): void => {
     let filteredResults = [...val];
-
     // Apply common text search for title, status, and description
 
     if (objFilter.Status) {
@@ -1003,7 +996,6 @@ const NewsPage = (props: any): JSX.Element => {
     let filteredData: any[] = [];
 
     if (curTab === CONFIG.TabsName[0] && newsIntranetData?.data?.length) {
-      // Current
       filteredData = newsIntranetData?.data?.filter(
         (newsItem: any) =>
           Number(moment().format("YYYYMMDD")) >=
@@ -1030,6 +1022,7 @@ const NewsPage = (props: any): JSX.Element => {
           Number(moment(newsItem.EndDate).format("YYYYMMDD"))
       );
     }
+
     objFilter.allSearch = "";
     objFilter.selectedDate = null;
     objFilter.Status = "";
@@ -1039,18 +1032,14 @@ const NewsPage = (props: any): JSX.Element => {
       selectedDate: null,
       Status: "",
     });
-
     setSelectedTab(curTab);
     setNewsData([...filteredData]);
     setShowNewsData([...filteredData]);
     handleSearch([...filteredData]);
-    // await handleSearch({
-    //   allSearch: searchField.allSearch,
-    //   selectedDate: searchField.selectedDate,
-    // });
   };
+
   useEffect(() => {
-    prepareNewsData(CONFIG.TabsName[0]);
+    prepareNewsData(selectedTab ? selectedTab : CONFIG.TabsName[0]);
   }, [newsIntranetData]);
 
   const filteredNewsData =
@@ -1104,16 +1093,6 @@ const NewsPage = (props: any): JSX.Element => {
               handleSearch([...shownewsData]);
             }}
           />
-          {/* <InputText
-            value={searchField.allSearch}
-            style={{ width: "150px" }}
-            placeholder="Search"
-            onChange={(e) => {
-              objFilter.allSearch = e.target.value;
-              setSearchField({ ...searchField, allSearch: e.target.value });
-              handleSearch([...shownewsData]);
-            }}
-          /> */}
           <CustomDateInput
             label="Select date"
             placeHolder="Date"
@@ -1191,7 +1170,6 @@ const NewsPage = (props: any): JSX.Element => {
                 0,
                 "open"
               );
-              debugger;
             }}
           >
             <i
@@ -1275,25 +1253,28 @@ const NewsPage = (props: any): JSX.Element => {
           ) : (
             filteredNewsData
               ?.slice(pagination.first, pagination.first + pagination.rows)
-              .map((item: any, idx: number) => (
-                <NewsCard
-                  title={item?.title}
-                  imageUrl={item?.imageUrl}
-                  key={idx}
-                  status={item?.Status}
-                  currentUserDetails={currentUserDetails}
-                  description={item?.description}
-                  noActions={false}
-                  noStatus={false}
-                  setIsEdit={setIsEdit}
-                  // setIsview={setIsview}
-                  setisDelete={setisDelete}
-                  handleEditClick={handleEditClick}
-                  handleViewClick={handleViewClick}
-                  handleDeleteClick={handleDeleteClick}
-                  item={item}
-                />
-              ))
+              ?.map((item: any, idx: number) => {
+                return (
+                  <NewsCard
+                    title={item?.title}
+                    imageUrl={item?.imageUrl}
+                    key={idx}
+                    idx={idx}
+                    status={item?.Status}
+                    currentUserDetails={currentUserDetails}
+                    description={item?.description}
+                    noActions={false}
+                    noStatus={false}
+                    setIsEdit={setIsEdit}
+                    // setIsview={setIsview}
+                    setisDelete={setisDelete}
+                    handleEditClick={handleEditClick}
+                    handleViewClick={handleViewClick}
+                    handleDeleteClick={handleDeleteClick}
+                    item={item}
+                  />
+                );
+              })
           )}
         </div>
 
@@ -1317,12 +1298,11 @@ const NewsPage = (props: any): JSX.Element => {
                 index,
                 "close"
               );
-              debugger;
+              resetFormData(formData, setFormData);
               if (popupData?.isLoading?.success) {
                 setIsile(false);
                 getAllNewsData(dispatch);
               }
-              resetFormData(formData, setFormData);
             }}
             popupTitle={
               popupData.popupType !== "confimation" && popupData.popupTitle

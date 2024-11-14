@@ -68,32 +68,23 @@ export const createOutlookEvent = async (
   try {
     // Combining date and time for start and end
     const { Title, StartDate, StartTime, EndTime, Description } = formData;
-    // const formattedStartTime = formatTime(StartTime.value); // Format startTime
-    // const formattedEndTime = formatTime(EndTime.value); // Format endTime
-
-    // Assuming StartTime.value and EndTime.value are Date objects
-    const startDate = new Date(StartTime.value); // Convert to Date object
-    const endDate = new Date(EndTime.value); // Convert to Date object
-
-    // Extract hours and minutes from the Date objects
-    const startHours = startDate.getHours(); // Get hours (0-23)
-    const startMinutes = startDate.getMinutes(); // Get minutes (0-59)
-
-    const endHours = endDate.getHours(); // Get hours (0-23)
-    const endMinutes = endDate.getMinutes(); // Get minutes (0-59)
-
-    console.log("Start Hours:", startHours, "Start Minutes:", startMinutes);
-    console.log("End Hours:", endHours, "End Minutes:", endMinutes);
 
     // Now you can set the hours and minutes as needed for your event creation
     const newStartDate = new Date(StartDate.value); // Copy of startDate
-    newStartDate.setHours(startHours, startMinutes, 0, 0); // Set hours and minutes
+    newStartDate.setHours(
+      StartTime.value?.split(":")[0],
+      StartTime.value?.split(":")[1],
+      0,
+      0
+    ); // Set hours and minutes
 
     const newEndDate = new Date(StartDate.value); // Copy of endDate
-    newEndDate.setHours(endHours, endMinutes, 0, 0); // Set hours and minutes
-
-    console.log(newStartDate.toISOString()); // Outputs the ISO string for the start date
-    console.log(newEndDate.toISOString()); // Outputs the ISO string for the end date
+    newEndDate.setHours(
+      EndTime.value?.split(":")[0],
+      EndTime.value?.split(":")[1],
+      0,
+      0
+    ); // Set hours and minutes
 
     const event: any = {
       subject: Title.value,
@@ -210,7 +201,6 @@ export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
       .getById(calendarGUID)
       .events.configure({ headers })
       .top(999)();
-    console.log(result, "result");
 
     const arrDatas: IEvent[] = result.map((val: any) => ({
       id: val?.id || null,
@@ -225,7 +215,6 @@ export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
       (a: any, b: any) => moment(a.start).valueOf() - moment(b.start).valueOf()
     );
 
-    console.log(filtervalue, "arrdatas");
     // if (isview == "") {
     //   BindCalender(arrDatas);
     // }
@@ -352,31 +341,23 @@ export const updateOutlookEvent = async (
 
   try {
     const { Title, StartDate, StartTime, EndTime, Description } = formData;
-    // const formattedStartTime = formatTime(StartTime.value);
-    // const formattedEndTime = formatTime(EndTime.value);
-
-    const startDate = new Date(StartTime.value); // Convert to Date object
-    const endDate = new Date(EndTime.value); // Convert to Date object
-
-    // Extract hours and minutes from the Date objects
-    const startHours = startDate.getHours(); // Get hours (0-23)
-    const startMinutes = startDate.getMinutes(); // Get minutes (0-59)
-
-    const endHours = endDate.getHours(); // Get hours (0-23)
-    const endMinutes = endDate.getMinutes(); // Get minutes (0-59)
-
-    console.log("Start Hours:", startHours, "Start Minutes:", startMinutes);
-    console.log("End Hours:", endHours, "End Minutes:", endMinutes);
 
     // Now you can set the hours and minutes as needed for your event creation
     const newStartDate = new Date(StartDate.value); // Copy of startDate
-    newStartDate.setHours(startHours, startMinutes, 0, 0); // Set hours and minutes
+    newStartDate.setHours(
+      StartTime.value?.split(":")[0],
+      StartTime.value?.split(":")[1],
+      0,
+      0
+    ); // Set hours and minutes
 
     const newEndDate = new Date(StartDate.value); // Copy of endDate
-    newEndDate.setHours(endHours, endMinutes, 0, 0); // Set hours and minutes
-
-    console.log(newStartDate.toISOString()); // Outputs the ISO string for the start date
-    console.log(newEndDate.toISOString());
+    newEndDate.setHours(
+      EndTime.value?.split(":")[0],
+      EndTime.value?.split(":")[1],
+      0,
+      0
+    ); // Set hours and minutes
 
     const eventUpdate: any = {
       subject: Title.value,

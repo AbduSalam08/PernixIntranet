@@ -209,7 +209,7 @@ const TicketView = (): JSX.Element => {
 
                 <div className={styles.ticketOneLine}>
                   {currentTicketsData?.EmployeeName?.Title} raised this ticket
-                  on {dayjs(currentTicketsData?.Created)?.format("DD MMM YYYY")}
+                  on {dayjs(currentTicketsData?.Created)?.format("DD MMM YYYY HH:MM")}
                   <span className={styles.splitterDot} />
                   {conversationData?.data?.length} comments
                   {currentTicketsData?.TicketClosedOn !== null && (

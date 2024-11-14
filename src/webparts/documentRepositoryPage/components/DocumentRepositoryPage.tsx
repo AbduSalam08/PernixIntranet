@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "../../../assets/styles/Style.css";
+import "./docStyle.css";
 import styles from "./DocumentRepositoryPage.module.scss";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import {
@@ -23,6 +24,8 @@ import {
   addDocRepository,
   deleteDocRepository,
   getDocRepository,
+  pathFileORFolderCheck,
+  updateDocRepositoryData,
 } from "../../../services/docRepositoryIntranet/docRepositoryIntranet";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import Popup from "../../../components/common/Popups/Popup";
@@ -32,6 +35,8 @@ import resetPopupController, {
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+import { InputSwitch } from "primereact/inputswitch";
 
 /* Interface creation */
 interface ITabObject {
@@ -42,6 +47,8 @@ interface ITabObject {
 interface IDocField {
   FolderName: IFormFields;
   Content: IFormFields;
+  Priority: IFormFields;
+  IsActive: IFormFields;
 }
 
 /* Global variable creation */
@@ -151,6 +158,24 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
         type: "file",
       },
     },
+    Priority: {
+      value: "1",
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "string",
+      },
+    },
+    IsActive: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "boolean",
+      },
+    },
   };
 
   const initialFileData: IDocField = {
@@ -170,6 +195,24 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
       validationRule: {
         required: true,
         type: "file",
+      },
+    },
+    Priority: {
+      value: "1",
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "string",
+      },
+    },
+    IsActive: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "boolean",
       },
     },
   };
@@ -266,7 +309,8 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
         return {
           ID: val?.ID || null,
           Content: objAttach,
-          IsDelete: false,
+          Priority: "",
+          IsActive: false,
         };
       })
     );
@@ -302,6 +346,8 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
           return {
             ID: val?.ID,
             Content: objAttach,
+            Priority: val?.Priority || "",
+            IsActive: val?.IsActive || false,
           };
         }) || []
       );
@@ -361,21 +407,36 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
         return {
           ID: val?.ID || null,
           Content: masObjAttach,
-          IsDelete: false,
+          Priority: val?.Priority || "",
+          IsActive: val?.IsActive || false,
         };
       })
     );
 
+    await Promise.all(
+      masterDocDatas?.sort((a: IDocRepository, b: IDocRepository) => {
+        const priorityComparison = Number(a?.Priority) - Number(b?.Priority);
+
+        if (priorityComparison === 0) {
+          return a?.Content?.name.localeCompare(b?.Content?.name);
+        }
+
+        return priorityComparison;
+      })
+    );
+
     setFilDocDatas([...masterDocDatas]);
-    !curSelectedFolder
-      ? await handleSearch("", [...masterDocDatas])
-      : (selectedPath.push({
-          name: curSelectedFolder,
-          path: curSelectedPath,
-        }),
-        setSelectedPath([...selectedPath]),
-        setCurFilePath(curSelectedPath),
-        await filCurrentItems(curSelectedPath));
+    if (!curSelectedFolder) {
+      await handleSearch("", [...masterDocDatas]);
+    } else {
+      selectedPath.push({
+        name: curSelectedFolder,
+        path: curSelectedPath,
+      });
+      setSelectedPath([...selectedPath]);
+      setCurFilePath(curSelectedPath);
+      await filCurrentItems(curSelectedPath);
+    }
   };
 
   const handleDelete = async (
@@ -403,7 +464,13 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     folderPath: string = CONFIG.fileFlowPath,
     idx: number
   ): Promise<void> => {
-    await addDocRepository(data, folderPath, setPopupController, idx);
+    await addDocRepository(
+      data,
+      folderPath,
+      setPopupController,
+      idx,
+      folderType
+    );
 
     await getDocRepository().then(async (val: any[]) => {
       masterRes = [...val];
@@ -465,6 +532,49 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     }
   };
 
+  const handleStatusAndPriorityChange = async (
+    type: string,
+    val: any,
+    anotherVal: any,
+    idx: number
+  ): Promise<void> => {
+    let data: any = {};
+    const column: IDocRepositoryColumn = CONFIG.DocRepositoryColumn;
+
+    data[column.ID] = masterDocDatas[idx]?.ID || null;
+    data[column.Priority] =
+      type === CONFIG.DocRepositoryColumn.Priority ? val : anotherVal;
+    data[column.IsActive] =
+      type === CONFIG.DocRepositoryColumn.IsActive ? val : anotherVal;
+
+    masterDocDatas[idx].Priority =
+      type === CONFIG.DocRepositoryColumn.Priority ? val : anotherVal;
+    masterDocDatas[idx].IsActive =
+      type === CONFIG.DocRepositoryColumn.IsActive ? val : anotherVal;
+
+    await pathFileORFolderCheck(
+      masterDocDatas[idx]?.Content?.ServerRelativeUrl
+    ).then((res: any[]) => {
+      masterDocDatas[idx].Content.isSubFiles = res.length ? true : false;
+    });
+
+    await Promise.all(
+      masterDocDatas?.sort((a: IDocRepository, b: IDocRepository) => {
+        const priorityComparison = Number(a?.Priority) - Number(b?.Priority);
+
+        if (priorityComparison === 0) {
+          return a?.Content?.name.localeCompare(b?.Content?.name);
+        }
+
+        return priorityComparison;
+      })
+    );
+
+    await updateDocRepositoryData({ ...data });
+    setFilDocDatas([...masterDocDatas]);
+    await handleSearch("", [...masterDocDatas]);
+  };
+
   const onLoadingFUN = async (): Promise<void> => {
     await RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
@@ -505,7 +615,7 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
             accept="application/*"
             placeholder="Click to upload a file"
             multiple
-            value={formData?.Content?.value?.name || null}
+            value={formData?.Content?.value ?? []}
             onFileSelect={(e: any) => {
               const value: any = e;
               const { isValid, errorMsg } = validateField(
@@ -528,7 +638,7 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
             accept="application/*"
             placeholder="Click to upload a file"
             multiple
-            value={formData?.Content?.value?.name || null}
+            value={formData?.Content?.value ?? []}
             onFileSelect={(e: any) => {
               const value: any = e;
               const { isValid, errorMsg } = validateField(
@@ -547,7 +657,8 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     [
       <div key={3}>
         <p>
-          Are you sure you want to delete this {curObject?.Content?.fileType}?
+          Are you sure you want to delete this{" "}
+          {curObject?.Content?.fileType !== "file" ? "folder" : "file"}?
         </p>
       </div>,
     ],
@@ -808,39 +919,95 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                 {curDocDatas?.map((val: IDocRepository, idx: number) => {
                   return (
                     <div key={idx} className={styles.folderSection}>
-                      <div className={styles.folderItems}>
-                        <div
-                          title={val?.Content?.name}
-                          onClick={() => {
-                            if (val?.Content?.fileType !== "file") {
-                              handleSelectFolder(
-                                "add",
-                                val?.Content?.name,
-                                idx + 1,
-                                val?.Content?.ServerRelativeUrl
-                              );
-                            } else {
-                              window.open(
-                                val?.Content?.ServerRelativeUrl + "?web=1"
-                              );
-                            }
-                          }}
-                        >
-                          <img
-                            src={
-                              val?.Content?.fileType !== "file"
-                                ? folderIcon
-                                : fileIcon
-                            }
-                            className={
-                              val?.Content?.fileType !== "file"
-                                ? styles.folderIcon
-                                : styles.fileIcon
-                            }
-                            alt="Doc"
-                          />
-                          <span>{val?.Content?.name}</span>
+                      <div
+                        className={styles.folderContentSec}
+                        title={val?.Content?.name}
+                        onClick={() => {
+                          if (val?.Content?.fileType !== "file") {
+                            handleSelectFolder(
+                              "add",
+                              val?.Content?.name,
+                              idx + 1,
+                              val?.Content?.ServerRelativeUrl
+                            );
+                          } else {
+                            window.open(
+                              val?.Content?.ServerRelativeUrl + "?web=1"
+                            );
+                          }
+                        }}
+                      >
+                        <img
+                          src={
+                            val?.Content?.fileType !== "file"
+                              ? folderIcon
+                              : fileIcon
+                          }
+                          className={
+                            val?.Content?.fileType !== "file"
+                              ? styles.folderIcon
+                              : styles.fileIcon
+                          }
+                          alt="Doc"
+                        />
+                        <div className={styles.contentSec}>
+                          {val?.Content?.name}
                         </div>
+                      </div>
+                      <div
+                        className={styles.folderActionSec}
+                        style={{
+                          justifyContent:
+                            val?.Content?.fileType === "master_folder"
+                              ? "flex-start"
+                              : "end",
+                        }}
+                      >
+                        {val?.Content?.fileType === "master_folder" ? (
+                          <>
+                            <div
+                              style={{
+                                width: "50%",
+                              }}
+                            >
+                              <CustomDropDown
+                                highlightDropdown
+                                noErrorMsg
+                                value={val?.Priority}
+                                size="SM"
+                                width="100px"
+                                options={["1", "2", "3", "4", "5", "6", "7"]}
+                                onChange={(data: any) => {
+                                  handleStatusAndPriorityChange(
+                                    CONFIG.DocRepositoryColumn.Priority,
+                                    data,
+                                    val?.IsActive,
+                                    idx
+                                  );
+                                }}
+                              />
+                            </div>
+
+                            <div
+                              style={{
+                                width: "26%",
+                              }}
+                            >
+                              <InputSwitch
+                                className="sectionToggler"
+                                checked={val?.IsActive}
+                                onChange={(data: any) => {
+                                  handleStatusAndPriorityChange(
+                                    CONFIG.DocRepositoryColumn.IsActive,
+                                    data?.value,
+                                    val?.Priority,
+                                    idx
+                                  );
+                                }}
+                              />
+                            </div>
+                          </>
+                        ) : null}
 
                         {!val?.Content?.isSubFiles && isAdmin ? (
                           <DeleteIcon

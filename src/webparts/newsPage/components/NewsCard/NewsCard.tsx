@@ -7,6 +7,7 @@ import { CONFIG } from "../../../../config/config";
 
 interface NewsCardProps {
   Id?: number;
+  idx?: number;
   imageUrl: string;
   title: string;
   description: string;
@@ -21,13 +22,13 @@ interface NewsCardProps {
   // setIsview?: (isview: boolean) => void;
   handleDeleteClick: (id: any) => void;
   setIsEdit?: (isEdit: boolean) => void; // Add setIsEdit prop
-
   noActionsAndStatus?: boolean;
   handleEditClick?: (item: any) => void; // Modify this to accept an item
   handleViewClick?: (item: any) => void; // Modify this to accept an item
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({
+  idx,
   imageUrl,
   title,
   description,
@@ -49,7 +50,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
   const handleEdit = (): void => {
     if (handleEditClick) {
       setisDelete?.(false);
-
       setIsEdit?.(true);
       handleEditClick(item); // Pass the item back to the parent
     }
@@ -57,19 +57,18 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
   const handleDelete = (): void => {
     setIsEdit?.(false);
-
     setisDelete?.(true);
     handleDeleteClick(item.ID);
   };
 
   const handleView = (): any => {
     if (handleViewClick) {
-      console.log("clicked");
       handleViewClick(item);
     }
   };
+
   return (
-    <div className={styles.newsCard}>
+    <div className={styles.newsCard} key={idx}>
       <img
         src={imageUrl}
         alt="News Thumbnail"
@@ -94,12 +93,11 @@ const NewsCard: React.FC<NewsCardProps> = ({
             <div className={styles.actionBtns}>
               <i
                 onClick={handleView}
-                className="pi pi-eye
-"
+                className="pi pi-eye"
                 style={{ color: "#adadad", fontSize: "1.2rem" }}
               />
               {currentUserDetails.role === CONFIG.RoleDetails.user ? (
-                <></>
+                ""
               ) : (
                 <>
                   <i
@@ -114,8 +112,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
                   />
                 </>
               )}
-              {/* <button onClick={onEdit}>Edit</button>
-              <button onClick={onDelete}>Delete</button> */}
             </div>
           )}
         </div>

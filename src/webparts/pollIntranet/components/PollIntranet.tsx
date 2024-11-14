@@ -287,22 +287,55 @@ const PollIntranet = (props: any): JSX.Element => {
           />
 
           {/* Show plus icon for the last option if it's not empty */}
-          {index === options.length - 1 && option.Title.trim() !== "" ? (
-            <DefaultButton
-              onlyIcon={true}
-              btnType="primaryGreen"
-              size="medium"
-              onClick={handleAddOption}
-              text={
-                <Add
-                  sx={{
-                    width: "20px",
-                    fontSize: "24px",
-                    color: "#fff",
-                  }}
-                />
-              }
-            />
+          {index === options.length - 1 ? (
+            <>
+              <DefaultButton
+                onlyIcon={true}
+                btnType="primaryGreen"
+                size="medium"
+                onClick={() => {
+                  const { isValid, errorMsg } = validateField(
+                    "Title",
+                    option.Title,
+                    option.validationRule
+                  );
+                  isValid
+                    ? handleAddOption()
+                    : handleInputChange(
+                        `options[${index}].Title`,
+                        option.Title,
+                        isValid,
+                        errorMsg
+                      );
+                }}
+                text={
+                  <Add
+                    sx={{
+                      width: "20px",
+                      fontSize: "24px",
+                      color: "#fff",
+                    }}
+                  />
+                }
+              />
+              <DefaultButton
+                style={{
+                  display: options.length !== 1 ? "flex" : "none",
+                }}
+                onlyIcon={true}
+                btnType="secondaryRed"
+                size="medium"
+                onClick={() => handleDeleteOption(index)}
+                text={
+                  <Delete
+                    sx={{
+                      width: "20px",
+                      fontSize: "24px",
+                    }}
+                  />
+                }
+              />
+            </>
           ) : (
             /* Show delete icon for non-last options or if last option is empty */
             index !== options.length - 1 && (
@@ -573,7 +606,7 @@ const PollIntranet = (props: any): JSX.Element => {
             }}
           />
 
-          {currentPoll ? (
+          {currentPoll?.length ? (
             <>
               <div
                 className={styles["poll-header"]}
@@ -633,7 +666,7 @@ const PollIntranet = (props: any): JSX.Element => {
               </div>
             </>
           ) : (
-            <p>No active poll available at the moment.</p>
+            <div className={styles.noDataFound}>No poll found!</div>
           )}
 
           <div
@@ -644,6 +677,9 @@ const PollIntranet = (props: any): JSX.Element => {
           >
             <div className={styles.voteButton}>
               <Button
+                style={{
+                  display: currentPoll?.length !== 0 ? "flex" : "none",
+                }}
                 label="Vote"
                 disabled={
                   selectedOption?.OptionId === currentPoll[0]?.PreviousOption ||
