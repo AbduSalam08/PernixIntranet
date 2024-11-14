@@ -1,34 +1,283 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+.container {
+  width: 100%;
+  height: calc(100vh - 128px);
+  background-color: white;
+  padding: 16px 30px;
+  overflow: auto;
+}
 
-.blogsPage {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}
+.blogbody {
+  .adminbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    h6 {
+      color: red;
+      font-size: 13px;
+      text-shadow: 0 0 black;
+    }
+  }
+  color: black;
+  .blogparentbox {
+    color: black;
+
+    .new-blog-button {
+      display: flex;
+      padding: 8px 16px;
+      background-color: #0a4b48;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      gap: 10px;
+      transition: background-color 0.3s ease;
+      span {
+        width: 65px;
+      }
+      .Addicon {
+        margin-right: 8px;
+        font-size: 16px;
+      }
+    }
+    .new-blog-button .icon {
+      margin-right: 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .new-blog-button:hover {
+      background-color: #006b68;
+    }
+  }
+  .blogarrowcontainer {
+    color: beige;
+    margin: 10px 0px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .bloginbox {
+    .dropdownbox {
+      display: flex;
+      align-items: center;
+      margin-top: 9px;
+    }
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .blog {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      h5 {
+        margin-left: 10px;
+        font-size: 17px;
+        color: #074307;
+      }
+      .roundiconbutton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background-color: #ffffff;
+        border: 2px solid #ffa500;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+
+      .roundiconbutton:hover {
+        transform: scale(1.1);
+        cursor: pointer;
+      }
+
+      .icon {
+        color: #ffa500;
+        font-size: 13px;
+      }
+      .blogheading {
+        color: #042b04;
+        font-size: 15px;
+      }
+      h5 {
+        font-size: 17px;
+      }
+    }
+  }
+  .searchboxcontainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    .searchbox {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
   }
 }
-
-.welcome {
-  text-align: center;
+.blogcontainer {
+  margin: 1% 0;
+  height: 65vh;
+  overflow: auto;
 }
-
-.welcomeImage {
+.blogmaincontainer {
+  .emptyfile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    img {
+      width: 50%;
+      height: 50%;
+    }
+  }
+  display: flex;
   width: 100%;
-  max-width: 420px;
-}
+  flex-wrap: wrap;
+  align-items: center;
+  // justify-content: space-between;
+  gap: 31px;
+  padding: 10px;
+  .smallcontainer {
+    .inbox {
+      padding: 24px;
+      height: 454px;
+      .imgbox {
+        height: 191px;
+        img {
+          border-radius: 11px;
+          object-fit: cover;
+        }
+      }
+      h4 {
+        margin: 7px 0px;
+        font-weight: 600;
+        color: #e0803d;
+      }
+      h3 {
+        margin: 7px 0px;
+        font-weight: 600;
+        color: #101828;
+      }
+      .contenttitle {
+        .parenttitle {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .Arrowupicon {
+          font-size: 12px;
+          cursor: pointer;
+        }
+        .paragraph {
+          color: #667085;
+          font-weight: 400;
+          line-height: 22px;
+          height: 71px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+        }
+      }
+      .footercontainer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 16px;
+        .peoplebox {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          .namediv {
+            line-height: 16px;
+            font-weight: bold;
+            cursor: auto;
+          }
+          .datediv {
+            font-weight: 400;
+            color: #535252;
+            font-size: 13px;
+            margin-top: 4px;
+            cursor: auto;
+          }
+        }
+        .likecontainer {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          width: 27%;
+          margin-right: 4px;
+          justify-content: space-between;
+          .likebox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            .likeicon {
+              color: #0a5f0a;
+              font-size: 18px;
+              cursor: pointer;
+            }
+            label {
+              color: #667085;
+            }
+          }
+          .eyecontainer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            .eyeicon {
+              color: orange;
+              font-weight: 600;
+              font-size: 25px;
+              cursor: pointer;
+            }
+            label {
+              color: #667085;
+            }
+          }
+        }
+      }
+      .approversection {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .checkbox {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+      }
+    }
+    box-shadow: 1px 1px 5px #9b9393;
+    .box {
+      padding: 11px;
+    }
+    width: 31%;
+    border-radius: 15px;
+    // height: 485px;
+  }
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    .peoplefooter {
+      display: flex;
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
-
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
+      gap: 9px;
     }
   }
 }
