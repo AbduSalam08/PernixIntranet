@@ -8,10 +8,10 @@ import "../../../assets/styles/Style.css";
 import styles from "./AddingComponent.module.scss";
 import { Icon } from "@fluentui/react";
 import QuillEditor from "../../../components/common/QuillEditor/QuillEditor";
-
 import { addfilemsg } from "../../../services/BlogsPage/BlogsPageServices";
-import { InputText } from "primereact/inputtext";
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+// import { InputText } from "primereact/inputtext";
+import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 interface IPopupData {
   ImageDescription: string;
   Attachmentfiles: any[];
@@ -36,12 +36,12 @@ function AddingComponent(props: any) {
     isEdited: false,
     value: "",
   });
-  const [additionaldetails, setadditionaldetails] =
-    useState(_additionaldetails);
-  const [joditContent, setJoditContent] = useState("");
-  const [popupData, setpoupData] = useState(_popupData);
-  const [error, seterror] = useState("");
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [objerror, setobjerror] = useState({
+    Title: "",
+    ParentTitle: "",
+    Image: "",
+    Quill: "",
+  });
   const allowedImageExtensions = [
     "jpg",
     "jpeg",
@@ -51,6 +51,13 @@ function AddingComponent(props: any) {
     "svg",
     "webp",
   ];
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [additionaldetails, setadditionaldetails] =
+    useState(_additionaldetails);
+  const [joditContent, setJoditContent] = useState("");
+  const [popupData, setpoupData] = useState(_popupData);
+  console.log(popupData);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   // This function is Quill onchange method
   const onChange = (key: any, text: any) => {
@@ -59,12 +66,23 @@ function AddingComponent(props: any) {
     } else if (text !== "<p><br></p>") {
       setJoditContent(text);
     }
-    seterror("");
+    setobjerror({
+      Title: "",
+      ParentTitle: "",
+      Image: "",
+      Quill: "",
+    });
   };
+  // this parenttitleonChange method
   const headingonchange = (key: any, text: any) => {
     const _additionaldetails: any = { ...additionaldetails };
     _additionaldetails[key] = text;
-    seterror("");
+    setobjerror({
+      Title: "",
+      ParentTitle: "",
+      Image: "",
+      Quill: "",
+    });
     setadditionaldetails({ ..._additionaldetails });
   };
 
@@ -86,7 +104,12 @@ function AddingComponent(props: any) {
       ...popupData,
       Attachmentfiles: [...popupData.Attachmentfiles, ...tempfiles],
     });
-    seterror("");
+    setobjerror({
+      Title: "",
+      ParentTitle: "",
+      Image: "",
+      Quill: "",
+    });
   };
   // This is file Validation Function Method
   const filevalidation = (event: any) => {
@@ -95,7 +118,12 @@ function AddingComponent(props: any) {
     if (allowedImageExtensions.some((item) => item === extension)) {
       fnfiles(event.target.files);
     } else {
-      seterror("Only Images Upload");
+      setobjerror({
+        Title: "",
+        ParentTitle: "",
+        Image: "Only image upload",
+        Quill: "",
+      });
     }
   };
   // This Function is Delete files Method
@@ -103,38 +131,63 @@ function AddingComponent(props: any) {
     const _Attachmentfiles: any[] = [...popupData.Attachmentfiles];
     _Attachmentfiles.splice(index, 1);
     setpoupData({ ...popupData, Attachmentfiles: [..._Attachmentfiles] });
-    seterror("");
+    setobjerror({
+      Title: "",
+      ParentTitle: "",
+      Image: "",
+      Quill: "",
+    });
   };
   // this overall validation
   const validation = () => {
     const matches = joditContent.replace(/<\/?p>/g, "");
-    let error = "";
-    if (popupData.Attachmentfiles.length === 0) {
-      error = "Please Upload Images";
-    } else if (additionaldetails.Title === "") {
-      error = "Please Give Title";
+    const _objerror: any = { ...objerror };
+    if (additionaldetails.Title === "") {
+      _objerror.Title = "Please give title";
+    } else if (additionaldetails.Title.trim() === "") {
+      _objerror.Title = "Please give title";
     } else if (additionaldetails.ParentTitle === "") {
-      error = "Please Give ParentTitle";
+      _objerror.ParentTitle = "Please give parent title";
+    } else if (additionaldetails.ParentTitle.trim() === "") {
+      _objerror.ParentTitle = "Please give parent title";
     } else if (matches.trim().length === 0) {
-      error = "Please Fill Image Description";
+      _objerror.Quill = "Please fill image description";
+    } else if (popupData.Attachmentfiles.length === 0) {
+      _objerror.Image = "Please upload image";
+    } else if (Math.floor(popupData.Attachmentfiles[0].Size) > 10000) {
+      _objerror.Image = "Image size no more than 10 MB";
     }
 
-    return error;
+    return _objerror;
   };
   // This is addmsg function method
   const addmsg = async () => {
+    debugger;
     const error = validation();
-    if (!error) {
+    let finderrorobj: boolean = false;
+    for (const _errorobj of Object.keys(error)) {
+      if (_errorobj[error]) {
+        finderrorobj = true;
+      }
+    }
+    if (finderrorobj !== true) {
+      setIsLoading(true);
       const _popupData = {
         ImageDescription: JSON.stringify(joditContent),
         BlogsHeading: additionaldetails.Title,
         BlogTitle: additionaldetails.ParentTitle,
+        Status: "Pending",
       };
-      addfilemsg(_popupData, popupData).then((response) => {
-        props.resetstate();
-      });
+      addfilemsg(_popupData, popupData)
+        .then((response) => {
+          setIsLoading(false);
+          props.resetstate();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      seterror(error);
+      setobjerror({ ...error });
     }
   };
   // This is Cancel Function Method
@@ -154,179 +207,244 @@ function AddingComponent(props: any) {
   }, []);
   return (
     <div>
-      <div className={styles.blogbody}>
-        <div className={styles.blogparentbox}>
-          <div className={styles.blog}>
-            <div
-              className={styles.roundiconbutton}
-              onClick={() => {
-                props.resetstate();
-              }}
-            >
-              <Icon iconName="SkypeArrow" className={styles.icon} />
-            </div>
-            <div>
-              <h5>New Blog</h5>
-            </div>
-          </div>
-          {/* This is File Inputs Method */}
-          {popupData.Attachmentfiles.length === 0 ? (
-            <div className={styles.fileuploadbox}>
-              <div className={styles.fileuploadinbox}>
-                <div className={styles.filedescriptionbox}>
-                  <div>
-                    <Icon
-                      iconName="CloudUpload"
-                      style={{
-                        fontSize: "27px",
-                        color: "#878787",
-                      }}
-                    />
-                  </div>
-                  <h4>Select a file or drag drop here</h4>
-                  <h6>JPG,PNG,or PDF,file size no more than 10 MB</h6>
+      {isLoading ? (
+        <div className={styles.LoaderContainer}>
+          <CircularSpinner />
+        </div>
+      ) : (
+        <div>
+          <div className={styles.blogbody}>
+            <div className={styles.blogparentbox}>
+              <div className={styles.blog}>
+                <div
+                  className={styles.roundiconbutton}
+                  onClick={() => {
+                    props.resetstate();
+                  }}
+                >
+                  <Icon iconName="SkypeArrow" className={styles.icon} />
                 </div>
-                <div className={styles.inputbox}>
-                  <div
-                    className={styles["new-blog-button"]}
-                    onClick={() => {
-                      // document.getElementById("filetype").click(); // Programmatically click the hidden input
-                    }}
-                  >
-                    <input
-                      type="file"
-                      id="filetype"
-                      ref={fileInputRef}
-                      style={{ display: "none" }}
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      onChange={(event: any) => {
-                        seterror("");
-                        // eslint-disable-next-line no-debugger
-                        filevalidation(event);
-                      }}
-                    />
-                    <span
-                      onClick={() => {
-                        if (fileInputRef.current) {
-                          fileInputRef.current.click();
+                <div>
+                  <h5>New blog</h5>
+                </div>
+              </div>
+              {/* This is File Inputs Method */}
+              <div style={{ color: "parenttitle" }}>
+                <div className={styles.inputparentbox}>
+                  <div style={{ display: "flex", width: "49%" }}>
+                    <CustomInput
+                      onChange={(value) => {
+                        if (value.length < 250) {
+                          headingonchange("Title", value);
+                        } else {
+                          setobjerror({
+                            Title:
+                              "The title may contain up to 250 characters.",
+                            ParentTitle: "",
+                            Image: "",
+                            Quill: "",
+                          });
                         }
                       }}
-                    >
-                      Select File
-                    </span>
+                      errorMsg={objerror.Title || ""}
+                      value={additionaldetails.Title}
+                      inputWrapperClassName={styles.pathSearchFilter}
+                      size="SM"
+                      placeholder="Title"
+                    />
                   </div>
+                  <div style={{ width: "49%" }}>
+                    <CustomInput
+                      onChange={(e) => {
+                        if (e.length < 250) {
+                          headingonchange("ParentTitle", e);
+                        } else {
+                          setobjerror({
+                            Title:
+                              "The parent title may contain up to 250 characters.",
+                            ParentTitle: "",
+                            Image: "",
+                            Quill: "",
+                          });
+                        }
+                      }}
+                      errorMsg={objerror.ParentTitle || ""}
+                      value={additionaldetails.ParentTitle}
+                      inputWrapperClassName={styles.pathSearchFilter}
+                      size="SM"
+                      placeholder="Parent title"
+                    />
+                  </div>
+                </div>
+                <div className={styles.quillparentbox}>
+                  {/* this is Quill Editor function method */}
+                  <QuillEditor
+                    onChange={(commentText: any) => {
+                      setobjerror({
+                        Title: "",
+                        ParentTitle: "",
+                        Image: "",
+                        Quill: "",
+                      });
+                      onChange("ImageDescription", commentText);
+
+                      setCommentText((prev: any) => ({
+                        ...prev,
+                        isValid: true,
+                        value: commentText,
+                      }));
+                    }}
+                    value={joditContent}
+                    getMentionedEmails={(e: any) => {
+                      console.log("shanmugaraj");
+                    }}
+                    placeHolder={"Enter Comments and @ to mention..."}
+                    defaultValue={commentText.value}
+                  />
+                  <label className={styles.errorlabel}>
+                    {objerror.Quill || ""}
+                  </label>
+                </div>
+                <div className={styles.fileuploadparentbox}>
+                  {popupData.Attachmentfiles.length === 0 ? (
+                    <div className={styles.fileuploadbox}>
+                      <div className={styles.fileuploadinbox}>
+                        <div className={styles.filedescriptionbox}>
+                          <div>
+                            <Icon
+                              iconName="CloudUpload"
+                              style={{
+                                fontSize: "27px",
+                                color: "#878787",
+                              }}
+                            />
+                          </div>
+                          <h4>Select a file or drag drop here</h4>
+                          <h6>JPG,PNG or JPEG size no more than 10 MB</h6>
+                        </div>
+                        <div className={styles.inputbox}>
+                          <div
+                            className={styles["new-blog-button"]}
+                            onClick={() => {
+                              // document.getElementById("filetype").click(); // Programmatically click the hidden input
+                            }}
+                          >
+                            <input
+                              type="file"
+                              id="filetype"
+                              ref={fileInputRef}
+                              style={{ display: "none" }}
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              onChange={(event: any) => {
+                                setobjerror({
+                                  Title: "",
+                                  ParentTitle: "",
+                                  Image: "",
+                                  Quill: "",
+                                });
+                                // eslint-disable-next-line no-debugger
+                                filevalidation(event);
+                              }}
+                            />
+                            <span
+                              onClick={() => {
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.click();
+                                }
+                              }}
+                            >
+                              Select file
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className={styles.fileuploadbox}
+                      style={{
+                        padding: "45px",
+                      }}
+                    >
+                      {imageSrc && (
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "10px",
+                          }}
+                        >
+                          <img
+                            src={imageSrc}
+                            alt="Selected"
+                            style={{
+                              width: "330px",
+                              height: "220px",
+                              borderRadius: "68px",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <Icon
+                            iconName="Cancel"
+                            className={styles.imageshowbox}
+                            onClick={() => {
+                              delfiles(0);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <label className={styles.errorlabel}>
+                    {objerror.Image || ""}
+                  </label>
                 </div>
               </div>
             </div>
-          ) : (
-            <div
-              className={styles.fileuploadbox}
-              style={{
-                padding: "45px",
-              }}
-            >
-              {imageSrc && (
+          </div>
+          <div
+            style={{
+              marginTop: "20px",
+            }}
+            className={styles.quillbox}
+          >
+            {/* this cancel submit button container */}
+            <div className={styles.buttonbox}>
+              {/* <div className={styles.errorobj}>
+            {objerror.Quill
+              ? objerror.Quill
+              : objerror.Image
+              ? objerror.Image
+              : ""}
+          </div> */}
+              <div className={styles.buttoninbox}>
                 <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
+                  className={styles["new-blog-button"]}
+                  onClick={() => {
+                    cancelstate();
                   }}
                 >
-                  <img
-                    src={imageSrc}
-                    alt="Selected"
-                    style={{
-                      width: "330px",
-                      height: "220px",
-                      borderRadius: "68px",
-                      objectFit: "cover",
-                    }}
-                  />
-                  <Icon
-                    iconName="Cancel"
-                    className={styles.imageshowbox}
-                    onClick={() => {
-                      delfiles(0);
-                    }}
-                  />
+                  <button className={styles.cancelbutton}>Cancel</button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      <div
-        style={{
-          marginTop: "20px",
-        }}
-        className={styles.quillbox}
-      >
-        <div style={{ display: "flex" }}>
-          <InputText
-            className={styles.inputbox}
-            value={additionaldetails.Title}
-            onChange={(e) => headingonchange("Title", e.target.value)} // Capture text input value
-            placeholder="Title"
-          />
-          <InputText
-            className={styles.inputbox}
-            value={additionaldetails.ParentTitle}
-            onChange={(e) => headingonchange("ParentTitle", e.target.value)} // Capture text input value
-            placeholder="Parent Title"
-          />
-        </div>
-
-        <div>
-          {/* this is Quill Editor function method */}
-          <QuillEditor
-            onChange={(commentText: any) => {
-              seterror("");
-              onChange("ImageDescription", commentText);
-
-              setCommentText((prev: any) => ({
-                ...prev,
-                isValid: true,
-                value: commentText,
-              }));
-            }}
-            value={joditContent}
-            getMentionedEmails={(e: any) => {
-              console.log("shanmugaraj");
-            }}
-            placeHolder={"Enter Comments and @ to mention..."}
-            defaultValue={commentText.value}
-          />
-        </div>
-        {/* this cancel submit button container */}
-        <div className={styles.buttonbox}>
-          <div className={styles.errorobj}>{error || ""}</div>
-          <div className={styles.buttoninbox}>
-            <div
-              className={styles["new-blog-button"]}
-              onClick={() => {
-                cancelstate();
-              }}
-            >
-              <button className={styles.cancelbutton}>Cancel</button>
-            </div>
-            <div
-              className={styles["new-blog-button"]}
-              onClick={() => {
-                console.log("shanmugaraj");
-              }}
-            >
-              <button
-                className={styles.submitbutton}
-                onClick={() => {
-                  addmsg();
-                }}
-              >
-                Submit
-              </button>
+                <div
+                  className={styles["new-blog-button"]}
+                  onClick={() => {
+                    console.log("shanmugaraj");
+                  }}
+                >
+                  <button
+                    className={styles.submitbutton}
+                    onClick={() => {
+                      addmsg();
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

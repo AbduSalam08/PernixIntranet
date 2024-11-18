@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CONFIG } from "../../config/config";
 import { sp } from "@pnp/sp/presets/all";
-
+// This function is User like functionality Update Method
 export const addlikemethod = async (
   Id: number,
   addingdetails: any,
@@ -25,6 +25,7 @@ export const addlikemethod = async (
       onLoadingFunc();
     });
 };
+// This function userviewlikes Method
 export const viewLikes = async (
   Id: number,
   addingdetails: any,
@@ -52,6 +53,7 @@ export const viewLikes = async (
       onLoadingFunc();
     });
 };
+// This function is Number View Person
 export const nooneviews = async (
   Id: number,
   addingdetails: any,
@@ -80,6 +82,7 @@ export const nooneviews = async (
       onLoadingFunc();
     });
 };
+// This function usergetdetails in Intranet_Blogs
 export const usergetdetails = async (): Promise<any> => {
   const listname = CONFIG.ListNames.Intranet_Blogs;
   return await sp.web.lists
@@ -94,6 +97,7 @@ export const usergetdetails = async (): Promise<any> => {
     .expand("AttachmentFiles,Author")
     .get();
 };
+// This function Other UserDetails in NOt Approved Person
 export const otheruserdetails = async (): Promise<any> => {
   const listname = CONFIG.ListNames.Intranet_Blogs;
   return await sp.web.lists
@@ -109,7 +113,7 @@ export const otheruserdetails = async (): Promise<any> => {
     .filter("Status eq 'Approved'")
     .get();
 };
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+// This function Admin Approved The Blog Status
 export const Approved = async (Id: number, _Status: string): Promise<any> => {
   debugger;
   const listname = CONFIG.ListNames.Intranet_Blogs;
@@ -117,6 +121,7 @@ export const Approved = async (Id: number, _Status: string): Promise<any> => {
     Status: _Status,
   });
 };
+// This Function is User Add Blogs Method
 export const addfilemsg = async (
   _popupData: any,
   popupData: any
@@ -144,14 +149,12 @@ export const addfilemsg = async (
     return `Failed to add file: ${error.message || "unknown error"}`;
   }
 };
+// This is The Permission Handling
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const permissionhandling = async () => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // const permissions:string=""
-    // const curruntuseremail = arr.Email;
-
-    return await sp.web.siteGroups.getByName("Blogs_Admin").users.get();
+    const groupname = CONFIG.SPGroupName.Calendar_Admin;
+    return await sp.web.siteGroups.getByName(groupname).users.get();
   } catch (err) {
     console.error("Error handling permissions:", err);
     return null;
@@ -168,5 +171,13 @@ export const getintername = async (): Promise<any[]> => {
   } catch (error) {
     console.error("Error fetching fields:", error);
     return [];
+  }
+};
+// This function get CurrentuserDetails
+export const getcuruserdetails = async (): Promise<any> => {
+  try {
+    return await sp.web.currentUser.get();
+  } catch {
+    console.log("shanmugaraj");
   }
 };

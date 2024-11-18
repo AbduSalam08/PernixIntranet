@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
 import styles from "./ViewComponent.module.scss";
 import { Icon } from "@fluentui/react";
-import { sp } from "@pnp/sp/presets/all";
+// import { sp } from "@pnp/sp/presets/all";
 import { Persona, PersonaSize, PersonaPresence } from "@fluentui/react";
+import { getcuruserdetails } from "../../../services/BlogsPage/BlogsPageServices";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 
 function ViewComponent(props: any) {
@@ -16,8 +17,8 @@ function ViewComponent(props: any) {
     Email: "",
     Title: "",
   });
+  // This is The curuserhow many likes and view Concepts is show
   let totaluserlikescount: number = 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let curuserlikes: boolean = false;
   let userviewcounts: number = 0;
   if (props.viewitem.userDetails.length > 0) {
@@ -30,11 +31,9 @@ function ViewComponent(props: any) {
       }
     });
   }
-  // debugger;
   if (props.viewitem.viewDetails && props.viewitem.viewDetails.length > 0) {
     userviewcounts = props.viewitem.viewDetails.length;
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userviewcounts = 0;
   }
   const poersonaStyles = {
@@ -42,9 +41,9 @@ function ViewComponent(props: any) {
       display: "revert",
     },
   };
-
+  //  This is Current User Details
   const getcurrentuser = async (): Promise<void> => {
-    await sp.web.currentUser.get().then((arr) => {
+    await getcuruserdetails().then((arr) => {
       setcuruser({
         ...curuser,
         Id: arr.Id,
@@ -68,7 +67,13 @@ function ViewComponent(props: any) {
         >
           <Icon iconName="SkypeArrow" className={styles.icon} />
         </div>
-        <h1>View Details</h1>
+        {/* <h5
+          style={{
+            textDecoration: "underline 1.5px green",
+          }}
+        >
+          View Details
+        </h5> */}
       </div>
       <div
         style={{ width: "100%", backgroundColor: "white", marginTop: "15px" }}
@@ -111,7 +116,9 @@ function ViewComponent(props: any) {
                 </div>
                 <div className={styles.namediv}>
                   <h5>{props.viewitem.Author?.Title}</h5>
-                  <h5 className={styles.datediv}>17 Jan 2022</h5>
+                  <h5 className={styles.datediv}>
+                    {props.viewitem.Created || ""}
+                  </h5>
                 </div>
               </div>
             </div>
