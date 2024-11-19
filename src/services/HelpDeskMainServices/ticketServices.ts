@@ -508,15 +508,16 @@ export const updateTicket = async (
 export const getAllUsersList = async (dispatch: any): Promise<any> => {
   await SpServices.getAllUsers()
     .then((res: any) => {
-      console.log("res: ", res);
+      // console.log("res: ", res);
+      // alert(JSON.stringify(res));
       const allUsers: any = res
         ?.map((user: any) => ({
           id: user?.Id,
           value: user?.Title,
           email: user?.Email,
         }))
-        ?.filter((item: any) => item?.Email?.trim() !== "");
-      console.log("allUsers: ", allUsers);
+        ?.filter((item: any) => item?.email?.trim() !== "");
+      // console.log("allUsers: ", allUsers);
       dispatch(setAllUsersData(allUsers));
     })
     .catch((err: any) => {

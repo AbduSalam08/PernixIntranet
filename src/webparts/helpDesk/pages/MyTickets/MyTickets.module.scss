@@ -183,6 +183,7 @@
   gap: 13px;
   font-size: 14px;
   font-family: "osMedium", sans-serif !important;
+  text-decoration: none;
   p {
     font-size: 16px;
     color: #adadad;
@@ -217,4 +218,16 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 10px;
+}
+
+.leftHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  .pillText {
+    color: #adadad;
+    font-size: 13px;
+    font-family: "osMedium", sans-serif;
+  }
 }

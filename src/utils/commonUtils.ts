@@ -3,6 +3,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from "dayjs";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import isBetween from "dayjs/plugin/isBetween";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { setHelpDeskTickets } from "../redux/features/HelpDeskSlice";
@@ -141,6 +143,66 @@ export const validateField = (
   }
 
   return { isValid: true, errorMsg: "" };
+};
+
+/**
+ * Downloads files either as a single file (if one file is provided)
+ * or as a ZIP archive (if multiple files are provided).
+ *
+ * @param {string} zipFileName - Name of the ZIP file (if applicable).
+ * @param {Array} files - Array of files to download. Each file should be an object with:
+ *   - name: The name of the file (e.g., "example.txt").
+ *   - content: The URL of the file content.
+ */
+export const downloadFiles = async (
+  zipFileName: string,
+  files: any[]
+): Promise<void> => {
+  if (!files || files.length === 0) {
+    console.error("No files provided for download.");
+    return;
+  }
+
+  if (files.length === 1) {
+    // Single file scenario
+    const file = files[0];
+    try {
+      const anchor = document.createElement("a");
+      anchor.href = file.content;
+      anchor.download = file.name;
+      anchor.click();
+    } catch (error) {
+      console.error("Error downloading single file:", error);
+    }
+  } else {
+    // Multiple files scenario
+    const zip = new JSZip();
+
+    for (const file of files) {
+      try {
+        const response = await fetch(file.content, {
+          mode: "cors",
+        });
+        if (!response.ok) {
+          console.error(
+            `Failed to fetch file ${file.name}: ${response.statusText}`
+          );
+          continue;
+        }
+        const blob = await response.blob();
+        zip.file(file.name, blob);
+      } catch (error) {
+        console.error(`Error adding file ${file.name} to ZIP:`, error);
+      }
+    }
+
+    try {
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, zipFileName || "files.zip");
+    } catch (error) {
+      console.error("Error generating ZIP file:", error);
+    }
+  }
 };
 
 // help desk UTILS
@@ -353,7 +415,7 @@ export const currentRoleBasedDataUtil: any = (
 ) => {
   if (
     currentUserDetails?.role === "Pernix_Admin" ||
-    currentUserDetails?.role === "Super Admin" ||
+    // currentUserDetails?.role === "Super Admin" ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
   ) {
     return {
@@ -366,7 +428,6 @@ export const currentRoleBasedDataUtil: any = (
         item?.ITOwner?.EMail === currentUserDetails?.email ||
         item?.EmployeeName?.EMail === currentUserDetails?.email
     );
-    console.log("isItOwner: ", isItOwner);
     return {
       data: !currentPath?.includes("mentions")
         ? isItOwner
@@ -417,12 +478,11 @@ export const ticketsFilter = async (
         isLoading: false,
         data: filterHandleData,
         AllData: helpDeskTicketsData?.AllData,
-        ticketType: "unassigned",
+        ticketType: "Unassigned",
       })
     );
   }
   if (currentPath?.includes("open")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.Status === "Open"
     );
@@ -437,7 +497,6 @@ export const ticketsFilter = async (
     );
   }
   if (currentPath?.includes("email")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.TicketSource?.toLowerCase() === "email"
     );
@@ -447,14 +506,13 @@ export const ticketsFilter = async (
         isLoading: false,
         data: filterHandleData,
         AllData: helpDeskTicketsData?.AllData,
-        ticketType: "Open",
+        ticketType: "From email",
       })
     );
   }
   if (currentPath?.includes("web")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
-      (item: any) => item?.TicketSource?.toLowerCase() === "web"
+      (item: any) => item?.TicketSource?.toLowerCase() === "web portal"
     );
 
     dispatch(
@@ -462,12 +520,11 @@ export const ticketsFilter = async (
         isLoading: false,
         data: filterHandleData,
         AllData: helpDeskTicketsData?.AllData,
-        ticketType: "Open",
+        ticketType: "From web portal",
       })
     );
   }
   if (currentPath?.includes("closed")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.Status === "Closed"
     );
@@ -482,7 +539,6 @@ export const ticketsFilter = async (
     );
   }
   if (currentPath?.includes("onhold")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.Status === "On Hold"
     );
@@ -497,7 +553,6 @@ export const ticketsFilter = async (
     );
   }
   if (currentPath?.includes("inprogress")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.Status === "In Progress"
     );
@@ -507,12 +562,11 @@ export const ticketsFilter = async (
         isLoading: false,
         data: filterHandleData,
         AllData: helpDeskTicketsData?.AllData,
-        ticketType: "In Progress",
+        ticketType: "In progress",
       })
     );
   }
   if (currentPath?.includes("overdue")) {
-    console.log("pass");
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.Status === "Overdue"
     );
@@ -532,9 +586,12 @@ export const ticketsFilter = async (
       "This Week",
       "Created"
     );
-    const allCreatedTicketsFlattened = Object.keys(createdTicketsData)?.flatMap(
-      (key: string) => createdTicketsData[key]?.data || []
-    );
+    const allCreatedTicketsFlattened = Object.keys(createdTicketsData)
+      ?.flatMap((key: string) => createdTicketsData[key]?.data || [])
+      ?.filter(
+        (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
+      );
+    console.log("allCreatedTicketsFlattened: ", allCreatedTicketsFlattened);
     dispatch(
       setHelpDeskTickets({
         isLoading: false,
@@ -557,7 +614,41 @@ export const ticketsFilter = async (
         isLoading: false,
         data: filterHandleData,
         AllData: helpDeskTicketsData?.AllData,
-        ticketType: "Last 7 days",
+        ticketType: "Mentioned tickets",
+      })
+    );
+  }
+  if (currentPath?.includes("created_by_me")) {
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) =>
+        [item?.EmployeeName]?.some(
+          (person: any) => person?.EMail === currentUserDetails?.email
+        )
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Created by me",
+      })
+    );
+  }
+  if (currentPath?.includes("assigned_to_me")) {
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) =>
+        [item?.ITOwner]?.some(
+          (person: any) => person?.EMail === currentUserDetails?.email
+        )
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Assigned to me",
       })
     );
   }
@@ -567,7 +658,7 @@ export const getCurrentRoleForTicketsRoute = (
   currentUserDetails: any
 ): string => {
   return currentUserDetails?.role === "Pernix_Admin" ||
-    currentUserDetails?.role === "Super Admin" ||
+    // currentUserDetails?.role === "Super Admin" ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
     ? "/helpdesk_manager"
     : currentUserDetails?.role === "HelpDesk_IT_Owners"

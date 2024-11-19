@@ -377,14 +377,15 @@ const Dashboard = (): JSX.Element => {
             />
           </div>
         </div>
+      </div>
 
+      <div className={styles.metricsGrid}>
         <div className={styles.metricCard}>
           <div className={styles.chartDetails}>
             <span>
-              {currentRoleBasedData?.role ===
-                CONFIG.SPGroupName.HelpDesk_Ticket_Managers ||
-              currentRoleBasedData?.role === "Super Admin"
-                ? "Tickets created by (user basis)"
+              {currentRoleBasedData?.role === "ticket_manager"
+                ? // || currentRoleBasedData?.role === "Super Admin"
+                  "Tickets created by (user basis)"
                 : "Tickets created by users & myself"}
             </span>
             <div className={styles.filters}>
@@ -409,8 +410,8 @@ const Dashboard = (): JSX.Element => {
             </div>
           </div>
           <div className={styles.chart}>
-            {currentRoleBasedData?.role === "ticket_manager" ||
-            currentRoleBasedData?.role === "Super Admin" ? (
+            {currentRoleBasedData?.role === "ticket_manager" ? (
+              // || currentRoleBasedData?.role === "Super Admin" ? (
               <TicketsCreatedByUserBasis
                 isLoading={HelpDeskTicktesData?.isLoading}
                 AllTickets={currentRoleBasedData}

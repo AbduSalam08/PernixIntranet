@@ -63,7 +63,6 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
           <Route path="/helpdesk_manager" Component={MainLayout}>
             <Route index Component={Dashboard} />
             <Route path="dashboard" Component={Dashboard} />
-            <Route path="mentions" Component={MyTickets} />
 
             <Route
               path="all_tickets/:ticketid/view_ticket"
@@ -88,6 +87,8 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
 
             <Route path="all_tickets" Component={MyTickets}>
               <Route index Component={MyTickets} />
+              <Route path="mentions" Component={MyTickets} />
+              <Route path="created_by_me" Component={MyTickets} />
               <Route path="all" Component={MyTickets} />
               <Route path="open" Component={MyTickets} />
               <Route path="unassigned" Component={MyTickets} />
@@ -99,7 +100,6 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
           <Route path="/user" Component={MainLayout}>
             {/* <Route index Component={Dashboard} /> */}
             {/* <Route path="dashboard" Component={Dashboard} /> */}
-            <Route path="mentions" Component={MyTickets} />
             <Route index Component={MyTickets} />
             <Route path="tickets" Component={MyTickets}>
               <Route index Component={MyTickets} />
@@ -122,6 +122,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
             />
             <Route path="all_tickets" Component={MyTickets}>
               <Route index Component={MyTickets} />
+              <Route path="mentions" Component={MyTickets} />
               <Route path="all" Component={MyTickets} />
               {/* <Route path="open" Component={MyTickets} /> */}
               <Route path="unassigned" Component={MyTickets} />
@@ -133,7 +134,6 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
           <Route path="/it_owner" Component={MainLayout}>
             <Route index Component={Dashboard} />
             <Route path="dashboard" Component={Dashboard} />
-            <Route path="mentions" Component={MyTickets} />
 
             <Route index Component={MyTickets} />
             <Route path="tickets" Component={MyTickets}>
@@ -157,6 +157,9 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
             />
             <Route path="all_tickets" Component={MyTickets}>
               <Route index Component={MyTickets} />
+              <Route path="mentions" Component={MyTickets} />
+              <Route path="created_by_me" Component={MyTickets} />
+              <Route path="assigned_to_me" Component={MyTickets} />
               <Route path="all" Component={MyTickets} />
               {/* <Route path="open" Component={MyTickets} /> */}
               <Route path="unassigned" Component={MyTickets} />
