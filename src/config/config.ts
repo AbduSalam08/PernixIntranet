@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import {
   IDocRepositoryColumn,
+  IFeedbackQusColumn,
+  IFeedbackQusType,
+  IFeedbackResColumn,
+  IFeedbackResType,
   IListName,
   IMotivateColumn,
   INavigatePage,
@@ -39,6 +43,9 @@ export namespace CONFIG {
     Intranet_PollOptions: "Intranet_PollOptions",
     Intranet_PollResponse: "Intranet_PollResponse",
     Intranet_Blogs: "Intranet_Blogs",
+    Intranet_feedbackQuestion: "Intranet_feedbackQuestion",
+    Intranet_feedbackResponse: "Intranet_feedbackResponse",
+    Intranet_ShoutOutsOptions: "Intranet_ShoutOutsOptions",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -57,6 +64,8 @@ export namespace CONFIG {
     Shoutouts_Admin: "Shoutouts_Admin",
     HelpDesk_Ticket_Managers: "HelpDesk_Ticket_Managers",
     HelpDesk_IT_Owners: "HelpDesk_IT_Owners",
+    Feedback_Admin: "Feedback_Admin",
+    Blogs_Admin: "Blogs_Admin",
   };
 
   export const QuestionsPageTabsName: string[] = [
@@ -76,6 +85,12 @@ export namespace CONFIG {
   };
 
   export const TabsName: string[] = ["Current", "Upcoming", "Previous"];
+
+  export const NewHiresPageTabsName: string[] = [
+    "Current",
+    "Up Comming",
+    "Previous",
+  ];
 
   export const DateFormat: string = "MM/DD/YYYY";
 
@@ -137,4 +152,39 @@ export namespace CONFIG {
     QuestionsCEOPage: "/SitePages/QuestionsCEOPage.aspx",
     ShoutOutsPage: "/SitePages/ShoutOutsPage.aspx",
   };
+
+  export const FeedbackQusColumn: IFeedbackQusColumn = {
+    ID: "ID",
+    Title: "Title",
+    StartDate: "StartDate",
+    EndDate: "EndDate",
+  };
+
+  export const FeedbackQusType: IFeedbackQusType = {
+    ID: null,
+    Title: "Title",
+    StartDate: null,
+    EndDate: null,
+  };
+
+  export const FeedbackResColumn: IFeedbackResColumn = {
+    ID: "ID",
+    Answer: "Answer",
+    FeedbackQuestionId: "FeedbackQuestionId",
+  };
+
+  export const FeedbackResType: IFeedbackResType = {
+    ID: null,
+    Answer: "Answer",
+    FeedbackQuestionId: null,
+    CreatedBy: {
+      ID: null,
+      Title: "",
+      Email: "",
+    },
+    Date: null,
+  };
+
+  export const userImageURL: string =
+    "/_layouts/15/userphoto.aspx?size=S&username=";
 }
