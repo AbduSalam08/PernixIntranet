@@ -22,3 +22,11 @@
     margin-top: -6.4px !important;
     box-shadow: 0 0 13px -1px rgba(0, 0, 0, 37%) !important;
 }
+.p-checkbox{
+    display: flex;
+    align-items: center;
+}
+.p-checkbox-box{
+    width: 15px!important;
+    height: 15px!important;
+}

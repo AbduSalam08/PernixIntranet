@@ -109,7 +109,7 @@
     width: 100%;
     min-height: 360px;
     max-height: 360px;
-    overflow: auto;
+    // overflow: auto;
     background-color: #ffffff;
     border-radius: 8px;
     padding: 10px;
@@ -163,7 +163,7 @@
         font-size: 13px;
         color: #4b4b4b;
         line-height: 20px;
-        margin: 10px 0px 20px 0px;
+        margin: 10px 0px 0px 0px;
         font-family: "osRegular", sans-serif;
       }
     }
@@ -173,7 +173,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 10px;
+      padding-top: 14px;
     }
   }
 }

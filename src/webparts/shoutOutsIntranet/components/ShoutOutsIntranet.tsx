@@ -22,13 +22,21 @@ import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import {
   addShoutOut,
   getAllShoutOutsData,
+  getShoutOutsOptions,
 } from "../../../services/shoutOutIntranet/shoutOutIntranet";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
+import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 // images
 const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+
+interface IShoutOutOptions {
+  ID: number;
+  Title: string;
+  Description: string;
+}
 
 const ShoutOutsIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -69,8 +77,12 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
   );
 
   const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
+  const [shoutOutsOptions, setShoutOutsOptions] = useState<IShoutOutOptions[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   console.log("shoutOutsData", shoutOutsData);
+  console.log("shoutOutsOptions", shoutOutsOptions);
 
   const [formData, setFormData] = useState<any>({
     SendTowards: {
@@ -78,6 +90,12 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "Send person is required",
       validationRule: { required: true, type: "array" },
+    },
+    Template: {
+      value: "",
+      isValid: true,
+      errorMsg: "Description is required",
+      validationRule: { required: true, type: "string" },
     },
     Description: {
       value: "",
@@ -142,22 +160,52 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
   const popupInputs: any[] = [
     [
       <div className={styles.addShoutOutGrid} key={1}>
-        <CustomPeoplePicker
-          labelText="Shout-out to"
-          isValid={formData.SendTowards.isValid}
-          errorMsg={formData.SendTowards.errorMsg}
-          selectedItem={[formData.SendTowards.value]}
-          onChange={(item: any) => {
-            const value = item[0];
-            console.log("value: ", value);
-            const { isValid, errorMsg } = validateField(
-              "SendTowards",
-              item,
-              formData.SendTowards.validationRule
-            );
-            handleInputChange("SendTowards", value, isValid, errorMsg);
-          }}
-        />
+        <div style={{ width: "100%", display: "flex", gap: "20px" }}>
+          <div style={{ width: "50%" }}>
+            <CustomPeoplePicker
+              labelText="Shout-out to"
+              isValid={formData.SendTowards.isValid}
+              errorMsg={formData.SendTowards.errorMsg}
+              selectedItem={[formData.SendTowards.value]}
+              onChange={(item: any) => {
+                const value = item[0];
+                console.log("value: ", value);
+                const { isValid, errorMsg } = validateField(
+                  "SendTowards",
+                  item,
+                  formData.SendTowards.validationRule
+                );
+                handleInputChange("SendTowards", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div style={{ width: "50%" }}>
+            <CustomDropDown
+              value={formData.Template.value}
+              options={shoutOutsOptions.map((obj: any) => obj.Title) || []}
+              placeholder="Template"
+              isValid={formData.Template.isValid}
+              errorMsg={formData.Template.errorMsg}
+              onChange={(value) => {
+                const description = shoutOutsOptions?.filter(
+                  (obj: any) => obj?.Title === value
+                );
+                const { isValid, errorMsg } = validateField(
+                  "Template",
+                  value,
+                  formData.Template.validationRule
+                );
+                handleInputChange("Template", value, isValid, errorMsg);
+                handleInputChange(
+                  "Description",
+                  description[0]?.Description,
+                  isValid,
+                  errorMsg
+                );
+              }}
+            />
+          </div>
+        </div>
         <FloatingLabelTextarea
           value={formData.Description.value}
           placeholder="Description"
@@ -286,6 +334,7 @@ const ShoutOutsIntranet = (props: any): JSX.Element => {
   }, [shoutOutData]);
   useEffect(() => {
     dispatch(setMainSPContext(props?.context));
+    getShoutOutsOptions(setShoutOutsOptions);
     getAllShoutOutsData(dispatch);
   }, [dispatch]);
 

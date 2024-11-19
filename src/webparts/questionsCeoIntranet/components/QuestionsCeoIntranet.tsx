@@ -216,7 +216,11 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
           <div className={styles.imgsection}>
             <Avatar
               className="qustionceo"
-              image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.avatarUrl}`}
+              image={`/_layouts/15/userphoto.aspx?size=S&username=${
+                val?.Anonymous
+                  ? "https://randomuser.me/api/portraits/placeholder.jpg"
+                  : val?.avatarUrl
+              }`}
               // size="small"
               shape="circle"
               style={{
@@ -267,7 +271,7 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
   ) : (
     <div className={styles.quesToCEOContainer}>
       <SectionHeaderIntranet
-        label={"Question to CEO"}
+        label={"Questions to Leadership"}
         headerAction={() => {
           togglePopupVisibility(
             setPopupController,

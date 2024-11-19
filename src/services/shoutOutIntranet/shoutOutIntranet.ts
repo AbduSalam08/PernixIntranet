@@ -6,6 +6,29 @@ import { sp } from "@pnp/sp";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export const getShoutOutsOptions = async (
+  setShoutOutsOptions: any
+): Promise<any> => {
+  try {
+    const response: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_ShoutOutsOptions,
+      Select: "*",
+      Expand: "",
+    });
+    console.log("response: ", response);
+    const shoutOutOptions: any = response?.map((item: any) => {
+      return {
+        ID: item?.ID,
+        Title: item?.Title,
+        Description: item?.Description,
+      };
+    });
+    setShoutOutsOptions(shoutOutOptions);
+  } catch (error) {
+    console.error("Error fetching shout-outs options:", error);
+  }
+};
+
 export const getAllShoutOutsData = async (dispatch: any): Promise<any> => {
   dispatch?.(
     setShoutOutsData({
@@ -25,6 +48,7 @@ export const getAllShoutOutsData = async (dispatch: any): Promise<any> => {
     const shoutOutData: any = response?.map((item: any) => {
       return {
         ID: item?.ID,
+        Template: item?.Title,
         receiverDetails: {
           id: item?.SendTowards?.ID,
           email: item?.SendTowards?.EMail,
@@ -215,9 +239,9 @@ export const addShoutOut = async (
     debugger;
 
     const payload = {
+      Title: formData.Template?.value,
       Description: formData.Description?.value,
       SendTowardsId: formData.SendTowards?.value?.id,
-      Status: "Pending",
     };
 
     // Add item to the SharePoint list
@@ -293,6 +317,7 @@ export const addShoutOut = async (
 };
 export const updateShoutOut = async (
   formData: FormData,
+  ID: number,
   setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
   index: number,
   dispath: any
@@ -316,15 +341,19 @@ export const updateShoutOut = async (
     debugger;
     const payload = formData.SendTowards?.value?.id
       ? {
+          Title: formData.Template?.value,
           Description: formData.Description?.value,
           SendTowardsId: formData.SendTowards?.value?.id,
         }
-      : { Description: formData.Description?.value };
+      : {
+          Title: formData.Template?.value,
+          Description: formData.Description?.value,
+        };
 
     // Add item to the SharePoint list
     await SpServices.SPUpdateItem({
       Listname: CONFIG.ListNames.Intranet_ShoutOuts,
-      ID: formData.ID.value,
+      ID: ID,
       RequestJSON: payload,
     }).then(async (res: any) => {
       await getAllShoutOutsData(dispath);
