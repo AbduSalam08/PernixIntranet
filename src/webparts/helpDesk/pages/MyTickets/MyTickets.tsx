@@ -14,10 +14,11 @@ const infoRed: any = require("../../../helpDesk/assets/images/svg/infoRed.svg");
 
 import styles from "./MyTickets.module.scss";
 import { useEffect, useMemo, useState } from "react";
-import { Add, OpenInNew, RestartAlt } from "@mui/icons-material";
+import { Add, AttachFile, OpenInNew, RestartAlt } from "@mui/icons-material";
 import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
 import {
   currentRoleBasedDataUtil,
+  downloadFiles,
   filterTicketsByCategory,
   filterTicketsByPriority,
   filterTicketsBySearch,
@@ -117,17 +118,17 @@ const MyTickets = (): JSX.Element => {
   console.log("currentUserDetails: ", currentUserDetails);
 
   const isTicketManager: boolean =
-    currentUserDetails?.role === "HelpDesk_Ticket_Managers" ||
-    currentUserDetails?.role === "Super Admin";
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers";
+  // || currentUserDetails?.role === "Super Admin";
 
   console.log("isTicketManager: ", isTicketManager);
-  const isITOwner: boolean =
-    currentUserDetails?.role === "HelpDesk_IT_Owners" ||
-    currentUserDetails?.role === "Super Admin";
+  const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
+  // || currentUserDetails?.role === "Super Admin";
 
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
   );
+  console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
 
@@ -286,30 +287,51 @@ const MyTickets = (): JSX.Element => {
           );
           const currentRowData: any = popupController[0]?.popupData;
 
-          const formDataAppended = {
-            TicketNumber: {
-              value: currentRowData?.TicketNumber,
-            },
-            Status: { value: "Open" },
-            RepeatedTicketSourceId: { value: currentRowData?.ID },
-            RepeatedTicket: { value: true },
-            TicketRepeatedOn: { value: dayjs(new Date()) },
-            Category: { value: currentRowData?.Category },
-            Priority: { value: currentRowData?.Priority },
-            EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
-            TicketSource: { value: currentRowData?.TicketSource },
-            TicketDescription: { value: currentRowData?.TicketDescription },
-            TicketManagerId: {
-              value: currentRowData?.TicketManagerId
-                ? currentRowData?.TicketManager?.ID
-                : null,
-            },
-            ITOwnerId: {
-              value: currentRowData?.ITOwnerId
-                ? currentRowData?.ITOwner?.ID
-                : null,
-            },
-          };
+          const formDataAppended = isTicketManager
+            ? {
+                TicketNumber: {
+                  value: currentRowData?.TicketNumber,
+                },
+                Status: { value: "Open" },
+                RepeatedTicketSourceId: { value: currentRowData?.ID },
+                RepeatedTicket: { value: true },
+                TicketRepeatedOn: { value: dayjs(new Date()) },
+                Category: { value: currentRowData?.Category },
+                Priority: { value: currentRowData?.Priority },
+                EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
+                TicketSource: { value: currentRowData?.TicketSource },
+                TicketDescription: { value: currentRowData?.TicketDescription },
+                TicketManagerId: {
+                  value: currentRowData?.TicketManagerId
+                    ? currentRowData?.TicketManager?.ID
+                    : null,
+                },
+                ITOwnerId: {
+                  value: currentRowData?.ITOwnerId
+                    ? currentRowData?.ITOwner?.ID
+                    : null,
+                },
+              }
+            : {
+                TicketNumber: {
+                  value: currentRowData?.TicketNumber,
+                },
+                Status: { value: "Open" },
+                RepeatedTicketSourceId: { value: currentRowData?.ID },
+                RepeatedTicket: { value: true },
+                TicketRepeatedOn: { value: dayjs(new Date()) },
+                Category: { value: currentRowData?.Category },
+                Priority: { value: currentRowData?.Priority },
+                EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
+                TicketSource: { value: currentRowData?.TicketSource },
+                TicketDescription: { value: currentRowData?.TicketDescription },
+                TicketManagerId: {
+                  value: null,
+                },
+                ITOwnerId: {
+                  value: null,
+                },
+              };
           console.log("formDataAppended: ", formDataAppended);
 
           await Promise.all([
@@ -347,7 +369,7 @@ const MyTickets = (): JSX.Element => {
       sortable: true,
       field: "ticket_number",
       headerName: "Ticket no",
-      width: 200,
+      width: 170,
       renderCell: (params: any) => {
         return (
           <span
@@ -370,7 +392,7 @@ const MyTickets = (): JSX.Element => {
       sortable: false,
       field: "IT_owner",
       headerName: "IT/Business Owner",
-      width: 200,
+      width: 300,
       renderCell: (params: any) => {
         return (
           <>
@@ -406,27 +428,68 @@ const MyTickets = (): JSX.Element => {
       sortable: false,
       field: "category",
       headerName: "Category",
-      width: 200,
+      width: 150,
     },
     {
       sortable: false,
       field: "priority",
       headerName: "Priority",
-      width: 200,
+      width: 150,
     },
+
     {
       sortable: false,
       field: "status",
       headerName: "Status",
-      maxWidth: 150,
+      maxWidth: 120,
       renderCell: (params: any) =>
         params?.value ? <StatusPill size="SM" status={params?.value} /> : "-",
+    },
+    {
+      sortable: false,
+      field: "attachments",
+      headerName: "Attachment",
+      maxWidth: 120,
+      renderCell: (params: any) => (
+        <span
+          style={{
+            width: "80%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={async () => {
+            console.log("params: ", params);
+            const files: any = await getAttachmentofTicket(params?.row?.id);
+            console.log("files: ", files);
+            const mappedFiles: any = files?.map((item: any) => {
+              return {
+                name: item?.FileName,
+                content: `${window.location.origin}${item?.ServerRelativeUrl}?web=1`,
+              };
+            });
+            await downloadFiles(
+              `${params?.row?.ticket_number} - Attachments`,
+              mappedFiles
+            );
+          }}
+        >
+          <AttachFile
+            sx={{
+              color: "#0a3622",
+              fontSize: "18px",
+              cursor: "pointer",
+              transform: "rotate(40deg)",
+            }}
+          />
+        </span>
+      ),
     },
     {
       field: "actions",
       sortable: false,
       headerName: "Actions",
-      width: 200,
+      width: 160,
       renderCell: (params: any) => (
         <div className={styles.actionButtons}>
           {!`${currentRole}${location.pathname}`?.includes("mentions") ? (
@@ -765,7 +828,15 @@ const MyTickets = (): JSX.Element => {
   return (
     <div className={styles.mytickets}>
       <div className={styles.mytickets_header}>
-        <PageHeader title={"All tickets"} noBackBtn />
+        <div className={styles.leftHeader}>
+          <PageHeader title={"All tickets"} noBackBtn />
+          {HelpDeskTicktesData?.ticketType?.toLowerCase() !== "all tickets" &&
+            HelpDeskTicktesData?.ticketType?.toLowerCase() !== "my tickets" && (
+              <span className={styles.pillText}>
+                ({HelpDeskTicktesData?.ticketType})
+              </span>
+            )}
+        </div>
 
         <div className={styles.topLevelFilter}>
           <CustomDropDown
@@ -1123,8 +1194,9 @@ const MyTickets = (): JSX.Element => {
                   // />
                   <CustomMultipleFileUpload
                     accept="image/svg, image/png, image/jpg"
-                    placeholder="Upload attachments"
+                    placeholder="Click to upload attachment(s)"
                     multiple
+                    customFileNameWidth={"370px"}
                     // value={formData?.Attachment?.value?.name || null}
                     value={formData?.Attachment?.value ?? []}
                     onFileSelect={(file) => {
@@ -1141,12 +1213,14 @@ const MyTickets = (): JSX.Element => {
                   />
                 ) : formData?.Attachment?.value?.length > 0 ? (
                   <>
-                    <p>Attachment(s)</p>
+                    <p>Attachments ({formData?.Attachment?.value?.length})</p>
                     <div className={styles.attachmentsWrapper}>
                       {formData?.Attachment?.value?.map(
                         (item: any, idx: number) => (
-                          <span
+                          <a
                             key={idx}
+                            href={`${window.location.origin}${item?.ServerRelativeUrl}?web=1`}
+                            download
                             className={styles.fileSource}
                             onClick={() => {
                               window.open(
@@ -1158,7 +1232,7 @@ const MyTickets = (): JSX.Element => {
                               <img src={fileIcon} />
                               <span>{item?.name}</span>
                             </div>
-                          </span>
+                          </a>
                         )
                       )}
                     </div>

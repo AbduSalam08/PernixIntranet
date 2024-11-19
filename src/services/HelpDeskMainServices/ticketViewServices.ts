@@ -29,7 +29,7 @@ export const addComment = async (
               results: [
                 ...alltaggedPersons,
                 ...formData?.TaggedPersonId?.results,
-              ],
+              ]?.filter((item: any) => item !== null && item !== undefined),
             },
           },
         })

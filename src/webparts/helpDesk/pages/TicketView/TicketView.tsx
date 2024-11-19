@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Avatar, Backdrop, CircularProgress } from "@mui/material";
+import { Avatar, AvatarGroup, Backdrop, CircularProgress } from "@mui/material";
 import styles from "./TicketView.module.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import CommentCard from "../../components/CommentCard/CommentCard";
@@ -19,7 +19,10 @@ import {
 } from "../../../../services/HelpDeskMainServices/ticketViewServices";
 import { ToastContainer } from "react-toastify";
 import dayjs from "dayjs";
-import { getCurrentRoleForTicketsRoute } from "../../../../utils/commonUtils";
+import {
+  downloadFiles,
+  getCurrentRoleForTicketsRoute,
+} from "../../../../utils/commonUtils";
 import { imageURL, TicketStatus } from "../../../../constants/HelpDeskTicket";
 import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
@@ -82,7 +85,6 @@ const TicketView = (): JSX.Element => {
     isLoading: true,
     data: [],
   });
-  console.log("conversationData: ", conversationData);
 
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
@@ -90,7 +92,6 @@ const TicketView = (): JSX.Element => {
   const AllUsersData = useSelector((state: any) => state.AllUsersData?.value);
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
-  console.log("currentRole: ", currentRole);
 
   const currentTicketsDataMain: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
@@ -99,7 +100,6 @@ const TicketView = (): JSX.Element => {
   const currentTicketsData = currentTicketsDataMain?.AllData?.filter(
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
-  console.log("currentTicketsData: ", currentTicketsData);
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
   const [toggles, setToggles] = useState({
@@ -167,26 +167,29 @@ const TicketView = (): JSX.Element => {
     results: [],
   });
 
-  // const uniqueUsers = new Set();
+  const uniqueUsers = new Set<string>();
 
-  // const usersToTag: any = [
-  //   ...AllUsersData,
-  //   currentTicketsData?.EmployeeName,
-  //   currentTicketsData?.ITOwner,
-  //   currentTicketsData?.TicketManager,
-  // ]?.map((user: any) => ({
-  //   id: user?.Id || user?.id,
-  //   name: user?.Title || user?.name,
-  //   email: user?.Email || user?.email,
-  // }));
-  // .filter((user) => {
-  //   if (user && !uniqueUsers?.has(user.email)) {
-  //     uniqueUsers.add(user.email);
-  //     return true;
-  //   }
-  //   return false;
-  // });
-  // console.log("usersToTag: ", usersToTag);
+  console.log("currentTicketsData: ", currentTicketsData);
+  console.log("conversationData: ", conversationData);
+  const contributors: any = [
+    ...conversationData?.data?.flatMap((item: any) => item?.TaggedPerson || []), // Handle taggedPerson array
+    currentTicketsData?.EmployeeName,
+    currentTicketsData?.ITOwner,
+    currentTicketsData?.TicketManager,
+  ]?.filter((user: any) => {
+    if (user?.EMail && !uniqueUsers.has(user.EMail)) {
+      uniqueUsers.add(user.EMail);
+      return true;
+    }
+    return false;
+  });
+  console.log([
+    ...conversationData?.data?.flatMap((item: any) => item?.TaggedPerson || []), // Handle taggedPerson array
+    currentTicketsData?.EmployeeName,
+    currentTicketsData?.ITOwner,
+    currentTicketsData?.TicketManager,
+  ]);
+  console.log("contributors: ", contributors);
 
   const repeatedTicketNumber = currentTicketsDataMain?.AllData?.filter(
     (item: any) => item?.ID === currentTicketsData?.RepeatedTicketSourceId
@@ -233,7 +236,6 @@ const TicketView = (): JSX.Element => {
                     {currentTicketsData?.EmployeeName?.Title} raised this ticket
                     on{" "}
                     {dayjs(currentTicketsData?.Created)?.format("DD MMM YYYY")}
-
                     <span className={styles.splitterDot} />
                     {conversationData?.data?.length} comments
                     {currentTicketsData?.TicketClosedOn !== null && (
@@ -276,7 +278,7 @@ const TicketView = (): JSX.Element => {
                 )}
               </div>
 
-              <div className={styles.headerDetailsLabel}>
+              {/* <div className={styles.headerDetailsLabel}>
                 <label
                   onClick={() => {
                     setToggles((prev: any) => ({
@@ -306,12 +308,22 @@ const TicketView = (): JSX.Element => {
                 >
                   {currentTicketsData?.TicketDescription ?? "-"}
                 </span>
-              </div>
+              </div> */}
             </div>
             <div className={styles.ticketChats}>
               <div className={styles.heading}>Conversations</div>
 
-              <div className={styles.conversationsWrapper}>
+              <div
+                className={styles.conversationsWrapper}
+                style={{
+                  maxHeight:
+                    currentTicketsData?.Status === "Closed" ||
+                    conversationData?.data?.length === 0
+                      ? "100%"
+                      : "calc(100% - 280px)",
+                  overflow: "auto",
+                }}
+              >
                 {conversationData?.isLoading ? (
                   <div className={styles.loaderElement}>
                     <CircularProgress
@@ -387,99 +399,101 @@ const TicketView = (): JSX.Element => {
                 )}
               </div>
 
-              <div
-                // className={`${styles.commentBox} ${localProperties?.expandCommentBar ? styles.expand : ''}`}
-                className={`${styles.commentBox}`}
-              >
-                <span
-                  className={styles.commentBoxTitle}
-                  // onClick={() => {
-                  // setLocalProperties((prev) => ({
-                  //   ...prev,
-                  //   expandCommentBar:!prev?.expandCommentBar
-                  // }))
-                  // }}
+              {currentTicketsData?.Status !== "Closed" && (
+                <div
+                  // className={`${styles.commentBox} ${localProperties?.expandCommentBar ? styles.expand : ''}`}
+                  className={`${styles.commentBox}`}
                 >
-                  {/* <ArrowRight className={styles.openArrow} /> */}
-                  Add a comment
-                </span>
-                <div className={styles.comment}>
-                  <div className="inputWrap">
-                    <QuillEditor
-                      onChange={(commentText: any) => {
-                        console.log("commentText: ", commentText);
-                        setCommentText((prev: any) => ({
-                          ...prev,
-                          isValid: true,
-                          value: commentText,
-                        }));
+                  <span
+                    className={styles.commentBoxTitle}
+                    // onClick={() => {
+                    // setLocalProperties((prev) => ({
+                    //   ...prev,
+                    //   expandCommentBar:!prev?.expandCommentBar
+                    // }))
+                    // }}
+                  >
+                    {/* <ArrowRight className={styles.openArrow} /> */}
+                    Add a comment
+                  </span>
+                  <div className={styles.comment}>
+                    <div className="inputWrap">
+                      <QuillEditor
+                        onChange={(commentText: any) => {
+                          console.log("commentText: ", commentText);
+                          setCommentText((prev: any) => ({
+                            ...prev,
+                            isValid: true,
+                            value: commentText,
+                          }));
+                        }}
+                        placeHolder={"Enter Comments and @ to mention..."}
+                        defaultValue={commentText.value}
+                        suggestionList={AllUsersData ?? []}
+                        getMentionedEmails={(e: any) => {
+                          console.log("e: ", e);
+                          setTaggedPerson((prev: any) => ({
+                            ...prev,
+                            results: e?.map((item: any) => item?.id),
+                          }));
+                        }}
+                      />
+                      {!commentText?.isValid && (
+                        <p className={styles.errorMsg}>Comment is required.</p>
+                      )}
+                    </div>
+                    <DefaultButton
+                      btnType="primaryGreen"
+                      text={"Comment"}
+                      style={{
+                        marginLeft: "auto",
                       }}
-                      placeHolder={"Enter Comments and @ to mention..."}
-                      defaultValue={commentText.value}
-                      suggestionList={AllUsersData ?? []}
-                      getMentionedEmails={(e: any) => {
-                        console.log("e: ", e);
-                        setTaggedPerson((prev: any) => ({
-                          ...prev,
-                          results: e?.map((item: any) => item?.id),
-                        }));
-                      }}
-                    />
-                    {!commentText?.isValid && (
-                      <p className={styles.errorMsg}>Comment is required.</p>
-                    )}
-                  </div>
-                  <DefaultButton
-                    btnType="primaryGreen"
-                    text={"Comment"}
-                    style={{
-                      marginLeft: "auto",
-                    }}
-                    onClick={async () => {
-                      if (
-                        commentText?.value?.replace(/<(.|\n)*?>/g, "").trim()
-                          .length === 0
-                      ) {
-                        setCommentText((prev) => ({
-                          ...prev,
-                          isValid: false,
-                        }));
-                      } else {
-                        const formData = {
-                          Comment: commentText.value,
-                          TaggedPersonId: taggedPerson,
-                          TicketDetailsId: currentTicketsData?.ID,
-                          IsEdited: commentText.isEdited,
-                        };
-                        const alltaggedPersons =
-                          conversationData?.data?.flatMap((item: any) =>
-                            item?.TaggedPersonId?.map((ID: any) => ID)
-                          );
-                        await Promise.all([
-                          addComment(formData, alltaggedPersons),
-                        ])
-                          .then(async (res: any) => {
-                            setCommentText((prev: any) => ({
-                              ...prev,
-                              isValid: true,
-                              value: "",
-                              isEdited: false,
-                            }));
-                            await getAllComments(
-                              currentTicketsData?.ID,
-                              setConversationData,
-                              true
+                      onClick={async () => {
+                        if (
+                          commentText?.value?.replace(/<(.|\n)*?>/g, "").trim()
+                            .length === 0
+                        ) {
+                          setCommentText((prev) => ({
+                            ...prev,
+                            isValid: false,
+                          }));
+                        } else {
+                          const formData = {
+                            Comment: commentText.value,
+                            TaggedPersonId: taggedPerson,
+                            TicketDetailsId: currentTicketsData?.ID,
+                            IsEdited: commentText.isEdited,
+                          };
+                          const alltaggedPersons =
+                            conversationData?.data?.flatMap((item: any) =>
+                              item?.TaggedPersonId?.map((ID: any) => ID)
                             );
-                          })
-                          .catch((err: any) => {
-                            console.log("err: ", err);
-                          });
-                      }
-                    }}
-                    disabled={commentText.value?.trim() === ""}
-                  />
+                          await Promise.all([
+                            addComment(formData, alltaggedPersons),
+                          ])
+                            .then(async (res: any) => {
+                              setCommentText((prev: any) => ({
+                                ...prev,
+                                isValid: true,
+                                value: "",
+                                isEdited: false,
+                              }));
+                              await getAllComments(
+                                currentTicketsData?.ID,
+                                setConversationData,
+                                true
+                              );
+                            })
+                            .catch((err: any) => {
+                              console.log("err: ", err);
+                            });
+                        }
+                      }}
+                      disabled={commentText.value?.trim() === ""}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -508,6 +522,38 @@ const TicketView = (): JSX.Element => {
                     ) ?? "-"}
                   </span>
                 </div> */}
+
+                <div className={styles.headerDetailsLabel}>
+                  <label
+                    onClick={() => {
+                      setToggles((prev: any) => ({
+                        ...prev,
+                        showDescription: !prev.showDescription,
+                      }));
+                    }}
+                  >
+                    <ArrowRight
+                      sx={{
+                        color: "#adadad",
+                        fontSize: "22px",
+                        transition: "all .2s",
+                        transform: toggles?.showDescription
+                          ? `rotate(90deg)`
+                          : `rotate(0deg)`,
+                      }}
+                    />
+                    <span>Description</span>
+                  </label>
+                  <span
+                    style={{
+                      transition: "all .2s",
+                      height: toggles.showDescription ? `100%` : `0px`,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {currentTicketsData?.TicketDescription ?? "-"}
+                  </span>
+                </div>
 
                 <div className={styles.detailsLabel}>
                   <label>Status</label>
@@ -575,11 +621,35 @@ const TicketView = (): JSX.Element => {
                 </div>
 
                 <div className={styles.detailsLabel}>
-                  <label>Attachment(s)</label>
+                  <label>
+                    Attachments ({currentAttachment?.length})
+                    {currentAttachment?.length > 1 && (
+                      <span
+                        className={styles.downloadText}
+                        onClick={async () => {
+                          const files = currentAttachment?.map((item: any) => {
+                            return {
+                              name: item?.FileName,
+                              content: `${window.location.origin}${item?.ServerRelativeUrl}?web=1`,
+                            };
+                          });
+                          console.log("files: ", files);
+                          await downloadFiles(
+                            `${currentTicketsData?.TicketNumber}-Attachments.zip`,
+                            files
+                          );
+                        }}
+                      >
+                        Download all
+                      </span>
+                    )}
+                  </label>
                   <span className={styles.attachmentsWrapper}>
                     {currentAttachment?.length > 0 ? (
                       currentAttachment?.map((item: any, idx: number) => (
-                        <div
+                        <a
+                          href={`${window.location.origin}${item?.ServerRelativeUrl}?web=1`}
+                          download
                           key={idx}
                           className={styles.fileName}
                           onClick={() => {
@@ -592,7 +662,7 @@ const TicketView = (): JSX.Element => {
                         >
                           <img src={fileIcon} />
                           <span>{item?.FileName}</span>
-                        </div>
+                        </a>
                       ))
                     ) : (
                       <div className={styles.fileName}>
@@ -673,35 +743,36 @@ const TicketView = (): JSX.Element => {
                 </div>
               </div>
             </div>
-            {/* <div className={styles.detailsCard}>
-          <div className={styles.heading}>
-            Contributors ({usersToTag?.length})
-          </div>
-          <div className={styles.ticketPeoples}>
-            <AvatarGroup
-              max={10}
-              spacing="medium"
-              sx={{
-                "& .MuiAvatar-root": {
-                  width: 30,
-                  height: 30,
-                  // border: "1px solid #eeeeee",
-                },
-              }}
-              total={usersToTag?.length}
-            >
-              {usersToTag?.map((user: any, index: number) => {
-                return (
-                  <Avatar
-                    key={index}
-                    alt={user?.name}
-                    src={`${imageURL}${user?.email}`}
-                  />
-                );
-              })}
-            </AvatarGroup>
-          </div>
-        </div> */}
+            <div className={styles.detailsCard}>
+              <div className={styles.heading}>
+                Contributors ({contributors?.length})
+              </div>
+              <div className={styles.ticketPeoples}>
+                <AvatarGroup
+                  max={10}
+                  spacing="small"
+                  sx={{
+                    "& .MuiAvatar-root": {
+                      width: 30,
+                      height: 30,
+                      // border: "1px solid #eeeeee",
+                    },
+                  }}
+                  total={contributors?.length}
+                >
+                  {contributors?.map((user: any, index: number) => {
+                    return (
+                      <Avatar
+                        key={index}
+                        title={user?.Title}
+                        alt={user?.Title}
+                        src={`${imageURL}${user?.EMail}`}
+                      />
+                    );
+                  })}
+                </AvatarGroup>
+              </div>
+            </div>
           </div>
           <ToastContainer
             position="top-center"

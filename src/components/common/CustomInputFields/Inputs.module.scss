@@ -451,15 +451,18 @@
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
 
-    div:nth-child(1) {
+    // div:nth-child(1) {
+    span {
       font-family: "osRegular", sans-serif !important;
       width: 90%;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       padding: 6px;
-      max-width: 370px;
+      // max-width: 370px;
+      max-width: 90%;
     }
 
     div:nth-child(2) {

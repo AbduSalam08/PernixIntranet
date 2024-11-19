@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable @rushstack/no-new-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -484,16 +485,19 @@ type FileUploadProps = {
   isValid?: boolean;
   errMsg?: string | null;
   multiple: boolean;
+  customFileNameWidth?: string | any;
 };
 
 const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
-  accept = "image/png,image/svg+xml",
+  accept,
+  // accept = "image/png,image/svg+xml",
   placeholder = "Select files...",
   value = [],
   onFileSelect,
   errMsg,
   isValid,
   multiple = false,
+  customFileNameWidth,
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
   console.log("value: ", value);
@@ -514,17 +518,53 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
     }
   }, [value]);
 
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+  //   debugger;
+  //   const files = e.target.files ? Array.from(e.target.files) : [];
+  //   console.log("files: ", files);
+
+  //   if (files.length > 0) {
+  //     const acceptedTypes = accept?.split(",");
+  //     const validFiles = files.filter((file) =>
+  //       acceptedTypes?.some((type) => file.type.startsWith(type.trim()))
+  //     );
+
+  //     if (validFiles?.length !== files?.length) {
+  //       setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
+  //       return;
+  //     }
+
+  //     setError(null);
+  //     const updatedFiles = multiple
+  //       ? [...selectedFiles, ...validFiles]
+  //       : validFiles;
+
+  //     setSelectedFiles(updatedFiles);
+  //     setFileNames(updatedFiles.map((file) => file.name));
+  //     onFileSelect?.(updatedFiles);
+  //   }
+  // };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
     const files = e.target.files ? Array.from(e.target.files) : [];
+    console.log("files: ", files);
 
     if (files.length > 0) {
-      const acceptedTypes = accept.split(",");
-      const validFiles = files.filter((file) =>
-        acceptedTypes.some((type) => file.type.startsWith(type.trim()))
-      );
+      const acceptedTypes = accept?.split(",").map((type) => type.trim()); // Split and trim accepted types
+
+      const validFiles = files.filter((file) => {
+        return acceptedTypes?.some((type) => {
+          if (type.endsWith("/*")) {
+            // Check for general MIME type (e.g., application/*)
+            return file.type.startsWith(type.replace("/*", ""));
+          }
+          // Check for specific MIME type (e.g., application/pdf)
+          return file.type === type;
+        });
+      });
 
       if (validFiles.length !== files.length) {
-        setError(`Only ${accept.replace(/,/g, ", ")} files are allowed.`);
+        setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
         return;
       }
 
@@ -540,9 +580,7 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
   };
 
   const handleRemove = (index: number): any => {
-    console.log("index: ", index);
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
-    console.log("updatedFiles: ", updatedFiles);
     setSelectedFiles(updatedFiles);
     setFileNames(updatedFiles.map((file) => file.name));
     onFileSelect?.(updatedFiles);
@@ -578,7 +616,7 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
         <div className={styles.error}>{errMsg}</div>
       ) : (
         <div className={styles.acceptedInfo}>
-          Accepted files: {accept.replace(/,/g, ", ")}
+          Accepted files: {accept?.replace(/,/g, ", ")}
         </div>
       )}
 
@@ -586,7 +624,14 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
         <div className={styles.fileNameAlign}>
           {fileNames?.map((fileName, idx) => (
             <div key={idx}>
-              <div title={fileName}>{fileName}</div>
+              <span
+                title={fileName}
+                style={{
+                  maxWidth: customFileNameWidth ?? "90%",
+                }}
+              >
+                {fileName}
+              </span>
               <div>
                 <Clear
                   onClick={async () => {

@@ -413,7 +413,7 @@ const CustomDropDown: React.FC<Props> = ({
           </Select>
         </FormControl>
       </ThemeProvider>
-      {!isValid && !noErrorMsg && (
+      {errorMsg && !isValid && !noErrorMsg && (
         <p
           className={styles.errorMsg}
           style={{

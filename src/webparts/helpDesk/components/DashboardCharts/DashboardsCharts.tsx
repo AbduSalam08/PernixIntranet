@@ -96,7 +96,7 @@ const TicketByStatusChart = memo(
               0
             );
             const percentage = Math.round((value / total) * 100);
-            return `${percentage}%`;
+            return `${percentage !== 0 ? `${percentage}%` : ""}`;
           },
         },
       },
@@ -138,7 +138,7 @@ const TicketBySource = memo(
 
     const portalTickets =
       allTicketsFlattened?.filter(
-        (ticket: any) => ticket.TicketSource === "Web"
+        (ticket: any) => ticket.TicketSource === "Web portal"
       )?.length || 0;
 
     // Add more sources if necessary
@@ -147,7 +147,7 @@ const TicketBySource = memo(
     const totalTicketsBySource = emailTickets + portalTickets; // Add other sources if necessary
 
     const ticketBySource = {
-      labels: ["Email", "Web"], // Add more labels if needed
+      labels: ["Email", "Web portal"], // Add more labels if needed
       datasets: [
         {
           data: [
@@ -185,7 +185,7 @@ const TicketBySource = memo(
               0
             );
             const percentage = Math.round((value / total) * 100);
-            return `${percentage}%`;
+            return `${percentage !== 0 ? `${percentage}%` : ""}`;
           },
         },
       },
@@ -443,8 +443,6 @@ const TicketsCreatedByUserBasis = memo(
     isLoading: boolean;
     Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
   }): JSX.Element => {
-    console.log("itOwners: ", itOwners);
-    console.log("helpdeskManagers: ", helpdeskManagers);
     // Group tickets by the specified time period
     const TicketsDataByTerm = useMemo(
       () => groupTicketsByPeriod(AllTickets?.data, Term, "Created"),
@@ -487,25 +485,35 @@ const TicketsCreatedByUserBasis = memo(
       [allTicketsFlattened, helpdeskManagers, itOwners]
     );
 
-    // Aggregate the counts for each role
-    const ticketsCreatedByUserBasis = useMemo(
-      () => [
-        heldeskManagersTickets.length,
-        itownersTickets.length,
-        otherUsersTickets.length,
-      ],
-      [heldeskManagersTickets, itownersTickets, otherUsersTickets]
-    );
+    // Aggregate the counts and filter out zero values
+    const ticketsCreatedByUserBasis = useMemo(() => {
+      const counts = [
+        {
+          label: "Helpdesk managers",
+          count: heldeskManagersTickets.length,
+          color: "#F9C74F",
+        },
+        {
+          label: "IT/Business owners",
+          count: itownersTickets.length,
+          color: "#0B4D53",
+        },
+        { label: "Users", count: otherUsersTickets.length, color: "#4F9DF9" },
+      ];
+      return counts;
+    }, [heldeskManagersTickets, itownersTickets, otherUsersTickets]);
 
     // Chart data configuration
     const ticketsByPriority = useMemo(
       () => ({
-        labels: ["Helpdesk managers", "IT/Business owners", "Users"],
+        labels: ticketsCreatedByUserBasis.map((item) => item.label),
         datasets: [
           {
             label: "Tickets",
-            data: ticketsCreatedByUserBasis,
-            backgroundColor: ["#F9C74F", "#0B4D53", "#4F9DF9"],
+            data: ticketsCreatedByUserBasis.map((item) => item.count),
+            backgroundColor: ticketsCreatedByUserBasis.map(
+              (item) => item.color
+            ),
           },
         ],
       }),
@@ -513,32 +521,39 @@ const TicketsCreatedByUserBasis = memo(
     );
 
     // Chart options
-    const ticketsByPriorityOptions = useMemo(
-      () => ({
-        indexAxis: "y",
-        plugins: {
-          legend: { display: false, position: "bottom" },
-          datalabels: {
-            color: "white",
-            formatter: (value: number) => (value > 0 ? value : ""),
+    const ticketsByPriorityOptions = {
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            font: {
+              size: 13,
+              family: "'osMedium', sans-serif",
+            },
+            color: "#484848",
+            boxWidth: 10,
+            padding: 20,
+            usePointStyle: true,
+            pointStyleWidth: 10,
+            borderRadius: 5,
           },
         },
-        barThickness: 60,
-        scales: {
-          x: { title: { display: true, text: "Ticket count" } },
-          y: { title: { display: true, text: "Roles" } },
+        datalabels: {
+          color: "white",
+          formatter: (value: number, ctx: any) => {
+            return `${value !== 0 ? `${value}%` : ""}`;
+          },
         },
-      }),
-      []
-    );
+      },
+    };
 
-    // Render the chart using the MainChart component or display empty message
-    return ticketsCreatedByUserBasis.every((item) => item === 0) ? (
+    // Render the chart using the MainChart component or display an empty message
+    return ticketsCreatedByUserBasis.length === 0 ? (
       emptyMessageText()
     ) : (
       <MainChart
         isLoading={isLoading}
-        chartType="Bar"
+        chartType="Pie"
         data={ticketsByPriority}
         options={ticketsByPriorityOptions}
       />
@@ -566,8 +581,6 @@ const TicketsCreatedByStatsForITOwner = memo(
     isLoading: boolean;
     Term: "This Week" | "This Month" | "Last 3 months" | "Last 6 months" | any;
   }): JSX.Element => {
-    console.log("itOwners: ", itOwners);
-    console.log("helpdeskManagers: ", helpdeskManagers);
     // Group tickets by the specified time period
     const TicketsDataByTerm = useMemo(
       () => groupTicketsByPeriod(AllTickets?.data, Term, "Created"),
@@ -589,7 +602,7 @@ const TicketsCreatedByStatsForITOwner = memo(
         allTicketsFlattened.filter(
           (res) => currentUserEmail === res?.EmployeeName?.EMail
         ),
-      [allTicketsFlattened, itOwners]
+      [allTicketsFlattened, currentUserEmail]
     );
 
     const otherUsersTickets = useMemo(
@@ -603,19 +616,22 @@ const TicketsCreatedByStatsForITOwner = memo(
     );
 
     // Aggregate the counts for each role
-    const ticketsCreatedByUserBasis = useMemo(
-      () => [itownersTickets.length, otherUsersTickets.length],
-      [itownersTickets, otherUsersTickets]
-    );
+    const ticketsCreatedByUserBasis = useMemo(() => {
+      const rawData = [
+        { label: "IT/Business owners (Me)", value: itownersTickets.length },
+        { label: "Users", value: otherUsersTickets.length },
+      ];
+      return rawData;
+    }, [itownersTickets, otherUsersTickets]);
 
     // Chart data configuration
     const ticketsByPriority = useMemo(
       () => ({
-        labels: ["IT/Business owners (Me)", "Users"],
+        labels: ticketsCreatedByUserBasis.map((entry) => entry.label),
         datasets: [
           {
             label: "Tickets",
-            data: ticketsCreatedByUserBasis,
+            data: ticketsCreatedByUserBasis.map((entry) => entry.value),
             backgroundColor: ["#F9C74F", "#0B4D53"],
           },
         ],
@@ -624,32 +640,37 @@ const TicketsCreatedByStatsForITOwner = memo(
     );
 
     // Chart options
-    const ticketsByPriorityOptions = useMemo(
-      () => ({
-        indexAxis: "y",
-        plugins: {
-          legend: { display: false, position: "bottom" },
-          datalabels: {
-            color: "white",
-            formatter: (value: number) => (value > 0 ? value : ""),
+    const ticketsByPriorityOptions = {
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            font: {
+              size: 13,
+              family: "'osMedium', sans-serif",
+            },
+            color: "#484848",
+            boxWidth: 10,
+            padding: 20,
+            usePointStyle: true,
+            pointStyleWidth: 10,
+            borderRadius: 5,
           },
         },
-        barThickness: 60,
-        scales: {
-          x: { title: { display: true, text: "Ticket count" } },
-          y: { title: { display: true, text: "Roles" } },
+        datalabels: {
+          color: "white",
+          formatter: (value: number) => `${value !== 0 ? value : ""}`,
         },
-      }),
-      []
-    );
+      },
+    };
 
     // Render the chart using the MainChart component or display empty message
-    return ticketsCreatedByUserBasis.every((item) => item === 0) ? (
+    return ticketsCreatedByUserBasis.length === 0 ? (
       emptyMessageText()
     ) : (
       <MainChart
         isLoading={isLoading}
-        chartType="Bar"
+        chartType="Pie"
         data={ticketsByPriority}
         options={ticketsByPriorityOptions}
       />

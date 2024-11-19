@@ -58,17 +58,11 @@ const LeftBar: React.FC = (): JSX.Element => {
                   label: "My tickets in last 7 days",
                   path: `${currentRole}/all_tickets/recent`,
                 },
+                {
+                  label: "@Mentions",
+                  path: `${currentRole}/all_tickets/mentions`,
+                },
               ],
-            },
-            {
-              label: "Mentioned tickets",
-              path: `${currentRole}/mentions`,
-              // children: [
-              //   {
-              //     label: "My tickets in last 7 days",
-              //     path: `${currentRole}/all_tickets/recent`,
-              //   },
-              // ],
             },
             {
               label: "Status",
@@ -125,20 +119,22 @@ const LeftBar: React.FC = (): JSX.Element => {
               },
               children: [
                 {
+                  label: "Created by me",
+                  path: `${currentRole}/all_tickets/created_by_me`,
+                },
+                {
+                  label: "Assigned to me",
+                  path: `${currentRole}/all_tickets/assigned_to_me`,
+                },
+                {
                   label: "My tickets in last 7 days",
                   path: `${currentRole}/all_tickets/recent`,
                 },
+                {
+                  label: "@Mentions",
+                  path: `${currentRole}/all_tickets/mentions`,
+                },
               ],
-            },
-            {
-              label: "Mentioned tickets",
-              path: `${currentRole}/mentions`,
-              // children: [
-              //   {
-              //     label: "My tickets in last 7 days",
-              //     path: `${currentRole}/all_tickets/recent`,
-              //   },
-              // ],
             },
             {
               label: "Status",
@@ -194,6 +190,10 @@ const LeftBar: React.FC = (): JSX.Element => {
               },
               children: [
                 {
+                  label: "Created by me",
+                  path: `${currentRole}/all_tickets/created_by_me`,
+                },
+                {
                   label: "Unassigned tickets",
                   path: `${currentRole}/all_tickets/unassigned`,
                 },
@@ -201,17 +201,11 @@ const LeftBar: React.FC = (): JSX.Element => {
                   label: "My tickets in last 7 days",
                   path: `${currentRole}/all_tickets/recent`,
                 },
+                {
+                  label: "@Mentions",
+                  path: `${currentRole}/all_tickets/mentions`,
+                },
               ],
-            },
-            {
-              label: "Mentioned tickets",
-              path: `${currentRole}/mentions`,
-              // children: [
-              //   {
-              //     label: "My tickets in last 7 days",
-              //     path: `${currentRole}/all_tickets/recent`,
-              //   },
-              // ],
             },
             {
               label: "Status",
@@ -316,7 +310,9 @@ const LeftBar: React.FC = (): JSX.Element => {
               className={`${
                 location.pathname === item?.path &&
                 currentRoleBasedData?.data?.length &&
-                (item?.label === "All tickets" || item?.label === "My tickets")
+                (item?.label?.toLowerCase() === "all tickets" ||
+                  item?.label?.toLowerCase() === "my tickets" ||
+                  item?.label?.toLowerCase() === "mentioned tickets")
                   ? styles.countBadge
                   : styles.hiddenBadge
               }`}
