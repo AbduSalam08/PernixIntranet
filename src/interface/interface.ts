@@ -20,6 +20,9 @@ export interface IListName {
   Intranet_PollOptions: string;
   Intranet_PollResponse: string;
   Intranet_Blogs: string;
+  Intranet_feedbackQuestion: string;
+  Intranet_feedbackResponse: string;
+  Intranet_ShoutOutsOptions: string;
 }
 
 export interface ISPGroupName {
@@ -38,6 +41,8 @@ export interface ISPGroupName {
   Shoutouts_Admin: string;
   HelpDesk_Ticket_Managers: string;
   HelpDesk_IT_Owners: string;
+  Feedback_Admin: string;
+  Blogs_Admin: string;
 }
 
 export interface IRoleDetails {
@@ -147,4 +152,43 @@ export interface INavigatePage {
   ApprovalsPage: string;
   ProjectTemplatePage: string;
   ShoutOutsPage: string;
+}
+
+export interface ICamlQuery {
+  ListName: string;
+  CamlQuery: string;
+}
+
+export interface IUserData {
+  Title: string;
+  ID: number | null;
+  Email: string;
+}
+
+export interface IFeedbackQusColumn {
+  ID: string;
+  Title: string;
+  StartDate: string;
+  EndDate: string;
+}
+
+export interface IFeedbackQusType {
+  ID: number | null;
+  Title: string;
+  StartDate: Date | null | string;
+  EndDate: Date | null | string;
+}
+
+export interface IFeedbackResColumn {
+  ID: string;
+  Answer: string;
+  FeedbackQuestionId: string;
+}
+
+export interface IFeedbackResType {
+  ID: number | null;
+  Answer: string;
+  FeedbackQuestionId: number | null;
+  CreatedBy: IUserData;
+  Date: Date | null | string;
 }

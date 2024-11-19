@@ -2,16 +2,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable  @typescript-eslint/no-use-before-define */
-
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import "../../../assets/styles/style.css";
-
 import { RadioButton } from "primereact/radiobutton";
 import { InputTextarea } from "primereact/inputtextarea";
 // import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
-
 import styles from "./FeedBackFormIntranet.module.scss";
 import resetPopupController, {
   togglePopupVisibility,
@@ -22,7 +19,6 @@ import CustomDropDown from "../../../components/common/CustomInputFields/CustomD
 import Popup from "../../../components/common/Popups/Popup";
 import { Add, Delete } from "@mui/icons-material";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
-
 import {
   addFeedback,
   fetchPollData,
