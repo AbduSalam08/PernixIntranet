@@ -1,3 +1,5 @@
+/* eslint-disable dot-notation */
+// /* eslint-disable no-// */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 // /* eslint-disable no-// */
@@ -7,7 +9,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
-import { sp } from "@pnp/sp/presets/all";
 import styles from "./BlogsPage.module.scss";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import {
@@ -24,6 +25,7 @@ import ViewComponent from "./ViewComponent";
 import {
   addlikemethod,
   Approved,
+  getcuruserdetails,
   // Approved,
   getintername,
   nooneviews,
@@ -36,6 +38,8 @@ import CustomDropDown from "../../../components/common/CustomInputFields/CustomD
 import { Checkbox } from "office-ui-fabric-react";
 import Popup from "../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../utils/popupUtils";
+import moment from "moment";
+// import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 const emptyfile = require("../assets/EmptyFile.jpg");
@@ -77,47 +81,74 @@ const BlogsPage = (props: any): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: () => {
+          const updatedData = data.map((item: any) => {
+            if (item.Id === Updateid) {
+              return {
+                ...item,
+                UserStatus: "",
+              };
+            }
+            return item;
+          });
+
+          setdata(updatedData);
+
           const _popupcontroller = [...popupController];
           _popupcontroller[0].open = false;
           setPopupController([..._popupcontroller]);
         },
       },
       {
-        text: "Approved",
+        text: "Submit",
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
         size: "large",
         onClick: async () => {
           const findarray = data.find((item: any) => item.Id === Updateid);
-          // eslint-disable-next-line no-debugger
-          debugger;
+
+          //;
           Approverfunc(findarray.Id, findarray.UserStatus);
         },
       },
     ],
   ];
-  const poersonaStyles = {
-    root: {
-      display: "revert",
-    },
-  };
 
+  const [data, setdata] = useState<any>([]);
+  const [duplicatedata, setduplicatedata] = useState<any>([]);
+  const [curuser, setcuruser] = useState<any>({
+    Id: null,
+    Email: "",
+    Title: "",
+  });
+
+  const [checkbox, setcheckbox] = useState(false);
+  const [Updateid, setupdateid] = useState<any>(null);
+  console.log(Updateid);
+  const [permission, setpermission] = useState("");
+  const [choices, setchoices] = useState<any>(["All"]);
+  const [filterkey, setfilterkey] = useState({
+    _status: "",
+    _gsearch: "",
+  });
+  const [viewitem, setviewitem] = useState("");
+  const [viewpage, setviewpage] = useState(false);
+  const [isopen, setisopen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const searchBoxStyle: Partial<ISearchBoxStyles> = {
     root: {
       padding: "0 10px",
       fontSize: 16,
       width: "100%",
-      border: "1px solid rgb(187 186 186) !important",
-      // ".ms-SearchBox": {
-      //   border: "1px solid #c5c1c1 !important",
-      // },
-      // ":hover": {
-      //   borderColor: "none",
-      // },
+      borderRadius: "6px",
+      border: "none !important",
+
       ".ms-SearchBox-icon": {
         fontWeight: 900,
         color: "rgb(151 144 155) !important",
+      },
+      ".ms-SearchBox": {
+        border: "none !important",
       },
       "::after": {
         border: "none !important",
@@ -126,36 +157,17 @@ const BlogsPage = (props: any): JSX.Element => {
       ".ms-Button-flexContainer": {
         background: "transparent",
       },
-      // ".ms-Button": {
-      //   ":hover": {
-      //     background: "transparent",
-      //   },
-      // },
     },
   };
-  // const [filtervalue, setfiltervalue] = useState("");
-  const [data, setdata] = useState<any>([]);
-  const [duplicatedata, setduplicatedata] = useState<any>([]);
-  const [curuser, setcuruser] = useState<any>({
-    Id: null,
-    Email: "",
-    Title: "",
-  });
-  const [Updateid, setupdateid] = useState<any>(null);
-  console.log(Updateid);
-  // This  State Admin Change Drop Down Value
-  // const [approverStatus, setApproverStatus] = useState<any>("");
-  const [permission, setpermission] = useState("");
-  const [choices, setchoices] = useState<any>(["All"]);
-  const [choicevalue, setchoicevalue] = useState("");
-  const [viewitem, setviewitem] = useState("");
-  const [viewpage, setviewpage] = useState(false);
-  const [isopen, setisopen] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  // This is Usergetdetails Method
-
+  const poersonaStyles = {
+    root: {
+      display: "revert",
+    },
+  };
+  // this function is Approver Details/ get userDetails in Intranet_Blogs
   const getdetails = async (): Promise<void> => {
     await usergetdetails().then((arr) => {
+      console.log(arr);
       const tempdata: any = [];
       arr.forEach((item: any) => {
         tempdata.push({
@@ -165,6 +177,9 @@ const BlogsPage = (props: any): JSX.Element => {
           Paragraph: item.ImageDescription
             ? JSON.parse(item.ImageDescription)
             : "",
+          Created: item.Created
+            ? moment(item.Created).format("DD/MM/YYYY")
+            : null,
           Author: {
             Id: item.Author && item.Author ? item.Author.ID : null,
             Email: item.Author ? item.Author.EMail : "",
@@ -183,12 +198,19 @@ const BlogsPage = (props: any): JSX.Element => {
       setduplicatedata([...tempdata]);
     });
   };
+  // this function is Other Member Details/ get userDetails in Intranet_Blogs
   const othermemberdetails = async (): Promise<void> => {
     await otheruserdetails().then((arr) => {
+      console.log(arr);
       const tempdata: any = [];
       arr.forEach((item: any) => {
         tempdata.push({
           Id: item.Id,
+
+          Created: item.Created
+            ? moment(item.Created).format("DD/MM/YYYY")
+            : null,
+
           Title: item.BlogsHeading,
           ParentTitle: item.BlogTitle,
           Paragraph: item.ImageDescription
@@ -208,6 +230,7 @@ const BlogsPage = (props: any): JSX.Element => {
         });
       });
       setdata([...tempdata]);
+      setduplicatedata([...tempdata]);
     });
   };
   // This is addlikemethod function
@@ -237,9 +260,10 @@ const BlogsPage = (props: any): JSX.Element => {
     }
     const addingdetails: any = JSON.stringify(additionaluserDetails);
     await addlikemethod(Id, addingdetails, onLoadingFunc);
+    resetstate();
   };
   // This is ViewLike Method function
-  async function viewLikemethod(Id: number, userDetails: any, item: any) {
+  const viewLikemethod = async (Id: number, userDetails: any, item: any) => {
     //;
     let additionaluserDetails: any = [];
     if (userDetails === undefined || userDetails.length === 0) {
@@ -288,13 +312,18 @@ const BlogsPage = (props: any): JSX.Element => {
       onLoadingFunc,
       item
     );
-  }
+    // resetstate()
+  };
+  // This function is resetstate function
   const resetstate = async () => {
     setisopen(false);
     setIsLoading(false);
     setchoices(["All"]);
     setviewpage(false);
-
+    setfilterkey({
+      _status: "",
+      _gsearch: "",
+    });
     getcurrentuser();
   };
   // This Functino Admin Change The Status
@@ -312,6 +341,7 @@ const BlogsPage = (props: any): JSX.Element => {
     });
     setdata([..._data]);
   };
+  // This is the OnLoadingFunc
   const onLoadingFunc = async (user: any): Promise<void> => {
     let _userpermission: string = "";
     await permissionhandling().then(async (arr) => {
@@ -348,7 +378,7 @@ const BlogsPage = (props: any): JSX.Element => {
   ): Promise<any> => {
     try {
       await Approved(Id, statusValue);
-      debugger;
+      //;
       const _popupcontroller = [...popupController];
       _popupcontroller[0].open = false;
       setPopupController([..._popupcontroller]);
@@ -357,19 +387,41 @@ const BlogsPage = (props: any): JSX.Element => {
     }
     resetstate();
   };
-
-  const stausfilter = (tstatus: any) => {
-    let _data = [...duplicatedata];
-    if (tstatus !== "All") {
-      _data = _data.filter((item) => item.Status === tstatus);
-    }
-
-    setdata([..._data]);
-    setchoicevalue(tstatus);
+  // This is The Filterfunction of Blogs Details
+  const filterOnchangehandler = (key: string, text: any) => {
+    const _filterkey: any = { ...filterkey };
+    _filterkey[key] = text;
+    filterfunction(_filterkey, text);
   };
+  const filterfunction = (key: any, value: any) => {
+    let _data = [...duplicatedata];
+    if (value !== "All" && key._gsearch && key._gsearch.trim() !== "") {
+      const _search = key._gsearch.toLowerCase().toString().trim();
+      _data = _data.filter((item) => {
+        return (
+          item.Title.toLowerCase().trim().includes(_search) ||
+          item.ParentTitle.trim().toLowerCase().includes(_search)
+        );
+      });
+    }
+    if (value !== "All" && key._status && key._status !== "All") {
+      _data = _data.filter((item) => item.Status === key._status);
+    }
+    if (value !== "All") {
+      setfilterkey({ ...key });
+      setdata([..._data]);
+    } else if (value === "All") {
+      setfilterkey({
+        _status: "",
+        _gsearch: "",
+      });
+      setdata([..._data]);
+    }
+  };
+
   // This is Currentuser Details
   const getcurrentuser = async (): Promise<void> => {
-    sp.web.currentUser.get().then((arr) => {
+    await getcuruserdetails().then((arr) => {
       setcuruser({
         ...curuser,
         Id: arr.Id,
@@ -402,18 +454,12 @@ const BlogsPage = (props: any): JSX.Element => {
               {/* Optional Icon and Blog Header code here */}
             </div>
             <div>
-              {/* Blogs Heading Section */}
-              {permission === "Admin" && (
-                <div className={styles.adminbox}>
-                  <h3>Admin Component</h3>
-                  <h6>{`${permission}:${curuser.Title}`}</h6>
-                </div>
-              )}
               <div className={styles.bloginbox}>
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
+                    gap: "10px",
                   }}
                 >
                   <div className={styles.blog}>
@@ -427,33 +473,50 @@ const BlogsPage = (props: any): JSX.Element => {
                       <h5>Blogs</h5>
                     </div>
                   </div>
-                  {permission === "Admin" ? (
-                    <div>
-                      <CustomDropDown
-                        value={choicevalue}
-                        options={choices}
-                        placeholder="Status"
-                        onChange={(value) => {
-                          stausfilter(value);
-                        }}
-                      />
-                    </div>
-                  ) : null}
                 </div>
 
                 <div className={styles.searchboxcontainer}>
+                  <div>
+                    <CustomDropDown
+                      value={filterkey._status}
+                      placeholder="Status"
+                      onChange={(value) => {
+                        filterOnchangehandler("_status", value);
+                        // stausfilter(value);
+                      }}
+                      noErrorMsg
+                      highlightDropdown={true}
+                      options={["All", "Pending", "Approved", "Rejected"]}
+                      size="SM"
+                      floatingLabel={false}
+                      width={"250px"}
+                    />
+                  </div>
+                  {/* <CustomInput
+                    onChange={(value) => {
+                      filterfunction("_gsearch", value);
+                    }}
+                    value={filterkey._gsearch}
+                    inputWrapperClassName={styles.pathSearchFilter}
+                    size="SM"
+                    placeholder="Search path"
+                  /> */}
                   <SearchBox
                     placeholder="Search..."
                     styles={searchBoxStyle}
-                    onChange={(e, value) => console.log("shanmugaraj")}
+                    value={filterkey._gsearch}
+                    onChange={(e, value) => {
+                      filterOnchangehandler("_gsearch", value);
+                    }}
                   />
+
                   <div>
                     <div
                       className={styles["new-blog-button"]}
                       onClick={() => setisopen(true)}
                     >
                       <Icon iconName="Add" className={styles.Addicon} />
-                      <span>New Blog</span>
+                      <span>New blog</span>
                     </div>
                   </div>
                 </div>
@@ -510,70 +573,97 @@ const BlogsPage = (props: any): JSX.Element => {
                               </div>
                               <div
                                 className={styles.paragraph}
+                                style={{
+                                  height:
+                                    permission !== "Admin" ? "130px" : "70px",
+                                }}
                                 dangerouslySetInnerHTML={{
                                   __html: item.Paragraph,
                                 }}
                               />
-                              <div className={styles.approversection}>
-                                <div>
-                                  <label
-                                    style={{
-                                      color:
-                                        item.Status === "Approved"
-                                          ? "green"
-                                          : item.Status === "Pending"
-                                          ? "red"
-                                          : "red",
-                                      fontWeight: "500",
-                                    }}
-                                  >
-                                    {item.Status}
-                                  </label>
-                                </div>
-                                <div className={styles.checkbox}>
+                              {permission === "Admin" && (
+                                <div className={styles.approversection}>
                                   <div>
-                                    {permission === "Admin" ? (
-                                      <div>
+                                    <label
+                                      style={{
+                                        fontSize: "12px",
+                                        height: "23px",
+                                        width: "66px",
+                                        display: "inline-block",
+                                        padding: "6px",
+                                        backgroundColor:
+                                          item.Status === "Approved"
+                                            ? "green"
+                                            : item.Status === "Pending"
+                                            ? "#c9c91bf5"
+                                            : "red",
+                                        color: "white",
+                                        borderRadius: "50px",
+
+                                        fontWeight: "500",
+                                      }}
+                                    >
+                                      {item.Status}
+                                    </label>
+                                  </div>
+                                  {permission === "Admin" && (
+                                    <div className={styles.checkbox}>
+                                      {/* <div> */}
+                                      {permission === "Admin" ? (
+                                        // <div>
                                         <CustomDropDown
                                           value={item.UserStatus}
-                                          options={choices}
                                           floatingLabel={false}
                                           placeholder="Status"
                                           onChange={(value) => {
+                                            setcheckbox(false);
                                             approverStatusFunc(value, item.Id);
                                           }}
                                           highlightDropdown={true}
+                                          options={[
+                                            "Pending",
+                                            "Approved",
+                                            "Rejected",
+                                          ]}
+                                          noErrorMsg
                                           size="SM"
                                           width={"150px"}
                                         />
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                  <Checkbox
-                                    checked={
-                                      item.UserStatus === ""
-                                        ? false
-                                        : item.UserStatus !== item.Status
-                                        ? false
-                                        : true
-                                    }
-                                    onChange={(event: any) => {
-                                      if (item.UserStatus !== item.Status) {
-                                        setupdateid(item.Id);
-                                        const _popupcontroller = [
-                                          ...popupController,
-                                        ];
-                                        _popupcontroller[0].open = true;
-                                        setPopupController([
-                                          ..._popupcontroller,
-                                        ]);
-                                      } else {
-                                        console.log("Shanmugaraj");
-                                      }
-                                    }}
-                                  />
+                                      ) : // </div>`
+                                      null}
+                                      {/* </div> */}
+                                      <Checkbox
+                                        checked={
+                                          item.UserStatus &&
+                                          item.UserStatus !== item.Status &&
+                                          checkbox === true
+                                            ? true
+                                            : false
+                                        }
+                                        onChange={(event: any) => {
+                                          if (
+                                            item.UserStatus &&
+                                            item.UserStatus !== item.Status
+                                          ) {
+                                            setcheckbox(true);
+                                            setupdateid(item.Id);
+                                            const _popupcontroller = [
+                                              ...popupController,
+                                            ];
+                                            _popupcontroller[0].open = true;
+                                            setPopupController([
+                                              ..._popupcontroller,
+                                            ]);
+                                          } else {
+                                            setcheckbox(false);
+                                            console.log("Shanmugaraj");
+                                          }
+                                        }}
+                                      />
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
+                              )}
                             </div>
                             <div className={styles.footercontainer}>
                               <div className={styles.peoplebox}>
@@ -590,7 +680,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                 <div className={styles.namediv}>
                                   <h5>{item.Author?.Title}</h5>
                                   <h5 className={styles.datediv}>
-                                    17 Jan 2022
+                                    {item.Created || ""}
                                   </h5>
                                 </div>
                               </div>

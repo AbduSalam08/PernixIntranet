@@ -1,6 +1,32 @@
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}
 .blogbody {
+  .quillparentbox {
+    background-color: white;
+    padding: 10px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    .errorlabel {
+      color: red;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
   color: black;
   .blogparentbox {
+    .inputparentbox {
+      justify-content: space-between;
+      display: flex;
+      margin-top: 1%;
+      align-items: center;
+    }
     color: black;
     .blog {
       height: 30px;
@@ -25,9 +51,9 @@
         transition: transform 0.2s;
       }
 
-      .roundiconbutton:hover {
-        transform: scale(1.1);
-      }
+      // .roundiconbutton:hover {
+      //   transform: scale(1.1);
+      // }
 
       .icon {
         color: #ffa500;
@@ -84,7 +110,15 @@
     .new-blog-button:hover {
       background-color: #006b68;
     }
-
+    .fileuploadparentbox {
+      background-color: white;
+      padding: 12px;
+      .errorlabel {
+        color: red;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
     .fileuploadbox {
       border-style: double;
       display: flex;
@@ -180,4 +214,7 @@
   font-size: 18px;
   margin-top: 10px;
   cursor: pointer;
+}
+.pathSearchFilter {
+  width: 100%;
 }
