@@ -171,7 +171,8 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
           question.Author?.EMail ||
           "https://randomuser.me/api/portraits/placeholder.jpg", // Author's email or placeholder
         replies: replies, // Attach filtered responses
-        assignTo: question?.AssignTo || "",
+        assignTo: question?.AssignTo?.toLowerCase() || "",
+        Anonymous: question?.isAnonymous,
       };
     });
     console.log(questionCeoData);
@@ -220,7 +221,8 @@ export const addQuestionCeo = async (
     const addItem: any = await SpServices.SPAddItem({
       Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
       RequestJSON: {
-        Question: formData.Description.value,
+        Question: formData?.Description?.value,
+        isAnonymous: formData?.Anonymous?.value,
       },
     }).then((res: any) => {
       console.log(addItem, "addItem");

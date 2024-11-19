@@ -38,6 +38,7 @@ import moment from "moment";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
+import { Checkbox } from "primereact/checkbox";
 interface IReplies {
   avatarUrl: string;
   content: string;
@@ -113,6 +114,12 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
+    },
+    Anonymous: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: { required: false, type: "boolean" },
     },
   });
   const [ceoQuestionsdata, setCeoQuestionsdata] = useState<IQuestion[]>([]);
@@ -232,9 +239,15 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         answer: {
           ...prevData.answer,
           isValid: true,
-          permission: userDetails.email === value?.email ? true : false,
+          permission:
+            userDetails.email.toLowerCase() === value?.email.toLowerCase()
+              ? true
+              : false,
           validationRule: {
-            required: userDetails.email === value?.email ? true : false,
+            required:
+              userDetails.email.toLowerCase() === value?.email.toLowerCase()
+                ? true
+                : false,
             type: "string",
           },
         },
@@ -334,8 +347,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           AnswerDate: formData?.answer?.value
             ? moment(new Date()).format("DD/MM/YYYY")
             : "",
-          AssignTo: formData?.assignTo?.value?.email
-            ? formData?.assignTo?.value?.email
+          AssignTo: formData?.assignTo?.value?.email.toLowerCase()
+            ? formData?.assignTo?.value?.email.toLowerCase()
             : formData?.assignTo?.value,
         };
         await submitCEOQuestionAnswer(
@@ -371,7 +384,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           <p className={styles.question}>{formData?.qustion?.value}</p>
         </div>
         {userDetails.email === formData?.assignTo?.value ||
-        userDetails.email === formData?.assignTo?.value?.email ||
+        userDetails.email === formData?.assignTo?.value?.email?.toLowerCase() ||
         formData?.answer?.value !== "" ? (
           <div className={styles.r4}>
             <div className={styles.item5}>
@@ -405,7 +418,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               errorMsg={formData?.assignTo?.errorMsg}
               selectedItem={[formData?.assignTo?.value]}
               readOnly={
-                userDetails.email === formData?.assignTo?.value &&
+                (userDetails.email === formData?.assignTo?.value ||
+                  userDetails.email ===
+                    formData?.assignTo?.value?.email?.toLowerCase()) &&
                 formData?.answer?.value !== ""
               }
               groupName="QuestionCEO"
@@ -478,6 +493,32 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             handleNewFormInputChange("Description", value, isValid, errorMsg);
           }}
         />
+        <div className={styles.anonymous}>
+          <Checkbox
+            inputId="Anonymous"
+            name=""
+            value="Anonymous"
+            // onChange={onIngredientsChange}
+            checked={newFormData?.Anonymous.value}
+            onChange={(e: any) => {
+              console.log(e);
+              const { isValid, errorMsg } = validateField(
+                "Anonymous",
+                e.checked,
+                newFormData?.Anonymous.validationRule
+              );
+              handleNewFormInputChange(
+                "Anonymous",
+                e.checked,
+                isValid,
+                errorMsg
+              );
+            }}
+          />
+          <label htmlFor="Anonymous" className="ml-2">
+            Anonymous
+          </label>
+        </div>
       </div>,
     ],
   ];
@@ -618,7 +659,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           (newsItem: any) => {
             // return newsItem?.replies.length > 0;
             if (
-              newsItem?.assignTo === userDetails?.email &&
+              newsItem?.assignTo.toLowerCase() === userDetails?.email &&
               newsItem.ID === searchParamsQusID &&
               !newsItem?.isActive
             ) {
@@ -634,11 +675,15 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   isValid: true,
                   value: newsItem?.replies[0]?.content || "",
                   permission:
-                    userDetails.email === newsItem?.assignTo ? true : false,
+                    userDetails.email === newsItem?.assignTo.toLowerCase()
+                      ? true
+                      : false,
                   ID: newsItem?.ID,
                   validationRule: {
                     required:
-                      userDetails.email === newsItem?.assignTo ? true : false,
+                      userDetails.email === newsItem?.assignTo.toLowerCase()
+                        ? true
+                        : false,
                     type: "string",
                   },
                 },
@@ -675,7 +720,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
             if (
-              newsItem?.assignTo === userDetails?.email &&
+              newsItem?.assignTo.toLowerCase() === userDetails?.email &&
               newsItem.ID === searchParamsQusID &&
               !newsItem?.isActive
             ) {
@@ -771,7 +816,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
           />
-          <p>Question to CEO</p>
+          <p>Questions to Leadership</p>
         </div>
         <div className={styles.rightSection}>
           <div>
@@ -949,7 +994,11 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                       <div className={styles.imgsection}>
                         <Avatar
                           className="qustionceo"
-                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.avatarUrl}`}
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${
+                            val?.Anonymous
+                              ? "https://randomuser.me/api/portraits/placeholder.jpg"
+                              : val?.avatarUrl
+                          }`}
                           // size="small"
                           shape="circle"
                           style={{

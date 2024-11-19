@@ -13,6 +13,7 @@ import {
   addShoutOut,
   changeShoutOutActiveStatus,
   getAllShoutOutsData,
+  getShoutOutsOptions,
   // handleShoutOutStatus,
   shoutOutsCurrentUserRole,
   updateShoutOut,
@@ -33,6 +34,7 @@ import Popup from "../../../components/common/Popups/Popup";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
 
 interface PopupState {
@@ -56,6 +58,11 @@ interface PopupState {
     inprogress: string;
   };
 }
+interface IShoutOutOptions {
+  ID: number;
+  Title: string;
+  Description: string;
+}
 
 const ShoutOutsPage = (props: any): JSX.Element => {
   console.log(props);
@@ -67,6 +74,9 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   });
   const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
   const [showShoutOutsData, setShowShoutOutsData] = useState<any[]>([]);
+  const [shoutOutsOptions, setShoutOutsOptions] = useState<IShoutOutOptions[]>(
+    []
+  );
   const [currentUserData, setCurrentUserData] = useState<any>({});
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -78,6 +88,12 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   });
   console.log("selectedTab", selectedTab);
   console.log("shoutOutsData", shoutOutsData);
+
+  const [handleForm, setHandleForm] = useState<any>({
+    ID: null,
+    type: "",
+  });
+  console.log("handleForm", handleForm);
 
   const [formData, setFormData] = useState<any>({
     SendTowards: {
@@ -92,23 +108,11 @@ const ShoutOutsPage = (props: any): JSX.Element => {
       errorMsg: "Description is required",
       validationRule: { required: true, type: "string" },
     },
-    Status: {
+    Template: {
       value: "",
       isValid: true,
       errorMsg: "",
       validationRule: { required: false, type: "string" },
-    },
-    Owner: {
-      value: "",
-      isValid: true,
-      errorMsg: "",
-      validationRule: { required: false, type: "string" },
-    },
-    ID: {
-      value: null,
-      isValid: true,
-      errorMsg: "",
-      validationRule: { required: false, type: "number" },
     },
   });
 
@@ -155,34 +159,12 @@ const ShoutOutsPage = (props: any): JSX.Element => {
         success: false,
       },
       messages: {
-        success: "Shout out approved successfully!",
+        success: "Shout out added successfully!",
         error: "Something went wrong!",
-        successDescription: "The shout out approved successfully.",
+        successDescription: "The shout out added successfully.",
         errorDescription:
-          "An error occured while submitting answer, please try again later.",
-        inprogress: "Submitting answer, please wait...",
-      },
-    },
-    {
-      open: false,
-      popupTitle: "Add News",
-      popupWidth: "900px",
-      popupType: "custom",
-      defaultCloseBtn: false,
-      popupData: "",
-      isLoading: {
-        inprogress: false,
-        error: false,
-        success: false,
-      },
-      messages: {
-        success: "Shout-out added successfully!",
-        error: "Something went wrong!",
-        successDescription:
-          "The shout-out to person email has been added successfully.",
-        errorDescription:
-          "An error occured while adding news, please try again later.",
-        inprogress: "Adding Shout-out, please wait...",
+          "An error occured while adding shout out, please try again later.",
+        inprogress: "Adding shout out, please wait...",
       },
     },
   ];
@@ -208,7 +190,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
     }));
   };
 
-  const handleNewShoutOut = async (): Promise<any> => {
+  const handleUserSubmit = async (isNew: boolean): Promise<any> => {
     let hasErrors = false;
 
     // Validate each field and update the state with error messages
@@ -236,45 +218,61 @@ const ShoutOutsPage = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addShoutOut(formData, setPopupController, 1, dispatch);
-    } else {
-      console.log("Form contains errors");
-    }
-  };
-
-  const handleUpdateShoutout = async (): Promise<any> => {
-    let hasErrors = false;
-
-    // Validate each field and update the state with error messages
-    const updatedFormData = Object.keys(formData).reduce((acc, key) => {
-      const fieldData = formData[key];
-      const { isValid, errorMsg } = validateField(
-        key,
-        key !== "SendTowards" ? fieldData.value : [fieldData.value],
-        fieldData?.validationRule
-      );
-
-      if (!isValid) {
-        hasErrors = true;
+      if (isNew) {
+        await addShoutOut(formData, setPopupController, 0, dispatch);
+      } else {
+        await updateShoutOut(
+          formData,
+          handleForm?.ID,
+          setPopupController,
+          0,
+          dispatch
+        );
       }
-
-      return {
-        ...acc,
-        [key]: {
-          ...fieldData,
-          isValid,
-          errorMsg,
-        },
-      };
-    }, {} as typeof formData);
-
-    setFormData(updatedFormData);
-    if (!hasErrors) {
-      await updateShoutOut(formData, setPopupController, 0, dispatch);
     } else {
       console.log("Form contains errors");
     }
   };
+
+  // const handleUserSubmit = async (): Promise<any> => {
+  //   let hasErrors = false;
+
+  //   // Validate each field and update the state with error messages
+  //   const updatedFormData = Object.keys(formData).reduce((acc, key) => {
+  //     const fieldData = formData[key];
+  //     const { isValid, errorMsg } = validateField(
+  //       key,
+  //       key !== "SendTowards" ? fieldData.value : [fieldData.value],
+  //       fieldData?.validationRule
+  //     );
+
+  //     if (!isValid) {
+  //       hasErrors = true;
+  //     }
+
+  //     return {
+  //       ...acc,
+  //       [key]: {
+  //         ...fieldData,
+  //         isValid,
+  //         errorMsg,
+  //       },
+  //     };
+  //   }, {} as typeof formData);
+
+  //   setFormData(updatedFormData);
+  //   if (!hasErrors) {
+  //     await updateShoutOut(
+  //       formData,
+  //       handleForm?.ID,
+  //       setPopupController,
+  //       0,
+  //       dispatch
+  //     );
+  //   } else {
+  //     console.log("Form contains errors");
+  //   }
+  // };
 
   // const handleShoutOutStatusTo = async (type: string) => {
   //   await handleShoutOutStatus(formData, type, setPopupController, 0, dispatch);
@@ -283,71 +281,60 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   const popupInputs: any[] = [
     [
       <div className={styles.addShoutOutGrid} key={1}>
-        <CustomPeoplePicker
-          labelText="Shout-out to"
-          isValid={formData.SendTowards.isValid}
-          errorMsg={formData.SendTowards.errorMsg}
-          selectedItem={[formData?.SendTowards?.value]}
-          readOnly
-          onChange={(item: any) => {
-            const value = item[0];
-            console.log("value: ", value);
-            const { isValid, errorMsg } = validateField(
-              "SendTowards",
-              item,
-              formData.SendTowards.validationRule
-            );
-            handleInputChange("SendTowards", value, isValid, errorMsg);
-          }}
-        />
+        <div style={{ width: "100%", display: "flex", gap: "20px" }}>
+          <div style={{ width: "50%" }}>
+            <CustomPeoplePicker
+              labelText="Shout-out to"
+              isValid={formData.SendTowards.isValid}
+              errorMsg={formData.SendTowards.errorMsg}
+              selectedItem={[formData.SendTowards.value]}
+              readOnly={handleForm?.type === "Update"}
+              onChange={(item: any) => {
+                const value = item[0];
+                console.log("value: ", value);
+                const { isValid, errorMsg } = validateField(
+                  "SendTowards",
+                  item,
+                  formData.SendTowards.validationRule
+                );
+                handleInputChange("SendTowards", value, isValid, errorMsg);
+              }}
+            />
+          </div>
+          <div style={{ width: "50%" }}>
+            <CustomDropDown
+              value={formData.Template.value}
+              options={shoutOutsOptions.map((obj: any) => obj.Title) || []}
+              placeholder="Template"
+              isValid={formData.Template.isValid}
+              errorMsg={formData.Template.errorMsg}
+              onChange={(value) => {
+                const description = shoutOutsOptions?.filter(
+                  (obj: any) => obj?.Title === value
+                );
+                const { isValid, errorMsg } = validateField(
+                  "Template",
+                  value,
+                  formData.Template.validationRule
+                );
+                handleInputChange("Template", value, isValid, errorMsg);
+                handleInputChange(
+                  "Description",
+                  description[0]?.Description,
+                  isValid,
+                  errorMsg
+                );
+              }}
+            />
+          </div>
+        </div>
         <FloatingLabelTextarea
           value={formData.Description.value}
           placeholder="Description"
           rows={5}
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
-          disabled={formData.Status.value !== "Pending"}
-          onChange={(e: any) => {
-            const value = e.trimStart();
-            const { isValid, errorMsg } = validateField(
-              "Description",
-              value,
-              formData.Description.validationRule
-            );
-            handleInputChange(
-              "Description",
-              value.trimStart(),
-              isValid,
-              errorMsg
-            );
-          }}
-        />
-      </div>,
-    ],
-    [
-      <div className={styles.addShoutOutGrid} key={1}>
-        <CustomPeoplePicker
-          labelText="Shout-out to"
-          isValid={formData.SendTowards.isValid}
-          errorMsg={formData.SendTowards.errorMsg}
-          selectedItem={[formData.SendTowards.value]}
-          onChange={(item: any) => {
-            const value = item[0];
-            console.log("value: ", value);
-            const { isValid, errorMsg } = validateField(
-              "SendTowards",
-              item,
-              formData.SendTowards.validationRule
-            );
-            handleInputChange("SendTowards", value, isValid, errorMsg);
-          }}
-        />
-        <FloatingLabelTextarea
-          value={formData.Description.value}
-          placeholder="Description"
-          rows={5}
-          isValid={formData.Description.isValid}
-          errorMsg={formData.Description.errorMsg}
+          // disabled={formData.Status.value !== "Pending"}
           onChange={(e: any) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
@@ -483,45 +470,22 @@ const ShoutOutsPage = (props: any): JSX.Element => {
         },
       },
       {
-        text: "Submit",
-        btnType: "primaryGreen",
-        endIcon: false,
-        startIcon: false,
-        disabled: !["SendTowards", "Description"].every(
-          (key) => formData[key]?.isValid
-        ),
-        size: "large",
-        onClick: async () => {
-          await handleUpdateShoutout();
-        },
-      },
-    ],
-    [
-      {
-        text: "Cancel",
-        btnType: "darkGreyVariant",
-        disabled: false,
-        endIcon: false,
-        startIcon: false,
-        size: "large",
-        onClick: () => {
-          togglePopupVisibility(
-            setPopupController,
-            initialPopupController[1],
-            1,
-            "close"
-          );
-        },
-      },
-      {
-        text: "Submit",
+        text: handleForm?.type === "Add" ? "Submit" : "Update",
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        // disabled: !["SendTowards", "Description"].every(
+        //   (key) => formData[key]?.isValid
+        // ),
         size: "large",
         onClick: async () => {
-          await handleNewShoutOut();
+          if (handleForm?.type === "Add") {
+            await handleUserSubmit(true);
+          } else {
+            await handleUserSubmit(false);
+          }
+          // await handleUpdateShoutout();
         },
       },
     ],
@@ -572,6 +536,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
 
   useEffect(() => {
     dispatch(setMainSPContext(props?.context));
+    getShoutOutsOptions(setShoutOutsOptions);
     getAllShoutOutsData(dispatch);
   }, [dispatch]);
 
@@ -631,10 +596,11 @@ const ShoutOutsPage = (props: any): JSX.Element => {
             }}
             className={styles.addNewbtn}
             onClick={() => {
+              setHandleForm({ ID: null, type: "Add" });
               togglePopupVisibility(
                 setPopupController,
-                initialPopupController[1],
-                1,
+                initialPopupController[0],
+                0,
                 "open",
                 "New Shout-out"
               );
@@ -772,11 +738,11 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                         !val.isActive && (
                           <i
                             onClick={() => {
+                              setHandleForm({ ID: val.ID, type: "Update" });
                               setFormData({
                                 SendTowards: {
                                   ...formData.SendTowards,
                                   isValid: true,
-                                  // value: val.receiverDetails || {},
                                   value: val.receiverName || {},
                                 },
                                 Description: {
@@ -784,20 +750,10 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                                   isValid: true,
                                   value: val?.message || "",
                                 },
-                                Status: {
-                                  ...formData.Description,
+                                Template: {
+                                  ...formData.Template,
                                   isValid: true,
-                                  value: val.Status || "",
-                                },
-                                Owner: {
-                                  ...formData.Description,
-                                  isValid: true,
-                                  value: val.senderImage || "",
-                                },
-                                ID: {
-                                  ...formData.Description,
-                                  isValid: true,
-                                  value: val.ID || null,
+                                  value: val.Template || "",
                                 },
                               });
                               togglePopupVisibility(
