@@ -337,6 +337,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               label="Start Date"
               isDateController={true}
               minimumDate={new Date()}
+              maximumDate={new Date(formData.EndDate.value) || ""}
               error={!formData.StartDate.isValid}
               errorMsg={formData.StartDate.errorMsg}
               onChange={(date: any) => {
@@ -346,7 +347,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                   formData.StartDate.validationRule
                 );
                 if (formData.EndDate.value !== "") {
-                  if (new Date(formData.EndDate.value) > new Date(date)) {
+                  if (new Date(formData.EndDate.value) >= new Date(date)) {
                     // handleInputChange("EndDate", date, isValid, errorMsg);
                     handleInputChange("StartDate", date, isValid, errorMsg);
                   } else {
@@ -357,6 +358,8 @@ const NewHiresPage = (props: any): JSX.Element => {
                       "Start date must be before end date"
                     );
                   }
+                } else {
+                  handleInputChange("StartDate", date, isValid, errorMsg);
                 }
               }}
             />
@@ -366,7 +369,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               value={formData.EndDate.value}
               label="End Date"
               isDateController={true}
-              minimumDate={new Date(formData.StartDate.value) || new Date()}
+              minimumDate={new Date(formData.StartDate.value)}
               disabledInput={formData.StartDate.value === ""}
               error={!formData.EndDate.isValid}
               errorMsg={formData.EndDate.errorMsg}

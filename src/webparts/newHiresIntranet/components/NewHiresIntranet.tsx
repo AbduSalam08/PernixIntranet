@@ -253,7 +253,8 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               value={formData.StartDate.value}
               label="Start Date"
               isDateController={true}
-              // minimumDate={new Date()}
+              minimumDate={new Date()}
+              maximumDate={new Date(formData.EndDate.value) || ""}
               error={!formData.StartDate.isValid}
               errorMsg={formData.StartDate.errorMsg}
               onChange={(date: any) => {
@@ -271,7 +272,8 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               value={formData.EndDate.value}
               label="End Date"
               isDateController={true}
-              // minimumDate={new Date()}
+              minimumDate={new Date(formData.StartDate.value)}
+              disabledInput={formData.StartDate.value === ""}
               error={!formData.EndDate.isValid}
               errorMsg={formData.EndDate.errorMsg}
               onChange={(date: any) => {
@@ -435,7 +437,9 @@ const NewHiresIntranet = (props: any): JSX.Element => {
           />
         )}
       </div>
-      {!newHiresData?.isLoading && <ViewAll onClick={handlenavigate} />}
+      {!newHiresData?.isLoading && newHires.length > 0 && (
+        <ViewAll onClick={handlenavigate} />
+      )}
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
