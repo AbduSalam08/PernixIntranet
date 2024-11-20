@@ -1,0 +1,50 @@
+.container {
+  height: 180px;
+  background: #282828;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  .firstRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    .firstRowLable {
+      color: #999999;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .firstRowIcon {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      img:nth-child(1) {
+        height: 36px;
+        width: 36px;
+        cursor: pointer;
+      }
+
+      img:nth-child(2) {
+        height: 28px;
+        width: 28px;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .secondRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999999;
+    font-size: 16px;
+    font-weight: 600;
+  }
+}

@@ -233,6 +233,14 @@
           "manifest": "./src/webparts/flexipleSectionsIntranet/FlexipleSectionsIntranetWebPart.manifest.json"
         }
       ]
+    },
+    "footer-intranet-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/footerIntranet/FooterIntranetWebPart.js",
+          "manifest": "./src/webparts/footerIntranet/FooterIntranetWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -266,6 +274,7 @@
     "FeedBackFormPageWebPartStrings": "lib/webparts/feedBackFormPage/loc/{locale}.js",
     "NewHiresPageWebPartStrings": "lib/webparts/newHiresPage/loc/{locale}.js",
     "BirthdayPageWebPartStrings": "lib/webparts/birthdayPage/loc/{locale}.js",
-    "FlexipleSectionsIntranetWebPartStrings": "lib/webparts/flexipleSectionsIntranet/loc/{locale}.js"
+    "FlexipleSectionsIntranetWebPartStrings": "lib/webparts/flexipleSectionsIntranet/loc/{locale}.js",
+    "FooterIntranetWebPartStrings": "lib/webparts/footerIntranet/loc/{locale}.js"
   }
 }

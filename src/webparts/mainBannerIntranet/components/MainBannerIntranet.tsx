@@ -22,7 +22,7 @@ import moment from "moment";
 // const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
 const EmployeeDirectory = require("../../../assets/images/svg/quickLinks/exployeeDirectory.svg");
 const HelpDesk = require("../../../assets/images/svg/quickLinks/helpdesk.svg");
-const PTO = require("../../../assets/images/svg/quickLinks/pto.svg");
+// const PTO = require("../../../assets/images/svg/quickLinks/pto.svg");
 const Approvals = require("../../../assets/images/svg/quickLinks/approvals.svg");
 const ProjectTemplate = require("../../../assets/images/svg/quickLinks/projectTemplate.svg");
 
@@ -30,7 +30,7 @@ const ProjectTemplate = require("../../../assets/images/svg/quickLinks/projectTe
 // const OrganizationalChartWhite = require("../../../assets/images/svg/quickLinks/orgChartWhite.svg");
 const EmployeeDirectoryWhite = require("../../../assets/images/svg/quickLinks/exployeeDirectoryWhite.svg");
 const HelpDeskWhite = require("../../../assets/images/svg/quickLinks/helpdeskWhite.svg");
-const PTOWhite = require("../../../assets/images/svg/quickLinks/ptoWhite.svg");
+// const PTOWhite = require("../../../assets/images/svg/quickLinks/ptoWhite.svg");
 const ApprovalsWhite = require("../../../assets/images/svg/quickLinks/approvalsWhite.svg");
 const ProjectTemplateWhite = require("../../../assets/images/svg/quickLinks/projectTemplateWhite.svg");
 const PernixBannerImage = require("../assets/PernixBannerImage.svg");
@@ -88,22 +88,22 @@ const MainBannerIntranet = (props: any): JSX.Element => {
         );
       },
     },
-    {
-      img: PTO,
-      hoverImg: PTOWhite,
-      text: "PTO",
-      onClick: (_: any) => {
-        window.open(
-          props.context.pageContext.web.absoluteUrl +
-            CONFIG.NavigatePage.PTOPage,
-          "_self"
-        );
-      },
-    },
+    // {
+    //   img: PTO,
+    //   hoverImg: PTOWhite,
+    //   text: "PTO",
+    //   onClick: (_: any) => {
+    //     window.open(
+    //       props.context.pageContext.web.absoluteUrl +
+    //         CONFIG.NavigatePage.PTOPage,
+    //       "_self"
+    //     );
+    //   },
+    // },
     {
       img: Approvals,
       hoverImg: ApprovalsWhite,
-      text: "Approvals",
+      text: "Admin activities",
       onClick: (_: any) => {
         window.open(
           props.context.pageContext.web.absoluteUrl +
