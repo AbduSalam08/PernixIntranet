@@ -10,6 +10,7 @@ import PollIntranetSlice from "../features/PollIntranetSlice";
 import FeedbackIntranetSlice from "../features/FeedbackIntranetSlice";
 import HelpDeskSlice from "../features/HelpDeskSlice";
 import AllUsersDataSlice from "../features/AllUsersDataSlice";
+import BirthdaysSlice from "../features/BirthdayIntranet";
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ const store = configureStore({
     NewHiresData: NewHiresIntranet,
     HelpDeskTicktesData: HelpDeskSlice,
     AllUsersData: AllUsersDataSlice,
+    BirthdaysData: BirthdaysSlice,
   },
 });
 

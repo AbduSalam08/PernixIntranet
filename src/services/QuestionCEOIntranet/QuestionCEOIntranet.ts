@@ -1,16 +1,8 @@
-// import { LISTNAMES } from "../../config/config";
-// import { sp } from "@pnp/sp/presets/all";
-// import { LISTNAMES } from "../../config/config";
 import moment from "moment";
 import { setQuestionCEOIntranetData } from "../../redux/features/QuestionCEOIntranetSlice";
 import SpServices from "../SPServices/SpServices";
 import { sp } from "@pnp/sp";
 import { CONFIG } from "../../config/config";
-// import SpServices from "../SPServices/SpServices";
-// import { log } from "@pnp/pnpjs";
-// import SpServices from "../SPServices/SpServices";
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 // export const getQuestionCeo = async (dispatch: any): Promise<any> => {
@@ -73,6 +65,7 @@ export const questionsCurrentUserRole = async (
 ): Promise<any> => {
   let userDetails = {};
   const currentUser: any = await sp.web.currentUser.get();
+  const currentUserID = currentUser?.Id || null;
   const currentUserEmail = currentUser?.Email.toLowerCase() || "";
 
   const questionCEOAdminData: any = await sp.web.siteGroups
@@ -90,21 +83,25 @@ export const questionsCurrentUserRole = async (
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
   if (isAdmin) {
-    // setUserDetails({ role: "CEO", email: currentUserEmail });
-    // userDetails = { role: "CEO", email: currentUserEmail };
-    setUserDetails({ role: "Admin", email: currentUserEmail });
+    setUserDetails({
+      role: "Admin",
+      email: currentUserEmail,
+      id: currentUserID,
+    });
     userDetails = { role: "Admin", email: currentUserEmail };
-    // setUserDetails({ role: "User", email: "thenmozhi@technorucs.com" });
-    // userDetails = { role: "User", email: "thenmozhi@technorucs.com" };
   } else if (isCEO) {
-    // setUserDetails({ role: "Admin", email: currentUserEmail });
-    // userDetails = { role: "Admin", email: currentUserEmail };
-    setUserDetails({ role: "User", email: currentUserEmail });
+    setUserDetails({
+      role: "User",
+      email: currentUserEmail,
+      id: currentUserID,
+    });
     userDetails = { role: "User", email: currentUserEmail };
-    // setUserDetails({ role: "User", email: "thenmozhi@technorucs.com" });
-    // userDetails = { role: "User", email: "thenmozhi@technorucs.com" };
   } else {
-    setUserDetails({ role: "User", email: currentUserEmail });
+    setUserDetails({
+      role: "User",
+      email: currentUserEmail,
+      id: currentUserID,
+    });
     userDetails = { role: "User", email: currentUserEmail };
   }
   return userDetails;
@@ -115,13 +112,13 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
       isLoading: true,
     })
   );
-
   try {
     // Fetch questions from the Intranet_QuestionsToCEO list
     const questionsResponse = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
-      Select: "*, Author/Title, Author/EMail, Author/Id",
-      Expand: "Author",
+      Select:
+        "*, Author/Title, Author/EMail, Author/Id,AssignTo/Title, AssignTo/EMail, AssignTo/Id,AnswerBy/Title, AnswerBy/EMail, AnswerBy/Id",
+      Expand: "Author,AssignTo,AnswerBy",
     });
 
     // Fetch responses from the Intranet_Response list
@@ -133,8 +130,6 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
 
     // Prepare the final structured data by filtering responses for each question
     const questionCeoData = questionsResponse.map((question: any) => {
-      console.log(question);
-
       // Filter responses that match the current question ID
       // const filteredResponses = responsesResponse.filter(
       //   (response: any) => response.Questionceo?.ID === question?.ID
@@ -155,8 +150,8 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
             {
               ID: question.ID,
               content: question?.Answer,
-              date: question?.AnswerDate,
-              avatarUrl: question?.AnswerBy,
+              date: moment(question?.AnswerDate).format("DD/MM/YYYY"),
+              avatarUrl: question?.AnswerBy?.EMail || "",
             },
           ]
         : [];
@@ -171,11 +166,16 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
           question.Author?.EMail ||
           "https://randomuser.me/api/portraits/placeholder.jpg", // Author's email or placeholder
         replies: replies, // Attach filtered responses
-        assignTo: question?.AssignTo?.toLowerCase() || "",
+        assignTo: question?.AssignTo
+          ? {
+              id: question.AssignTo.Id,
+              name: question.AssignTo.Title,
+              email: question.AssignTo.EMail,
+            }
+          : { id: null, name: "", email: "" },
         Anonymous: question?.isAnonymous,
       };
     });
-    console.log(questionCeoData);
 
     // Dispatch the data
     dispatch?.(

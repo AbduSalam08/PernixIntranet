@@ -33,7 +33,6 @@ import {
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
-import moment from "moment";
 // import { Tooltip } from "primereact/tooltip";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
@@ -132,10 +131,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
-  console.log("showCEOQuestions", showCEOQuestions);
-
-  console.log("formData", formData);
-  console.log("assignToUsersList", assignToUsersList);
 
   const totalRecords = showCEOQuestions?.length || 0;
   const onPageChange = (event: any): void => {
@@ -151,7 +146,13 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       temp = temp?.filter(
         (val: any) =>
           val?.title.toLowerCase().includes(searchField.Search.toLowerCase()) ||
+          val?.avatarUrl
+            .toLowerCase()
+            .includes(searchField.Search.toLowerCase()) ||
           val?.replies[0]?.content
+            .toLowerCase()
+            .includes(searchField.Search.toLowerCase()) ||
+          val?.replies[0]?.avatarUrl
             .toLowerCase()
             .includes(searchField.Search.toLowerCase())
       );
@@ -240,14 +241,10 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           ...prevData.answer,
           isValid: true,
           permission:
-            userDetails.email.toLowerCase() === value?.email.toLowerCase()
-              ? true
-              : false,
+            userDetails.email === value?.email.toLowerCase() ? true : false,
           validationRule: {
             required:
-              userDetails.email.toLowerCase() === value?.email.toLowerCase()
-                ? true
-                : false,
+              userDetails.email === value?.email.toLowerCase() ? true : false,
             type: "string",
           },
         },
@@ -339,18 +336,28 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
 
     if (!hasErrors) {
       if (submitCondition) {
-        const AdminPayload = {
-          Answer: formData?.answer?.value ? formData?.answer?.value : "",
-          AnswerBy: formData?.answer?.value
-            ? userDetails?.email?.toLowerCase()
-            : "",
-          AnswerDate: formData?.answer?.value
-            ? moment(new Date()).format("DD/MM/YYYY")
-            : "",
-          AssignTo: formData?.assignTo?.value?.email.toLowerCase()
-            ? formData?.assignTo?.value?.email.toLowerCase()
-            : formData?.assignTo?.value,
-        };
+        const AdminPayload =
+          formData?.assignTo?.value?.email && formData?.answer?.value
+            ? {
+                Answer: formData?.answer?.value,
+                AnswerById: userDetails?.id,
+                AnswerDate: new Date(),
+                AssignToId: formData?.assignTo?.value?.id,
+              }
+            : formData?.answer?.value
+            ? {
+                Answer: formData?.answer?.value ? formData?.answer?.value : "",
+                AnswerById: userDetails?.id,
+                AnswerDate: new Date(),
+              }
+            : {
+                Answer: formData?.answer?.value ? formData?.answer?.value : "",
+                AnswerById: null,
+                AnswerDate: null,
+                AssignToId: formData?.assignTo?.value?.email
+                  ? formData?.assignTo?.value?.id
+                  : formData?.assignTo?.previousAssignTo?.id,
+              };
         await submitCEOQuestionAnswer(
           formData,
           AdminPayload,
@@ -361,8 +368,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       } else {
         const userPayload = {
           Answer: formData?.answer?.value,
-          AnswerBy: userDetails?.email?.toLowerCase(),
-          AnswerDate: moment(new Date()).format("DD/MM/YYYY"),
+          AnswerById: userDetails?.id,
+          AnswerDate: new Date(),
         };
         await submitCEOQuestionAnswer(
           formData,
@@ -373,7 +380,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         );
       }
     } else {
-      console.log("err");
+      console.log("Form contains errors");
     }
   };
 
@@ -383,7 +390,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         <div>
           <p className={styles.question}>{formData?.qustion?.value}</p>
         </div>
-        {userDetails.email === formData?.assignTo?.value ||
+        {userDetails.email ===
+          formData?.assignTo?.previousAssignTo?.email?.toLowerCase() ||
         userDetails.email === formData?.assignTo?.value?.email?.toLowerCase() ||
         formData?.answer?.value !== "" ? (
           <div className={styles.r4}>
@@ -418,7 +426,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               errorMsg={formData?.assignTo?.errorMsg}
               selectedItem={[formData?.assignTo?.value]}
               readOnly={
-                (userDetails.email === formData?.assignTo?.value ||
+                (userDetails.email ===
+                  formData?.assignTo?.previousAssignTo?.email ||
                   userDetails.email ===
                     formData?.assignTo?.value?.email?.toLowerCase()) &&
                 formData?.answer?.value !== ""
@@ -426,7 +435,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               groupName="QuestionCEO"
               onChange={(item: any) => {
                 const value = item[0];
-                console.log("value: ", value);
                 const { isValid, errorMsg } = validateField(
                   "assignTo",
                   item,
@@ -501,7 +509,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             // onChange={onIngredientsChange}
             checked={newFormData?.Anonymous.value}
             onChange={(e: any) => {
-              console.log(e);
               const { isValid, errorMsg } = validateField(
                 "Anonymous",
                 e.checked,
@@ -549,7 +556,10 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         disabled: false,
         size: "large",
         onClick: async () => {
-          if (userDetails.email === formData?.assignTo?.value) {
+          if (
+            userDetails.email ===
+            formData?.assignTo?.previousAssignTo?.email.toLowerCase()
+          ) {
             if (userDetails.role === "Admin") {
               userHandleSubmit(true);
             } else {
@@ -602,7 +612,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       setUserDetails,
       setAssignToUsersList
     );
-    console.log(userDetails);
 
     if (QuestionCEOIntranetData?.data?.length && userDetails?.role === "CEO") {
       if (curTab === CONFIG.QuestionsPageTabsName[0]) {
@@ -637,10 +646,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       } else if (curTab === CONFIG.QuestionsPageTabsName[1]) {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
-            return (
-              newsItem?.avatarUrl?.toLowerCase() ===
-              userDetails?.email?.toLowerCase()
-            );
+            return newsItem?.avatarUrl?.toLowerCase() === userDetails?.email;
           }
         );
       } else {
@@ -659,7 +665,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           (newsItem: any) => {
             // return newsItem?.replies.length > 0;
             if (
-              newsItem?.assignTo.toLowerCase() === userDetails?.email &&
+              newsItem?.assignTo?.email.toLowerCase() === userDetails?.email &&
               newsItem.ID === searchParamsQusID &&
               !newsItem?.isActive
             ) {
@@ -675,13 +681,15 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   isValid: true,
                   value: newsItem?.replies[0]?.content || "",
                   permission:
-                    userDetails.email === newsItem?.assignTo.toLowerCase()
+                    userDetails.email ===
+                    newsItem?.assignTo?.email.toLowerCase()
                       ? true
                       : false,
                   ID: newsItem?.ID,
                   validationRule: {
                     required:
-                      userDetails.email === newsItem?.assignTo.toLowerCase()
+                      userDetails.email ===
+                      newsItem?.assignTo?.email.toLowerCase()
                         ? true
                         : false,
                     type: "string",
@@ -690,7 +698,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                 assignTo: {
                   ...formData.assignTo,
                   isValid: true,
-                  value: newsItem?.assignTo || "",
+                  value: newsItem?.assignTo?.name || "",
+                  previousAssignTo: newsItem?.assignTo,
                   ID: newsItem?.ID,
                 },
               });
@@ -708,10 +717,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       } else {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
-            return (
-              newsItem?.avatarUrl?.toLowerCase() ===
-              userDetails?.email?.toLowerCase()
-            );
+            return newsItem?.avatarUrl?.toLowerCase() === userDetails?.email;
           }
         );
       }
@@ -720,7 +726,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
             if (
-              newsItem?.assignTo.toLowerCase() === userDetails?.email &&
+              newsItem?.assignTo?.email.toLowerCase() === userDetails?.email &&
               newsItem.ID === searchParamsQusID &&
               !newsItem?.isActive
             ) {
@@ -736,18 +742,25 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   isValid: true,
                   value: newsItem?.replies[0]?.content || "",
                   permission:
-                    userDetails.email === newsItem?.assignTo ? true : false,
+                    userDetails.email ===
+                    newsItem?.assignTo?.email.toLowerCase()
+                      ? true
+                      : false,
                   ID: newsItem?.ID,
                   validationRule: {
                     required:
-                      userDetails.email === newsItem?.assignTo ? true : false,
+                      userDetails.email ===
+                      newsItem?.assignTo.email.toLowerCase()
+                        ? true
+                        : false,
                     type: "string",
                   },
                 },
                 assignTo: {
                   ...formData.assignTo,
                   isValid: true,
-                  value: newsItem?.assignTo || "",
+                  value: newsItem?.assignTo?.name || "",
+                  previousAssignTo: newsItem?.assignTo,
                   ID: newsItem?.ID,
                 },
               });
@@ -760,17 +773,15 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               );
             }
             return (
-              newsItem?.isActive || newsItem?.assignTo === userDetails.email
+              newsItem?.isActive ||
+              newsItem?.assignTo?.email.toLowerCase() === userDetails.email
             );
           }
         );
       } else {
         filteredData = QuestionCEOIntranetData?.data?.filter(
           (newsItem: any) => {
-            return (
-              newsItem?.avatarUrl?.toLowerCase() ===
-              userDetails?.email?.toLowerCase()
-            );
+            return newsItem?.avatarUrl?.toLowerCase() === userDetails?.email;
           }
         );
       }
@@ -1027,19 +1038,10 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                         </p>
                       </div>
                       <p className={styles.date}>
-                        {/* <i
-                          className="pi pi-clock"
-                          style={{ fontSize: "1rem" }}
-                        /> */}
                         Posted on :{val.replies[0]?.date}
                       </p>
-                      {/* <p className={styles.date}>
-                        <i className="pi pi-clock" style={{ fontSize: "1rem" }} /> 
-                        Responded on :{val.date}
-                      </p> */}
                     </div>
                   </div>
-                  {/* {userDetails.role !== "User" && ( */}
                   <div className={styles.cardFooter}>
                     {userDetails.role === "Admin" ? (
                       <div
@@ -1054,7 +1056,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                     )}
                     <div className={styles.actionBtns}>
                       {((userDetails.role === "Admin" && !val.isActive) ||
-                        (userDetails.email === val?.assignTo &&
+                        (userDetails.email ===
+                          val?.assignTo?.email?.toLowerCase() &&
                           !val.isActive)) && (
                         <i
                           onClick={() => {
@@ -1070,13 +1073,15 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                                 isValid: true,
                                 value: val?.replies[0]?.content || "",
                                 permission:
-                                  userDetails.email === val?.assignTo
+                                  userDetails.email ===
+                                  val?.assignTo?.email?.toLowerCase()
                                     ? true
                                     : false,
                                 ID: val?.ID,
                                 validationRule: {
                                   required:
-                                    userDetails.email === val?.assignTo
+                                    userDetails.email ===
+                                    val?.assignTo?.email?.toLowerCase()
                                       ? true
                                       : false,
                                   type: "string",
@@ -1085,7 +1090,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                               assignTo: {
                                 ...formData.assignTo,
                                 isValid: true,
-                                value: val?.assignTo || "",
+                                value: val?.assignTo?.name || "",
+                                previousAssignTo: val?.assignTo,
                                 ID: val?.ID,
                               },
                             });

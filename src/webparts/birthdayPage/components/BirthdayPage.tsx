@@ -1,43 +1,32 @@
-import * as React from 'react';
-import styles from './BirthdayPage.module.scss';
-import type { IBirthdayPageProps } from './IBirthdayPageProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-var-requires */
+import { useEffect, useState } from "react";
+import styles from "./BirthdayPage.module.scss";
+import { useDispatch, useSelector } from "react-redux";
+import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+import {
+  getAllBirthdayData,
+  getBirthdayCurrentUserRole,
+} from "../../../services/BirthDayIntranet/birthDayIntranet";
 
-export default class BirthdayPage extends React.Component<IBirthdayPageProps, {}> {
-  public render(): React.ReactElement<IBirthdayPageProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
+const BirthdayPage = (props: any): JSX.Element => {
+  const dispatch = useDispatch();
+  const birthDaysData: any = useSelector((state: any) => {
+    return state.BirthdaysData.value;
+  });
+  console.log("birthDaysData", birthDaysData);
+  const [currentUserDetails, setCurrentUserDetails] = useState<any>({
+    role: "User",
+    email: "",
+  });
+  console.log("currentUserDetails", currentUserDetails);
 
-    return (
-      <section className={`${styles.birthdayPage} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
-        </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
-        </div>
-      </section>
-    );
-  }
-}
+  useEffect(() => {
+    dispatch(setMainSPContext(props?.context));
+    getBirthdayCurrentUserRole(setCurrentUserDetails);
+    getAllBirthdayData(dispatch);
+  }, [dispatch]);
+  return <div className={styles.heading}>BirthdayPage</div>;
+};
+export default BirthdayPage;
