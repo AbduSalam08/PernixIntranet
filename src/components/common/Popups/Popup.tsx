@@ -23,6 +23,7 @@ interface Props {
   messages?: loadingProps | any;
   popupHeight?: boolean;
   secondaryText?: string;
+  centerActionBtn?: boolean;
   noActionBtn?: boolean;
   popupCustomBgColor?: string;
 }
@@ -47,6 +48,7 @@ const Popup = ({
   popupCustomBgColor,
   PopupType,
   popupActions,
+  centerActionBtn,
   popupTitle,
   defaultCloseBtn,
   onHide,
@@ -80,6 +82,9 @@ const Popup = ({
           ? styles.popupFooterConfirmation
           : styles.popupFooter
       }
+      style={{
+        justifyContent: centerActionBtn ? "center" : "flex-end",
+      }}
     >
       {popupActions?.map((btn: any, id: number) => (
         <DefaultButton

@@ -25,10 +25,6 @@ interface HelpDeskProps {
 const HelpDesk: React.FC<HelpDeskProps> = (props) => {
   console.log("props: ", props);
   const dispatch = useDispatch();
-  const isViewRoute: boolean =
-    window.location.pathname?.includes("/view_ticket");
-  console.log("window.location.pathname: ", window.location.pathname);
-  console.log("isViewRoute: ", isViewRoute);
 
   // Effect for handling role-based authentication
   useEffect(() => {

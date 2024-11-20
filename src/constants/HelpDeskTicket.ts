@@ -27,3 +27,10 @@ export const TicketStatus: string[] = [
   "On Hold",
 ];
 export const imageURL: string = "/_layouts/15/userphoto.aspx?size=S&username=";
+
+export const TicketRecurrenceFrequency: string[] = [
+  "Weekly",
+  "Quarterly",
+  "Semi Annual",
+  "Annual",
+];

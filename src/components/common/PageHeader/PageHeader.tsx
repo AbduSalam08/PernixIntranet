@@ -14,6 +14,7 @@ interface PageHeaderProps {
   noBackBtn?: boolean;
   centered?: boolean;
   underlined?: boolean;
+  backbtnTitle?: any;
   headerClick?: () => any;
 }
 
@@ -27,6 +28,7 @@ const PageHeader = ({
   centered = false,
   underlined = false,
   headerClick,
+  backbtnTitle,
 }: PageHeaderProps): JSX.Element => {
   // const navigate = useNavigate();
 
@@ -63,7 +65,14 @@ const PageHeader = ({
       }}
       onClick={handleHeaderClick}
     >
-      {!noBackBtn && <img src={headerBack} onClick={headerClick} alt="Back" />}
+      {!noBackBtn && (
+        <img
+          src={headerBack}
+          title={backbtnTitle}
+          onClick={headerClick}
+          alt="Back"
+        />
+      )}
       <span
         style={{
           marginLeft: centered ? "auto" : "0",

@@ -36,6 +36,8 @@
 }
 .rhsG {
   width: 80%;
+  max-height: calc(100vh - 150px);
+  overflow: auto;
   background-color: #fff;
   display: flex;
   align-items: flex-start;
@@ -45,6 +47,13 @@
   padding: 15px;
   border: 1px solid #cfcfcf50;
   border-radius: 10px;
+  &::-webkit-scrollbar {
+    width: 2px !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
 }
 .ticketViewWrapper {
   width: 100%;
@@ -52,7 +61,7 @@
   align-items: stretch;
   justify-content: center;
   min-height: calc(100vh - 150px);
-  height: 100vh;
+  height: 90vh;
   gap: 15px;
   padding: 10px;
   background-color: transparent;

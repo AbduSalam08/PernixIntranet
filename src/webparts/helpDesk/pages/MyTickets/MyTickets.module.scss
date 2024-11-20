@@ -163,7 +163,7 @@
   }
 }
 .userNamePill {
-  max-width: 135px;
+  max-width: 115px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -229,5 +229,77 @@
     color: #adadad;
     font-size: 13px;
     font-family: "osMedium", sans-serif;
+  }
+}
+.recurrenceWrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  .repeatQues {
+    text-align: center;
+    font-size: 15px;
+    font-family: "osMedium", sans-serif;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .recurrenceBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-left: 10px;
+    p {
+      font-size: 15px;
+      font-family: "osMedium", sans-serif;
+      color: #212529;
+    }
+  }
+}
+.recurrenceOptions {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  .recurrenceLabel {
+    font-size: 14px;
+    color: #414141;
+    background-color: #eee;
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+    padding: 15px;
+    font-family: "osSemiBold", sans-serif;
+    width: 100%;
+  }
+  .r1 {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+.nextTicketIntimation {
+  width: 50%;
+  height: 100%;
+  font-family: "osMedium", sans-serif;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 10px;
+  label {
+    font-size: 14px;
+    color: #adadad;
+  }
+  span {
+    font-size: 14px;
+    color: #414141;
+    font-family: "osSemiBold", sans-serif;
   }
 }

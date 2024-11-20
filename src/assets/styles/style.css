@@ -53,6 +53,11 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
   padding: 0px !important;
 }
 
+/* hide header */
+[class^="headerRow"] {
+  display: none !important;
+}
+
 /* #spCommandBar {
   display: none !important;
 }
