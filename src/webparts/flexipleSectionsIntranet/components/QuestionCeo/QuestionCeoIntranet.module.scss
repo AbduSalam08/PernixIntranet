@@ -1,0 +1,128 @@
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}
+
+.quesToCEOContainer {
+  box-shadow: 0px -1px 4px 0px #b9b9b940;
+  border-radius: 6px;
+  padding: 20px;
+  // margin: 20px;
+
+  // height: 460px;
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
+  // padding: 25px;
+  .carouselWrapper {
+    min-height: 390px;
+  }
+
+  .contentSection {
+    padding: 15px 20px;
+    box-shadow: 0px -1px 4px 0px #b6b6b640;
+    border-radius: 10px;
+    margin-top: 20px;
+    // height: 350px;
+    // overflow: auto;
+    // margin-bottom: 10px;
+
+    &::-webkit-scrollbar {
+      width: 2px !important;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: transparent !important;
+    }
+
+    .Container {
+      background-color: #fff;
+      padding: 10px;
+      height: 350px;
+      overflow: auto;
+      margin-bottom: 10px;
+
+      .questions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .imgsection {
+          width: 30px;
+        }
+
+        .ques {
+          width: calc(100% - 30px);
+          margin: 0;
+          color: #0b4d53;
+          font-size: 14px;
+          font-family: "osSemibold", sans-serif;
+          max-height: 60px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-break: break-word;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          line-clamp: 2;
+          -webkit-line-clamp: 2;
+          white-space: normal;
+        }
+      }
+    }
+
+    .date {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      color: #878787;
+      font-size: 13px;
+      font-family: "osRegular", sans-serif;
+      margin-bottom: 20px;
+
+      // font-weight: 500;
+      // margin: 5px 0px 20px 0px;
+      i {
+        color: #e0803d;
+      }
+    }
+  }
+}
+
+.addNewsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* Four equal-width columns */
+  gap: 16px;
+  /* Space between grid items */
+}
+
+.answer {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0;
+  color: #4b4b4b;
+  line-height: 21px;
+  margin: 10px 0;
+
+  p {
+    font-family: "osRegular", sans-serif;
+    line-height: 23px;
+    font-size: 14px;
+    max-height: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 6;
+    -webkit-line-clamp: 6;
+    white-space: normal;
+  }
+}

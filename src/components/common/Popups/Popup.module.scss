@@ -253,3 +253,9 @@
     color: #adadad;
   }
 }
+
+@media (max-width: 768px) {
+  .popupWrapper {
+    width: 90% !important;
+  }
+}
