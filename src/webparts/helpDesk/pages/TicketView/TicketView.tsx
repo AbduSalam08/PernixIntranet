@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Avatar, AvatarGroup, Backdrop, CircularProgress } from "@mui/material";
 import styles from "./TicketView.module.scss";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CommentCard from "../../components/CommentCard/CommentCard";
 import QuillEditor from "../../../../components/common/QuillEditor/QuillEditor";
 import { useEffect, useState } from "react";
@@ -35,14 +35,16 @@ import {
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import ErrorElement from "../../../../components/common/ErrorElement/ErrorElement";
 import { ArrowRight } from "@mui/icons-material";
+import CircularSpinner from "../../../../components/common/Loaders/CircularSpinner";
 // import { getTicketByTicketNumber } from "../../../../services/HelpDeskMainServices/dashboardServices";
 const leftArrow = require("../../../../assets/images/svg/headerBack.svg");
 const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
 
 const TicketView = (): JSX.Element => {
-  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const pageParams = useParams();
+  console.log("pageParams: ", pageParams);
 
   const initialPopupController = [
     {
@@ -68,13 +70,14 @@ const TicketView = (): JSX.Element => {
       },
     },
   ];
+
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
 
   const [currentAttachment, setCurrentAttachment] = useState<any>(null);
 
-  const ticketNumber: string = location.state?.ticket_number;
+  const ticketNumber: string | any = pageParams?.ticketid;
   // const [localProperties, setLocalProperties] = useState({
   //   expandCommentBar:true
   // });
@@ -89,6 +92,7 @@ const TicketView = (): JSX.Element => {
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
   );
+
   const AllUsersData = useSelector((state: any) => state.AllUsersData?.value);
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
@@ -97,7 +101,28 @@ const TicketView = (): JSX.Element => {
     (state: any) => state.HelpDeskTicktesData.value
   );
 
-  const currentTicketsData = currentTicketsDataMain?.AllData?.filter(
+  const isTicketManager: boolean =
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers";
+  // || currentUserDetails?.role === "Super Admin";
+
+  const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
+  console.log("isITOwner: ", isITOwner);
+
+  const verifyTicketWithCurrentUser: any = !isTicketManager
+    ? currentTicketsDataMain?.AllData?.filter(
+        (item: any) =>
+          item?.EmployeeName?.EMail === currentUserDetails?.email ||
+          item?.ITOwner?.EMail === currentUserDetails?.email ||
+          item?.TicketManager?.EMail === currentUserDetails?.email ||
+          item?.TaggedPerson?.some(
+            (item: any) => item?.EMail === currentUserDetails?.email
+          )
+      )
+    : currentTicketsDataMain?.AllData;
+
+  console.log("verifyTicketWithCurrentUser: ", verifyTicketWithCurrentUser);
+
+  const currentTicketsData = verifyTicketWithCurrentUser?.filter(
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
 
@@ -169,8 +194,6 @@ const TicketView = (): JSX.Element => {
 
   const uniqueUsers = new Set<string>();
 
-  console.log("currentTicketsData: ", currentTicketsData);
-  console.log("conversationData: ", conversationData);
   const contributors: any = [
     ...conversationData?.data?.flatMap((item: any) => item?.TaggedPerson || []), // Handle taggedPerson array
     currentTicketsData?.EmployeeName,
@@ -183,40 +206,55 @@ const TicketView = (): JSX.Element => {
     }
     return false;
   });
-  console.log([
-    ...conversationData?.data?.flatMap((item: any) => item?.TaggedPerson || []), // Handle taggedPerson array
-    currentTicketsData?.EmployeeName,
-    currentTicketsData?.ITOwner,
-    currentTicketsData?.TicketManager,
-  ]);
-  console.log("contributors: ", contributors);
+
+  // 	emp name
+  // hd manager
+  // it owner
+  // taggedperson
 
   const repeatedTicketNumber = currentTicketsDataMain?.AllData?.filter(
     (item: any) => item?.ID === currentTicketsData?.RepeatedTicketSourceId
   )[0]?.TicketNumber;
-  console.log("repeatedTicketNumber: ", repeatedTicketNumber);
+
   const combinedUsers = [
     currentTicketsData?.EmployeeName,
     currentTicketsData?.ITOwner,
     currentTicketsData?.TicketManager,
   ];
-  console.log("combinedUsers: ", combinedUsers);
 
   const isUserTagged = combinedUsers.some(
     (user: any) => user?.EMail === currentUserDetails?.email
   );
-  console.log("isUserTagged: ", isUserTagged);
-  useEffect(() => {
-    getAllComments(currentTicketsData?.ID, setConversationData, false);
 
-    getAttachmentofTicket(currentTicketsData?.ID)?.then((res: any) => {
-      console.log("res: ", res);
-      setCurrentAttachment(res || null);
-    });
-  }, []);
+  const isValidTicket = (value: any): boolean =>
+    value !== null &&
+    value !== undefined &&
+    typeof value === "string" &&
+    value?.trim() !== "";
+
+  const hasValidTicketId =
+    isValidTicket(pageParams?.ticketid) &&
+    isValidTicket(ticketNumber) &&
+    currentTicketsData !== null &&
+    currentTicketsData !== undefined;
+
+  useEffect(() => {
+    getAllTickets(dispatch);
+
+    if (pageParams?.ticketid) {
+      getAllComments(currentTicketsData?.ID, setConversationData, false);
+
+      getAttachmentofTicket(currentTicketsData?.ID)?.then((res: any) => {
+        setCurrentAttachment(res || null);
+      });
+    }
+  }, [pageParams?.ticketid, ticketNumber]);
+
   return (
     <>
-      {location?.state !== null ? (
+      {currentTicketsDataMain?.isLoading && !hasValidTicketId ? (
+        <CircularSpinner />
+      ) : hasValidTicketId ? (
         <>
           <div className={styles.tcLhs}>
             <div className={styles.ticketHeader}>
@@ -277,38 +315,6 @@ const TicketView = (): JSX.Element => {
                   <StatusPill size="MD" status={currentTicketsData?.Status} />
                 )}
               </div>
-
-              {/* <div className={styles.headerDetailsLabel}>
-                <label
-                  onClick={() => {
-                    setToggles((prev: any) => ({
-                      ...prev,
-                      showDescription: !prev.showDescription,
-                    }));
-                  }}
-                >
-                  <ArrowRight
-                    sx={{
-                      color: "#adadad",
-                      fontSize: "22px",
-                      transition: "all .2s",
-                      transform: toggles?.showDescription
-                        ? `rotate(90deg)`
-                        : `rotate(0deg)`,
-                    }}
-                  />
-                  <span>Description</span>
-                </label>
-                <span
-                  style={{
-                    transition: "all .2s",
-                    height: toggles.showDescription ? `100%` : `0px`,
-                    overflow: "hidden",
-                  }}
-                >
-                  {currentTicketsData?.TicketDescription ?? "-"}
-                </span>
-              </div> */}
             </div>
             <div className={styles.ticketChats}>
               <div className={styles.heading}>Conversations</div>
@@ -320,7 +326,7 @@ const TicketView = (): JSX.Element => {
                     currentTicketsData?.Status === "Closed" ||
                     conversationData?.data?.length === 0
                       ? "100%"
-                      : "calc(100% - 280px)",
+                      : "calc(100% - 300px)",
                   overflow: "auto",
                 }}
               >
@@ -506,23 +512,6 @@ const TicketView = (): JSX.Element => {
                   <span>{ticketNumber ?? "-"}</span>
                 </div>
 
-                {/* <div className={styles.detailsLabel}>
-                  <label>Created at</label>
-                  <span>
-                    {dayjs(currentTicketsData?.Created).format("DD MMM YYYY") ??
-                      "-"}
-                  </span>
-                </div>
-
-                <div className={styles.detailsLabel}>
-                  <label>Last Modified</label>
-                  <span>
-                    {dayjs(currentTicketsData?.Modified).format(
-                      "DD MMM YYYY"
-                    ) ?? "-"}
-                  </span>
-                </div> */}
-
                 <div className={styles.headerDetailsLabel}>
                   <label
                     onClick={() => {
@@ -602,11 +591,6 @@ const TicketView = (): JSX.Element => {
                   </>
                 )}
 
-                {/* <div className={styles.detailsLabel}>
-                  <label>Ticket description</label>
-                  <span>{currentTicketsData?.TicketDescription ?? "-"}</span>
-                </div> */}
-
                 <div className={styles.detailsLabel}>
                   <label>Last commented on</label>
                   <span>
@@ -673,6 +657,7 @@ const TicketView = (): JSX.Element => {
                 </div>
               </div>
             </div>
+
             <div className={styles.detailsCard}>
               <div className={styles.heading}>Responsibilities</div>
               <div className={styles.details}>
@@ -743,6 +728,7 @@ const TicketView = (): JSX.Element => {
                 </div>
               </div>
             </div>
+
             <div className={styles.detailsCard}>
               <div className={styles.heading}>
                 Contributors ({contributors?.length})
@@ -774,6 +760,7 @@ const TicketView = (): JSX.Element => {
               </div>
             </div>
           </div>
+
           <ToastContainer
             position="top-center"
             autoClose={3000}
@@ -785,7 +772,9 @@ const TicketView = (): JSX.Element => {
             draggable
             pauseOnHover
           />
+
           {/* popup */}
+
           {popupController?.map((popupData: any, index: number) => (
             <Popup
               popupCustomBgColor="#fff"

@@ -192,3 +192,24 @@ export interface IFeedbackResType {
   CreatedBy: IUserData;
   Date: Date | null | string;
 }
+
+export interface IinitialPopupLoaders {
+  open: boolean;
+  popupTitle: string;
+  popupWidth: string;
+  popupType?: string; // Consider using a union type like 'custom' | 'default' if applicable
+  defaultCloseBtn: boolean;
+  popupData?: any[] | any; // Replace `any` with the specific type of data if known
+  isLoading?: {
+    inprogress: boolean;
+    error: boolean;
+    success: boolean;
+  };
+  messages?: {
+    success: string;
+    error: string;
+    successDescription: string;
+    errorDescription: string;
+    inprogress: string;
+  };
+}

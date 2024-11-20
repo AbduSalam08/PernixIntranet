@@ -29,6 +29,7 @@ interface DDateInputProps {
   maximumDate?: any;
   timeOnly?: boolean;
   showIcon?: boolean;
+  hightLightInput?: boolean;
 }
 
 const DDateInput: React.FC<DDateInputProps> = ({
@@ -55,6 +56,7 @@ const DDateInput: React.FC<DDateInputProps> = ({
   maximumDate = null,
   timeOnly = false,
   showIcon = true,
+  hightLightInput = false,
 }) => {
   const handleChange = useCallback(
     (e: any) => {
@@ -87,6 +89,8 @@ const DDateInput: React.FC<DDateInputProps> = ({
         width: size ? size : "auto",
         minWidth: minWidth ? minWidth : "auto",
         maxWidth: maxWidth ? maxWidth : "auto",
+        borderRadius: "6px",
+        border: hightLightInput ? "1px solid #eee" : "none",
       }}
     >
       <div

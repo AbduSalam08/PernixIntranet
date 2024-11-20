@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 // import PageHeader from "../../../components/common/PageHeader/PageHeader";
 import LeftBar from "../components/LeftBar/LeftBar";
 // import MyTickets from "../pages/MyTickets/MyTickets";
@@ -12,14 +12,13 @@ import { CONFIG } from "../../../config/config";
 const MainLayout = (): JSX.Element => {
   const navigate = useNavigate();
   const location = useLocation();
+  const pageParams = useParams();
 
   const currentUserDetails = useSelector(
     (state: { MainSPContext: { currentUserDetails: any } }) =>
       state.MainSPContext.currentUserDetails
   );
   const MainSPContext = useSelector((state: any) => state.MainSPContext.value);
-
-  console.log("currentUserDetails: ", currentUserDetails);
 
   const currentRole: string =
     currentUserDetails?.role === "Pernix_Admin" ||
@@ -30,26 +29,40 @@ const MainLayout = (): JSX.Element => {
       ? "/it_owner/dashboard"
       : `/${currentUserDetails?.role}/all_tickets`;
 
-  console.log("currentRole: ", currentRole);
+  const currentRoleInitial: string =
+    currentUserDetails?.role === "Pernix_Admin" ||
+    // currentUserDetails?.role === "Super Admin" ||
+    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+      ? "helpdesk_manager"
+      : currentUserDetails?.role === "HelpDesk_IT_Owners"
+      ? "it_owner"
+      : `${currentUserDetails?.role}`;
+
   const isViewRoute: boolean = location.pathname?.includes("/view_ticket");
-  // Redirect to the current role path if not centered
+
   useEffect(() => {
-    if (currentUserDetails.email !== "") {
-      navigate(currentRole);
+    if (currentUserDetails.email) {
+      if (pageParams?.ticketid) {
+        navigate(
+          `/${currentRoleInitial || "user"}/all_tickets/${
+            pageParams?.ticketid
+          }/view_ticket`,
+          { replace: true }
+        );
+      } else if (currentUserDetails.email && !pageParams?.ticketid) {
+        navigate(currentRole);
+      }
     }
-  }, [currentRole, currentUserDetails]);
+  }, [currentRole, currentUserDetails.email]);
 
   return (
     <div className={styles.ticketsGrid}>
-      {/* //   <div className={styles.ticketHeader}>
-    //     <PageHeader title={"Tickets"} />
-    //   </div>
-     */}
       {/* Page Header */}
       {!isViewRoute && (
         <div className={styles.ticketHeader}>
           <PageHeader
-            title="Tickets"
+            title="Helpdesk"
+            backbtnTitle={"Back to home"}
             headerClick={() => {
               window.open(
                 MainSPContext?.pageContext.web.absoluteUrl +

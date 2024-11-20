@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// import { Drawer, Switch } from "@mui/material";
 import { Drawer } from "@mui/material";
 import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
 import DataTable from "../../../../components/common/DataTable/DataTable";
@@ -43,6 +44,7 @@ import { toast } from "react-toastify";
 import {
   TicketCategories,
   TicketPriority,
+  // TicketRecurrenceFrequency,
   TicketStatus,
 } from "../../../../constants/HelpDeskTicket";
 import { ToastContainer } from "react-toastify";
@@ -54,12 +56,14 @@ import { Avatar } from "primereact/avatar";
 import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
 import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
 import { useLocation, useNavigate } from "react-router-dom";
-import { mapRowDataToFormData } from "../../../../utils/helpdeskUtils";
 import { togglePopupVisibility } from "../../../../utils/popupUtils";
 import Popup from "../../../../components/common/Popups/Popup";
 import dayjs from "dayjs";
 import { getAttachmentofTicket } from "../../../../services/HelpDeskMainServices/ticketViewServices";
 import CustomMultipleFileUpload from "../../../../components/common/CustomInputFields/CustomMultipleFileUpload";
+import { mapRowDataToFormData } from "../../../../utils/helpdeskUtils";
+import { IinitialPopupLoaders } from "../../../../interface/interface";
+// import CustomDateInput from "../../../../components/common/CustomInputFields/CustomDateInput";
 // Import SVGs
 const myTickets: any = require("../../assets/images/svg/myTickets.svg");
 const openTickets: any = require("../../assets/images/svg/openTickets.svg");
@@ -83,15 +87,27 @@ const MyTickets = (): JSX.Element => {
     data: [],
   });
 
-  const initialPopupController = [
+  const [recurrenceDetails, setRecurrenceDetails] = useState({
+    isRecurrence: false,
+    StartDate: "",
+    EndDate: "",
+    Frequency: "",
+    TicketDetails: "",
+  });
+
+  console.log("recurrenceDetails: ", recurrenceDetails);
+  console.log("setRecurrenceDetails: ", setRecurrenceDetails);
+
+  const initialPopupController: IinitialPopupLoaders[] = [
     {
       open: false,
       popupTitle: "Confirmation",
       popupWidth: "450px",
-      popupType: "confirmation",
+      // popupWidth: "650px",
+      popupType: "custom",
       defaultCloseBtn: false,
-      confirmationTitle: "Are you sure want to repeat this ticket?",
-      popupData: "",
+      // confirmationTitle: "Are you sure want to repeat this ticket?",
+      popupData: [],
       isLoading: {
         inprogress: false,
         error: false,
@@ -115,13 +131,11 @@ const MyTickets = (): JSX.Element => {
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
   );
-  console.log("currentUserDetails: ", currentUserDetails);
 
   const isTicketManager: boolean =
     currentUserDetails?.role === "HelpDesk_Ticket_Managers";
   // || currentUserDetails?.role === "Super Admin";
 
-  console.log("isTicketManager: ", isTicketManager);
   const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
   // || currentUserDetails?.role === "Super Admin";
 
@@ -248,7 +262,6 @@ const MyTickets = (): JSX.Element => {
   };
 
   const [formData, setFormData] = useState<any>(initialData);
-  console.log("formData: ", formData);
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
@@ -334,9 +347,9 @@ const MyTickets = (): JSX.Element => {
               };
           console.log("formDataAppended: ", formDataAppended);
 
-          await Promise.all([
-            addNewTicket(formDataAppended, ["Attachments"], true),
-          ])
+          // await Promise.all([
+          // ])
+          await addNewTicket(formDataAppended, ["Attachments"], true)
             .then(async (res: any) => {
               navigate(`${currentRole}/all_tickets`);
               await Promise.all([getAllTickets(dispatch)]);
@@ -347,6 +360,59 @@ const MyTickets = (): JSX.Element => {
         },
       },
     ],
+  ];
+
+  const popupInputs: any = [
+    <div key={1} className={styles.recurrenceWrapper}>
+      <p className={styles.repeatQues}>
+        Are you sure want to repeat this ticket &quot;
+        {popupController[0]?.popupData?.TicketNumber}&quot;?
+      </p>
+      {/* <div className={styles.recurrenceBtn}>
+        <p>Set recurrence</p>
+        <Switch
+          sx={{
+            color: "#2d4b51",
+          }}
+        />
+      </div>
+
+      <div className={styles.recurrenceOptions}>
+        <span className={styles.recurrenceLabel}>
+          Recurrence details ({popupController[0]?.popupData?.TicketNumber})
+        </span>
+        <div className={styles.r1}>
+          <CustomDateInput
+            maxWidth="50%"
+            value={""}
+            disablePast
+            label="Start date"
+            hightLightInput
+          />
+          <CustomDateInput
+            maxWidth="50%"
+            value={""}
+            disablePast
+            label="End date"
+            hightLightInput
+          />
+        </div>
+
+        <div className={styles.r1}>
+          <CustomDropDown
+            value={""}
+            placeholder="Select frequency"
+            options={TicketRecurrenceFrequency}
+            highlightDropdown
+            width={"50%"}
+          />
+          <div className={styles.nextTicketIntimation}>
+            <label>Next ticket on</label>
+            <span>20/12/2024</span>
+          </div>
+        </div>
+      </div> */}
+    </div>,
   ];
 
   const [dataGridProps, setDataGridProps] = useState<{
@@ -436,7 +502,6 @@ const MyTickets = (): JSX.Element => {
       headerName: "Priority",
       width: 150,
     },
-
     {
       sortable: false,
       field: "status",
@@ -468,10 +533,30 @@ const MyTickets = (): JSX.Element => {
                 content: `${window.location.origin}${item?.ServerRelativeUrl}?web=1`,
               };
             });
+            console.log("mappedFiles: ", mappedFiles);
             await downloadFiles(
               `${params?.row?.ticket_number} - Attachments`,
               mappedFiles
             );
+            if (mappedFiles?.length !== 0) {
+              toast.success("Attachment downloaded!", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+              });
+            } else {
+              toast.warning("No Attachments found!", {
+                position: "top-center",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+              });
+            }
           }}
         >
           <AttachFile
@@ -808,7 +893,7 @@ const MyTickets = (): JSX.Element => {
       currentUserDetails,
       dispatch
     );
-    navigate(location.pathname, { state: null });
+    // navigate(location.pathname, { state: null });
   }, [location.pathname]);
 
   useEffect(() => {
@@ -1291,6 +1376,7 @@ const MyTickets = (): JSX.Element => {
           //    resetPopupController(prev, index, true);
           // });
           // }}
+
           PopupType={popupData.popupType}
           onHide={() => {
             togglePopupVisibility(
@@ -1306,10 +1392,11 @@ const MyTickets = (): JSX.Element => {
           }
           popupActions={popupActions[index]}
           visibility={popupData.open}
-          // content={popupInputs[index]}
+          content={popupInputs[index]}
           popupWidth={popupData.popupWidth}
           defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={popupData?.confirmationTitle}
+          confirmationTitle={popupData?.confirmationTitle ?? ""}
+          centerActionBtn
           popupHeight={index === 0 ? true : false}
           noActionBtn={true}
         />
