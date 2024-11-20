@@ -9,6 +9,7 @@ import { Icon } from "@fluentui/react";
 // import { sp } from "@pnp/sp/presets/all";
 import { Persona, PersonaSize, PersonaPresence } from "@fluentui/react";
 import { getcuruserdetails } from "../../../services/BlogsPage/BlogsPageServices";
+import { VisibilityOutlined } from "@mui/icons-material";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 
 function ViewComponent(props: any) {
@@ -76,7 +77,12 @@ function ViewComponent(props: any) {
         </h5> */}
       </div>
       <div
-        style={{ width: "100%", backgroundColor: "white", marginTop: "15px" }}
+        style={{
+          width: "100%",
+          backgroundColor: "white",
+          marginTop: "15px",
+          borderRadius: "10px",
+        }}
       >
         <div className={styles.section}>
           <div className={styles?.Imagecontainer}>
@@ -124,19 +130,30 @@ function ViewComponent(props: any) {
             </div>
             <div className={styles.likecontainer}>
               <div className={styles.likebox}>
-                <Icon
+                <i
+                  className="pi pi-thumbs-up-fill"
+                  style={{
+                    color: curuserlikes ? "#0a4b48" : "#b3b0b0",
+                  }}
+                />
+                {/* <Icon
                   iconName="LikeSolid"
                   style={{
                     color: curuserlikes ? "#0a4b48" : "#b3b0b0",
                   }}
                   className={styles.likeicon}
-                />
+                /> */}
                 <label style={{ cursor: "auto" }}>
                   {totaluserlikescount || "0"}
                 </label>
               </div>
               <div className={styles.eyecontainer}>
-                <Icon iconName="RedEye12" className={styles.eyeicon} />
+                {/* <Icon iconName="RedEye12" className={styles.eyeicon} /> */}
+                <VisibilityOutlined
+                  style={{
+                    color: "orange",
+                  }}
+                />
                 <label style={{ cursor: "auto" }}>
                   {userviewcounts || "0"}
                 </label>

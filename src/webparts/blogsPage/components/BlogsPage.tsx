@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 /* eslint-disable dot-notation */
 // /* eslint-disable no-// */
 /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -18,6 +19,7 @@ import {
   Persona,
   PersonaSize,
   PersonaPresence,
+  // IconButton,
 } from "@fluentui/react";
 // import styles from "../../../components/common/CustomInputFields/Inputs.module.scss";
 import AddingComponent from "./AddingComponent";
@@ -29,16 +31,22 @@ import {
   // Approved,
   getintername,
   nooneviews,
-  otheruserdetails,
+  // otheruserdetails,
   permissionhandling,
   usergetdetails,
   viewLikes,
 } from "../../../services/BlogsPage/BlogsPageServices";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
-import { Checkbox } from "office-ui-fabric-react";
+// import { Checkbox } from "office-ui-fabric-react";
 import Popup from "../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../utils/popupUtils";
 import moment from "moment";
+import {
+  // ThumbUpAltOutlined
+  VisibilityOutlined,
+} from "@mui/icons-material";
+import _ from "lodash";
+// import { arrayIncludes } from "@mui/x-date-pickers/internals/utils/utils";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
@@ -74,46 +82,47 @@ const BlogsPage = (props: any): JSX.Element => {
   const popupActions: any = [
     [
       {
-        text: "Cancel",
+        text: "Rejected",
         btnType: "darkGreyVariant",
         disabled: false,
         endIcon: false,
         startIcon: false,
         size: "large",
         onClick: () => {
-          const updatedData = data.map((item: any) => {
-            if (item.Id === Updateid) {
-              return {
-                ...item,
-                UserStatus: "",
-              };
-            }
-            return item;
-          });
+          // const updatedData = data.map((item: any) => {
+          //   if (item.Id === Updateid) {
+          //     return {
+          //       ...item,
+          //       UserStatus: "",
+          //     };
+          //   }
+          //   return item;
+          // });
 
-          setdata(updatedData);
+          // setdata(updatedData);
 
-          const _popupcontroller = [...popupController];
-          _popupcontroller[0].open = false;
-          setPopupController([..._popupcontroller]);
+          // const _popupcontroller = [...popupController];
+          // _popupcontroller[0].open = false;
+          // setPopupController([..._popupcontroller]);
+          const findarray = data.find((item: any) => item.Id === Updateid);
+          Approverfunc(findarray.Id, "Rejected");
         },
       },
       {
-        text: "Submit",
+        text: "Approved",
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
         size: "large",
         onClick: async () => {
           const findarray = data.find((item: any) => item.Id === Updateid);
-
-          //;
-          Approverfunc(findarray.Id, findarray.UserStatus);
+          Approverfunc(findarray.Id, "Approved");
         },
       },
     ],
   ];
-
+  // const [duplicatefilter, setduplicatefilter] = useState<any>([]);
+  // console.log(duplicatefilter);
   const [data, setdata] = useState<any>([]);
   const [duplicatedata, setduplicatedata] = useState<any>([]);
   const [curuser, setcuruser] = useState<any>({
@@ -122,7 +131,7 @@ const BlogsPage = (props: any): JSX.Element => {
     Title: "",
   });
 
-  const [checkbox, setcheckbox] = useState(false);
+  // const [checkbox, setcheckbox] = useState(false);
   const [Updateid, setupdateid] = useState<any>(null);
   console.log(Updateid);
   const [permission, setpermission] = useState("");
@@ -131,6 +140,10 @@ const BlogsPage = (props: any): JSX.Element => {
     _status: "",
     _gsearch: "",
   });
+  // const [additionalfilterkey, setadditionalfilterkey] = useState({
+  //   _status: "",
+  // });
+
   const [viewitem, setviewitem] = useState("");
   const [viewpage, setviewpage] = useState(false);
   const [isopen, setisopen] = useState(false);
@@ -164,8 +177,39 @@ const BlogsPage = (props: any): JSX.Element => {
       display: "revert",
     },
   };
+
+  // function algorithmfilterfunction(value: string) {
+  //   const _newdata = [...duplicatefilter];
+  //   const newdata = [];
+  //   if (value.length) {
+  //     for (let i = 0; i < _newdata.length; i++) {
+  //       const matches = _newdata[i].Searchstring.includes(value.toLowerCase());
+  //       if (matches === true) {
+  //         newdata.push(_newdata[i]);
+  //       }
+  //     }
+  //     letnewfilterdata(newdata);
+  //   } else {
+  //     const _duplicatedata = [...duplicatedata];
+  //     setdata([..._duplicatedata]);
+  //   }
+  // }
+
+  // function letnewfilterdata(data: any) {
+  //   // eslint-disable-next-line no-debugger
+  //   debugger;
+  //   const newdata: any = [];
+  //   const _duplicatedata = [...duplicatedata];
+  //   _duplicatedata.filter((arr) => {
+  //     if (data.some((newItem: any) => newItem.Id === arr.Id)) {
+  //       newdata.push(arr);
+  //     }
+  //   });
+  //   setdata([...newdata]);
+  // }
+
   // this function is Approver Details/ get userDetails in Intranet_Blogs
-  const getdetails = async (): Promise<void> => {
+  const getdetails = async (_userpermission: string): Promise<void> => {
     await usergetdetails().then((arr) => {
       console.log(arr);
       const tempdata: any = [];
@@ -194,45 +238,79 @@ const BlogsPage = (props: any): JSX.Element => {
           viewDetails: item.ViewPerson ? JSON.parse(item.ViewPerson) : [],
         });
       });
-      setdata([...tempdata]);
-      setduplicatedata([...tempdata]);
+      if (_userpermission === "Admin") {
+        const _filterdata = tempdata.filter(
+          (_admin: any) => _admin.Status === "Pending"
+        );
+        _filterdata.sort((a: any, b: any) => b.Id - a.Id);
+        setdata([..._filterdata]);
+        setduplicatedata([..._filterdata]);
+      } else {
+        const _filterdata = tempdata.filter(
+          (_admin: any) => _admin.Status === "Approved"
+        );
+        _filterdata.sort((a: any, b: any) => b.Id - a.Id);
+        // const additionaldata: { Id: any; Searchstring: string }[] = [];
+        // _filterdata.map((_reitem: any) => {
+        //   let newstring = "";
+        //   for (const newitem in _reitem) {
+        //     if (
+        //       typeof _reitem[newitem] === "string" ||
+        //       typeof _reitem[newitem] === "number"
+        //     ) {
+        //       newstring += `  ${_reitem[newitem]}`;
+        //     }
+        //   }
+
+        //   // eslint-disable-next-line no-debugger
+        //   debugger;
+        //   additionaldata.push({
+        //     Id: _reitem.Id,
+        //     Searchstring: newstring.toLowerCase(),
+        //   });
+        // });
+        // setduplicatefilter([...additionaldata]);
+        setdata([..._filterdata]);
+        setduplicatedata([..._filterdata]);
+      }
     });
   };
   // this function is Other Member Details/ get userDetails in Intranet_Blogs
-  const othermemberdetails = async (): Promise<void> => {
-    await otheruserdetails().then((arr) => {
-      console.log(arr);
-      const tempdata: any = [];
-      arr.forEach((item: any) => {
-        tempdata.push({
-          Id: item.Id,
+  // const othermemberdetails = async (): Promise<void> => {
+  //   await otheruserdetails().then((arr) => {
+  //     console.log(arr);
+  //     const tempdata: any = [];
+  //     arr.forEach((item: any) => {
+  //       tempdata.push({
+  //         Id: item.Id,
 
-          Created: item.Created
-            ? moment(item.Created).format("DD/MM/YYYY")
-            : null,
+  //         Created: item.Created
+  //           ? moment(item.Created).format("DD/MM/YYYY")
+  //           : null,
 
-          Title: item.BlogsHeading,
-          ParentTitle: item.BlogTitle,
-          Paragraph: item.ImageDescription
-            ? JSON.parse(item.ImageDescription)
-            : "",
-          Author: {
-            Id: item.Author && item.Author ? item.Author.ID : null,
-            Email: item.Author ? item.Author.EMail : "",
-            Title: item.Author ? item.Author.Title : "",
-          },
-          Status: item.Status ? item.Status : "",
-          img: item.AttachmentFiles.map(
-            (attachment: any) => attachment.ServerRelativeUrl
-          ).join(""),
-          userDetails: item.UserLikes ? JSON.parse(item.UserLikes) : [],
-          viewDetails: item.ViewPerson ? JSON.parse(item.ViewPerson) : [],
-        });
-      });
-      setdata([...tempdata]);
-      setduplicatedata([...tempdata]);
-    });
-  };
+  //         Title: item.BlogsHeading,
+  //         ParentTitle: item.BlogTitle,
+  //         Paragraph: item.ImageDescription
+  //           ? JSON.parse(item.ImageDescription)
+  //           : "",
+  //         Author: {
+  //           Id: item.Author && item.Author ? item.Author.ID : null,
+  //           Email: item.Author ? item.Author.EMail : "",
+  //           Title: item.Author ? item.Author.Title : "",
+  //         },
+  //         Status: item.Status ? item.Status : "",
+  //         img: item.AttachmentFiles.map(
+  //           (attachment: any) => attachment.ServerRelativeUrl
+  //         ).join(""),
+  //         userDetails: item.UserLikes ? JSON.parse(item.UserLikes) : [],
+  //         viewDetails: item.ViewPerson ? JSON.parse(item.ViewPerson) : [],
+  //       });
+  //     });
+  //     tempdata.sort((a: any, b: any) => b.Id - a.Id);
+  //     setdata([...tempdata]);
+  //     setduplicatedata([...tempdata]);
+  //   });
+  // };
   // This is addlikemethod function
   const addLikeMethod = async (Id: number, userDetails: any): Promise<any> => {
     let additionaluserDetails: any = [];
@@ -327,20 +405,20 @@ const BlogsPage = (props: any): JSX.Element => {
     getcurrentuser();
   };
   // This Functino Admin Change The Status
-  const approverStatusFunc = (value: string, Id: number) => {
-    let _data = [...data];
-    _data = _data.map((item) => {
-      if (item.Id === Id) {
-        return {
-          ...item,
-          UserStatus: value,
-        };
-      }
+  // const approverStatusFunc = (value: string, Id: number) => {
+  //   let _data = [...data];
+  //   _data = _data.map((item) => {
+  //     if (item.Id === Id) {
+  //       return {
+  //         ...item,
+  //         UserStatus: value,
+  //       };
+  //     }
 
-      return item;
-    });
-    setdata([..._data]);
-  };
+  //     return item;
+  //   });
+  //   setdata([..._data]);
+  // };
   // This is the OnLoadingFunc
   const onLoadingFunc = async (user: any): Promise<void> => {
     let _userpermission: string = "";
@@ -352,6 +430,7 @@ const BlogsPage = (props: any): JSX.Element => {
         _userpermission = "OtherUser";
         setpermission(_userpermission);
       }
+      // Unwanted Code
       getintername()
         .then((arr: any) => {
           const temp: { key: any; text: any }[] = [];
@@ -364,11 +443,11 @@ const BlogsPage = (props: any): JSX.Element => {
         .catch((error) => {
           console.error("Error retrieving internal names:", error);
         });
-      if (_userpermission === "Admin") {
-        getdetails();
-      } else {
-        othermemberdetails();
-      }
+      // if (_userpermission === "Admin") {
+      getdetails(_userpermission);
+      // } else {
+      //   othermemberdetails();
+      // }
     });
   };
   // Approver Status Change Function
@@ -377,6 +456,8 @@ const BlogsPage = (props: any): JSX.Element => {
     statusValue: string
   ): Promise<any> => {
     try {
+      // eslint-disable-next-line no-debugger
+      debugger;
       await Approved(Id, statusValue);
       //;
       const _popupcontroller = [...popupController];
@@ -412,7 +493,7 @@ const BlogsPage = (props: any): JSX.Element => {
       setdata([..._data]);
     } else if (value === "All") {
       setfilterkey({
-        _status: "",
+        _status: "All",
         _gsearch: "",
       });
       setdata([..._data]);
@@ -476,22 +557,24 @@ const BlogsPage = (props: any): JSX.Element => {
                 </div>
 
                 <div className={styles.searchboxcontainer}>
-                  <div>
-                    <CustomDropDown
-                      value={filterkey._status}
-                      placeholder="Status"
-                      onChange={(value) => {
-                        filterOnchangehandler("_status", value);
-                        // stausfilter(value);
-                      }}
-                      noErrorMsg
-                      highlightDropdown={true}
-                      options={["All", "Pending", "Approved", "Rejected"]}
-                      size="SM"
-                      floatingLabel={false}
-                      width={"250px"}
-                    />
-                  </div>
+                  {permission === "Admin" && (
+                    <div>
+                      <CustomDropDown
+                        value={filterkey._status}
+                        placeholder="Status"
+                        onChange={(value) => {
+                          filterOnchangehandler("_status", value);
+                          // stausfilter(value);
+                        }}
+                        noErrorMsg
+                        highlightDropdown={true}
+                        options={["All", "Pending", "Approved", "Rejected"]}
+                        size="SM"
+                        floatingLabel={false}
+                        width={"250px"}
+                      />
+                    </div>
+                  )}
                   {/* <CustomInput
                     onChange={(value) => {
                       filterfunction("_gsearch", value);
@@ -501,6 +584,7 @@ const BlogsPage = (props: any): JSX.Element => {
                     size="SM"
                     placeholder="Search path"
                   /> */}
+
                   <SearchBox
                     placeholder="Search..."
                     styles={searchBoxStyle}
@@ -509,6 +593,23 @@ const BlogsPage = (props: any): JSX.Element => {
                       filterOnchangehandler("_gsearch", value);
                     }}
                   />
+
+                  {/* 
+                  {permission !== "Admin" && (
+                    <SearchBox
+                      placeholder="Search..."
+                      styles={searchBoxStyle}
+                      value={additionalfilterkey._status}
+                      onChange={(e, value: any) => {
+                        setadditionalfilterkey({
+                          ...additionalfilterkey,
+                          _status: value,
+                        });
+                        // filterOnchangehandler("_gsearch", value);
+                        algorithmfilterfunction(value);
+                      }}
+                    />
+                  )} */}
 
                   <div>
                     <div
@@ -575,7 +676,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                 className={styles.paragraph}
                                 style={{
                                   height:
-                                    permission !== "Admin" ? "130px" : "70px",
+                                    permission !== "Admin" ? "110px" : "110px",
                                 }}
                                 dangerouslySetInnerHTML={{
                                   __html: item.Paragraph,
@@ -595,11 +696,16 @@ const BlogsPage = (props: any): JSX.Element => {
                                           item.Status === "Approved"
                                             ? "green"
                                             : item.Status === "Pending"
-                                            ? "#c9c91bf5"
+                                            ? "#f3e8c9"
                                             : "red",
-                                        color: "white",
+                                        color:
+                                          item.Status === "Approved"
+                                            ? "green"
+                                            : item.Status === "Pending"
+                                            ? "#c99b1b"
+                                            : "red",
                                         borderRadius: "50px",
-
+                                        textAlign: "center",
                                         fontWeight: "500",
                                       }}
                                     >
@@ -610,29 +716,52 @@ const BlogsPage = (props: any): JSX.Element => {
                                     <div className={styles.checkbox}>
                                       {/* <div> */}
                                       {permission === "Admin" ? (
-                                        // <div>
-                                        <CustomDropDown
-                                          value={item.UserStatus}
-                                          floatingLabel={false}
-                                          placeholder="Status"
-                                          onChange={(value) => {
-                                            setcheckbox(false);
-                                            approverStatusFunc(value, item.Id);
-                                          }}
-                                          highlightDropdown={true}
-                                          options={[
-                                            "Pending",
-                                            "Approved",
-                                            "Rejected",
-                                          ]}
-                                          noErrorMsg
-                                          size="SM"
-                                          width={"150px"}
-                                        />
-                                      ) : // </div>`
+                                        <div>
+                                          <div
+                                            className={
+                                              styles["new-blog-button"]
+                                            }
+                                            onClick={() => {
+                                              // setcheckbox(false);
+                                              setupdateid(item.Id);
+                                              const _popupcontroller = [
+                                                ...popupController,
+                                              ];
+                                              _popupcontroller[0].open = true;
+                                              setPopupController([
+                                                ..._popupcontroller,
+                                              ]);
+                                              // approverStatusFunc(
+                                              //   item.Id
+                                              // );
+                                            }}
+                                          >
+                                            <span>Approval</span>
+                                          </div>
+                                        </div>
+                                      ) : // <div>
+                                      // <CustomDropDown
+                                      //   value={item.UserStatus}
+                                      //   floatingLabel={false}
+                                      //   placeholder="Status"
+                                      //   onChange={(value) => {
+                                      // setcheckbox(false);
+                                      // approverStatusFunc(value, item.Id);
+                                      //   }}
+                                      //   highlightDropdown={true}
+                                      //   options={[
+                                      //     "Pending",
+                                      //     "Approved",
+                                      //     "Rejected",
+                                      //   ]}
+                                      //   noErrorMsg
+                                      //   size="SM"
+                                      //   width={"150px"}
+                                      // />
+                                      // </div>`
                                       null}
                                       {/* </div> */}
-                                      <Checkbox
+                                      {/* <Checkbox
                                         checked={
                                           item.UserStatus &&
                                           item.UserStatus !== item.Status &&
@@ -659,7 +788,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                             console.log("Shanmugaraj");
                                           }
                                         }}
-                                      />
+                                      /> */}
                                     </div>
                                   )}
                                 </div>
@@ -686,7 +815,7 @@ const BlogsPage = (props: any): JSX.Element => {
                               </div>
                               <div className={styles.likecontainer}>
                                 <div className={styles.likebox}>
-                                  <Icon
+                                  {/* <Icon
                                     iconName="LikeSolid"
                                     style={{
                                       color: curuserlikes
@@ -697,16 +826,49 @@ const BlogsPage = (props: any): JSX.Element => {
                                     onClick={() =>
                                       addLikeMethod(item.Id, item.userDetails)
                                     }
+                                  /> */}
+                                  <i
+                                    className="pi pi-thumbs-up-fill"
+                                    style={{
+                                      color: curuserlikes
+                                        ? "#0a4b48"
+                                        : "#b3b0b0",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() =>
+                                      addLikeMethod(item.Id, item.userDetails)
+                                    }
                                   />
+                                  {/* <ThumbUpAltOutlined
+                                    style={{
+                                      color: curuserlikes
+                                        ? "#0a4b48"
+                                        : "#b3b0b0",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() =>
+                                      addLikeMethod(item.Id, item.userDetails)
+                                    }
+                                  /> */}
                                   <label style={{ cursor: "auto" }}>
                                     {totaluserlikescount || "0"}
                                   </label>
                                 </div>
                                 <div className={styles.eyecontainer}>
-                                  <Icon
+                                  {/* <Icon
+                                    className={styles.eyeicon}
+                                    iconName="VisibilityOutlined"
+                                  /> */}
+                                  <VisibilityOutlined
+                                    style={{
+                                      color: "orange",
+                                    }}
+                                  />
+
+                                  {/* <Icon
                                     iconName="RedEye12"
                                     className={styles.eyeicon}
-                                  />
+                                  /> */}
                                   <label style={{ cursor: "auto" }}>
                                     {userviewcounts || "0"}
                                   </label>

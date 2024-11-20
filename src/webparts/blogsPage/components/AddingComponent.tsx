@@ -143,13 +143,13 @@ function AddingComponent(props: any) {
     const matches = joditContent.replace(/<\/?p>/g, "");
     const _objerror: any = { ...objerror };
     if (additionaldetails.Title === "") {
-      _objerror.Title = "Please give title";
+      _objerror.Title = "Please give tag";
     } else if (additionaldetails.Title.trim() === "") {
-      _objerror.Title = "Please give title";
+      _objerror.Title = "Please give tag";
     } else if (additionaldetails.ParentTitle === "") {
-      _objerror.ParentTitle = "Please give parent title";
+      _objerror.ParentTitle = "Please give parent tag";
     } else if (additionaldetails.ParentTitle.trim() === "") {
-      _objerror.ParentTitle = "Please give parent title";
+      _objerror.ParentTitle = "Please give parent tag";
     } else if (matches.trim().length === 0) {
       _objerror.Quill = "Please fill image description";
     } else if (popupData.Attachmentfiles.length === 0) {
@@ -250,7 +250,7 @@ function AddingComponent(props: any) {
                       value={additionaldetails.Title}
                       inputWrapperClassName={styles.pathSearchFilter}
                       size="SM"
-                      placeholder="Title"
+                      placeholder="Tag"
                     />
                   </div>
                   <div style={{ width: "49%" }}>
@@ -272,7 +272,7 @@ function AddingComponent(props: any) {
                       value={additionaldetails.ParentTitle}
                       inputWrapperClassName={styles.pathSearchFilter}
                       size="SM"
-                      placeholder="Parent title"
+                      placeholder="Parent tag"
                     />
                   </div>
                 </div>
@@ -298,7 +298,7 @@ function AddingComponent(props: any) {
                     getMentionedEmails={(e: any) => {
                       console.log("shanmugaraj");
                     }}
-                    placeHolder={"Enter Comments and @ to mention..."}
+                    placeHolder={"Enter Comments..."}
                     defaultValue={commentText.value}
                   />
                   <label className={styles.errorlabel}>
@@ -322,7 +322,14 @@ function AddingComponent(props: any) {
                           <h4>Select a file or drag drop here</h4>
                           <h6>JPG,PNG or JPEG size no more than 10 MB</h6>
                         </div>
-                        <div className={styles.inputbox}>
+                        <div
+                          className={styles.inputbox}
+                          onClick={() => {
+                            if (fileInputRef.current) {
+                              fileInputRef.current.click();
+                            }
+                          }}
+                        >
                           <div
                             className={styles["new-blog-button"]}
                             onClick={() => {
@@ -346,15 +353,7 @@ function AddingComponent(props: any) {
                                 filevalidation(event);
                               }}
                             />
-                            <span
-                              onClick={() => {
-                                if (fileInputRef.current) {
-                                  fileInputRef.current.click();
-                                }
-                              }}
-                            >
-                              Select file
-                            </span>
+                            <span>Select file</span>
                           </div>
                         </div>
                       </div>
@@ -379,7 +378,7 @@ function AddingComponent(props: any) {
                             style={{
                               width: "330px",
                               height: "220px",
-                              borderRadius: "68px",
+                              borderRadius: "10px",
                               objectFit: "cover",
                             }}
                           />
