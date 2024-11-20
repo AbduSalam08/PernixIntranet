@@ -23,6 +23,8 @@ export interface IListName {
   Intranet_feedbackQuestion: string;
   Intranet_feedbackResponse: string;
   Intranet_ShoutOutsOptions: string;
+  Intranet_BirthDay: string;
+  Intranet_BirthdayWishes: string;
 }
 
 export interface ISPGroupName {
@@ -152,6 +154,7 @@ export interface INavigatePage {
   ApprovalsPage: string;
   ProjectTemplatePage: string;
   ShoutOutsPage: string;
+  FeedbackPage: string;
 }
 
 export interface ICamlQuery {
@@ -191,4 +194,25 @@ export interface IFeedbackResType {
   FeedbackQuestionId: number | null;
   CreatedBy: IUserData;
   Date: Date | null | string;
+}
+
+export interface IinitialPopupLoaders {
+  open: boolean;
+  popupTitle: string;
+  popupWidth: string;
+  popupType?: string; // Consider using a union type like 'custom' | 'default' if applicable
+  defaultCloseBtn: boolean;
+  popupData?: any[] | any; // Replace `any` with the specific type of data if known
+  isLoading?: {
+    inprogress: boolean;
+    error: boolean;
+    success: boolean;
+  };
+  messages?: {
+    success: string;
+    error: string;
+    successDescription: string;
+    errorDescription: string;
+    inprogress: string;
+  };
 }

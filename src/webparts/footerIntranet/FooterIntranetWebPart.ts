@@ -6,25 +6,25 @@ import {
   PropertyPaneTextField,
 } from "@microsoft/sp-property-pane";
 import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
+// import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from "FeedBackFormIntranetWebPartStrings";
-import FeedBackFormIntranet from "./components/FeedBackFormIntranet";
-
+import * as strings from "FooterIntranetWebPartStrings";
+import FooterIntranet from "./components/FooterIntranet";
+// import { IFooterIntranetProps } from './components/IFooterIntranetProps';
 import { SPComponentLoader } from "@microsoft/sp-loader";
 import { sp } from "@pnp/sp/presets/all";
 import { graph } from "@pnp/graph/presets/all";
-import { Provider } from "react-redux";
 import { store } from "../../redux/store/store";
-// require("../../assets/styles/style.css");
+import { Provider } from "react-redux";
+require("../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css");
+require("../../assets/styles/style.css");
 require("../../components/common/CustomInputFields/customStyle.css");
-require("../../../node_modules/primereact/resources/primereact.min.css");
-require("../../../node_modules/react-toastify/dist/ReactToastify.css");
 
-export interface IFeedBackFormIntranetWebPartProps {
+export interface IFooterIntranetWebPartProps {
   description: string;
 }
 
-export default class FeedBackFormIntranetWebPart extends BaseClientSideWebPart<IFeedBackFormIntranetWebPartProps> {
+export default class FooterIntranetWebPart extends BaseClientSideWebPart<IFooterIntranetWebPartProps> {
   // private _isDarkTheme: boolean = false;
   // private _environmentMessage: string = "";
 
@@ -55,26 +55,13 @@ export default class FeedBackFormIntranetWebPart extends BaseClientSideWebPart<I
     const element: React.ReactElement = React.createElement(
       Provider, // Wrap everything in Redux's Provider
       { store: store }, // Pass the store to the Provider
-      React.createElement(FeedBackFormIntranet, {
+      React.createElement(FooterIntranet, {
         context: this.context,
       })
     );
 
     ReactDom.render(element, this.domElement);
   }
-
-  // public render(): void {
-  //   const element: React.ReactElement<IFeedBackFormIntranetProps> =
-  //     React.createElement(FeedBackFormIntranet, {
-  //       description: this.properties.description,
-  //       isDarkTheme: this._isDarkTheme,
-  //       environmentMessage: this._environmentMessage,
-  //       hasTeamsContext: !!this.context.sdks.microsoftTeams,
-  //       userDisplayName: this.context.pageContext.user.displayName,
-  //     });
-
-  //   ReactDom.render(element, this.domElement);
-  // }
 
   // protected onInit(): Promise<void> {
   //   return this._getEnvironmentMessage().then((message) => {

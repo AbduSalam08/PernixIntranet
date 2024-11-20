@@ -46,6 +46,8 @@ export namespace CONFIG {
     Intranet_feedbackQuestion: "Intranet_feedbackQuestion",
     Intranet_feedbackResponse: "Intranet_feedbackResponse",
     Intranet_ShoutOutsOptions: "Intranet_ShoutOutsOptions",
+    Intranet_BirthDay: "Intranet_BirthDay",
+    Intranet_BirthdayWishes: "Intranet_BirthdayWishes",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -151,6 +153,7 @@ export namespace CONFIG {
     PTOPage: "/SitePages/PTOPage.aspx",
     QuestionsCEOPage: "/SitePages/QuestionsCEOPage.aspx",
     ShoutOutsPage: "/SitePages/ShoutOutsPage.aspx",
+    FeedbackPage: "/SitePages/FeedbackPage.aspx",
   };
 
   export const FeedbackQusColumn: IFeedbackQusColumn = {
@@ -187,4 +190,10 @@ export namespace CONFIG {
 
   export const userImageURL: string =
     "/_layouts/15/userphoto.aspx?size=S&username=";
+
+  export const LinkdinURL: string =
+    "https://www.linkedin.com/company/technorucs/mycompany/";
+
+  export const TwitterURL: string =
+    "https://www.linkedin.com/company/technorucs/mycompany/";
 }
