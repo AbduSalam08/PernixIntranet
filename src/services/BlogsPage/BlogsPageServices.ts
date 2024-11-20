@@ -95,6 +95,7 @@ export const usergetdetails = async (): Promise<any> => {
       "Author/EMail"
     )
     .expand("AttachmentFiles,Author")
+    // .filter("Status eq 'Pending'")
     .get();
 };
 // This function Other UserDetails in NOt Approved Person
@@ -110,7 +111,7 @@ export const otheruserdetails = async (): Promise<any> => {
       "Author/EMail"
     )
     .expand("AttachmentFiles,Author")
-    .filter("Status eq 'Approved'")
+    // .filter("Status eq 'Approved'")
     .get();
 };
 // This function Admin Approved The Blog Status
@@ -153,8 +154,8 @@ export const addfilemsg = async (
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const permissionhandling = async () => {
   try {
-    const groupname = CONFIG.SPGroupName.Calendar_Admin;
-    return await sp.web.siteGroups.getByName(groupname).users.get();
+    // const groupname = CONFIG.SPGroupName.Calendar_Admin;
+    return await sp.web.siteGroups.getByName("Blogs_Admin").users.get();
   } catch (err) {
     console.error("Error handling permissions:", err);
     return null;

@@ -39,11 +39,11 @@
       padding: 8px 16px;
       background-color: #0a4b48;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
       font-size: 14px;
       border-radius: 5px;
       cursor: pointer;
-      gap: 10px;
+      gap: 0px;
       transition: background-color 0.3s ease;
       span {
         width: 65px;
@@ -161,7 +161,7 @@
       background-color: white;
       height: 470px;
       .imgbox {
-        height: 191px;
+        height: 183px;
         img {
           border-radius: 11px;
           object-fit: cover;
@@ -195,7 +195,7 @@
           text-overflow: ellipsis;
           overflow: hidden;
           display: -webkit-box;
-          -webkit-line-clamp: 3;
+          -webkit-line-clamp: 5;
           -webkit-box-orient: vertical;
         }
       }
@@ -260,15 +260,44 @@
       .approversection {
         display: flex;
         align-items: center;
+        margin-top: 3px;
         justify-content: space-between;
         .checkbox {
           display: flex;
           align-items: center;
           gap: 10px;
+          .new-blog-button {
+            display: flex;
+            padding: 5px 8px;
+            background-color: #0a4b48;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            gap: 0px;
+            transition: background-color 0.3s ease;
+            span {
+              width: 60px;
+              height: 17px;
+            }
+            .Addicon {
+              margin-right: 8px;
+              font-size: 16px;
+            }
+          }
+          .new-blog-button .icon {
+            margin-right: 8px;
+            font-size: 16px;
+            font-weight: 600;
+          }
+          .new-blog-button:hover {
+            background-color: #006b68;
+          }
         }
       }
     }
-    box-shadow: 1px 1px 5px #9b9393;
+    box-shadow: 0px 0px 1px #9b9393;
     .box {
       padding: 11px;
     }
