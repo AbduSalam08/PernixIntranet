@@ -637,9 +637,9 @@ const BlogsPage = (props: any): JSX.Element => {
                   </div>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: "10px", margin: "7px 39px" }}>
+              <div style={{ display: "flex", gap: "10px", margin: "20px" }}>
                 <div>
-                  <h4
+                  <div
                     style={{
                       borderBottom:
                         allBlogs === "AllBlogs"
@@ -650,6 +650,8 @@ const BlogsPage = (props: any): JSX.Element => {
                       color: "#0b4d53",
                       borderRadius: "4px",
                       cursor: "pointer",
+                      fontSize: "18px",
+                      fontWeight: "500",
                     }}
                     onClick={() => {
                       const _data = [...admindata];
@@ -662,11 +664,11 @@ const BlogsPage = (props: any): JSX.Element => {
                     }}
                   >
                     All blogs
-                  </h4>
+                  </div>
                 </div>
                 {permission === "Admin" ? (
                   <div>
-                    <h4
+                    <div
                       style={{
                         borderBottom:
                           allBlogs !== "AllBlogs"
@@ -676,6 +678,8 @@ const BlogsPage = (props: any): JSX.Element => {
                         color: "#0b4d53",
                         borderRadius: "4px",
                         cursor: "pointer",
+                        fontSize: "18px",
+                        fontWeight: "500",
                       }}
                       onClick={() => {
                         setAllBlogs("PendingApprovals");
@@ -688,11 +692,11 @@ const BlogsPage = (props: any): JSX.Element => {
                       }}
                     >
                       Pending approvals
-                    </h4>
+                    </div>
                   </div>
                 ) : (
                   <div>
-                    <h5
+                    <div
                       style={{
                         borderBottom:
                           allBlogs !== "AllBlogs"
@@ -702,6 +706,8 @@ const BlogsPage = (props: any): JSX.Element => {
                         color: "#0b4d53",
                         borderRadius: "4px",
                         cursor: "pointer",
+                        fontSize: "18px",
+                        fontWeight: "500",
                       }}
                       onClick={() => {
                         if (permission === "Admin") {
@@ -720,7 +726,7 @@ const BlogsPage = (props: any): JSX.Element => {
                       }}
                     >
                       My Blogs
-                    </h5>
+                    </div>
                   </div>
                 )}
               </div>
