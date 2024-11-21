@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { Drawer, Switch } from "@mui/material";
 import { Drawer } from "@mui/material";
 import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
 import DataTable from "../../../../components/common/DataTable/DataTable";
@@ -44,7 +43,6 @@ import { toast } from "react-toastify";
 import {
   TicketCategories,
   TicketPriority,
-  // TicketRecurrenceFrequency,
   TicketStatus,
 } from "../../../../constants/HelpDeskTicket";
 import { ToastContainer } from "react-toastify";
@@ -94,7 +92,6 @@ const MyTickets = (): JSX.Element => {
     Frequency: "",
     TicketDetails: "",
   });
-
   console.log("recurrenceDetails: ", recurrenceDetails);
   console.log("setRecurrenceDetails: ", setRecurrenceDetails);
 
@@ -151,8 +148,6 @@ const MyTickets = (): JSX.Element => {
     HelpDeskTicktesData,
     `${currentRole}${location.pathname}`
   );
-
-  console.log("currentRoleBasedData: ", currentRoleBasedData);
 
   const initialData = {
     TicketNumber: {
@@ -215,13 +210,14 @@ const MyTickets = (): JSX.Element => {
     Status: {
       // value: isTicketManager || isITOwner ? "" : "Open",
       // value: "Open",
-      value:
-        openNewTicketSlide?.data?.Status === "Open" &&
-        isTicketManager &&
-        openNewTicketSlide?.data?.ITOwnerId === null &&
-        openNewTicketSlide?.type === "update"
-          ? "In Progress"
-          : "Open",
+      value: isTicketManager
+        ? "In Progress"
+        : openNewTicketSlide?.data?.Status === "Open" &&
+          isTicketManager &&
+          openNewTicketSlide?.data?.ITOwnerId === null &&
+          openNewTicketSlide?.type === "update"
+        ? "In Progress"
+        : "Open",
       isValid: true,
       errorMsg: "This field is required",
       validationRule: {
@@ -305,7 +301,9 @@ const MyTickets = (): JSX.Element => {
                 TicketNumber: {
                   value: currentRowData?.TicketNumber,
                 },
-                Status: { value: "Open" },
+                Status: {
+                  value: currentRowData?.ITOwner?.ID ? "In Progress" : "Open",
+                },
                 RepeatedTicketSourceId: { value: currentRowData?.ID },
                 RepeatedTicket: { value: true },
                 TicketRepeatedOn: { value: dayjs(new Date()) },
@@ -345,13 +343,14 @@ const MyTickets = (): JSX.Element => {
                   value: null,
                 },
               };
+
           console.log("formDataAppended: ", formDataAppended);
 
           // await Promise.all([
           // ])
           await addNewTicket(formDataAppended, ["Attachments"], true)
             .then(async (res: any) => {
-              navigate(`${currentRole}/all_tickets`);
+              // navigate(`${currentRole}/all_tickets`);
               await Promise.all([getAllTickets(dispatch)]);
             })
             .catch((err: any) => {
@@ -434,10 +433,10 @@ const MyTickets = (): JSX.Element => {
     {
       sortable: true,
       field: "ticket_number",
-      headerName: "Ticket no",
+      headerName: "Ticket Number",
       width: 170,
       renderCell: (params: any) => {
-        return (
+        return params?.value ? (
           <span
             className={styles.clickableLink}
             onClick={() => {
@@ -451,6 +450,8 @@ const MyTickets = (): JSX.Element => {
           >
             {params?.value}
           </span>
+        ) : (
+          ""
         );
       },
     },
@@ -756,12 +757,19 @@ const MyTickets = (): JSX.Element => {
       setLoadingSubmit(true);
       setSubmitClicked(true);
       debugger;
-      console.log("oadingSubmit: ", loadingSubmit);
+      console.log("loadingSubmit: ", loadingSubmit);
       if (openNewTicketSlide.type === "add") {
         await Promise.all([addNewTicket(formData, ["Attachment"])])
           .then(async (res: any) => {
             await getAllTickets(dispatch);
-            navigate(`${currentRole}/all_tickets`);
+            navigate(location.pathname);
+            ticketsFilter(
+              `${currentRole}${location.pathname}`,
+              HelpDeskTicktesData,
+              currentUserDetails,
+              dispatch
+            );
+            console.log("location.pathname: ", location.pathname);
             setFormData(initialData);
             setOpenNewTicketSlide((prev: any) => ({
               ...prev,
@@ -1013,9 +1021,8 @@ const MyTickets = (): JSX.Element => {
               //       (id: number | undefined) => id !== undefined && id !== null
               //     )
               // );
-
               const lastTicketID = getLastTicketNumber(
-                HelpDeskTicktesData?.data
+                HelpDeskTicktesData?.AllData
               );
 
               const newTicketNumber = generateTicketNumber(lastTicketID + 1);
@@ -1042,6 +1049,7 @@ const MyTickets = (): JSX.Element => {
           />
         </div>
       </div>
+
       {currentRoleBasedData?.role === "user" && (
         <div className={styles.infoCards}>
           {infoCards?.map((item: any, idx: number) => (
@@ -1055,6 +1063,7 @@ const MyTickets = (): JSX.Element => {
           ))}
         </div>
       )}
+
       <DataTable
         rows={dataGridProps?.data ?? []}
         // rows={dataGridProps?.sortedBy==="Asc (Old)"? currentRoleBasedData?.data:dataGridProps?.sortedBy==="Desc (Latest)"?DescData:[]}
@@ -1064,6 +1073,7 @@ const MyTickets = (): JSX.Element => {
         pageSize={10}
         checkboxSelection={false}
       />
+
       {/* new ticket slide */}
       <Drawer
         anchor={"right"}
@@ -1219,7 +1229,11 @@ const MyTickets = (): JSX.Element => {
                         openNewTicketSlide?.type === "update"
                       }
                       value={formData?.Status?.value}
-                      options={TicketStatus}
+                      options={
+                        openNewTicketSlide?.data?.Status === "In Progress"
+                          ? TicketStatus.filter((item: any) => item !== "Open")
+                          : TicketStatus
+                      }
                       placeholder="Status"
                       isValid={formData?.Status?.isValid}
                       errorMsg={formData?.Status?.errorMsg}
@@ -1352,6 +1366,7 @@ const MyTickets = (): JSX.Element => {
           </div>
         </div>
       </Drawer>
+
       <ToastContainer
         position="top-center"
         autoClose={3000}
@@ -1376,7 +1391,6 @@ const MyTickets = (): JSX.Element => {
           //    resetPopupController(prev, index, true);
           // });
           // }}
-
           PopupType={popupData.popupType}
           onHide={() => {
             togglePopupVisibility(
