@@ -231,7 +231,6 @@ const NewHiresPage = (props: any): JSX.Element => {
       };
     }, {} as typeof formData);
     setFormData(updatedFormData);
-    debugger;
     if (!hasErrors) {
       if (isNew) {
         await addNewHire(formData, setPopupController, 0);
@@ -334,7 +333,11 @@ const NewHiresPage = (props: any): JSX.Element => {
               label="Start Date"
               isDateController={true}
               minimumDate={new Date()}
-              maximumDate={new Date(formData.EndDate.value) || ""}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
               error={!formData.StartDate.isValid}
               errorMsg={formData.StartDate.errorMsg}
               onChange={(date: any) => {
@@ -343,7 +346,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                   date,
                   formData.StartDate.validationRule
                 );
-                if (formData.EndDate.value !== "") {
+                if (formData?.EndDate?.value) {
                   if (new Date(formData.EndDate.value) >= new Date(date)) {
                     // handleInputChange("EndDate", date, isValid, errorMsg);
                     handleInputChange("StartDate", date, isValid, errorMsg);
@@ -366,8 +369,13 @@ const NewHiresPage = (props: any): JSX.Element => {
               value={formData.EndDate.value}
               label="End Date"
               isDateController={true}
-              minimumDate={new Date(formData.StartDate.value)}
-              disabledInput={formData.StartDate.value === ""}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
+              disabledInput={!formData?.StartDate?.value}
               error={!formData.EndDate.isValid}
               errorMsg={formData.EndDate.errorMsg}
               onChange={(date: any) => {
@@ -376,7 +384,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                   date,
                   formData.EndDate.validationRule
                 );
-                if (formData.StartDate.value !== "") {
+                if (formData?.StartDate?.value) {
                   if (new Date(formData.StartDate.value) <= new Date(date)) {
                     handleInputChange("EndDate", date, isValid, errorMsg);
                   } else {
@@ -516,13 +524,13 @@ const NewHiresPage = (props: any): JSX.Element => {
         const startDate = new Date(obj?.StartDate);
         const endDate = new Date(obj?.EndDate);
         return (
-          today <=
+          today <
             new Date(
               startDate.getFullYear(),
               startDate.getMonth(),
               startDate.getDate()
             ) &&
-          today <=
+          today <
             new Date(
               endDate.getFullYear(),
               endDate.getMonth(),

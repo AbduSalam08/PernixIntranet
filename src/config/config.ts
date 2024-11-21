@@ -91,7 +91,12 @@ export namespace CONFIG {
 
   export const NewHiresPageTabsName: string[] = [
     "Current",
-    "Up Comming",
+    "Upcoming",
+    "Previous",
+  ];
+  export const BirthDayPageTabsName: string[] = [
+    "Today",
+    "Upcoming",
     "Previous",
   ];
 

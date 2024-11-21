@@ -65,7 +65,6 @@ interface IShoutOutOptions {
 }
 
 const ShoutOutsPage = (props: any): JSX.Element => {
-  console.log(props);
 
   const dispatch = useDispatch();
   const searchField: IPageSearchFields = CONFIG.PageSearchFields;
@@ -79,7 +78,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   );
   const [currentUserData, setCurrentUserData] = useState<any>({});
   const [selectedTab, setSelectedTab] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pagination, setPagination] = useState<IPaginationData>(
     CONFIG.PaginationData
   );
