@@ -318,8 +318,8 @@ const LeftBar: React.FC = (): JSX.Element => {
               }`}
             >
               {location.pathname === item?.path
-                ? currentRoleBasedData?.data?.length
-                : ""}
+                ? currentRoleBasedData?.data?.length || "0"
+                : "0"}
             </span>
           </div>
           {item.children && (

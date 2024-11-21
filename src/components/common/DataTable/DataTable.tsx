@@ -93,6 +93,34 @@ const DataTable: React.FC<DataTableProps> = ({
             </Stack>
           ),
         }}
+        // columns={columns?.map((col) => ({
+        //   ...col,
+        //   flex: 1,
+        //   filterable: true,
+        //   resizable: true,
+        //   renderHeader: (params: any) => (
+        //     <span
+        //       style={{
+        //         fontSize: "14px",
+        //         fontFamily: "osSemiBold",
+        //         color: "#0B4D53",
+        //         // height:'45px',
+        //         width:
+        //           params.colDef.headerName?.toLowerCase() === "actions"
+        //             ? "100%"
+        //             : "auto",
+        //         textAlign:
+        //           params.colDef.headerName?.toLowerCase() === "actions"
+        //             ? "center"
+        //             : "left",
+        //       }}
+        //     >
+        //       {params.colDef.headerName}
+        //     </span>
+        //   ),
+        //   headerClassName: "header", // Add a class to the header for custom styles
+        // }))}
+
         columns={columns?.map((col) => ({
           ...col,
           flex: 1,
@@ -104,7 +132,6 @@ const DataTable: React.FC<DataTableProps> = ({
                 fontSize: "14px",
                 fontFamily: "osSemiBold",
                 color: "#0B4D53",
-                // height:'45px',
                 width:
                   params.colDef.headerName?.toLowerCase() === "actions"
                     ? "100%"
@@ -119,7 +146,41 @@ const DataTable: React.FC<DataTableProps> = ({
             </span>
           ),
           headerClassName: "header", // Add a class to the header for custom styles
-        }))} // Set flex and resizable
+          renderCell: (params: any) => {
+            if (col?.renderCell) {
+              // Use the custom renderCell function if it exists
+              return col.renderCell(params);
+            }
+            // Default fallback: Render '-' if no value
+            return params.value ? (
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "100%",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={params.value}
+              >
+                {params.value}
+              </span>
+            ) : (
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "100%",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={"-"}
+              >
+                -
+              </span>
+            );
+          },
+        }))}
         hideFooter
         loading={isLoading}
         hideFooterPagination

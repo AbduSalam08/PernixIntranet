@@ -41,8 +41,6 @@ const Dashboard = (): JSX.Element => {
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
   );
-  console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
-
   const [usersByType, setUsersByType] = useState<{
     it_owners: any[];
     helpdesk_managers: any[];
@@ -99,8 +97,6 @@ const Dashboard = (): JSX.Element => {
     currentUserDetails,
     HelpDeskTicktesData
   );
-
-  console.log("currentRoleBasedData: ", currentRoleBasedData);
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
 

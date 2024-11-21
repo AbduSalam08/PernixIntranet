@@ -85,13 +85,39 @@ const MyTickets = (): JSX.Element => {
     data: [],
   });
 
-  const [recurrenceDetails, setRecurrenceDetails] = useState({
-    isRecurrence: false,
-    StartDate: "",
-    EndDate: "",
-    Frequency: "",
-    TicketDetails: "",
-  });
+  const initialRecurrenceFormData = {
+    StartDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "array" },
+    },
+    EndDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+    Frequency: {
+      value: null,
+      isValid: true,
+      errorMsg: "Invalid file",
+      validationRule: { required: true, type: "file" },
+    },
+    TicketDetails: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+  };
+
+  const [recurrenceDetails, setRecurrenceDetails] = useState<any>(
+    initialRecurrenceFormData
+  );
+  const [hasRecurrence, setHasRecurrence] = useState(false);
+  console.log("setHasRecurrence: ", setHasRecurrence);
+  console.log("hasRecurrence: ", hasRecurrence);
   console.log("recurrenceDetails: ", recurrenceDetails);
   console.log("setRecurrenceDetails: ", setRecurrenceDetails);
 
@@ -348,10 +374,18 @@ const MyTickets = (): JSX.Element => {
 
           // await Promise.all([
           // ])
+
           await addNewTicket(formDataAppended, ["Attachments"], true)
             .then(async (res: any) => {
-              // navigate(`${currentRole}/all_tickets`);
-              await Promise.all([getAllTickets(dispatch)]);
+              navigate(`${currentRole}/all_tickets`);
+              await getAllTickets(dispatch);
+              // navigate(location.pathname);
+              // ticketsFilter(
+              //   `${currentRole}${location.pathname}`,
+              //   HelpDeskTicktesData,
+              //   currentUserDetails,
+              //   dispatch
+              // );
             })
             .catch((err: any) => {
               console.log("err: ", err);
@@ -372,6 +406,15 @@ const MyTickets = (): JSX.Element => {
         <Switch
           sx={{
             color: "#2d4b51",
+          }}
+          onChange={(value: any) => {
+            console.log("value: ", value);
+            setHasRecurrence(value);
+            if (value) {
+              setPopupController((prev: any) => ({
+                ...prev,
+              }));
+            }
           }}
         />
       </div>
@@ -413,6 +456,50 @@ const MyTickets = (): JSX.Element => {
       </div> */}
     </div>,
   ];
+
+  // const handleSubmitForRepeatTicket = async (sendBy: string): Promise<any> => {
+  //   let hasErrors = false;
+  //   // Validate each field and update the state with error messages
+  //   const updatedFormData = Object.keys(recurrenceDetails).reduce(
+  //     (acc, key) => {
+  //       const fieldData = recurrenceDetails[key];
+  //       const { isValid, errorMsg } = validateField(
+  //         key,
+  //         key === "EmployeeName"
+  //           ? fieldData?.value?.length > 0
+  //             ? fieldData.value
+  //             : fieldData.value
+  //             ? [fieldData.value]
+  //             : []
+  //           : fieldData.value,
+  //         fieldData?.validationRule
+  //       );
+
+  //       if (!isValid) {
+  //         hasErrors = true;
+  //       }
+
+  //       return {
+  //         ...acc,
+  //         [key]: {
+  //           ...fieldData,
+  //           isValid,
+  //           errorMsg,
+  //         },
+  //       };
+  //     },
+  //     {} as typeof formData
+  //   );
+
+  //   setFormData(updatedFormData);
+
+  //   if (!hasErrors) {
+  //     console.log("submitted");
+  //   } else {
+  //     console.log("has errors");
+  //   }
+  // };
+  // console.log("handleSubmitForRepeatTicket: ", handleSubmitForRepeatTicket);
 
   const [dataGridProps, setDataGridProps] = useState<{
     data: any[];
@@ -769,7 +856,6 @@ const MyTickets = (): JSX.Element => {
               currentUserDetails,
               dispatch
             );
-            console.log("location.pathname: ", location.pathname);
             setFormData(initialData);
             setOpenNewTicketSlide((prev: any) => ({
               ...prev,
@@ -786,7 +872,14 @@ const MyTickets = (): JSX.Element => {
         ])
           .then(async (res: any) => {
             await getAllTickets(dispatch);
-            navigate(`${currentRole}/all_tickets`);
+            // navigate(`${currentRole}/all_tickets`);
+            navigate(location.pathname);
+            ticketsFilter(
+              `${currentRole}${location.pathname}`,
+              HelpDeskTicktesData,
+              currentUserDetails,
+              dispatch
+            );
             setFormData(initialData);
             setOpenNewTicketSlide((prev: any) => ({
               ...prev,
