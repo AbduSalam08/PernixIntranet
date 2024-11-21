@@ -17,6 +17,16 @@ import resetPopupController, {
 import Popup from "../../../components/common/Popups/Popup";
 import { Checkbox } from "primereact/checkbox";
 import { ShowHide } from "../../../services/FlexipleSectionIntranet/FlexipleSectionIntranet";
+import { sp } from "@pnp/sp/presets/all";
+import { CONFIG } from "../../../config/config";
+
+interface Curobj {
+  Id: number;
+  isActive: boolean;
+  Created: string;
+  title: string;
+}
+let _isAdmin: boolean = false;
 const FlexipleSectionIntranet = (props: any) => {
   const currentUser = props?.context._pageContext._user.email;
   const initialPopupController = [
@@ -48,9 +58,8 @@ const FlexipleSectionIntranet = (props: any) => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-  // const [isPopup, setIsPopup] = useState(false); // Controls popup visibility
-  const [componentsList, setComponentsList] = useState<any[]>([]);
-  const [pollSelected, setPollSelected] = useState(false);
+  const [componentsList, setComponentsList] = useState<Curobj[]>([]);
+  const [pollSelected, setPollSelected] = useState<boolean>(false);
 
   const popupInputs: any[] = [
     [
@@ -124,57 +133,43 @@ const FlexipleSectionIntranet = (props: any) => {
         Expand: "Author",
       });
 
-      const formattedData = res.map((val: any) => ({
-        Id: val.ID,
-        title: val.Title,
-        isActive: val.isActive,
+      const formattedData: Curobj[] = res.map((val: any) => ({
+        Id: val?.ID,
+        title: val?.Title,
+        isActive: val?.isActive,
         Created: val?.Author?.EMail || "",
       }));
 
       setComponentsList(formattedData);
 
-      // Initialize pollSelected state for the current user
-      const poll = formattedData.find(
-        (item) => item.title === "Poll" && item.Created === currentUser
-      );
+      const poll = formattedData.find((item) => item.title === "Poll");
       setPollSelected(poll?.isActive ?? false);
+
+      _getAdmin();
     } catch (err) {
       console.error("Error fetching data:", err);
     }
   };
-
-  // Update data in the SharePoint list
-  // const updateData = async (val: any) => {
-  //   try {
-  //     const pollComponent = componentsList.find(
-  //       (component: any) => component.title === "Poll"
-  //     );
-
-  //     if (pollComponent) {
-  //       await SpServices.SPUpdateItem({
-  //         Listname: "ShowComponent",
-  //         ID: pollComponent.Id,
-  //         RequestJSON: { isActive: val },
-  //       });
-  //       console.log("Poll component updated successfully!");
-  //     }
-  //   } catch (err) {
-  //     console.error("Error updating Poll component:", err);
-  //   }
-  // };
+  const _getAdmin = (): void => {
+    sp.web.siteGroups
+      .getByName(CONFIG.SPGroupName.Pernix_Admin)
+      .users.get()
+      .then((res: any) => {
+        _isAdmin = res.some(
+          (val: any) => val.Email.toLowerCase() === currentUser.toLowerCase()
+        );
+        console.log(_isAdmin, "_isAdmin");
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
     getData();
   }, []);
 
-  const handleConfirm = async () => {
-    // setComponentsList((prevList: any) =>
-    //   prevList.map((component: any) =>
-    //     component.title === "Poll"
-    //       ? { ...component, isActive: pollSelected }
-    //       : component
-    //   )
-    // );
+  const handleConfirm = async (): Promise<void> => {
     await ShowHide(
       pollSelected,
       componentsList,
@@ -182,67 +177,40 @@ const FlexipleSectionIntranet = (props: any) => {
       0,
       currentUser
     );
-    // setIsPopup(false);
-    // updateData(pollSelected);
   };
 
   return (
-    <>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <i
-          onClick={() => {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              0,
-              "open"
-            );
-          }}
-          className="pi pi-pencil"
-          style={{ fontSize: "1rem", color: "blue", cursor: "pointer" }}
-        ></i>
-      </div>
+    <div className={styles.flexibleSection}>
+      {_isAdmin && (
+        <div className={styles.icon}>
+          <i
+            onClick={() => {
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open"
+              );
+            }}
+            className="pi pi-pencil"
+          ></i>
+        </div>
+      )}
 
       <div className={styles.container}>
-        {componentsList.map((component: any) => {
-          if (component.title === "Poll") {
-            // Poll component is shown only for the current user based on isActive
-            return (
-              component.Created === currentUser &&
-              component.isActive && (
-                <div key={component.title} style={{ flex: "1 1 100%" }}>
-                  <PollIntranet props={props} />
-                </div>
-              )
-            );
-          } else {
-            // Other components are shown to all users
-            return (
+        {componentsList?.map(
+          (component: Curobj) =>
+            component?.isActive && (
               <div key={component.title} style={{ flex: "1 1 100%" }}>
-                {component.title === "QuestionCeo" && (
+                {component?.title === "QuestionCeo" && (
                   <QuestionCeo props={props} />
                 )}
-                {component.title === "ShoutOuts" && <Shoutout props={props} />}
-              </div>
-            );
-          }
-        })}
-      </div>
-
-      {/* <div className={styles.container}>
-        {componentsList.map(
-          (component: any) =>
-            component.isActive && (
-              <div key={component.title} style={{ flex: "1 1 100%" }}>
-                {component.title === "QuestionCeo" && (
-                  <QuestionCeo props={props} />
-                )}
-                {component.title === "Poll" && <PollIntranet props={props} />}
-                {component.title === "ShoutOuts" && <Shoutout props={props} />}
+                {component?.title === "Poll" && <PollIntranet props={props} />}
+                {component?.title === "ShoutOuts" && <Shoutout props={props} />}
               </div>
             )
         )}
-      </div> */}
+      </div>
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -284,7 +252,7 @@ const FlexipleSectionIntranet = (props: any) => {
         />
       ))}
       {/* Popup Dialog */}
-    </>
+    </div>
   );
 };
 export default FlexipleSectionIntranet;
