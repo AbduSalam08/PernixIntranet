@@ -94,7 +94,7 @@ function ViewComponent(props: any) {
             <div
               style={{
                 overflow: "auto",
-                height: "104px",
+                // height: "104px",
                 lineHeight: "22px",
               }}
             >
