@@ -27,6 +27,7 @@ import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+import moment from "moment";
 // images
 const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
@@ -414,9 +415,15 @@ const NewHiresIntranet = (props: any): JSX.Element => {
     if (newHiresData?.data?.length > 0) {
       const filteredData = newHiresData?.data?.filter((obj: any) => {
         return (
-          new Date() >= new Date(obj?.StartDate) &&
-          new Date() <= new Date(obj?.EndDate)
+          Number(moment().format("YYYYMMDD")) >=
+            Number(moment(obj?.StartDate).format("YYYYMMDD")) &&
+          Number(moment().format("YYYYMMDD")) <=
+            Number(moment(obj?.EndDate).format("YYYYMMDD"))
         );
+        // return (
+        //   new Date() >= new Date(obj?.StartDate) &&
+        //   new Date() <= new Date(obj?.EndDate)
+        // );
       });
       setNewHires([...filteredData]);
     }
