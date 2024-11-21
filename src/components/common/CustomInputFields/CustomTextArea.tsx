@@ -106,6 +106,8 @@ interface Props {
   customBorderColor?: string;
   noBorderInput?: boolean;
   topLabel?: boolean;
+  highLightBackground?: boolean;
+  noErrorMsg?: boolean;
 }
 
 export default function FloatingLabelTextarea({
@@ -130,6 +132,8 @@ export default function FloatingLabelTextarea({
   rows = 5,
   topLabel,
   customBorderColor,
+  noErrorMsg,
+  highLightBackground,
 }: Props): JSX.Element {
   return (
     <div
@@ -156,20 +160,19 @@ export default function FloatingLabelTextarea({
         slotProps={{ textarea: { placeholder } }}
         sx={{
           borderRadius: "6px",
-          border: `none`,
-          // border: !isValid
-          //   ? "1.5px solid #ff8585 !important"
-          //   : `1.5px solid ${customBorderColor || "#e5e5e5"} !important`,
+          border: "none",
           paddingTop: "20px", // for the floating label
-          width: textAreaWidth ? textAreaWidth : "100%",
+          width: textAreaWidth || "100%",
           height: rows ? `${rows * 20}px` : "auto",
           fontSize: "15px",
           fontFamily: "osMedium, sans-serif",
-          // border: noBorderInput ? "none" : "1px solid #e5e5e5",
+          background: highLightBackground ? "#eee !important" : "#fff", // Ensure proper nesting with '&'
         }}
         className={inputClassName}
       />
-      {!isValid && <span className={styles.errorMsg}>{errorMsg}</span>}
+      {!isValid && !noErrorMsg && (
+        <span className={styles.errorMsg}>{errorMsg}</span>
+      )}
     </div>
   );
 }

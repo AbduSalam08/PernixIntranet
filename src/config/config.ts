@@ -48,6 +48,7 @@ export namespace CONFIG {
     Intranet_ShoutOutsOptions: "Intranet_ShoutOutsOptions",
     Intranet_BirthDay: "Intranet_BirthDay",
     Intranet_BirthdayWishes: "Intranet_BirthdayWishes",
+    EmployeeDirectory_Config: "EmployeeDirectory_Config",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -99,6 +100,11 @@ export namespace CONFIG {
   export const PaginationData: IPaginationData = {
     first: 0,
     rows: 8,
+  };
+
+  export const birthdayPaginationData: IPaginationData = {
+    first: 0,
+    rows: 9,
   };
 
   export const MotivateColumn: IMotivateColumn = {
@@ -154,6 +160,9 @@ export namespace CONFIG {
     QuestionsCEOPage: "/SitePages/QuestionsCEOPage.aspx",
     ShoutOutsPage: "/SitePages/ShoutOutsPage.aspx",
     FeedbackPage: "/SitePages/FeedbackPage.aspx",
+    NewHiresPage: "/SitePages/NewHiresPage.aspx",
+    BirthdayPage: "/SitePages/BirthdayPage.aspx",
+    BlogsPage: "/SitePages/BlogsPage.aspx",
   };
 
   export const FeedbackQusColumn: IFeedbackQusColumn = {
@@ -192,8 +201,7 @@ export namespace CONFIG {
     "/_layouts/15/userphoto.aspx?size=S&username=";
 
   export const LinkdinURL: string =
-    "https://www.linkedin.com/company/technorucs/mycompany/";
+    "https://www.linkedin.com/company/pernix-group-inc-";
 
-  export const TwitterURL: string =
-    "https://www.linkedin.com/company/technorucs/mycompany/";
+  export const TwitterURL: string = "https://x.com/PernixGroup";
 }

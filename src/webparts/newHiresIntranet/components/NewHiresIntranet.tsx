@@ -394,7 +394,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
   const handlenavigate = (): void => {
     window.open(
       props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.QuestionsCEOPage,
+        CONFIG.NavigatePage.NewHiresPage,
       "_self"
     );
   };

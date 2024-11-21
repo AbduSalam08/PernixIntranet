@@ -11,6 +11,7 @@ import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 // import styles from "./HelpDesk.module.scss";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+import "../assets/styles/styles.css";
 // pages
 const TicketView = lazy(() => import("../pages/TicketView/TicketView"));
 const Dashboard = lazy(() => import("../pages/Dashboard/Dashboard"));

@@ -17,6 +17,7 @@ import { Skeleton } from "primereact/skeleton"; // Import PrimeReact Skeleton
 import { CONFIG } from "../../../config/config";
 import { IQuoteDatas, IUserDetails } from "../../../interface/interface";
 import moment from "moment";
+import { sp } from "@pnp/sp/presets/all";
 
 // hover images - default
 // const OrganizationalChart = require("../../../assets/images/svg/quickLinks/orgChart.svg");
@@ -34,6 +35,8 @@ const HelpDeskWhite = require("../../../assets/images/svg/quickLinks/helpdeskWhi
 const ApprovalsWhite = require("../../../assets/images/svg/quickLinks/approvalsWhite.svg");
 const ProjectTemplateWhite = require("../../../assets/images/svg/quickLinks/projectTemplateWhite.svg");
 const PernixBannerImage = require("../assets/PernixBannerImage.svg");
+
+let curUserName: string = "";
 
 const MainBannerIntranet = (props: any): JSX.Element => {
   /* State creations */
@@ -101,18 +104,6 @@ const MainBannerIntranet = (props: any): JSX.Element => {
     //   },
     // },
     {
-      img: Approvals,
-      hoverImg: ApprovalsWhite,
-      text: "Admin activities",
-      onClick: (_: any) => {
-        window.open(
-          props.context.pageContext.web.absoluteUrl +
-            CONFIG.NavigatePage.ApprovalsPage,
-          "_self"
-        );
-      },
-    },
-    {
       img: ProjectTemplate,
       hoverImg: ProjectTemplateWhite,
       text: "Project template",
@@ -120,6 +111,18 @@ const MainBannerIntranet = (props: any): JSX.Element => {
         window.open(
           props.context.pageContext.web.absoluteUrl +
             CONFIG.NavigatePage.ProjectTemplatePage,
+          "_self"
+        );
+      },
+    },
+    {
+      img: Approvals,
+      hoverImg: ApprovalsWhite,
+      text: "Admin activities",
+      onClick: (_: any) => {
+        window.open(
+          props.context.pageContext.web.absoluteUrl +
+            CONFIG.NavigatePage.ApprovalsPage,
           "_self"
         );
       },
@@ -156,8 +159,14 @@ const MainBannerIntranet = (props: any): JSX.Element => {
     });
   };
 
+  const currentUserName = async (): Promise<void> => {
+    const currentUser: any = await sp.web.currentUser.get();
+    curUserName = currentUser?.Title ?? "";
+  };
+
   useEffect(() => {
     setLoading(true);
+    currentUserName();
     onLoadingFUN();
   }, [dispatch, props?.context]);
 
@@ -213,7 +222,7 @@ const MainBannerIntranet = (props: any): JSX.Element => {
           </>
         ) : (
           <>
-            <h1>Welcome {currentUserDetails?.userName} !</h1>
+            <h1>Welcome {curUserName} !</h1>
             <p>{QuotesData?.value || ""}</p>
           </>
         )}
@@ -221,7 +230,7 @@ const MainBannerIntranet = (props: any): JSX.Element => {
 
       <div className={loading ? styles.quickLinksLoading : styles.quickLinks}>
         {loading
-          ? Array(6)
+          ? Array(4)
               .fill(null)
               .map((_, idx) => (
                 <Skeleton

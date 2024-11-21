@@ -437,7 +437,7 @@ Enjoy your special day!`;
   const handlenavigate = (): void => {
     window.open(
       props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.QuestionsCEOPage,
+        CONFIG.NavigatePage.BirthdayPage,
       "_self"
     );
   };
@@ -537,7 +537,7 @@ Enjoy your special day!`;
                     >
                       <i
                         className="pi pi-send"
-                        style={{ color: "#E0803D", fontSize: "24px" }}
+                        style={{ color: "#0b4d53", fontSize: "24px" }}
                       />
                     </div>
                   )}

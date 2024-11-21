@@ -1,6 +1,6 @@
 .container {
   width: auto;
-  height: 448px;
+  height: 496px;
   padding: 16px 30px;
   margin: 20px;
   padding: 20px;
@@ -29,65 +29,35 @@
   }
 }
 
-.feedbackContainer {
-  margin: 20px;
-  padding: 20px;
+.PRCarouselContainer {
+  width: 100%;
+  height: 350px;
   box-shadow: 0px -1px 4px 0px #b9b9b940;
+  margin-top: 20px;
+  padding: 20px;
   border-radius: 6px;
-  height: 460px;
 
-  .feedbackQues {
-    font-size: 16px;
-    // font-weight: 600;
-    color: #0b4d53;
-    font-family: "osSemibold", sans-serif;
-    margin: 10px 0px;
-  }
-  .radioContainer {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-
-    label {
-      font-size: 14px;
-      color: #4b4b4b;
-      font-family: "osRegular", sans-serif;
+  .carouselContainer {
+    .CarouselTitle {
+      font-size: 16px;
+      font-weight: 500;
+      width: 100%;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-  }
 
-  .reasonText {
-    font-size: 14px;
-    margin: 15px 0px;
-    // font-weight: 600;
-    color: #0b4d53;
-    font-family: "osSemibold", sans-serif;
-  }
-}
-
-.carouselContainer {
-  height: 316px;
-
-  .CarouselTitle {
-    font-size: 16px;
-    font-weight: 500;
-    padding: 20px 0px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .CarouselTextArea {
-    height: 260px;
-    padding-bottom: 20px;
+    .CarouselTextArea {
+      padding: 20px 0px;
+    }
   }
 }
 
 .footerBTNSec {
   display: flex;
-  // justify-content: space-between;
   align-items: center;
   margin-top: 20px;
 
