@@ -1,7 +1,7 @@
 .container {
   width: 100%;
   height: calc(100vh - 128px);
-  background-color: #f0f0f0;
+  background-color: white;
   padding: 16px 30px;
 }
 
@@ -11,4 +11,249 @@
   align-items: center;
   width: 100%;
   height: calc(100vh - 144px);
+}
+.employeebox {
+  .textfieldbox {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    width: 66%;
+    margin: 11px 5px;
+    .refreshBTN {
+      padding: 7px;
+      border-radius: 4px;
+      background-color: #0b4d53;
+      cursor: pointer;
+
+      i {
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffff;
+      }
+    }
+    .filtericon {
+      font-size: 17px;
+      bottom: 9px;
+      position: absolute;
+      right: 11px;
+      font-weight: 800;
+      color: #0b4d53;
+    }
+  }
+  .blog {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    margin-left: 9px;
+    h5 {
+      margin-left: 10px;
+      font-size: 17px;
+
+      color: #0b4d53;
+    }
+    .roundiconbutton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background-color: #ffffff;
+      border: 2px solid #ffa500;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s;
+    }
+
+    // .roundiconbutton:hover {
+    //   transform: scale(1.1);
+    //   cursor: pointer;
+    // }
+
+    .icon {
+      color: #ffa500;
+      font-size: 13px;
+    }
+    .blogheading {
+      color: #042b04;
+      font-size: 15px;
+    }
+    h5 {
+      font-size: 17px;
+    }
+  }
+  border-radius: 15px;
+  background: white;
+  .headingbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    gap: 12px;
+    h3 {
+      color: #0b4d53;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .filterbox {
+      display: flex;
+      align-items: center;
+      gap: 21px;
+    }
+    .new-blog-button {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      padding: 8px 16px;
+      background-color: #0b4d53;
+      color: #fff;
+      font-weight: 700;
+      width: 104px;
+      justify-content: space-around;
+      font-size: 14px;
+      gap: 35x;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 4px;
+      gap: 0;
+      -webkit-transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease;
+      span {
+        width: 37px;
+      }
+      .Addicon {
+        margin-right: 8px;
+        font-size: 16px;
+      }
+    }
+    .new-blog-button .icon {
+      margin-right: 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .new-blog-button:hover {
+      background-color: #006b68;
+    }
+  }
+}
+.twoiconbox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  .visibilityicon {
+    display: flex;
+    cursor: pointer;
+  }
+  .windowediticon {
+    display: flex;
+    cursor: pointer;
+  }
+}
+.phonebox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.personabox {
+  display: flex;
+  align-items: center;
+}
+.pathSearchFilter {
+  width: 100%;
+}
+.drawcontainer {
+  .drawerheading {
+    padding: 14px;
+    background-color: #0b4d53;
+    .drawericonbox {
+      display: flex;
+      font-weight: 800;
+      align-items: center;
+      color: white;
+      gap: 5px;
+      .drawerionc {
+        font-size: 22px;
+      }
+      h4 {
+        font-size: 19px;
+        font-weight: 500;
+      }
+    }
+  }
+  .drawerpersonabox {
+    justify-content: center;
+    margin: 5 0;
+    align-items: center;
+    display: flex;
+    margin: 10% 0;
+    .drawerinbox {
+      .personabox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 41px;
+      }
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      .namebox {
+        text-align: center;
+        line-height: 23px;
+        h3 {
+          color: #0b4d53;
+          font-weight: 500;
+        }
+        h5 {
+          color: #e0803d;
+          font-weight: 400;
+        }
+        h6 {
+          color: #8c8c8c;
+          font-weight: 400;
+        }
+      }
+    }
+  }
+  .userdetailbox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    line-height: 38px;
+    margin-left: 30px;
+
+    .mailbox {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      width: 81%;
+    }
+    .phonebox {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      width: 27%;
+      gap: 12px;
+    }
+    .birthdaybox {
+      display: flex;
+      align-items: center;
+      width: 81%;
+      justify-content: space-evenly;
+    }
+    .locationbox {
+      display: flex;
+      align-items: center;
+      width: 81%;
+      gap: 5px;
+    }
+    label {
+      color: #8e8e8e;
+      font-size: 13px;
+    }
+  }
+  .line {
+    border-top: 2px solid #8e8e8e;
+    width: 100%;
+    margin: 20px 0;
+  }
 }
