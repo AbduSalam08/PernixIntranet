@@ -90,13 +90,13 @@ export const getAllBirthdayData = async (dispatch: any): Promise<any> => {
         Message: birthdayWish[0]?.Message
           ? birthdayWish[0]?.Message
           : item?.Message,
-        BirthDayWishID: birthdayWish[0]?.ID ? birthdayWish[0]?.ID : null,
         isTeams: birthdayWish[0]?.isTeams ? true : false,
         isOutlook: birthdayWish[0]?.isOutlook ? true : false,
         createdEmail: item?.Author?.EMail,
         createdName: item?.Author?.Title,
         imgUrl: item?.AttachmentFiles[0]?.ServerRelativeUrl,
         Attachment: item?.AttachmentFiles[0],
+        BirthDayWishID: birthdayWish[0]?.ID ? birthdayWish[0]?.ID : null,
       };
     });
 
@@ -312,7 +312,7 @@ export const submitBirthdayWish = async (
     });
   }
 };
-export const updateHire = async (
+export const updateBirthday = async (
   formData: FormData,
   ID: number,
   attachmentObject: any,
@@ -337,42 +337,32 @@ export const updateHire = async (
   try {
     debugger;
     let fileRes: any;
-    const payload = formData.EmployeeName?.value?.id
-      ? {
-          Description: formData.Description?.value,
-          EmployeeNameId: formData.EmployeeName?.value?.id,
-          Title: formData.Title?.value,
-          StartDate: formData.StartDate?.value,
-          EndDate: formData.EndDate?.value,
-        }
-      : {
-          Description: formData.Description?.value,
-          Title: formData.Title?.value,
-          StartDate: formData.StartDate?.value,
-          EndDate: formData.EndDate?.value,
-        };
+    const payload = {
+      Message: formData.Message?.value,
+      DateOfBirth: formData.DateOfBirth?.value,
+    };
 
     // update item to the SharePoint list
     const res: any = await SpServices.SPUpdateItem({
-      Listname: CONFIG.ListNames.Intranet_NewHires,
+      Listname: CONFIG.ListNames.Intranet_BirthDay,
       ID: ID,
       RequestJSON: payload,
     });
     console.log("res", res);
 
-    if (formData?.ProfileImage?.value?.type) {
+    if (formData?.Image?.value?.type) {
       await sp.web.lists
-        .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+        .getByTitle(CONFIG.ListNames.Intranet_BirthDay)
         .items.getById(Number(ID))
         .attachmentFiles.getByName(attachmentObject.FileName)
         .delete();
-      if (formData?.ProfileImage?.value?.name) {
+      if (formData?.Image?.value?.name) {
         fileRes = await sp.web.lists
-          .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+          .getByTitle(CONFIG.ListNames.Intranet_BirthDay)
           .items.getById(Number(ID))
           .attachmentFiles.add(
-            formData?.ProfileImage?.value?.name,
-            formData?.ProfileImage?.value
+            formData?.Image?.value?.name,
+            formData?.Image?.value
           );
       }
     }
@@ -380,19 +370,20 @@ export const updateHire = async (
 
     const responseData: any = {
       ID: ID,
-      Title: formData.Title?.value,
-      EmployeeName: formData.EmployeeName?.value,
-      StartDate: formData.StartDate?.value,
-      EndDate: formData.EndDate?.value,
-      Description: formData.Description?.value,
+      DateOfBirth: formData.DateOfBirth?.value,
+      Message: formData.Message?.value,
+      isOutlook: false,
+      isTeams: false,
+      EmployeeName: {},
       createdEmail: res?.Author?.EMail,
       createdName: res?.Author?.Title,
-      imgUrl: formData?.ProfileImage?.value?.type
+      imgUrl: formData?.Image?.value?.type
         ? fileRes?.data?.ServerRelativeUrl
         : attachmentObject?.ServerRelativeUrl,
-      Attachment: formData?.ProfileImage?.value?.type
+      Attachment: formData?.Image?.value?.type
         ? fileRes?.data
         : attachmentObject,
+      BirthDayWishID: null,
     };
 
     // Success state after item and attachment are added
@@ -408,12 +399,8 @@ export const updateHire = async (
         },
         messages: {
           ...updatedState[index].messages,
-          success: "Hire updated successfully!",
-          successDescription: `The hire '${
-            formData.EmployeeName?.value?.name
-              ? formData.EmployeeName.value.name
-              : formData.EmployeeName.value
-          }' has been updated successfully.`,
+          success: "Birthday updated successfully!",
+          successDescription: `The birthday has been updated successfully.`,
         },
       };
       return updatedState;
@@ -444,7 +431,7 @@ export const updateHire = async (
   }
 };
 
-export const deleteHire = async (
+export const deleteBirthday = async (
   ID: number,
   setLoaderState: any,
   index: number
@@ -464,7 +451,7 @@ export const deleteHire = async (
   });
   try {
     await SpServices.SPUpdateItem({
-      Listname: CONFIG.ListNames.Intranet_NewHires,
+      Listname: CONFIG.ListNames.Intranet_BirthDay,
       ID: ID,
       RequestJSON: { IsDelete: true },
     });
@@ -480,8 +467,8 @@ export const deleteHire = async (
         },
         messages: {
           ...updatedState[index].messages,
-          success: "Hire deleted successfully!",
-          successDescription: `The hire has been deleted successfully.`,
+          success: "Birthday deleted successfully!",
+          successDescription: `The birthday has been deleted successfully.`,
         },
       };
       return updatedState;
@@ -499,8 +486,9 @@ export const deleteHire = async (
         },
         messages: {
           ...updatedState[index].messages,
+          success: "Birthday deleted unsuccessfully!",
           errorDescription:
-            "An error occurred while deleting hire, please try again later.",
+            "An error occurred while deleting birthday, please try again later.",
         },
       };
       return updatedState;
