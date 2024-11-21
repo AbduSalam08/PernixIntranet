@@ -36,7 +36,7 @@ import {
   usergetdetails,
   viewLikes,
 } from "../../../services/BlogsPage/BlogsPageServices";
-import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+// import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 // import { Checkbox } from "office-ui-fabric-react";
 import Popup from "../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../utils/popupUtils";
@@ -83,7 +83,7 @@ const BlogsPage = (props: any): JSX.Element => {
   const popupActions: any = [
     [
       {
-        text: "Rejected",
+        text: "Reject",
         btnType: "darkGreyVariant",
         disabled: false,
         endIcon: false,
@@ -110,7 +110,7 @@ const BlogsPage = (props: any): JSX.Element => {
         },
       },
       {
-        text: "Approved",
+        text: "Approve",
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
@@ -125,12 +125,14 @@ const BlogsPage = (props: any): JSX.Element => {
   // const [duplicatefilter, setduplicatefilter] = useState<any>([]);
   // console.log(duplicatefilter);
   const [data, setdata] = useState<any>([]);
+  const [admindata, setadmindata] = useState<any>([]);
   const [duplicatedata, setduplicatedata] = useState<any>([]);
   const [curuser, setcuruser] = useState<any>({
     Id: null,
     Email: "",
     Title: "",
   });
+  const [allBlogs, setAllBlogs] = useState("AllBlogs");
 
   // const [checkbox, setcheckbox] = useState(false);
   const [Updateid, setupdateid] = useState<any>(null);
@@ -239,9 +241,10 @@ const BlogsPage = (props: any): JSX.Element => {
           viewDetails: item.ViewPerson ? JSON.parse(item.ViewPerson) : [],
         });
       });
+      setadmindata([...tempdata]);
       if (_userpermission === "Admin") {
         const _filterdata = tempdata.filter(
-          (_admin: any) => _admin.Status === "Pending"
+          (_admin: any) => _admin.Status === "Approved"
         );
         _filterdata.sort((a: any, b: any) => b.Id - a.Id);
         setdata([..._filterdata]);
@@ -403,6 +406,7 @@ const BlogsPage = (props: any): JSX.Element => {
       _status: "",
       _gsearch: "",
     });
+    setAllBlogs("AllBlogs");
     getcurrentuser();
   };
   // This Functino Admin Change The Status
@@ -570,7 +574,7 @@ const BlogsPage = (props: any): JSX.Element => {
                 <div className={styles.searchboxcontainer}>
                   {permission === "Admin" && (
                     <div>
-                      <CustomDropDown
+                      {/* <CustomDropDown
                         value={filterkey._status}
                         placeholder="Status"
                         onChange={(value) => {
@@ -579,11 +583,11 @@ const BlogsPage = (props: any): JSX.Element => {
                         }}
                         noErrorMsg
                         highlightDropdown={true}
-                        options={["All", "Pending", "Approved", "Rejected"]}
+                        options={["All", "Pending", "Approved"]}
                         size="SM"
                         floatingLabel={false}
                         width={"250px"}
-                      />
+                      /> */}
                     </div>
                   )}
                   {/* <CustomInput
@@ -632,6 +636,93 @@ const BlogsPage = (props: any): JSX.Element => {
                     </div>
                   </div>
                 </div>
+              </div>
+              <div style={{ display: "flex", gap: "10px", margin: "7px 39px" }}>
+                <div>
+                  <h4
+                    style={{
+                      borderBottom:
+                        allBlogs === "AllBlogs"
+                          ? "3.5px solid rgb(224, 128, 61)"
+                          : "",
+
+                      paddingBottom: "10px",
+                      color: "#0b4d53",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      const _data = [...admindata];
+                      const _filterdata = _data.filter(
+                        (item) => item.Status === "Approved"
+                      );
+                      _filterdata.sort((a, b) => b.Id - a.Id);
+                      setdata([..._filterdata]);
+                      setAllBlogs("AllBlogs");
+                    }}
+                  >
+                    All blogs
+                  </h4>
+                </div>
+                {permission === "Admin" ? (
+                  <div>
+                    <h4
+                      style={{
+                        borderBottom:
+                          allBlogs !== "AllBlogs"
+                            ? "3.5px solid rgb(224, 128, 61)"
+                            : "",
+                        paddingBottom: "10px",
+                        color: "#0b4d53",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setAllBlogs("PendingApprovals");
+                        const userdata = [...admindata];
+                        const filterdata = userdata.filter(
+                          (item) => item.Status === "Pending"
+                        );
+                        filterdata.sort((a, b) => b.Id - a.Id);
+                        setdata([...filterdata]);
+                      }}
+                    >
+                      Pending approvals
+                    </h4>
+                  </div>
+                ) : (
+                  <div>
+                    <h5
+                      style={{
+                        borderBottom:
+                          allBlogs !== "AllBlogs"
+                            ? "3.5px solid rgb(224, 128, 61)"
+                            : "",
+                        paddingBottom: "10px",
+                        color: "#0b4d53",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        if (permission === "Admin") {
+                          setAllBlogs("PendingApprovals");
+                        } else {
+                          debugger;
+                          const _data = [...data];
+                          const _filterdata = _data.filter(
+                            (item) =>
+                              item.Author && item.Author.Id === curuser.Id
+                          );
+                          _filterdata.sort((a, b) => b.Id - a.Id);
+                          setdata([..._filterdata]);
+                          setAllBlogs("MyBlogs");
+                        }
+                      }}
+                    >
+                      My Blogs
+                    </h5>
+                  </div>
+                )}
               </div>
 
               {/* Blogs Container Section */}
@@ -693,86 +784,87 @@ const BlogsPage = (props: any): JSX.Element => {
                                   __html: item.Paragraph,
                                 }}
                               />
-                              {permission === "Admin" && (
-                                <div className={styles.approversection}>
-                                  <div>
-                                    <label
-                                      style={{
-                                        fontSize: "12px",
-                                        height: "23px",
-                                        width: "66px",
-                                        display: "inline-block",
-                                        padding: "6px",
-                                        backgroundColor:
-                                          item.Status === "Approved"
-                                            ? "green"
-                                            : item.Status === "Pending"
-                                            ? "#f3e8c9"
-                                            : "red",
-                                        color:
-                                          item.Status === "Approved"
-                                            ? "green"
-                                            : item.Status === "Pending"
-                                            ? "#c99b1b"
-                                            : "red",
-                                        borderRadius: "50px",
-                                        textAlign: "center",
-                                        fontWeight: "500",
-                                      }}
-                                    >
-                                      {item.Status}
-                                    </label>
-                                  </div>
-                                  {permission === "Admin" && (
-                                    <div className={styles.checkbox}>
-                                      {/* <div> */}
-                                      {permission === "Admin" ? (
-                                        <div>
-                                          <div
-                                            className={
-                                              styles["new-blog-button"]
-                                            }
-                                            onClick={() => {
-                                              // setcheckbox(false);
-                                              setupdateid(item.Id);
-                                              const _popupcontroller = [
-                                                ...popupController,
-                                              ];
-                                              _popupcontroller[0].open = true;
-                                              setPopupController([
-                                                ..._popupcontroller,
-                                              ]);
-                                              // approverStatusFunc(
-                                              //   item.Id
-                                              // );
-                                            }}
-                                          >
-                                            <span>Approval</span>
+                              {permission === "Admin" &&
+                                item.Status === "Pending" && (
+                                  <div className={styles.approversection}>
+                                    <div>
+                                      <label
+                                        style={{
+                                          fontSize: "12px",
+                                          height: "23px",
+                                          width: "66px",
+                                          display: "inline-block",
+                                          padding: "6px",
+                                          backgroundColor:
+                                            item.Status === "Approved"
+                                              ? "green"
+                                              : item.Status === "Pending"
+                                              ? "#f3e8c9"
+                                              : "red",
+                                          color:
+                                            item.Status === "Approved"
+                                              ? "green"
+                                              : item.Status === "Pending"
+                                              ? "#c99b1b"
+                                              : "red",
+                                          borderRadius: "50px",
+                                          textAlign: "center",
+                                          fontWeight: "500",
+                                        }}
+                                      >
+                                        {item.Status}
+                                      </label>
+                                    </div>
+                                    {permission === "Admin" && (
+                                      <div className={styles.checkbox}>
+                                        {/* <div> */}
+                                        {permission === "Admin" ? (
+                                          <div>
+                                            <div
+                                              className={
+                                                styles["new-blog-button"]
+                                              }
+                                              onClick={() => {
+                                                // setcheckbox(false);
+                                                setupdateid(item.Id);
+                                                const _popupcontroller = [
+                                                  ...popupController,
+                                                ];
+                                                _popupcontroller[0].open = true;
+                                                setPopupController([
+                                                  ..._popupcontroller,
+                                                ]);
+                                                // approverStatusFunc(
+                                                //   item.Id
+                                                // );
+                                              }}
+                                            >
+                                              <span>Approval</span>
+                                            </div>
                                           </div>
-                                        </div>
-                                      ) : // <div>
-                                      // <CustomDropDown
-                                      //   value={item.UserStatus}
-                                      //   floatingLabel={false}
-                                      //   placeholder="Status"
-                                      //   onChange={(value) => {
-                                      // setcheckbox(false);
-                                      // approverStatusFunc(value, item.Id);
-                                      //   }}
-                                      //   highlightDropdown={true}
-                                      //   options={[
-                                      //     "Pending",
-                                      //     "Approved",
-                                      //     "Rejected",
-                                      //   ]}
-                                      //   noErrorMsg
-                                      //   size="SM"
-                                      //   width={"150px"}
-                                      // />
-                                      // </div>`
-                                      null}
-                                      {/* </div> */}
-                                      {/* <Checkbox
+                                        ) : // <div>
+                                        // <CustomDropDown
+                                        //   value={item.UserStatus}
+                                        //   floatingLabel={false}
+                                        //   placeholder="Status"
+                                        //   onChange={(value) => {
+                                        // setcheckbox(false);
+                                        // approverStatusFunc(value, item.Id);
+                                        //   }}
+                                        //   highlightDropdown={true}
+                                        //   options={[
+                                        //     "Pending",
+                                        //     "Approved",
+                                        //     "Rejected",
+                                        //   ]}
+                                        //   noErrorMsg
+                                        //   size="SM"
+                                        //   width={"150px"}
+                                        // />
+                                        // </div>`
+                                        null}
+                                        {/* </div> */}
+                                        {/* <Checkbox
                                         checked={
                                           item.UserStatus &&
                                           item.UserStatus !== item.Status &&
@@ -800,10 +892,10 @@ const BlogsPage = (props: any): JSX.Element => {
                                           }
                                         }}
                                       /> */}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                             </div>
                             <div className={styles.footercontainer}>
                               <div className={styles.peoplebox}>
@@ -920,6 +1012,7 @@ const BlogsPage = (props: any): JSX.Element => {
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle
           }
+          centerActionBtn={true}
           popupActions={popupActions[index]}
           visibility={popupData.open}
           // content={popupInputs[index]}

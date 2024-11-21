@@ -90,6 +90,8 @@
   }
 }
 .section {
+  height: 80vh;
+  overflow: auto;
   .Imagecontainer {
     width: 100%;
     height: 510px;
@@ -129,7 +131,7 @@
   margin-top: 10px;
   color: #000;
 
-  height: 171px;
+  // height: 171px;
   padding-top: 7px;
   h1 {
     color: orange;

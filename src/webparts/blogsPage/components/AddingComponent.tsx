@@ -238,7 +238,7 @@ function AddingComponent(props: any) {
                       onChange={(value) => {
                         if (value.length < 250) {
                           headingonchange("Title", value);
-                        } else {
+                        } else if (value.length >= 250) {
                           setobjerror({
                             Title:
                               "The title may contain up to 250 characters.",
