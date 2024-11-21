@@ -88,6 +88,7 @@ const TicketView = (): JSX.Element => {
     isLoading: true,
     data: [],
   });
+  console.log("conversationData: ", conversationData);
 
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
@@ -125,6 +126,8 @@ const TicketView = (): JSX.Element => {
   const currentTicketsData = verifyTicketWithCurrentUser?.filter(
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
+
+  console.log("currentTicketsData: ", currentTicketsData);
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
   const [toggles, setToggles] = useState({
@@ -238,17 +241,59 @@ const TicketView = (): JSX.Element => {
     currentTicketsData !== null &&
     currentTicketsData !== undefined;
 
+  // useEffect(() => {
+  //   console.log("reeeeeeeeeeee");
+  //   if (pageParams?.ticketid) {
+  //     const currentTicketsDataLocal = verifyTicketWithCurrentUser?.filter(
+  //       (item: any) => item?.TicketNumber === ticketNumber
+  //     )[0];
+  //     getAllComments(currentTicketsDataLocal?.ID, setConversationData, false);
+  //     console.log("currentTicketsData: ", currentTicketsDataLocal);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   getAllTickets(dispatch);
+
+  //   if (pageParams?.ticketid) {
+  //     const currentTicketsDataLocal = verifyTicketWithCurrentUser?.filter(
+  //       (item: any) => item?.TicketNumber === ticketNumber
+  //     )[0];
+
+  //     getAllComments(currentTicketsDataLocal?.ID, setConversationData, false);
+
+  //     getAttachmentofTicket(currentTicketsDataLocal?.ID)?.then((res: any) => {
+  //       setCurrentAttachment(res || null);
+  //     });
+  //     console.log("currentTicketsDataLocal: ", currentTicketsDataLocal);
+  //   }
+  // }, [pageParams?.ticketid, ticketNumber]);
+
   useEffect(() => {
-    getAllTickets(dispatch);
+    if (pageParams?.ticketid && ticketNumber) {
+      const currentTicketsDataLocal = verifyTicketWithCurrentUser?.find(
+        (item: any) => item?.TicketNumber === ticketNumber
+      );
 
-    if (pageParams?.ticketid) {
-      getAllComments(currentTicketsData?.ID, setConversationData, false);
+      if (!currentTicketsDataLocal) {
+        console.warn("No ticket data found for the provided ticket number.");
+        return;
+      }
 
-      getAttachmentofTicket(currentTicketsData?.ID)?.then((res: any) => {
+      // Fetch comments
+      getAllComments(currentTicketsDataLocal?.ID, setConversationData, false);
+
+      // Fetch attachments
+      getAttachmentofTicket(currentTicketsDataLocal?.ID)?.then((res: any) => {
         setCurrentAttachment(res || null);
       });
     }
-  }, [pageParams?.ticketid, ticketNumber]);
+  }, [pageParams?.ticketid, ticketNumber, verifyTicketWithCurrentUser]);
+
+  useEffect(() => {
+    // Fetch all tickets on initial load
+    getAllTickets(dispatch);
+  }, [dispatch]);
 
   return (
     <>
@@ -609,7 +654,7 @@ const TicketView = (): JSX.Element => {
 
                 <div className={styles.detailsLabel}>
                   <label>
-                    Attachments ({currentAttachment?.length})
+                    Attachments ({currentAttachment?.length || "0"})
                     {currentAttachment?.length > 1 && (
                       <span
                         className={styles.downloadText}
