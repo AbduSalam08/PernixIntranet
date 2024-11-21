@@ -131,10 +131,7 @@ const NewHiresPage = (props: any): JSX.Element => {
     ID: null,
     type: "",
   });
-  const [attachmentObject, setAttachmentObject] = useState<any>({
-    ID: null,
-    type: "",
-  });
+  const [attachmentObject, setAttachmentObject] = useState<any>({});
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
