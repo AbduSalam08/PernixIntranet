@@ -540,7 +540,7 @@ const TicketsCreatedByUserBasis = memo(
         datalabels: {
           color: "white",
           formatter: (value: number, ctx: any) => {
-            return `${value !== 0 ? `${value}%` : ""}`;
+            return `${value !== 0 ? value : ""}`;
           },
         },
       },
