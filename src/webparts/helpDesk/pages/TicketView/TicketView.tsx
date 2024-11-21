@@ -292,6 +292,9 @@ const TicketView = (): JSX.Element => {
                     options={
                       currentRole === "/user"
                         ? [currentTicketsData?.Status, "Closed"]
+                        : currentTicketsData?.Status?.toLowerCase() ===
+                          "in progress"
+                        ? TicketStatus?.filter((item: any) => item !== "Open")
                         : TicketStatus
                     }
                     placeholder="Update status"
@@ -508,7 +511,7 @@ const TicketView = (): JSX.Element => {
               <div className={styles.heading}>Details</div>
               <div className={styles.details}>
                 <div className={styles.detailsLabel}>
-                  <label>Ticket ID/Number</label>
+                  <label>Ticket Number</label>
                   <span>{ticketNumber ?? "-"}</span>
                 </div>
 
@@ -807,6 +810,7 @@ const TicketView = (): JSX.Element => {
               confirmationTitle={popupData?.confirmationTitle}
               popupHeight={index === 0 ? true : false}
               noActionBtn={true}
+              centerActionBtn={true}
             />
           ))}
 

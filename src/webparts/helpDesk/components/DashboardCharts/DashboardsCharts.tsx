@@ -333,20 +333,17 @@ const TicketsByPriority = memo(
       | "Un assigned"
       | any;
   }): JSX.Element => {
-    // Filter tickets based on status
     const TicketsDataByTerm: any = groupTicketsByPeriod(
       AllTickets?.data,
       Term,
       "Created"
     );
 
-    // Flatmap to consolidate all ticket data into a single array
     const allTicketsFlattened = Object.keys(TicketsDataByTerm)?.flatMap(
       (key: string) => TicketsDataByTerm[key]?.data || []
     );
 
     let dataFilteredByStatus: any[] = [];
-
     if (Status === "Un assigned") {
       dataFilteredByStatus =
         allTicketsFlattened?.filter((item: any) => item?.ITOwnerId === null) ||
@@ -359,7 +356,6 @@ const TicketsByPriority = memo(
       );
     }
 
-    // Group filtered tickets by priority
     const priorities = [
       "Standard",
       "Low priority",
@@ -375,7 +371,6 @@ const TicketsByPriority = memo(
       ).length;
     });
 
-    // Chart data configuration
     const ticketsByPriority = {
       labels: priorities,
       datasets: [
@@ -383,36 +378,40 @@ const TicketsByPriority = memo(
           label: "Tickets",
           data: priorityCounts,
           backgroundColor: [
-            "#4F9DF9", // Standard
-            "#0B4D53", // Low priority
-            "#F9C74F", // Medium priority
-            "#BE6D6D", // High priority
-            "#E0803D", // Critical/Impacting Multiple People
+            "#4F9DF9",
+            "#0B4D53",
+            "#F9C74F",
+            "#BE6D6D",
+            "#E0803D",
           ],
         },
       ],
     };
 
-    // Chart options
     const ticketsByPriorityOptions = {
       plugins: {
         legend: { display: false, position: "bottom" },
         datalabels: {
           color: "white",
-          formatter: (value: number) => {
-            return value > 0 ? value : "";
-          },
+          formatter: (value: number) => value,
         },
       },
-      barThickness: 60,
+      barThickness: "flex",
       scales: {
-        x: { title: { display: true, text: "Priority" } },
-        y: { title: { display: true, text: "Ticket Count" } },
+        x: {
+          title: { display: true, text: "Priority" },
+          grid: { display: false },
+        },
+        y: {
+          title: { display: true, text: "Ticket Count" },
+          ticks: { beginAtZero: true },
+        },
       },
     };
 
-    // Render the chart using the MainChart component
-    return priorityCounts?.every((item: any) => item === 0) ? (
+    return priorityCounts?.length === 0 ? (
+      emptyMessageText()
+    ) : priorityCounts.every((item) => item === 0) ? (
       emptyMessageText()
     ) : (
       <MainChart

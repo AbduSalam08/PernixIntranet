@@ -393,15 +393,15 @@ const Dashboard = (): JSX.Element => {
                 floatingLabel={false}
                 size="SM"
                 width={"150px"}
-                value={filters.TicketByPriority.termsSelectedValue}
-                options={filters.TicketByPriority.termsOptions}
+                value={filters.TicketsCreatedByUserBasis.termsSelectedValue}
+                options={filters.TicketsCreatedByUserBasis.termsOptions}
                 noErrorMsg
                 placeholder="select term"
                 onChange={(value) => {
                   setFilters((prev: any) => ({
                     ...prev,
-                    TicketByPriority: {
-                      ...prev.TicketByPriority,
+                    TicketsCreatedByUserBasis: {
+                      ...prev.TicketsCreatedByUserBasis,
                       termsSelectedValue: value,
                     },
                   }));
