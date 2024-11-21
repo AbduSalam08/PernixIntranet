@@ -254,16 +254,35 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               label="Start Date"
               isDateController={true}
               minimumDate={new Date()}
-              maximumDate={new Date(formData.EndDate.value) || ""}
+              maximumDate={
+                formData?.EndDate?.value
+                  ? new Date(formData?.EndDate?.value)
+                  : null
+              }
               error={!formData.StartDate.isValid}
-              errorMsg={formData.StartDate.errorMsg}
+              errorMsg={formData?.StartDate?.errorMsg}
               onChange={(date: any) => {
                 const { isValid, errorMsg } = validateField(
                   "StartDate",
                   date,
                   formData.StartDate.validationRule
                 );
-                handleInputChange("StartDate", date, isValid, errorMsg);
+                if (formData?.EndDate?.value) {
+                  if (new Date(formData.EndDate.value) >= new Date(date)) {
+                    // handleInputChange("EndDate", date, isValid, errorMsg);
+                    handleInputChange("StartDate", date, isValid, errorMsg);
+                  } else {
+                    handleInputChange(
+                      "StartDate",
+                      "",
+                      false,
+                      "Start date must be before end date"
+                    );
+                  }
+                } else {
+                  handleInputChange("StartDate", date, isValid, errorMsg);
+                }
+                // handleInputChange("StartDate", date, isValid, errorMsg);
               }}
             />
           </div>
@@ -272,17 +291,34 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               value={formData.EndDate.value}
               label="End Date"
               isDateController={true}
-              minimumDate={new Date(formData.StartDate.value)}
-              disabledInput={formData.StartDate.value === ""}
-              error={!formData.EndDate.isValid}
-              errorMsg={formData.EndDate.errorMsg}
+              minimumDate={
+                formData?.StartDate?.value
+                  ? new Date(formData?.StartDate?.value)
+                  : null
+              }
+              maximumDate={null}
+              disabledInput={!formData?.StartDate?.value}
+              error={!formData?.EndDate?.isValid}
+              errorMsg={formData?.EndDate?.errorMsg}
               onChange={(date: any) => {
                 const { isValid, errorMsg } = validateField(
                   "EndDate",
                   date,
                   formData.EndDate.validationRule
                 );
-                handleInputChange("EndDate", date, isValid, errorMsg);
+                if (formData?.StartDate?.value) {
+                  if (new Date(formData.StartDate.value) <= new Date(date)) {
+                    handleInputChange("EndDate", date, isValid, errorMsg);
+                  } else {
+                    handleInputChange(
+                      "EndDate",
+                      "",
+                      false,
+                      "End date must be after start date"
+                    );
+                  }
+                }
+                // handleInputChange("EndDate", date, isValid, errorMsg);
               }}
             />
           </div>

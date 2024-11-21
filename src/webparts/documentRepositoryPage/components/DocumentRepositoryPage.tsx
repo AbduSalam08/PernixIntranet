@@ -963,7 +963,8 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                               : "end",
                         }}
                       >
-                        {val?.Content?.fileType === "master_folder" ? (
+                        {val?.Content?.fileType === "master_folder" &&
+                        isAdmin ? (
                           <>
                             <div
                               style={{

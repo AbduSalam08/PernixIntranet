@@ -18,10 +18,10 @@ import {
   SearchBox,
 } from "@fluentui/react";
 import { MailOutline, VisibilityOutlined } from "@mui/icons-material";
-import { getuserdetails } from "../../../services/EmployeeDirectory/EmployeeDirectory";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { TextField } from "office-ui-fabric-react";
 import { Drawer } from "@mui/material";
+import { getuserdetails } from "../../../services/employeeDirectory/EmployeeDirectory";
 
 // import { Item } from "@pnp/sp/items";
 // import { Button } from "primereact/button";

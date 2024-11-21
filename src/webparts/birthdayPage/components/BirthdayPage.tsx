@@ -517,14 +517,14 @@ Enjoy your special day!`;
       new Date().getMonth(),
       new Date().getDate()
     );
-    if (curTab === CONFIG.NewHiresPageTabsName[0]) {
+    if (curTab === CONFIG.BirthDayPageTabsName[0]) {
       filteredData = data?.filter((obj: any) => {
         return (
           moment(new Date()).format("DD/MM/YYYY") ===
           moment(obj?.DateOfBirth).format("DD/MM/YYYY")
         );
       });
-    } else if (curTab === CONFIG.NewHiresPageTabsName[1]) {
+    } else if (curTab === CONFIG.BirthDayPageTabsName[1]) {
       filteredData = data?.filter((obj: any) => {
         const DateOfBirth = new Date(obj?.DateOfBirth);
         return (
@@ -559,7 +559,7 @@ Enjoy your special day!`;
     if (birthDaysData?.data?.length > 0) {
       setBirthdays(birthDaysData?.data);
       onLoadingFUN(
-        selectedTab || CONFIG.NewHiresPageTabsName[0],
+        selectedTab || CONFIG.BirthDayPageTabsName[0],
         birthDaysData?.data
       );
     }
@@ -653,7 +653,7 @@ Enjoy your special day!`;
       </div>
       {/* tabs */}
       <div className={styles.tabsContainer}>
-        {CONFIG.NewHiresPageTabsName.map((str: string, i: number) => {
+        {CONFIG.BirthDayPageTabsName.map((str: string, i: number) => {
           return (
             <div
               key={i}
@@ -782,8 +782,8 @@ Enjoy your special day!`;
                             </div>
                           )}
                           {currentUserDetails?.role === "Admin" &&
-                            selectedTab !== CONFIG.NewHiresPageTabsName[2] &&
-                            selectedTab !== CONFIG.NewHiresPageTabsName[0] && (
+                            selectedTab !== CONFIG.BirthDayPageTabsName[2] &&
+                            selectedTab !== CONFIG.BirthDayPageTabsName[0] && (
                               <i
                                 onClick={() => {
                                   setHandleForm({
