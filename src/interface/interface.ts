@@ -25,6 +25,7 @@ export interface IListName {
   Intranet_ShoutOutsOptions: string;
   Intranet_BirthDay: string;
   Intranet_BirthdayWishes: string;
+  EmployeeDirectory_Config: string;
 }
 
 export interface ISPGroupName {
@@ -155,6 +156,9 @@ export interface INavigatePage {
   ProjectTemplatePage: string;
   ShoutOutsPage: string;
   FeedbackPage: string;
+  NewHiresPage: string;
+  BirthdayPage: string;
+  BlogsPage: string;
 }
 
 export interface ICamlQuery {

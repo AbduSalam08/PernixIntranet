@@ -131,10 +131,10 @@ const NewsPage = (props: any): JSX.Element => {
       messages: {
         success: "News added successfully!",
         error: "Something went wrong!",
-        successDescription: "The new news 'ABC' has been added successfully.",
+        successDescription: "The news 'ABC' has been added successfully.",
         errorDescription:
           "An error occured while adding news, please try again later.",
-        inprogress: "Adding new news, please wait...",
+        inprogress: "Adding news, please wait...",
       },
     },
 
@@ -153,10 +153,10 @@ const NewsPage = (props: any): JSX.Element => {
       messages: {
         success: "News Updated successfully!",
         error: "Something went wrong!",
-        successDescription: "The new news 'ABC' has been Updated successfully.",
+        successDescription: "The news 'ABC' has been Updated successfully.",
         errorDescription:
           "An error occured while Updated news, please try again later.",
-        inprogress: "Updated new news, please wait...",
+        inprogress: "Updated news, please wait...",
       },
     },
 
@@ -176,10 +176,10 @@ const NewsPage = (props: any): JSX.Element => {
       messages: {
         success: "News Deleted successfully!",
         error: "Something went wrong!",
-        successDescription: "The new news 'ABC' has been Deleted successfully.",
+        successDescription: "The news 'ABC' has been Deleted successfully.",
         errorDescription:
           "An error occured while Deleting news, please try again later.",
-        inprogress: "Deleting new news, please wait...",
+        inprogress: "Deleting news, please wait...",
       },
     },
 
@@ -198,10 +198,10 @@ const NewsPage = (props: any): JSX.Element => {
       messages: {
         success: "News Deleted successfully!",
         error: "Something went wrong!",
-        successDescription: "The new news 'ABC' has been Deleted successfully.",
+        successDescription: "The news 'ABC' has been Deleted successfully.",
         errorDescription:
           "An error occured while Deleting news, please try again later.",
-        inprogress: "Deleting new news, please wait...",
+        inprogress: "Deleting news, please wait...",
       },
     },
   ];

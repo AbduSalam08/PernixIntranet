@@ -1,0 +1,4 @@
+/* hide header */
+[class^="headerRow"] {
+  display: none !important;
+}

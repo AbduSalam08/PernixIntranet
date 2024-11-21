@@ -29,8 +29,6 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
     return state.QuestionCEOIntranetData.value;
   });
 
-  console.log(QuestionCEOIntranetData, "QuestionCEOIntranetData");
-
   // const dispatch = useDispatch();
   // popup properties
   const initialPopupController = [

@@ -30,7 +30,7 @@
   --Textarea-focusedHighlight: 0 !important;
   border: 0 !important;
   box-shadow: none !important;
-  background: #fff !important;
+  background: #fff;
 }
 .MuiFormControl-root {
   width: 100% !important;

@@ -474,7 +474,9 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
             placeholder="Answer"
             isValid={responseData.Answer.isValid}
             errorMsg={responseData.Answer.errorMsg}
-            rows={12}
+            highLightBackground={true}
+            rows={11}
+            noErrorMsg
             onChange={(e: any) => {
               const value = e.trimStart();
 
@@ -537,19 +539,19 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
 
           {/* Carousel section */}
           {allFeedbackQuestion.length ? (
-            <>
+            <div className={styles.PRCarouselContainer}>
               <Carousel
                 value={allFeedbackQuestion}
                 numScroll={1}
                 numVisible={1}
-                showIndicators={isResponse ? false : true}
+                showIndicators={!isResponse}
                 showNavigators={false}
                 circular
                 autoplayInterval={
                   isResponse
                     ? 0
                     : allFeedbackQuestion.length > 1
-                    ? 5000
+                    ? 3000
                     : 8.64e7
                 }
                 itemTemplate={productTemplate}
@@ -560,7 +562,7 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
                   height: "8px",
                 }}
               ></div>
-            </>
+            </div>
           ) : (
             <div className={styles.noDataFound}>
               No feedback questions found!

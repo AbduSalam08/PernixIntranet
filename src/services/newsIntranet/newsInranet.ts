@@ -147,7 +147,7 @@ export const addNews = async (
         },
         messages: {
           ...updatedState[index].messages,
-          successDescription: `The new news '${formData.Title.value}' has been added successfully.`,
+          successDescription: `The news added successfully.`,
         },
       };
       return updatedState;
@@ -254,7 +254,7 @@ export const editNews = async (
         },
         messages: {
           ...updatedState[index].messages,
-          successDescription: `The news '${formData.Title.value}' has been updated successfully.`,
+          successDescription: `The news updated successfully.`,
         },
       };
       return updatedState;
@@ -327,7 +327,7 @@ export const deleteNews = async (
         },
         messages: {
           ...updatedState[index].messages,
-          successDescription: `The news with ID '${newsID}' has been deleted successfully.`,
+          successDescription: `The news deleted successfully.`,
         },
       };
       return updatedState;
