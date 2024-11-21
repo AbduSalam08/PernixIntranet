@@ -13,6 +13,7 @@ interface DataTableProps {
   isLoading?: boolean; // Enable checkbox selection
   disableSelectionOnClick?: boolean; // Disable selection on click
   emptyMessage?: string;
+  headerBgColor?: string;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -24,6 +25,7 @@ const DataTable: React.FC<DataTableProps> = ({
   disableSelectionOnClick = true,
   onRowClick,
   emptyMessage,
+  headerBgColor,
 }) => {
   // Add state for page and page size
   const [currentPage, setCurrentPage] = useState(1); // Start from page 1
@@ -144,7 +146,7 @@ const DataTable: React.FC<DataTableProps> = ({
           },
           "& .MuiDataGrid-columnHeaders": {
             border: "none", // Remove border from column headers
-            backgroundColor: "#0B4D5306",
+            backgroundColor: headerBgColor ?? "#0B4D5306",
             borderBottom: "1px solid #eeeeee90", // Set body rows to light grey
             "& .MuiDataGrid-columnSeparator": {
               display: "none",

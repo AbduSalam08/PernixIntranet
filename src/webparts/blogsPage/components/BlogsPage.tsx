@@ -46,6 +46,7 @@ import {
   VisibilityOutlined,
 } from "@mui/icons-material";
 import _ from "lodash";
+import { CONFIG } from "../../../config/config";
 // import { arrayIncludes } from "@mui/x-date-pickers/internals/utils/utils";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
@@ -480,13 +481,16 @@ const BlogsPage = (props: any): JSX.Element => {
       const _search = key._gsearch.toLowerCase().toString().trim();
       _data = _data.filter((item) => {
         return (
-          item.Title.toLowerCase().trim().includes(_search) ||
-          item.ParentTitle.trim().toLowerCase().includes(_search)
+          (item.Title && item.Title.toLowerCase().trim().includes(_search)) ||
+          (item.ParenTitle &&
+            item.ParentTitle.trim().toLowerCase().includes(_search))
         );
       });
     }
     if (value !== "All" && key._status && key._status !== "All") {
-      _data = _data.filter((item) => item.Status === key._status);
+      _data = _data.filter(
+        (item) => item.Status && item.Status === key._status
+      );
     }
     if (value !== "All") {
       setfilterkey({ ...key });
@@ -547,6 +551,13 @@ const BlogsPage = (props: any): JSX.Element => {
                     <div
                       className={styles.roundiconbutton}
                       style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        window.open(
+                          props.context.pageContext.web.absoluteUrl +
+                            CONFIG.NavigatePage.PernixIntranet,
+                          "_self"
+                        );
+                      }}
                     >
                       <Icon iconName="SkypeArrow" className={styles.icon} />
                     </div>

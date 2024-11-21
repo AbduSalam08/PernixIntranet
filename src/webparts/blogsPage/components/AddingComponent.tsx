@@ -147,9 +147,9 @@ function AddingComponent(props: any) {
     } else if (additionaldetails.Title.trim() === "") {
       _objerror.Title = "Please give tag";
     } else if (additionaldetails.ParentTitle === "") {
-      _objerror.ParentTitle = "Please give parent tag";
+      _objerror.ParentTitle = "Please give title";
     } else if (additionaldetails.ParentTitle.trim() === "") {
-      _objerror.ParentTitle = "Please give parent tag";
+      _objerror.ParentTitle = "Please give title";
     } else if (matches.trim().length === 0) {
       _objerror.Quill = "Please fill image description";
     } else if (popupData.Attachmentfiles.length === 0) {
@@ -157,16 +157,18 @@ function AddingComponent(props: any) {
     } else if (Math.floor(popupData.Attachmentfiles[0].Size) > 10000) {
       _objerror.Image = "Image size no more than 10 MB";
     }
-
+    debugger;
     return _objerror;
   };
   // This is addmsg function method
   const addmsg = async () => {
     debugger;
     const error = validation();
+    debugger;
     let finderrorobj: boolean = false;
-    for (const _errorobj of Object.keys(error)) {
-      if (_errorobj[error]) {
+    for (const [key, value] of Object.entries(error)) {
+      console.log(key);
+      if (value !== "") {
         finderrorobj = true;
       }
     }
@@ -272,7 +274,7 @@ function AddingComponent(props: any) {
                       value={additionaldetails.ParentTitle}
                       inputWrapperClassName={styles.pathSearchFilter}
                       size="SM"
-                      placeholder="Parent tag"
+                      placeholder="Title"
                     />
                   </div>
                 </div>
