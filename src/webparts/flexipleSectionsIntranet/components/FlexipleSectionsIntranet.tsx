@@ -1,96 +1,73 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises*/
+/* eslint-disable @typescript-eslint/no-use-before-define*/
+
 import QuestionCeo from "../components/QuestionCeo/QuestionCeoIntranet";
 import PollIntranet from "../components/PollIntranet/PollIntranet";
 import Shoutout from "../components/Shoutout/ShoutOutsIntranet";
 import styles from "./FlexipleSectionsIntranet.module.scss";
 import { useEffect, useState } from "react";
-import { Dialog } from "primereact/dialog";
-import { Checkbox } from "primereact/checkbox";
+import "./Style.css";
+// import { Dialog } from "primereact/dialog";
+// import { Checkbox } from "primereact/checkbox";
 import SpServices from "../../../services/SPServices/SpServices";
-let temp = [];
+import resetPopupController, {
+  togglePopupVisibility,
+} from "../../../utils/popupUtils";
+import Popup from "../../../components/common/Popups/Popup";
+import { Checkbox } from "primereact/checkbox";
+import { ShowHide } from "../../../services/FlexipleSectionIntranet/FlexipleSectionIntranet";
 const FlexipleSectionIntranet = (props: any) => {
-  const [isPopup, setIsPopup] = useState(false); // Controls popup visibility
-  const [selectedComponents, setSelectedComponents] = useState([
-    "QuestionCeo",
-    "PollIntranet",
-    "Shoutout",
-  ]);
-  const [pollSelected, setPollSelected] = useState(true); // Tracks Poll checkbox state
+  const currentUser = props?.context._pageContext._user.email;
+  const initialPopupController = [
+    {
+      open: false,
+      popupTitle: "Show Component",
 
-  const handleConfirm = () => {
-    setSelectedComponents((prev) => {
-      if (pollSelected) {
-        return prev.includes("PollIntranet") ? prev : [...prev, "PollIntranet"];
-      } else {
-        return prev.filter((component) => component !== "PollIntranet");
-      }
-    });
-    setIsPopup(false);
-  };
+      popupWidth: "300px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "FlexibleSection added successfully!",
+        error: "Something went wrong!",
+        successDescription:
+          "The new FlexibleSection 'ABC' has been added successfully.",
+        errorDescription:
+          "An error occured while adding FlexibleSection, please try again later.",
+        inprogress: "Adding new FlexibleSection, please wait...",
+      },
+    },
+  ];
 
-  const getData = () => {
-    temp = [];
-    SpServices.SPReadItems({
-      Listname: "ShowComponent",
-    })
-      .then((res: any) => {
-        temp = res.map((val: any) => ({
-          Title: val.Title,
-          IsActive: val.isActive,
-        }));
+  const [popupController, setPopupController] = useState(
+    initialPopupController
+  );
+  // const [isPopup, setIsPopup] = useState(false); // Controls popup visibility
+  const [componentsList, setComponentsList] = useState<any[]>([]);
+  const [pollSelected, setPollSelected] = useState(false);
 
-        console.log("temp: ", temp);
-      })
-      .catch((err: any) => {
-        console.log(err);
-      });
-  };
-  useEffect(() => {
-    getData();
-  }, []);
-  return (
-    <>
-      {/* Edit Button */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <i
-          onClick={() => setIsPopup(true)}
-          className="pi pi-pencil"
-          style={{ fontSize: "1rem", color: "blue", cursor: "pointer" }}
-        ></i>
-      </div>
-
-      {/* Components to Display */}
-      <div className={styles.container}>
-        {selectedComponents.includes("QuestionCeo") && (
-          <div style={{ flex: "1 1 100%" }}>
-            <QuestionCeo props={props} />
-          </div>
-        )}
-        {selectedComponents.includes("PollIntranet") && (
-          <div style={{ flex: "1 1 100%" }}>
-            <PollIntranet props={props} />
-          </div>
-        )}
-        {selectedComponents.includes("Shoutout") && (
-          <div style={{ flex: "1 1 100%" }}>
-            <Shoutout props={props} />
-          </div>
-        )}
-      </div>
-
-      {/* Popup Dialog */}
-      <Dialog
-        header="Select Option"
-        visible={isPopup}
-        showHeader={false}
-        style={{ width: "35vw" }}
-        onHide={() => setIsPopup(false)}
-      >
-        <div style={{ padding: "20px" }}>
+  const popupInputs: any[] = [
+    [
+      <div key={1}>
+        <div>
           <p>Please Select Option</p>
-          <div className="flex align-items-center mb-2">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              margin: "15px 0px 0px 0px",
+            }}
+          >
             <Checkbox
               inputId="pollOption"
-              value="PollIntranet"
+              value="Poll"
               onChange={(e: any) => setPollSelected(e.checked)}
               checked={pollSelected}
             />
@@ -98,91 +75,216 @@ const FlexipleSectionIntranet = (props: any) => {
               Poll
             </label>
           </div>
-          <div className="flex justify-content-end mt-3">
-            <button
-              className="p-button p-button-primary"
-              onClick={handleConfirm}
-            >
-              Apply
-            </button>
-          </div>
         </div>
-      </Dialog>
+      </div>,
+    ],
+  ];
+
+  const popupActions: any[] = [
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          const poll = componentsList.find((item) => item.title === "Poll");
+          setPollSelected(poll?.isActive ?? false);
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        // disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          handleConfirm();
+          // await handleSubmit();
+        },
+      },
+    ],
+  ];
+  // Fetch data from the SharePoint list
+  const getData = async () => {
+    try {
+      const res = await SpServices.SPReadItems({
+        Listname: "ShowComponent",
+
+        Select: "*, Author/EMail, Author/Title, Author/ID",
+        Expand: "Author",
+      });
+
+      const formattedData = res.map((val: any) => ({
+        Id: val.ID,
+        title: val.Title,
+        isActive: val.isActive,
+        Created: val?.Author?.EMail || "",
+      }));
+
+      setComponentsList(formattedData);
+
+      // Initialize pollSelected state for the current user
+      const poll = formattedData.find(
+        (item) => item.title === "Poll" && item.Created === currentUser
+      );
+      setPollSelected(poll?.isActive ?? false);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
+  };
+
+  // Update data in the SharePoint list
+  // const updateData = async (val: any) => {
+  //   try {
+  //     const pollComponent = componentsList.find(
+  //       (component: any) => component.title === "Poll"
+  //     );
+
+  //     if (pollComponent) {
+  //       await SpServices.SPUpdateItem({
+  //         Listname: "ShowComponent",
+  //         ID: pollComponent.Id,
+  //         RequestJSON: { isActive: val },
+  //       });
+  //       console.log("Poll component updated successfully!");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error updating Poll component:", err);
+  //   }
+  // };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const handleConfirm = async () => {
+    // setComponentsList((prevList: any) =>
+    //   prevList.map((component: any) =>
+    //     component.title === "Poll"
+    //       ? { ...component, isActive: pollSelected }
+    //       : component
+    //   )
+    // );
+    await ShowHide(
+      pollSelected,
+      componentsList,
+      setPopupController,
+      0,
+      currentUser
+    );
+    // setIsPopup(false);
+    // updateData(pollSelected);
+  };
+
+  return (
+    <>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <i
+          onClick={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              0,
+              "open"
+            );
+          }}
+          className="pi pi-pencil"
+          style={{ fontSize: "1rem", color: "blue", cursor: "pointer" }}
+        ></i>
+      </div>
+
+      <div className={styles.container}>
+        {componentsList.map((component: any) => {
+          if (component.title === "Poll") {
+            // Poll component is shown only for the current user based on isActive
+            return (
+              component.Created === currentUser &&
+              component.isActive && (
+                <div key={component.title} style={{ flex: "1 1 100%" }}>
+                  <PollIntranet props={props} />
+                </div>
+              )
+            );
+          } else {
+            // Other components are shown to all users
+            return (
+              <div key={component.title} style={{ flex: "1 1 100%" }}>
+                {component.title === "QuestionCeo" && (
+                  <QuestionCeo props={props} />
+                )}
+                {component.title === "ShoutOuts" && <Shoutout props={props} />}
+              </div>
+            );
+          }
+        })}
+      </div>
+
+      {/* <div className={styles.container}>
+        {componentsList.map(
+          (component: any) =>
+            component.isActive && (
+              <div key={component.title} style={{ flex: "1 1 100%" }}>
+                {component.title === "QuestionCeo" && (
+                  <QuestionCeo props={props} />
+                )}
+                {component.title === "Poll" && <PollIntranet props={props} />}
+                {component.title === "ShoutOuts" && <Shoutout props={props} />}
+              </div>
+            )
+        )}
+      </div> */}
+
+      {popupController?.map((popupData: any, index: number) => (
+        <Popup
+          key={index}
+          isLoading={popupData?.isLoading}
+          messages={popupData?.messages}
+          resetPopup={() => {
+            setPopupController((prev: any): any => {
+              resetPopupController(prev, index, true);
+            });
+          }}
+          PopupType={popupData.popupType}
+          onHide={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              index,
+              "close"
+            );
+            // resetFormData(formData, setFormData);
+            // resetOptionsData(options, setOptions);
+            if (popupData?.isLoading?.success) {
+              getData();
+            }
+          }}
+          popupTitle={
+            popupData.popupType !== "confimation" && popupData.popupTitle
+          }
+          popupActions={popupActions[index]}
+          visibility={popupData.open}
+          content={popupInputs[index]}
+          popupWidth={popupData.popupWidth}
+          defaultCloseBtn={popupData.defaultCloseBtn || false}
+          confirmationTitle={
+            popupData.popupType !== "custom" ? popupData.popupTitle : ""
+          }
+          popupHeight={index === 0 ? true : false}
+          noActionBtn={true}
+        />
+      ))}
+      {/* Popup Dialog */}
     </>
   );
-
-  // const [ispopup, setIspopup] = useState<boolean>(false);
-  // return (
-  //   <>
-  //     <div style={{ display: "flex", justifyContent: "flex-end" }}>
-  //       <i
-  //         onClick={() => {
-  //           setIspopup(true);
-  //         }}
-  //         className="pi pi-pencil"
-  //         style={{ fontSize: "1rem", color: "blue" }}
-  //       ></i>
-  //     </div>
-  //     <div
-  //       className={styles.container}
-  //       // style={{
-  //       //   display: "flex",
-  //       //   margin: "20px",
-  //       //   gap: "15px",
-  //       // }}
-  //     >
-  //       <div>
-  //         <QuestionCeo props={props} />
-  //       </div>
-  //       <div>
-  //         <PollIntranet props={props} />
-  //       </div>
-  //       <div>
-  //         <Shoutout props={props} />
-  //       </div>
-
-  //       <Dialog
-  //         header="Select option"
-  //         visible={ispopup}
-  //         // closable={true}
-  //         showHeader={false}
-  //         style={{ width: "35vw" }}
-  //         onHide={() => {
-  //           if (!ispopup) return;
-  //           setIspopup(false);
-  //         }}
-  //       >
-  //         <div style={{ padding: "20px" }}>
-  //           <p>Please Select Option</p>
-  //           <div className="flex align-items-center">
-  //             <Checkbox
-  //               inputId="ingredient1"
-  //               name="pizza"
-  //               value="Cheese"
-  //               checked
-  //               // onChange={onIngredientsChange}
-  //               // checked={ingredients.includes("Cheese")}
-  //             />
-  //             <label htmlFor="ingredient1" className="ml-2">
-  //               Poll
-  //             </label>
-  //           </div>
-  //         </div>
-  //       </Dialog>
-  //     </div>
-  //   </>
-
-  //   // <div
-  //   //   style={{
-  //   //     display: "flex",
-  //   //     justifyContent: "space-between",
-  //   //     alignItems: "center",
-  //   //   }}
-  //   // >
-  //   //   <QuestionCeo props={props} />
-  //   //   <PollIntranet props={props} />
-  //   //   <Shoutout props={props} />
-  //   // </div>
-  // );
 };
 export default FlexipleSectionIntranet;
