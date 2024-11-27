@@ -551,7 +551,7 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
                   isResponse
                     ? 0
                     : allFeedbackQuestion.length > 1
-                    ? 3000
+                    ? 6000
                     : 8.64e7
                 }
                 itemTemplate={productTemplate}

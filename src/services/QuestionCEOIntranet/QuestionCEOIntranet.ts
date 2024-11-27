@@ -68,20 +68,42 @@ export const questionsCurrentUserRole = async (
   const currentUserID = currentUser?.Id || null;
   const currentUserEmail = currentUser?.Email.toLowerCase() || "";
 
+  const superAdmin: any = await sp.web.siteGroups
+    .getByName(CONFIG.SPGroupName.Pernix_Admin)
+    .users.get();
+
   const questionCEOAdminData: any = await sp.web.siteGroups
     .getByName(CONFIG.SPGroupName.QuestionCEO_Admin)
     .users.get();
+
   const questionCEOData: any = await sp.web.siteGroups
     .getByName(CONFIG.SPGroupName.QuestionCEO)
     .users.get();
-  setAssignToUsersList([...questionCEOData]);
 
-  const isAdmin = questionCEOAdminData?.some(
+  const usersWithJobTitles: any[] = await Promise.all(
+    questionCEOData?.map(async (user: any) => {
+      const profileProperties = await sp.profiles.getUserProfilePropertyFor(
+        user?.LoginName,
+        "SPS-JobTitle"
+      );
+
+      return {
+        ...user,
+        JobTitle: profileProperties || "Not Available",
+      };
+    })
+  );
+
+  setAssignToUsersList([...usersWithJobTitles]);
+
+  const usersArray: any[] = [...superAdmin, ...questionCEOAdminData];
+  const isAdmin: boolean = usersArray?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
-  const isCEO = questionCEOData?.some(
+  const isCEO: boolean = usersWithJobTitles?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
+
   if (isAdmin) {
     setUserDetails({
       role: "Admin",
@@ -106,6 +128,7 @@ export const questionsCurrentUserRole = async (
   }
   return userDetails;
 };
+
 export const getQuestionCeo = async (dispatch: any): Promise<any> => {
   dispatch?.(
     setQuestionCEOIntranetData({

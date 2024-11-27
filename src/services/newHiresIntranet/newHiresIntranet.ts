@@ -9,25 +9,30 @@ import { sp } from "@pnp/sp";
 export const getCurrentUserRole = async (
   setCurrentUserDetails: any
 ): Promise<any> => {
-  let userDetails = {};
+  // let userDetails = {};
   const currentUser: any = await sp.web.currentUser.get();
   const currentUserEmail = currentUser?.Email.toLowerCase() || "";
 
-  const questionCEOAdminData: any = await sp.web.siteGroups
+  const superAdmin: any = await sp.web.siteGroups
+    .getByName(CONFIG.SPGroupName.Pernix_Admin)
+    .users.get();
+
+  const newHiresAdminData: any = await sp.web.siteGroups
     .getByName(CONFIG.SPGroupName.Newhire_Admin)
     .users.get();
-  const isAdmin = questionCEOAdminData?.some(
+
+  const usersArray: any[] = [...superAdmin, ...newHiresAdminData];
+  const isAdmin = usersArray?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
+
   if (isAdmin) {
-    // setCurrentUserDetails({ role: "User", email: currentUserEmail });
     setCurrentUserDetails({ role: "Admin", email: currentUserEmail });
-    userDetails = { role: "Admin", email: currentUserEmail };
+    // userDetails = { role: "Admin", email: currentUserEmail };
   } else {
     setCurrentUserDetails({ role: "User", email: currentUserEmail });
-    userDetails = { role: "User", email: currentUserEmail };
+    // userDetails = { role: "User", email: currentUserEmail };
   }
-  console.log(userDetails);
 };
 
 export const getAllNewHiresData = async (dispatch: any): Promise<any> => {
@@ -138,14 +143,14 @@ export const addNewHire = async (
   });
 
   try {
-    debugger;
     let fileRes: any;
+
     const payload = {
-      Description: formData.Description?.value,
-      EmployeeNameId: formData.EmployeeName?.value?.id,
-      Title: formData.Title?.value,
-      StartDate: formData.StartDate?.value,
-      EndDate: formData.EndDate?.value,
+      Description: formData?.Description?.value,
+      EmployeeNameId: formData?.EmployeeName?.value?.id,
+      // Title: formData.Title?.value ?? "",
+      StartDate: formData?.StartDate?.value,
+      EndDate: formData?.EndDate?.value,
     };
 
     // Add item to the SharePoint list
@@ -153,6 +158,7 @@ export const addNewHire = async (
       Listname: CONFIG.ListNames.Intranet_NewHires,
       RequestJSON: payload,
     });
+
     if (formData?.ProfileImage?.value?.name) {
       fileRes = await sp.web.lists
         .getByTitle(CONFIG.ListNames.Intranet_NewHires)
@@ -207,6 +213,7 @@ export const addNewHire = async (
     });
   }
 };
+
 export const updateHire = async (
   formData: FormData,
   ID: number,
@@ -230,19 +237,18 @@ export const updateHire = async (
   });
 
   try {
-    debugger;
     let fileRes: any;
     const payload = formData.EmployeeName?.value?.id
       ? {
           Description: formData.Description?.value,
           EmployeeNameId: formData.EmployeeName?.value?.id,
-          Title: formData.Title?.value,
+          // Title: formData.Title?.value,
           StartDate: formData.StartDate?.value,
           EndDate: formData.EndDate?.value,
         }
       : {
           Description: formData.Description?.value,
-          Title: formData.Title?.value,
+          // Title: formData.Title?.value,
           StartDate: formData.StartDate?.value,
           EndDate: formData.EndDate?.value,
         };
@@ -253,15 +259,25 @@ export const updateHire = async (
       ID: ID,
       RequestJSON: payload,
     });
-    console.log("res", res);
 
     if (formData?.ProfileImage?.value?.type) {
-      await sp.web.lists
-        .getByTitle(CONFIG.ListNames.Intranet_NewHires)
-        .items.getById(Number(ID))
-        .attachmentFiles.getByName(attachmentObject.FileName)
-        .delete();
-      if (formData?.ProfileImage?.value?.name) {
+      if (attachmentObject?.FileName) {
+        await sp.web.lists
+          .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+          .items.getById(Number(ID))
+          .attachmentFiles.getByName(attachmentObject?.FileName)
+          .delete();
+
+        if (formData?.ProfileImage?.value?.name) {
+          fileRes = await sp.web.lists
+            .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+            .items.getById(Number(ID))
+            .attachmentFiles.add(
+              formData?.ProfileImage?.value?.name,
+              formData?.ProfileImage?.value
+            );
+        }
+      } else if (formData?.ProfileImage?.value?.name) {
         fileRes = await sp.web.lists
           .getByTitle(CONFIG.ListNames.Intranet_NewHires)
           .items.getById(Number(ID))
@@ -270,8 +286,15 @@ export const updateHire = async (
             formData?.ProfileImage?.value
           );
       }
+    } else {
+      if (attachmentObject?.FileName) {
+        await sp.web.lists
+          .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+          .items.getById(Number(ID))
+          .attachmentFiles.getByName(attachmentObject?.FileName)
+          .delete();
+      }
     }
-    console.log("fileRes", fileRes);
 
     const responseData: any = {
       ID: ID,
@@ -284,10 +307,14 @@ export const updateHire = async (
       createdName: res?.Author?.Title,
       imgUrl: formData?.ProfileImage?.value?.type
         ? fileRes?.data?.ServerRelativeUrl
-        : attachmentObject?.ServerRelativeUrl,
+        : attachmentObject?.ServerRelativeUrl
+        ? attachmentObject?.ServerRelativeUrl
+        : "",
       Attachment: formData?.ProfileImage?.value?.type
         ? fileRes?.data
-        : attachmentObject,
+        : attachmentObject
+        ? attachmentObject
+        : null,
     };
 
     // Success state after item and attachment are added
