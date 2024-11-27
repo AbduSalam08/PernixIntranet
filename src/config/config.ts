@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import {
+  ICommonentsName,
   IDocRepositoryColumn,
   IFeedbackQusColumn,
   IFeedbackQusType,
@@ -49,6 +50,8 @@ export namespace CONFIG {
     Intranet_BirthDay: "Intranet_BirthDay",
     Intranet_BirthdayWishes: "Intranet_BirthdayWishes",
     EmployeeDirectory_Config: "EmployeeDirectory_Config",
+    IntranetBlogs_Title: "IntranetBlogs_Title",
+    FlexibleSection: "ShowComponent",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -200,6 +203,20 @@ export namespace CONFIG {
       Email: "",
     },
     Date: null,
+  };
+
+  export const CommonentsName: ICommonentsName = {
+    Birthdays: "Birthdays",
+    Blogs: "Blogs",
+    Calendar: "Calendar",
+    DocumentRepository: "Document Repository",
+    Feedback: "Feedback",
+    MotivationBanner: "Motivation Banner",
+    NewHires: "New Hires",
+    News: "News",
+    Poll: "Poll",
+    QuestionCEO: "Questions to Leadership",
+    ShoutOuts: "Shout-Outs",
   };
 
   export const userImageURL: string =

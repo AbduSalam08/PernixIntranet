@@ -4,12 +4,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type*/
 import { useEffect, useState } from "react";
-// import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import { CONFIG } from "../../../config/config";
 import styles from "./NewHiresPage.module.scss";
 import "./Style.css";
 import {
+  IFormFields,
   IPageSearchFields,
   IPaginationData,
 } from "../../../interface/interface";
@@ -35,12 +35,28 @@ import { resetFormData, validateField } from "../../../utils/commonUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+
+/* Images creation */
 const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
 
+/* Local interfaces */
+interface INewHiresField {
+  EmployeeName: IFormFields;
+  ProfileImage: IFormFields;
+  Description: IFormFields;
+  StartDate: IFormFields;
+  EndDate: IFormFields;
+}
+
 const NewHiresPage = (props: any): JSX.Element => {
-  console.log("props", props);
+  /* Local variable creation */
   const dispatch = useDispatch();
   const searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const newHiresData: any = useSelector((state: any) => {
+    return state.NewHiresData.value;
+  });
+
+  /* popup properties */
   const initialPopupController = [
     {
       open: false,
@@ -85,34 +101,30 @@ const NewHiresPage = (props: any): JSX.Element => {
       },
     },
   ];
-  const newHiresData: any = useSelector((state: any) => {
-    return state.NewHiresData.value;
-  });
-  console.log("newHiresData", newHiresData);
-  const [formData, setFormData] = useState<any>({
-    Title: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
+  const initialFormData: INewHiresField = {
     EmployeeName: {
       value: "",
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "array" },
     },
-    StartDate: {
-      value: "",
+    ProfileImage: {
+      value: null,
       isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
+      errorMsg: "",
+      validationRule: { required: false, type: "file" },
+    },
+    StartDate: {
+      value: new Date(),
+      isValid: true,
+      errorMsg: "",
+      validationRule: { required: false, type: "date" },
     },
     EndDate: {
-      value: "",
+      value: null,
       isValid: true,
       errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
+      validationRule: { required: true, type: "date" },
     },
     Description: {
       value: "",
@@ -120,12 +132,10 @@ const NewHiresPage = (props: any): JSX.Element => {
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
     },
-    ProfileImage: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid file",
-      validationRule: { required: true, type: "file" },
-    },
+  };
+
+  const [formData, setFormData] = useState<INewHiresField | any>({
+    ...initialFormData,
   });
   const [handleForm, setHandleForm] = useState<any>({
     ID: null,
@@ -150,10 +160,9 @@ const NewHiresPage = (props: any): JSX.Element => {
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
-  console.log("newHires", newHires);
-  console.log("formData", formData);
 
   const totalRecords = showNewHires?.length || 0;
+
   const onPageChange = (event: any): void => {
     setPagination({
       first: event?.first || CONFIG.PaginationData.first,
@@ -162,16 +171,11 @@ const NewHiresPage = (props: any): JSX.Element => {
   };
 
   const handleSearch = async (datas: any[]): Promise<void> => {
-    console.log("datas", datas);
-
     let temp: any[] = [...datas];
+
     if (searchField.Search) {
       temp = temp?.filter(
         (val: any) =>
-          val?.Title.toLowerCase().includes(searchField.Search.toLowerCase()) ||
-          val?.createdName
-            .toLowerCase()
-            .includes(searchField.Search.toLowerCase()) ||
           val?.Description.toLowerCase().includes(
             searchField.Search.toLowerCase()
           ) ||
@@ -203,6 +207,7 @@ const NewHiresPage = (props: any): JSX.Element => {
 
   const handleUserSubmit = async (isNew: boolean): Promise<any> => {
     let hasErrors = false;
+
     // Validate each field and update the state with error messages
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
@@ -230,19 +235,19 @@ const NewHiresPage = (props: any): JSX.Element => {
         },
       };
     }, {} as typeof formData);
+
     setFormData(updatedFormData);
     if (!hasErrors) {
       if (isNew) {
         await addNewHire(formData, setPopupController, 0);
       } else {
-        const reponse = await updateHire(
+        await updateHire(
           formData,
           handleForm?.ID,
           attachmentObject,
           setPopupController,
           0
         );
-        console.log("reponse", reponse);
       }
     } else {
       console.log("Form contains errors");
@@ -252,21 +257,6 @@ const NewHiresPage = (props: any): JSX.Element => {
   const popupInputs: any[] = [
     [
       <div className={styles.newHiresGrid} key={1}>
-        <CustomInput
-          value={formData.Title.value}
-          placeholder="Title"
-          isValid={formData.Title.isValid}
-          errorMsg={formData.Title.errorMsg}
-          onChange={(e) => {
-            const value = e.trimStart();
-            const { isValid, errorMsg } = validateField(
-              "Title",
-              value,
-              formData.Title.validationRule
-            );
-            handleInputChange("Title", value, isValid, errorMsg);
-          }}
-        />
         <div className={styles.secondRow}>
           <div className={styles.c1}>
             <CustomPeoplePicker
@@ -285,21 +275,6 @@ const NewHiresPage = (props: any): JSX.Element => {
                 handleInputChange("EmployeeName", value, isValid, errorMsg);
               }}
             />
-            {/* <CustomInput
-              value={formData.EmployeeName.value}
-              placeholder="Employee name"
-              isValid={formData.EmployeeName.isValid}
-              errorMsg={formData.EmployeeName.errorMsg}
-              onChange={(e) => {
-                const value = e.trimStart();
-                const { isValid, errorMsg } = validateField(
-                  "EmployeeName",
-                  value,
-                  formData.EmployeeName.validationRule
-                );
-                handleInputChange("EmployeeName", value, isValid, errorMsg);
-              }}
-            /> */}
           </div>
           <div className={styles.c1}>
             <CustomFileUpload
@@ -573,6 +548,7 @@ const NewHiresPage = (props: any): JSX.Element => {
       );
     }
   }, [newHiresData]);
+
   useEffect(() => {
     dispatch(setMainSPContext(props?.context));
     getCurrentUserRole(setUserDetails);
@@ -638,6 +614,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               onClick={() => {
                 setHandleForm({ ID: null, type: "Add" });
                 resetFormData(formData, setFormData);
+                setFormData({ ...initialFormData });
                 togglePopupVisibility(
                   setPopupController,
                   initialPopupController[0],
@@ -656,6 +633,7 @@ const NewHiresPage = (props: any): JSX.Element => {
           )}
         </div>
       </div>
+
       {/* tabs */}
       <div className={styles.tabsContainer}>
         {CONFIG.NewHiresPageTabsName.map((str: string, i: number) => {
@@ -762,28 +740,24 @@ const NewHiresPage = (props: any): JSX.Element => {
                                 setHandleForm({ ID: val?.ID, type: "Update" });
                                 setAttachmentObject(val?.Attachment);
                                 setFormData({
-                                  Title: {
-                                    ...formData.Title,
-                                    value: val?.Title,
-                                  },
                                   EmployeeName: {
-                                    ...formData.EmployeeName,
+                                    ...initialFormData.EmployeeName,
                                     value: val?.EmployeeName?.name,
                                   },
                                   StartDate: {
-                                    ...formData.StartDate,
+                                    ...initialFormData.StartDate,
                                     value: new Date(val?.StartDate),
                                   },
                                   EndDate: {
-                                    ...formData.EndDate,
+                                    ...initialFormData.EndDate,
                                     value: new Date(val?.EndDate),
                                   },
                                   Description: {
-                                    ...formData.Description,
+                                    ...initialFormData.Description,
                                     value: val?.Description,
                                   },
                                   ProfileImage: {
-                                    ...formData.ProfileImage,
+                                    ...initialFormData.ProfileImage,
                                     value: { name: val?.Attachment?.FileName },
                                   },
                                 });
@@ -829,6 +803,7 @@ const NewHiresPage = (props: any): JSX.Element => {
             })}
         </div>
       )}
+
       {showNewHires.length > 0 && (
         <div
           className="card"
@@ -845,6 +820,7 @@ const NewHiresPage = (props: any): JSX.Element => {
           />
         </div>
       )}
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
@@ -864,6 +840,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               "close"
             );
             resetFormData(formData, setFormData);
+            setFormData({ ...initialFormData });
             if (popupData?.isLoading?.success) {
               if (handleForm?.type === "Delete") {
                 const filteredData = newHires?.filter(

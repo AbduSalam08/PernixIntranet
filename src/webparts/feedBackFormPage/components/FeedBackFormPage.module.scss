@@ -204,3 +204,27 @@
     }
   }
 }
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: calc(100vh - 200px);
+  gap: 20px;
+
+  img {
+    height: 60px;
+    width: 60px;
+    object-fit: contain;
+  }
+
+  div {
+    font-size: 18px;
+    font-weight: 500;
+    color: #adadad;
+    text-align: center;
+    font-family: "osRegular";
+  }
+}

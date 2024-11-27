@@ -43,6 +43,7 @@ interface IReplies {
   content: string;
   date: string;
 }
+
 interface IQuestion {
   avatarUrl: string;
   date: string;
@@ -50,6 +51,7 @@ interface IQuestion {
   replies: IReplies;
   isAllDay: boolean;
 }
+
 interface PopupState {
   open: boolean;
   popupTitle: string;
@@ -72,9 +74,12 @@ interface PopupState {
   };
 }
 
+let assignedUser: string = "";
+
 const QuestionsCeoPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const searchField: IPageSearchFields = CONFIG.PageSearchFields;
+
   const QuestionCEOIntranetData: any = useSelector((state: any) => {
     return state.QuestionCEOIntranetData.value;
   });
@@ -82,7 +87,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   const [pagination, setPagination] = useState<IPaginationData>(
     CONFIG.PaginationData
   );
-
   const [formData, setFormData] = useState<any>({
     qustion: {
       ID: null,
@@ -398,7 +402,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             <div className={styles.item5}>
               <FloatingLabelTextarea
                 value={formData?.answer?.value}
-                placeholder="answer"
+                placeholder="Answer"
                 rows={5}
                 isValid={formData?.answer?.isValid}
                 errorMsg={formData?.answer?.errorMsg}
@@ -406,7 +410,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                 onChange={(e: any) => {
                   const value = e.trimStart();
                   const { isValid, errorMsg } = validateField(
-                    "answer",
+                    "Answer",
                     value,
                     formData?.answer?.validationRule
                   );
@@ -420,53 +424,83 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         )}
         {userDetails.role === "Admin" && (
           <div style={{ display: "flex", alignItems: "center" }}>
-            <CustomPeoplePicker
-              labelText="Assign to"
-              isValid={formData?.assignTo?.isValid}
-              errorMsg={formData?.assignTo?.errorMsg}
-              selectedItem={[formData?.assignTo?.value]}
-              readOnly={
-                (userDetails.email ===
-                  formData?.assignTo?.previousAssignTo?.email ||
-                  userDetails.email ===
-                    formData?.assignTo?.value?.email?.toLowerCase()) &&
-                formData?.answer?.value !== ""
-              }
-              groupName="QuestionCEO"
-              onChange={(item: any) => {
-                const value = item[0];
-                const { isValid, errorMsg } = validateField(
-                  "assignTo",
-                  item,
-                  formData?.assignTo?.validationRule
-                );
-                handleInputChange("assignTo", value, isValid, errorMsg);
-              }}
-            />
+            <div>
+              <CustomPeoplePicker
+                labelText="Assigned To"
+                isValid={formData?.assignTo?.isValid}
+                errorMsg={formData?.assignTo?.errorMsg}
+                selectedItem={[formData?.assignTo?.value]}
+                readOnly={
+                  (userDetails.email ===
+                    formData?.assignTo?.previousAssignTo?.email ||
+                    userDetails.email ===
+                      formData?.assignTo?.value?.email?.toLowerCase()) &&
+                  formData?.answer?.value !== ""
+                }
+                groupName="QuestionCEO"
+                onChange={(item: any) => {
+                  const value = item?.[0];
+                  assignedUser = value?.name ?? "";
+                  const { isValid, errorMsg } = validateField(
+                    "Assigned To",
+                    item,
+                    formData?.assignTo?.validationRule
+                  );
+                  handleInputChange("assignTo", value, isValid, errorMsg);
+                }}
+              />
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginTop: "10px",
+                }}
+              >
+                {assignToUsersList?.filter(
+                  (val: any) => val?.Title === assignedUser
+                )?.[0]?.JobTitle || ""}
+              </div>
+            </div>
+
             <Tooltip
               title={
                 <div
                   style={{
-                    padding: "8px",
+                    padding: "10px",
                     textAlign: "center",
                     minHeight: "50px",
-                    maxHeight: "85px",
+                    maxHeight: "200px",
                     overflow: "auto",
                   }}
                 >
                   {assignToUsersList?.map((user: any, index: number) => {
                     return (
-                      <p
+                      <div
+                        key={index}
                         style={{
                           padding:
                             assignToUsersList.length - 1 === index
                               ? "0px"
-                              : "0px 0px 5px 0px",
+                              : "0px 0px 10px 0px",
                         }}
-                        key={index}
                       >
-                        {user?.Title}
-                      </p>
+                        <p
+                          style={{
+                            fontSize: "16px",
+                            marginBottom: "2px",
+                          }}
+                        >
+                          {user?.Title ?? ""}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "12px",
+                          }}
+                        >
+                          {user?.JobTitle
+                            ? `( ${user?.JobTitle ?? ""} )`
+                            : null}
+                        </p>
+                      </div>
                     );
                   })}
                 </div>
@@ -1061,6 +1095,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                           !val.isActive)) && (
                         <i
                           onClick={() => {
+                            assignedUser = val?.assignTo?.name ?? "";
                             setFormData({
                               qustion: {
                                 ...formData.qustion,

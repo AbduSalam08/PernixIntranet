@@ -5,7 +5,6 @@ import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntra
 import styles from "./NewHiresIntranet.module.scss";
 import "../../../assets/styles/style.css";
 import { Carousel } from "primereact/carousel";
-import { Avatar } from "primereact/avatar";
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
@@ -18,7 +17,6 @@ import {
   getAllNewHiresData,
   getCurrentUserRole,
 } from "../../../services/newHiresIntranet/newHiresIntranet";
-import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
@@ -28,14 +26,32 @@ import { CONFIG } from "../../../config/config";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import moment from "moment";
-// images
-const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
+import { IFormFields } from "../../../interface/interface";
+import { Button } from "primereact/button";
+
+/* Images creation */
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+const defaultUserImg: string = require("../../../assets/images/svg/user2.png");
+
+/* Local interfaces */
+interface INewHiresField {
+  EmployeeName: IFormFields;
+  ProfileImage: IFormFields;
+  Description: IFormFields;
+  StartDate: IFormFields;
+  EndDate: IFormFields;
+}
 
 const NewHiresIntranet = (props: any): JSX.Element => {
+  /* Local variable creation */
   const dispatch = useDispatch();
-  // popup properties
-  const initialPopupController = [
+
+  const newHiresData: any = useSelector((state: any) => {
+    return state.NewHiresData.value;
+  });
+
+  /* popup properties */
+  const initialPopupController: any[] = [
     {
       open: false,
       popupTitle: "New Hire",
@@ -57,47 +73,51 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         inprogress: "Adding new hire, please wait...",
       },
     },
-  ];
-
-  const [popupController, setPopupController] = useState(
-    initialPopupController
-  );
-
-  const newHiresData: any = useSelector((state: any) => {
-    return state.NewHiresData.value;
-  });
-  console.log("newHiresData", newHiresData);
-
-  const [newHires, setNewHires] = useState<any[]>([]);
-  const [currentUserDetails, setCurrentUserDetails] = useState<any>({
-    role: "User",
-    email: "",
-  });
-  console.log("currentUserDetails", currentUserDetails);
-  const [formData, setFormData] = useState<any>({
-    Title: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
+    {
+      open: false,
+      popupTitle: "",
+      popupWidth: "900px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "",
+        error: "",
+        successDescription: "",
+        errorDescription: "",
+        inprogress: "",
+      },
     },
+  ];
+  const initialFormData: INewHiresField = {
     EmployeeName: {
       value: "",
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "array" },
     },
-    StartDate: {
-      value: "",
+    ProfileImage: {
+      value: null,
       isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
+      errorMsg: "",
+      validationRule: { required: false, type: "file" },
+    },
+    StartDate: {
+      value: new Date(),
+      isValid: true,
+      errorMsg: "",
+      validationRule: { required: false, type: "date" },
     },
     EndDate: {
-      value: "",
+      value: null,
       isValid: true,
       errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
+      validationRule: { required: true, type: "date" },
     },
     Description: {
       value: "",
@@ -105,12 +125,19 @@ const NewHiresIntranet = (props: any): JSX.Element => {
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
     },
-    ProfileImage: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid file",
-      validationRule: { required: true, type: "file" },
-    },
+  };
+
+  const [popupController, setPopupController] = useState<any[]>(
+    initialPopupController
+  );
+  const [curObject, setCurObject] = useState<any>();
+  const [newHires, setNewHires] = useState<any[]>([]);
+  const [currentUserDetails, setCurrentUserDetails] = useState<any>({
+    role: "User",
+    email: "",
+  });
+  const [formData, setFormData] = useState<INewHiresField | any>({
+    ...initialFormData,
   });
 
   const handleInputChange = (
@@ -173,21 +200,6 @@ const NewHiresIntranet = (props: any): JSX.Element => {
   const popupInputs: any[] = [
     [
       <div className={styles.newHiresGrid} key={1}>
-        <CustomInput
-          value={formData.Title.value}
-          placeholder="Title"
-          isValid={formData.Title.isValid}
-          errorMsg={formData.Title.errorMsg}
-          onChange={(e) => {
-            const value = e.trimStart();
-            const { isValid, errorMsg } = validateField(
-              "Title",
-              value,
-              formData.Title.validationRule
-            );
-            handleInputChange("Title", value, isValid, errorMsg);
-          }}
-        />
         <div className={styles.secondRow}>
           <div className={styles.c1}>
             <CustomPeoplePicker
@@ -197,30 +209,14 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               selectedItem={[formData?.EmployeeName?.value]}
               onChange={(item: any) => {
                 const value = item[0];
-                console.log("value: ", value);
                 const { isValid, errorMsg } = validateField(
-                  "EmployeeName",
+                  "Employee name",
                   item,
                   formData?.EmployeeName?.validationRule
                 );
                 handleInputChange("EmployeeName", value, isValid, errorMsg);
               }}
             />
-            {/* <CustomInput
-              value={formData.EmployeeName.value}
-              placeholder="Employee name"
-              isValid={formData.EmployeeName.isValid}
-              errorMsg={formData.EmployeeName.errorMsg}
-              onChange={(e) => {
-                const value = e.trimStart();
-                const { isValid, errorMsg } = validateField(
-                  "EmployeeName",
-                  value,
-                  formData.EmployeeName.validationRule
-                );
-                handleInputChange("EmployeeName", value, isValid, errorMsg);
-              }}
-            /> */}
           </div>
 
           <div className={styles.c1}>
@@ -230,7 +226,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               onFileSelect={async (file) => {
                 console.log("file: ", file);
                 const { isValid, errorMsg } = validateField(
-                  "ProfileImage",
+                  "Profile image",
                   file ? file.name : "",
                   formData.ProfileImage.validationRule
                 );
@@ -241,7 +237,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
                   errorMsg
                 );
               }}
-              placeholder="Profile (1120 x 350)"
+              placeholder="Profile (400 x 400)"
               isValid={formData.ProfileImage.isValid}
               errMsg={formData.ProfileImage.errorMsg}
             />
@@ -264,13 +260,12 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               errorMsg={formData?.StartDate?.errorMsg}
               onChange={(date: any) => {
                 const { isValid, errorMsg } = validateField(
-                  "StartDate",
+                  "Start date",
                   date,
                   formData.StartDate.validationRule
                 );
                 if (formData?.EndDate?.value) {
                   if (new Date(formData.EndDate.value) >= new Date(date)) {
-                    // handleInputChange("EndDate", date, isValid, errorMsg);
                     handleInputChange("StartDate", date, isValid, errorMsg);
                   } else {
                     handleInputChange(
@@ -283,7 +278,6 @@ const NewHiresIntranet = (props: any): JSX.Element => {
                 } else {
                   handleInputChange("StartDate", date, isValid, errorMsg);
                 }
-                // handleInputChange("StartDate", date, isValid, errorMsg);
               }}
             />
           </div>
@@ -303,7 +297,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               errorMsg={formData?.EndDate?.errorMsg}
               onChange={(date: any) => {
                 const { isValid, errorMsg } = validateField(
-                  "EndDate",
+                  "End date",
                   date,
                   formData.EndDate.validationRule
                 );
@@ -319,7 +313,6 @@ const NewHiresIntranet = (props: any): JSX.Element => {
                     );
                   }
                 }
-                // handleInputChange("EndDate", date, isValid, errorMsg);
               }}
             />
           </div>
@@ -341,6 +334,27 @@ const NewHiresIntranet = (props: any): JSX.Element => {
             handleInputChange("Description", value, isValid, errorMsg);
           }}
         />
+      </div>,
+    ],
+    [
+      <div className={styles.popUpContainer} key={2}>
+        <div className={styles.popUpHeaderSec}>
+          <img src={curObject?.imgUrl ?? defaultUserImg} alt="User image" />
+          <div>
+            <div>{curObject?.EmployeeName?.name ?? ""}</div>
+            <div>
+              {moment(curObject?.StartDate).format("YYYYMMDD") ===
+              moment(curObject?.EndDate).format("YYYYMMDD")
+                ? moment(curObject?.StartDate).format("DD MMM YYYY")
+                : moment(curObject?.StartDate).format("DD MMM YYYY") +
+                  " - " +
+                  moment(curObject?.EndDate).format("DD MMM YYYY")}
+            </div>
+          </div>
+        </div>
+        <div title={curObject?.Description} className={styles.popUpBodySec}>
+          {curObject?.Description ?? ""}
+        </div>
       </div>,
     ],
   ];
@@ -375,37 +389,59 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         },
       },
     ],
+    [
+      {
+        text: "Close",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[1],
+            1,
+            "close"
+          );
+        },
+      },
+    ],
   ];
 
   const productTemplate = (val: any): JSX.Element => {
     return (
-      <div
-        className={styles.Container}
-        style={{
-          height: currentUserDetails.role === "Admin" ? "350px" : "365px",
-        }}
-      >
-        <p
-          className={styles.employeeName}
-        >{`${val.Title} ${val.EmployeeName?.name}`}</p>
-        <div className={styles.imgandName}>
-          <Avatar
-            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.createdEmail}`}
-            // size="small"
-            shape="circle"
-            style={{
-              width: "40px !important",
-              height: "40px !important",
-            }}
-            data-pr-tooltip={val.receiverName}
-          />
-          <p>{val.createdName}</p>
+      <div className={styles.cardContainer}>
+        <div className={styles.cardHeaderSec}>
+          <img src={val?.imgUrl ?? defaultUserImg} alt="User image" />
+          <div>
+            <div>{val?.EmployeeName?.name ?? ""}</div>
+            <div>
+              {moment(val?.StartDate).format("YYYYMMDD") ===
+              moment(val?.EndDate).format("YYYYMMDD")
+                ? moment(val?.StartDate).format("DD MMM YYYY")
+                : moment(val?.StartDate).format("DD MMM YYYY") +
+                  " - " +
+                  moment(val?.EndDate).format("DD MMM YYYY")}
+            </div>
+          </div>
         </div>
-        <p className={styles.description} title={val.Description}>
-          {val.Description}
-        </p>
-        <div className={styles.imgSection}>
-          <img src={val.imgUrl || personImagePlaceholder} alt="" />
+        <div title={val?.Description} className={styles.cardBodySec}>
+          {val?.Description ?? ""}
+        </div>
+        <div className={styles.cardBTNSec}>
+          <Button
+            label="Read more"
+            onClick={() => {
+              setCurObject({ ...val });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[1],
+                1,
+                "open"
+              );
+            }}
+          />
         </div>
       </div>
     );
@@ -420,27 +456,16 @@ const NewHiresIntranet = (props: any): JSX.Element => {
           Number(moment().format("YYYYMMDD")) <=
             Number(moment(obj?.EndDate).format("YYYYMMDD"))
         );
-        // return (
-        //   new Date() >= new Date(obj?.StartDate) &&
-        //   new Date() <= new Date(obj?.EndDate)
-        // );
       });
       setNewHires([...filteredData]);
     }
   }, [newHiresData]);
+
   useEffect(() => {
     dispatch(setMainSPContext(props?.context));
     getCurrentUserRole(setCurrentUserDetails);
     getAllNewHiresData(dispatch);
   }, [dispatch]);
-
-  const handlenavigate = (): void => {
-    window.open(
-      props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.NewHiresPage,
-      "_self"
-    );
-  };
 
   return (
     <div className={styles.newhireContainer}>
@@ -448,13 +473,14 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         label="New Hires"
         removeAdd={currentUserDetails?.role === "Admin" ? false : true}
         headerAction={() => {
+          resetFormData(formData, setFormData);
+          setFormData({ ...initialFormData });
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
             0,
             "open"
           );
-          resetFormData(formData, setFormData);
         }}
       />
 
@@ -474,15 +500,25 @@ const NewHiresIntranet = (props: any): JSX.Element => {
             showIndicators={true}
             showNavigators={false}
             circular
-            autoplayInterval={newHires.length > 1 ? 3000 : 8.64e7}
+            autoplayInterval={newHires.length > 1 ? 6000 : 8.64e7}
             // circular
             itemTemplate={productTemplate}
           />
         )}
       </div>
+
       {!newHiresData?.isLoading && newHires.length > 0 && (
-        <ViewAll onClick={handlenavigate} />
+        <ViewAll
+          onClick={() => {
+            window.open(
+              props.context.pageContext.web.absoluteUrl +
+                CONFIG.NavigatePage.NewHiresPage,
+              "_self"
+            );
+          }}
+        />
       )}
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
@@ -502,6 +538,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               "close"
             );
             resetFormData(formData, setFormData);
+            setFormData({ ...initialFormData });
             if (popupData?.isLoading?.success) {
               getAllNewHiresData(dispatch);
             }

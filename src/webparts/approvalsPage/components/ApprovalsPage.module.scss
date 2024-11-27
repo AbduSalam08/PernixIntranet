@@ -12,3 +12,91 @@
   width: 100%;
   height: calc(100vh - 144px);
 }
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  .backContainer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    .backHeader {
+      font-size: 22px;
+      font-weight: 600;
+      color: #0b4d53;
+      font-family: "osSemibold", sans-serif;
+    }
+  }
+}
+
+.bodyContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .activitieContainer {
+    width: 85%;
+    max-height: calc(100vh - 200px);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 28px;
+
+    .activitieCard {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 31%;
+      padding: 20px;
+      border-radius: 6px;
+      background-image: linear-gradient(to right, #5f8285, #0b4d53);
+      cursor: pointer;
+
+      .imgSec {
+        padding: 10px;
+        background: #76979a;
+        border-radius: 6px;
+
+        img {
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      .nameSec {
+        font-size: 18px;
+        font-weight: 500;
+        color: #ffff;
+      }
+    }
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: calc(100vh - 200px);
+  gap: 20px;
+
+  img {
+    height: 60px;
+    width: 60px;
+    object-fit: contain;
+  }
+
+  div {
+    font-size: 18px;
+    font-weight: 500;
+    color: #adadad;
+    text-align: center;
+    font-family: "osRegular";
+  }
+}
