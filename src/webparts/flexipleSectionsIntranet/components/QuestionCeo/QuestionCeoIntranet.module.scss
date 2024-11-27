@@ -10,8 +10,10 @@
   box-shadow: 0px -1px 4px 0px #b9b9b940;
   border-radius: 6px;
   padding: 20px;
-  background: #ffff;
   // margin: 20px;
+  background: #ffff;
+
+  line-height: 1.4;
 
   // height: 460px;
   // display: flex;
@@ -122,8 +124,8 @@
     word-break: break-word;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    line-clamp: 6;
-    -webkit-line-clamp: 6;
+    line-clamp: 10;
+    -webkit-line-clamp: 10;
     white-space: normal;
   }
 }

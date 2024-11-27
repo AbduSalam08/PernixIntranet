@@ -45,6 +45,8 @@ interface IFeedbackField {
 }
 
 /* Global variable creation */
+const errorImg: string = require("../../../assets/images/svg/errorImg.svg");
+
 let isAdmin: boolean = false;
 let masterFeedBackQus: IFeedbackQusType[] = [];
 let masterFeedBackRes: IFeedbackResType[] = [];
@@ -744,7 +746,12 @@ const FeedBackFormPage = (props: any): JSX.Element => {
               <div className={styles.backHeader}>Feedback</div>
             </div>
 
-            <div className={styles.searchContainer}>
+            <div
+              className={styles.searchContainer}
+              style={{
+                display: isAdmin ? "flex" : "none",
+              }}
+            >
               <div>
                 <CustomInput
                   noErrorMsg
@@ -812,91 +819,100 @@ const FeedBackFormPage = (props: any): JSX.Element => {
             </div>
           </div>
 
-          {/* Tab section */}
-          <div className={styles.tabsContainer}>
-            {CONFIG.TabsName.map((str: string, i: number) => {
-              return isAdmin ? (
-                <div
-                  key={i}
-                  style={{
-                    borderBottom:
-                      selectedTab === str ? "3px solid #e0803d" : "none",
-                  }}
-                  onClick={(_) => {
-                    setIsLoading(true);
-                    prepareDatas(str);
-                  }}
-                >
-                  {str}
-                </div>
-              ) : i === 0 ? (
-                <div
-                  key={i}
-                  style={{
-                    borderBottom:
-                      selectedTab === str ? "3px solid #e0803d" : "none",
-                  }}
-                  onClick={(_) => {
-                    setIsLoading(true);
-                    prepareDatas(str);
-                  }}
-                >
-                  {str}
+          {isAdmin ? (
+            <>
+              {/* Tab section */}
+              <div className={styles.tabsContainer}>
+                {CONFIG.TabsName.map((str: string, i: number) => {
+                  return isAdmin ? (
+                    <div
+                      key={i}
+                      style={{
+                        borderBottom:
+                          selectedTab === str ? "3px solid #e0803d" : "none",
+                      }}
+                      onClick={(_) => {
+                        setIsLoading(true);
+                        prepareDatas(str);
+                      }}
+                    >
+                      {str}
+                    </div>
+                  ) : i === 0 ? (
+                    <div
+                      key={i}
+                      style={{
+                        borderBottom:
+                          selectedTab === str ? "3px solid #e0803d" : "none",
+                      }}
+                      onClick={(_) => {
+                        setIsLoading(true);
+                        prepareDatas(str);
+                      }}
+                    >
+                      {str}
+                    </div>
+                  ) : (
+                    ""
+                  );
+                })}
+              </div>
+
+              {/* Body section */}
+              {showFeedbackQuestion?.length ? (
+                <div className={styles.bodyContainer}>
+                  {showFeedbackQuestion?.map(
+                    (val: IFeedbackQusType, idx: number) => {
+                      return (
+                        <div key={idx} className={styles.bodySection}>
+                          <div className={styles.titleSec} title={val?.Title}>
+                            {val?.Title}
+                          </div>
+                          <div className={styles.iconSec}>
+                            <OpenInNew
+                              onClick={() => {
+                                setCurObject({ ...val });
+                                setIsQuestion(false);
+                              }}
+                            />
+                            <Edit
+                              style={{
+                                display:
+                                  CONFIG.TabsName[2] !== selectedTab
+                                    ? "flex"
+                                    : "none",
+                              }}
+                              onClick={() => {
+                                handleSelect(val);
+                              }}
+                            />
+                            <Delete
+                              onClick={() => {
+                                setCurObject({ ...val });
+                                togglePopupVisibility(
+                                  setPopupController,
+                                  initialPopupController[2],
+                                  2,
+                                  "open"
+                                );
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               ) : (
-                ""
-              );
-            })}
-          </div>
-
-          {/* Body section */}
-          {showFeedbackQuestion?.length ? (
-            <div className={styles.bodyContainer}>
-              {showFeedbackQuestion?.map(
-                (val: IFeedbackQusType, idx: number) => {
-                  return (
-                    <div key={idx} className={styles.bodySection}>
-                      <div className={styles.titleSec} title={val?.Title}>
-                        {val?.Title}
-                      </div>
-                      <div className={styles.iconSec}>
-                        <OpenInNew
-                          onClick={() => {
-                            setCurObject({ ...val });
-                            setIsQuestion(false);
-                          }}
-                        />
-                        <Edit
-                          style={{
-                            display:
-                              CONFIG.TabsName[2] !== selectedTab
-                                ? "flex"
-                                : "none",
-                          }}
-                          onClick={() => {
-                            handleSelect(val);
-                          }}
-                        />
-                        <Delete
-                          onClick={() => {
-                            setCurObject({ ...val });
-                            togglePopupVisibility(
-                              setPopupController,
-                              initialPopupController[2],
-                              2,
-                              "open"
-                            );
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                }
+                <div className={styles.bodyNoDataFound}>
+                  No feedback questions found!
+                </div>
               )}
-            </div>
+            </>
           ) : (
-            <div className={styles.bodyNoDataFound}>
-              No feedback questions found!
+            <div className={styles.content}>
+              <img src={errorImg} alt="errorImg" />
+              <div>You don't have access to this page!</div>
             </div>
           )}
 

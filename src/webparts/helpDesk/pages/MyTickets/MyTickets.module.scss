@@ -257,13 +257,20 @@
     }
   }
 }
+
 .recurrenceOptions {
   width: 100%;
+  max-height: 0; /* Collapsed state */
   display: flex;
   align-items: flex-start;
   justify-content: center;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  transition: all 0.2s;
+  transition-delay: 0.3s;
   .recurrenceLabel {
     font-size: 14px;
     color: #414141;
@@ -274,14 +281,16 @@
     font-family: "osSemiBold", sans-serif;
     width: 100%;
   }
+
   .r1 {
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 10px;
   }
 }
+
 .nextTicketIntimation {
   width: 50%;
   height: 100%;
@@ -302,4 +311,23 @@
     color: #414141;
     font-family: "osSemiBold", sans-serif;
   }
+}
+.closedRecurrence {
+  height: 0;
+  max-height: 0; /* Collapse the element */
+  padding: 0; /* Remove padding for smooth transition */
+  overflow: hidden; /* Hide overflowing content */
+  transition: max-height 0.3s ease, padding 0.3s ease; /* Smooth animation */
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+}
+.badgeNextDateError {
+  color: #802a0b !important;
+  background-color: #ff591c15;
+  padding: 5px 13px;
+  border-radius: 40px;
+  font-size: 13px !important;
 }

@@ -150,15 +150,31 @@
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px 15px;
   // padding-top: 10px;
   // border-bottom: 1px solid #eee;
-  color: #2d4b51;
   background-color: #2d4b5110;
-  font-size: 16px;
   border-radius: 4px;
   text-align: left;
   font-family: "osSemiBold", sans-serif;
+  .title {
+    font-size: 16px;
+    color: #2d4b51;
+  }
+  .editBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    padding: 3px;
+    background-color: #2d4b5120;
+    // border: 1px solid #2d4b5130;
+    cursor: pointer;
+  }
 }
 .details {
   display: flex;

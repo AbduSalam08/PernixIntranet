@@ -1,4 +1,4 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import "~@fluentui/react/dist/sass/References.scss";
 
 .LoaderContainer {
   display: flex;
@@ -172,6 +172,30 @@
     }
   }
 }
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  position: relative; /* Adjust based on textarea position */
+  z-index: 10; /* Positioned behind the textarea */
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.suggestionItem:hover {
+  background-color: #e0f7fa;
+}
 .bodyContainer {
   display: flex;
   align-items: start;
@@ -179,80 +203,80 @@
   flex-wrap: wrap;
   height: calc(100vh - 306px);
   overflow: auto;
-      .contentMain {
+  .contentMain {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    height: 120px;
+    .image {
+      width: 120px;
+      height: 95px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        // object-fit: cover;
+      }
+    }
+
+    .content {
+      width: calc(100% - 50px);
+
+      .contentwithIconsection {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        .actionSection {
+          width: 100%;
           display: flex;
-          align-items: center;
+          justify-content: end;
           gap: 10px;
-          margin-bottom: 8px;
-          background-color: #ffffff;
-          border-radius: 8px;
-          padding: 10px;
-          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
-          height: 120px;
-          .image {
-            width: 120px;
-            height: 95px;
-      
-            img {
-              width: 100%;
-              height: 100%;
-              border-radius: 8px;
-              // object-fit: cover;
-            }
+          margin-top: 26px;
+        }
+
+        .Title {
+          flex-grow: 1;
+
+          .name {
+            margin: 0;
+            font-size: 16px;
+            // font-weight: 600;
+            color: #0b4d53;
+            font-family: "osSemibold", sans-serif;
+
+            // font-family: ;
+            margin-bottom: 5px;
           }
-      
-          .content {
-            width: calc(100% - 50px);
-      
-            .contentwithIconsection {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 10px;
-              justify-content: space-between;
-              align-items: center;
-              .actionSection{
-                width: 100%;
-                display: flex;
-                justify-content: end;
-                gap: 10px;
-                margin-top: 26px;
-              }
-      
-              .Title {
-                flex-grow: 1;
-      
-                .name {
-                  margin: 0;
-                  font-size: 16px;
-                  // font-weight: 600;
-                  color: #0b4d53;
-                  font-family: "osSemibold", sans-serif;
-      
-                  // font-family: ;
-                  margin-bottom: 5px;
-                }
-      
-                .date {
-                  margin: 0;
-                  font-size: 14px;
-                  font-family: "osRegular", sans-serif;
-                  // font-weight: 400;
-                }
-              }
-      
-              // .shareicon {
-              //   width: 20px;
-              //   height: 20px;
-              //   img {
-              //     width: 100%;
-              //     height: 100%;
-              //     object-fit: cover;
-              //   }
-              // }
-            }
+
+          .date {
+            margin: 0;
+            font-size: 14px;
+            font-family: "osRegular", sans-serif;
+            // font-weight: 400;
           }
         }
+
+        // .shareicon {
+        //   width: 20px;
+        //   height: 20px;
+        //   img {
+        //     width: 100%;
+        //     height: 100%;
+        //     object-fit: cover;
+        //   }
+        // }
       }
+    }
+  }
+}
 .birthdaySection {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

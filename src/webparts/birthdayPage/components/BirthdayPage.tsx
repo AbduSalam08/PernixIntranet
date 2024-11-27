@@ -32,10 +32,11 @@ import CustomDateInput from "../../../components/common/CustomInputFields/Custom
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 // images
 const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
-const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.svg");
-const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.svg");
+// const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.svg");
+// const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.svg");
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import moment from "moment";
+import { Checkbox } from "primereact/checkbox";
 
 const BirthdayPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -160,6 +161,10 @@ const BirthdayPage = (props: any): JSX.Element => {
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
+
+  const [curuser, setCurrentuser] = useState<any>("");
+  console.log("setCurrentuser: ", setCurrentuser);
+
   console.log("formData", formData);
   console.log("currentUserDetails", currentUserDetails);
   console.log("attachmentObject", attachmentObject);
@@ -260,7 +265,8 @@ const BirthdayPage = (props: any): JSX.Element => {
           payloadJson = {
             Message: formData?.Message?.value,
             BirthDayId: handleForm?.BirthDayID,
-            isTeams: true,
+            isTeams: formData.isTeams?.value,
+            isOutlook: formData.isOutlook?.value,
           };
         } else {
           payloadJson = {
@@ -279,6 +285,15 @@ const BirthdayPage = (props: any): JSX.Element => {
     } else {
       console.log("Form contains errors");
     }
+  };
+
+  const isFormValid = (): boolean => {
+    const isMessageValid =
+      formData?.Message?.isValid && formData?.Message?.value.trim() !== "";
+    const isAnyCheckboxChecked =
+      formData?.isTeams?.value || formData?.isOutlook?.value;
+
+    return isMessageValid && isAnyCheckboxChecked;
   };
 
   const popupInputs: any[] = [
@@ -416,7 +431,88 @@ Enjoy your special day!`;
           }}
         />
 
-        <div className={styles.actionBtns}>
+        <div className={styles.suggestions}>
+          {[
+            { text: `Happy Birthday ${curuser ? curuser : ""} `, emoji: "🎂" },
+
+            { text: "Wishing you a fantastic year ahead !", emoji: "🎉" },
+            { text: "Cheers to another amazing year !", emoji: "🥂" },
+            { text: "Hope your day is as special as you are !", emoji: "🌟" },
+            { text: "Have a blast on your birthday !", emoji: "🎈" },
+          ].map((suggestion, index) => (
+            <button
+              key={index}
+              className={styles.suggestionItem}
+              onClick={() => {
+                const message = `${suggestion.emoji} ${suggestion.text} `;
+                handleInputChange("Message", message, true, "");
+              }}
+            >
+              {suggestion.emoji} {suggestion.text}
+            </button>
+          ))}
+        </div>
+
+        <div
+          style={{ display: "flex", flexDirection: "column", width: "100%" }}
+        >
+          <p>Send wishes in :</p>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                margin: "15px 0px 0px 0px",
+              }}
+            >
+              <Checkbox
+                inputId="teamsOption"
+                value="Teams"
+                onChange={(e: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "isTeams",
+                    e.checked,
+                    formData?.Message?.validationRule
+                  );
+                  handleInputChange("isTeams", e.checked, isValid, errorMsg);
+                }}
+                checked={formData?.isTeams?.value}
+              />
+              <label htmlFor="teamsOption" className="ml-2">
+                Teams
+              </label>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                margin: "15px 0px 0px 0px",
+              }}
+            >
+              <Checkbox
+                inputId="outlookOption"
+                value="Outlook"
+                onChange={(e: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "isOutlook",
+                    e.checked,
+                    formData?.Message?.validationRule
+                  );
+                  handleInputChange("isOutlook", e.checked, isValid, errorMsg);
+                }}
+                checked={formData?.isOutlook?.value}
+              />
+              <label htmlFor="outlookOption" className="ml-2">
+                Outlook
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className={styles.actionBtns}>
           {!formData?.isTeams?.value && (
             <button
               className={styles.teams}
@@ -437,7 +533,7 @@ Enjoy your special day!`;
               <img src={outlookImg} /> Send in Outlook
             </button>
           )}
-        </div>
+        </div> */}
       </div>,
     ],
     [
@@ -477,7 +573,6 @@ Enjoy your special day!`;
         },
       },
     ],
-    [],
     [
       {
         text: "Cancel",
@@ -491,6 +586,36 @@ Enjoy your special day!`;
             setPopupController,
             initialPopupController[1],
             1,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !isFormValid(),
+        // disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit("Teams");
+        },
+      },
+    ],
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[2],
+            2,
             "close"
           );
         },
@@ -723,64 +848,67 @@ Enjoy your special day!`;
                         </div>
 
                         <div className={styles.actionSection}>
-                          {moment(new Date()).format("DD/MM/YYYY") ===
-                            moment(val?.DateOfBirth).format("DD/MM/YYYY") && (
-                            <div
-                              onClick={() => {
-                                setHandleForm({
-                                  BirthDayID: val?.ID,
-                                  BirthDayWishID: val?.BirthDayWishID
-                                    ? val?.BirthDayWishID
-                                    : null,
-                                  Type: "SendWish",
-                                });
-                                togglePopupVisibility(
-                                  setPopupController,
-                                  initialPopupController[1],
-                                  1,
-                                  "open"
-                                );
-                                setFormData({
-                                  Message: {
-                                    value: val?.Message,
-                                    isValid: true,
-                                    errorMsg: "This field is required",
-                                    validationRule: {
-                                      required: true,
-                                      type: "string",
+                          {!(val?.isTeams || val?.isOutlook) &&
+                            !val.sameuser &&
+                            moment(new Date()).format("DD/MM/YYYY") ===
+                              moment(val?.DateOfBirth).format("DD/MM/YYYY") && (
+                              <div
+                                onClick={() => {
+                                  setCurrentuser(val?.EmployeeName?.name);
+                                  setHandleForm({
+                                    BirthDayID: val?.ID,
+                                    BirthDayWishID: val?.BirthDayWishID
+                                      ? val?.BirthDayWishID
+                                      : null,
+                                    Type: "SendWish",
+                                  });
+                                  togglePopupVisibility(
+                                    setPopupController,
+                                    initialPopupController[1],
+                                    1,
+                                    "open"
+                                  );
+                                  setFormData({
+                                    Message: {
+                                      value: "",
+                                      isValid: true,
+                                      errorMsg: "This field is required",
+                                      validationRule: {
+                                        required: true,
+                                        type: "string",
+                                      },
                                     },
-                                  },
-                                  isTeams: {
-                                    value: val?.isTeams,
-                                    isValid: true,
-                                    errorMsg: "This field is required",
-                                    validationRule: {
-                                      required: false,
-                                      type: "boolean",
+                                    isTeams: {
+                                      value: val?.isTeams,
+                                      isValid: true,
+                                      errorMsg: "This field is required",
+                                      validationRule: {
+                                        required: false,
+                                        type: "boolean",
+                                      },
                                     },
-                                  },
-                                  isOutlook: {
-                                    value: val?.isOutlook,
-                                    isValid: true,
-                                    errorMsg: "This field is required",
-                                    validationRule: {
-                                      required: false,
-                                      type: "boolean",
+                                    isOutlook: {
+                                      value: val?.isOutlook,
+                                      isValid: true,
+                                      errorMsg: "This field is required",
+                                      validationRule: {
+                                        required: false,
+                                        type: "boolean",
+                                      },
                                     },
-                                  },
-                                });
-                              }}
-                            >
-                              <i
-                                className="pi pi-send"
-                                style={{
-                                  color: "#0b4d53",
-                                  fontSize: "1.2rem",
-                                  cursor: "pointer",
+                                  });
                                 }}
-                              />
-                            </div>
-                          )}
+                              >
+                                <i
+                                  className="pi pi-send"
+                                  style={{
+                                    color: "#0b4d53",
+                                    fontSize: "1.2rem",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              </div>
+                            )}
                           {currentUserDetails?.role === "Admin" &&
                             selectedTab !== CONFIG.BirthDayPageTabsName[2] &&
                             selectedTab !== CONFIG.BirthDayPageTabsName[0] && (

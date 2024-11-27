@@ -26,6 +26,8 @@ export interface IListName {
   Intranet_BirthDay: string;
   Intranet_BirthdayWishes: string;
   EmployeeDirectory_Config: string;
+  IntranetBlogs_Title: string;
+  FlexibleSection: string;
 }
 
 export interface ISPGroupName {
@@ -219,4 +221,26 @@ export interface IinitialPopupLoaders {
     errorDescription: string;
     inprogress: string;
   };
+}
+
+export interface ICommonentsName {
+  MotivationBanner: string;
+  Calendar: string;
+  News: string;
+  DocumentRepository: string;
+  QuestionCEO: string;
+  Poll: string;
+  ShoutOuts: string;
+  Feedback: string;
+  NewHires: string;
+  Birthdays: string;
+  Blogs: string;
+}
+
+export interface IPageURL {
+  Name: string;
+  GroupName: string;
+  IsAdmin: boolean;
+  URL: string;
+  Image: string;
 }

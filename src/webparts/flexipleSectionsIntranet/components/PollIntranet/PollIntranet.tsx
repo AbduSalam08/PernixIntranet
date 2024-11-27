@@ -57,7 +57,6 @@ import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIn
 
 const PollIntranet = ({ props }: any): JSX.Element => {
   const dispatch = useDispatch();
-  debugger;
   const curUser = props.context._pageContext._user.email;
 
   const currentUserDetails: any = useSelector(
@@ -405,6 +404,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
       <div
         key={2}
         className={styles.inputContainer}
+
         // style={{
         //   display: "flex",
         //   gap: "20px",
@@ -414,6 +414,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
       >
         <div
           className={styles.inputWrapper}
+
           // style={{ width: "50%" }}
         >
           <CustomDateInput
@@ -637,73 +638,76 @@ const PollIntranet = ({ props }: any): JSX.Element => {
             }}
           />
 
-          {currentPoll?.length ? (
-            <>
-              <div
-                className={styles["poll-header"]}
-                title={currentPoll[0]?.Question}
-              >
-                {currentPoll[0]?.Question}
-              </div>
+          <div className={styles.pollCardSec}>
+            {currentPoll?.length ? (
+              <>
+                <div
+                  className={styles["poll-header"]}
+                  title={currentPoll[0]?.Question}
+                >
+                  {currentPoll[0]?.Question}
+                </div>
 
-              <div className={styles.bodyOptions}>
-                {currentPoll[0]?.options?.map((val: any, index: number) => (
-                  <div key={index} title={val?.Title}>
-                    <div
-                      className={styles.container}
-                      onClick={() => {
-                        setCurPollID(curPollID !== index + 1 ? index + 1 : 0);
-                        handleOptionClick(
-                          currentPoll[0]?.Id,
-                          val.Id,
-                          val.Title,
-                          currentPoll[0]?.resId
-                        );
-                      }}
-                    >
+                <div className={styles.bodyOptions}>
+                  {currentPoll[0]?.options?.map((val: any, index: number) => (
+                    <div key={index} title={val?.Title}>
                       <div
-                        style={{ width: `${val?.Percentage}%` }}
-                        className={styles.backgroundfill}
-                      />
+                        className={styles.container}
+                        onClick={() => {
+                          setCurPollID(curPollID !== index + 1 ? index + 1 : 0);
+                          handleOptionClick(
+                            currentPoll[0]?.Id,
+                            val.Id,
+                            val.Title,
+                            currentPoll[0]?.resId
+                          );
+                        }}
+                      >
+                        <div
+                          style={{ width: `${val?.Percentage}%` }}
+                          className={styles.backgroundfill}
+                        />
 
-                      <div className={styles.contentSection}>
-                        <div className={styles.content}>
-                          <p
-                            style={{
-                              width: "5%",
-                            }}
-                          >
-                            {index + 1}.
-                          </p>
-                          {selectedOption?.OptionId === val?.Id && curPollID ? (
-                            <i className="pi pi-check" />
-                          ) : (
-                            ""
-                          )}
-                          <p
-                            style={{
-                              width: "95%",
-                            }}
-                          >
-                            {val?.Title}
-                          </p>
+                        <div className={styles.contentSection}>
+                          <div className={styles.content}>
+                            <p
+                              style={{
+                                width: "5%",
+                              }}
+                            >
+                              {index + 1}.
+                            </p>
+                            {selectedOption?.OptionId === val?.Id &&
+                            curPollID ? (
+                              <i className="pi pi-check" />
+                            ) : (
+                              ""
+                            )}
+                            <p
+                              style={{
+                                width: "95%",
+                              }}
+                            >
+                              {val?.Title}
+                            </p>
+                          </div>
+
+                          <div>{`${val?.Percentage}%`}</div>
                         </div>
-
-                        <div>{`${val?.Percentage}%`}</div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className={styles.noDataFound}>No poll found!</div>
-          )}
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className={styles.noDataFound}>No poll found!</div>
+            )}
+          </div>
 
           <div
             style={{
               display: "flex",
-              alignItems: "flex-start",
+              alignItems: "baseline",
             }}
           >
             <div className={styles.voteButton}>

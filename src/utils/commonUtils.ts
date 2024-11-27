@@ -414,8 +414,7 @@ export const currentRoleBasedDataUtil: any = (
   currentPath?: any
 ) => {
   if (
-    currentUserDetails?.role === "Pernix_Admin" ||
-    // currentUserDetails?.role === "Super Admin" ||
+    // currentUserDetails?.role === "Pernix_Admin" ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
   ) {
     return {
@@ -434,6 +433,20 @@ export const currentRoleBasedDataUtil: any = (
         : HelpDeskTicktesData?.data,
       role: "it_owner",
     };
+  } else if (
+    currentUserDetails?.role === "Super Admin" ||
+    currentUserDetails?.role === "Pernix_Admin"
+  ) {
+    const isUser = HelpDeskTicktesData?.data?.filter(
+      (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
+    );
+
+    return {
+      data: !currentPath?.includes("mentions")
+        ? isUser
+        : HelpDeskTicktesData?.data,
+      role: "user",
+    };
   } else {
     const isUser = HelpDeskTicktesData?.data?.filter(
       (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
@@ -449,8 +462,6 @@ export const currentRoleBasedDataUtil: any = (
 };
 
 export const generateTicketNumber = (number: number): string => {
-  console.log("number: ", number);
-
   // If number is not finite, default to 0
   const validNumber = isFinite(number) ? number : 0;
 
@@ -657,12 +668,13 @@ export const ticketsFilter = async (
 export const getCurrentRoleForTicketsRoute = (
   currentUserDetails: any
 ): string => {
-  return currentUserDetails?.role === "Pernix_Admin" ||
-    // currentUserDetails?.role === "Super Admin" ||
-    currentUserDetails?.role === "HelpDesk_Ticket_Managers"
+  return currentUserDetails?.role === "HelpDesk_Ticket_Managers"
     ? "/helpdesk_manager"
     : currentUserDetails?.role === "HelpDesk_IT_Owners"
     ? "/it_owner"
+    : currentUserDetails?.role === "Super Admin" ||
+      currentUserDetails?.role === "Pernix_Admin"
+    ? "/user"
     : `/${currentUserDetails?.role}`;
 };
 

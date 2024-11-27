@@ -32,13 +32,21 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
     dispatch(setMainSPContext(props?.context));
     getAllUsersList(dispatch);
     RoleAuth(
-      CONFIG.SPGroupName.Pernix_Admin,
+      CONFIG.SPGroupName.HelpDesk_Ticket_Managers,
       {
-        highPriorityGroups: [CONFIG.SPGroupName.HelpDesk_Ticket_Managers],
-        lowPriorityGroups: [CONFIG.SPGroupName.HelpDesk_IT_Owners],
+        highPriorityGroups: [CONFIG.SPGroupName.HelpDesk_IT_Owners],
+        lowPriorityGroups: [CONFIG.SPGroupName.Pernix_Admin],
       },
       dispatch
     );
+    // RoleAuth(
+    //   CONFIG.SPGroupName.Pernix_Admin,
+    //   {
+    //     highPriorityGroups: [CONFIG.SPGroupName.HelpDesk_Ticket_Managers],
+    //     lowPriorityGroups: [CONFIG.SPGroupName.HelpDesk_IT_Owners],
+    //   },
+    //   dispatch
+    // );
   }, [dispatch]);
 
   return (

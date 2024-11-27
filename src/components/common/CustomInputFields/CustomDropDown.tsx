@@ -272,8 +272,18 @@ const CustomDropDown: React.FC<Props> = ({
         MuiFilledInput: {
           styleOverrides: {
             root: {
+              border: highlightDropdown
+                ? "1px solid #eeeeee !important"
+                : "none !important",
+              borderRadius: "4px", // Optional: Add a border-radius if needed
+              "&:hover": {
+                borderColor: "none",
+              },
+              "&.Mui-focused": {
+                borderColor: "none", // Optional: Add a focus color
+              },
               "&::before, &::after": {
-                display: "none",
+                display: "none", // Disable the default underline styles
               },
               "&:hover:not(.Mui-disabled, .Mui-error):before": {
                 display: "none",
@@ -316,7 +326,7 @@ const CustomDropDown: React.FC<Props> = ({
         flexDirection: "column",
         gap: "2px",
         width: width,
-        border: highlightDropdown ? "1px solid #eeeeee" : "none",
+        // border: highlightDropdown ? "1px solid #eeeeee" : "none",
         borderRadius: "6px",
         overflow: "hidden",
       }}
@@ -324,7 +334,14 @@ const CustomDropDown: React.FC<Props> = ({
       <ThemeProvider theme={customTheme(outerTheme)}>
         <FormControl
           variant="filled"
-          sx={{ minWidth: width || "276px" }}
+          sx={{
+            minWidth: width || "276px",
+            border: highlightDropdown
+              ? "1px solid #eeeeee !important"
+              : "none !important",
+            overflow: "hidden",
+            borderRadius: "6px",
+          }}
           disabled={disabled}
         >
           {floatingLabel && (

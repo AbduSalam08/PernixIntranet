@@ -25,7 +25,6 @@ import {
   skillUpdate,
 } from "../../../services/EmployeeDirectory/EmployeeDirectory";
 import { __metadata } from "tslib";
-// import { getuserdetails } from "../../../services/employeeDirectory/EmployeeDirectory";
 
 // import { Item } from "@pnp/sp/items";
 // import { Button } from "primereact/button";

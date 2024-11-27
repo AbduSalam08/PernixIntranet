@@ -90,10 +90,13 @@ const DDateInput: React.FC<DDateInputProps> = ({
         minWidth: minWidth ? minWidth : "auto",
         maxWidth: maxWidth ? maxWidth : "auto",
         borderRadius: "6px",
-        border: hightLightInput ? "1px solid #eee" : "none",
       }}
     >
       <div
+        style={{
+          borderRadius: "6px",
+          border: hightLightInput ? "1px solid #eee" : "none",
+        }}
         className={`${
           withLabel ? styles.inputWrapperWithLabel : styles.inputWrapper
         } ${disabledInput ? styles.disabledInput : ""} ${

@@ -38,6 +38,7 @@ const LeftBar: React.FC = (): JSX.Element => {
   );
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
+  console.log("currentRole: ", currentRole);
 
   const currentRoleBasedData: any = currentRoleBasedDataUtil(
     currentUserDetails,
@@ -48,7 +49,9 @@ const LeftBar: React.FC = (): JSX.Element => {
   // Define nav items
   useEffect(() => {
     const items: NavItem[] =
-      currentUserDetails?.role === "user"
+      currentUserDetails?.role === "user" ||
+      currentUserDetails?.role === "Super Admin" ||
+      currentUserDetails?.role === "Pernix_Admin"
         ? [
             {
               label: "My tickets",

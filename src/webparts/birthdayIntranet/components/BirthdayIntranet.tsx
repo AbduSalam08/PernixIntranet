@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
+//import { MSGraphClient } from "@microsoft/sp-http";
+// import { graph } from "@pnp/graph";
 
 import styles from "./BirthdayIntranet.module.scss";
+import { Checkbox } from "primereact/checkbox";
+
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 import "../../../assets/styles/style.css";
 import "primereact/resources/themes/saga-blue/theme.css";
@@ -18,8 +22,8 @@ import FloatingLabelTextarea from "../../../components/common/CustomInputFields/
 import Popup from "../../../components/common/Popups/Popup";
 // images
 const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
-const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.svg");
-const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.svg");
+const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
+const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
 // icons
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
@@ -39,6 +43,9 @@ import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 
 const BirthdayIntranet = (props: any): JSX.Element => {
+  let _curuser: string = props?.context._pageContext._user.email;
+  console.log(_curuser, "curuser");
+
   const today = new Date(
     new Date().getFullYear(),
     new Date().getMonth(),
@@ -68,6 +75,25 @@ const BirthdayIntranet = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
+    },
+
+    isTeams: {
+      value: false,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: {
+        required: false,
+        type: "boolean",
+      },
+    },
+    isOutlook: {
+      value: false,
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: {
+        required: false,
+        type: "boolean",
+      },
     },
   };
   const dispatch = useDispatch();
@@ -126,6 +152,7 @@ const BirthdayIntranet = (props: any): JSX.Element => {
     initialPopupController
   );
   const [birthdays, setBirthdays] = useState<any[]>([]);
+  const [curuser, setCurrentuser] = useState<any>("");
 
   const [currentUserDetails, setCurrentUserDetails] = useState<any>({
     role: "User",
@@ -201,7 +228,8 @@ const BirthdayIntranet = (props: any): JSX.Element => {
           payloadJson = {
             Message: formData?.Message?.value,
             BirthDayId: handleForm?.BirthDayID,
-            isTeams: true,
+            isTeams: formData.isTeams?.value,
+            isOutlook: formData.isOutlook?.value,
           };
         } else {
           payloadJson = {
@@ -224,7 +252,7 @@ const BirthdayIntranet = (props: any): JSX.Element => {
 
   const popupInputs: any[] = [
     [
-      <div className={styles.newBirthdayGrid} key={2}>
+      <div className={styles.newBirthdayGrid} key={1}>
         <div className={styles.firstRow}>
           <div className={styles.c1}>
             <CustomPeoplePicker
@@ -338,7 +366,8 @@ Enjoy your special day!`;
         />
         <FloatingLabelTextarea
           customBorderColor="#0B4D53"
-          readOnly
+          // readOnly
+          disabled={false}
           value={formData?.Message?.value}
           placeholder="Message"
           rows={6}
@@ -356,6 +385,127 @@ Enjoy your special day!`;
           }}
         />
 
+        <div className={styles.suggestions}>
+          {[
+            { text: `Happy Birthday ${curuser ? curuser : ""} `, emoji: "🎂" },
+
+            { text: "Wishing you a fantastic year ahead !", emoji: "🎉" },
+            { text: "Cheers to another amazing year !", emoji: "🥂" },
+            { text: "Hope your day is as special as you are !", emoji: "🌟" },
+            { text: "Have a blast on your birthday !", emoji: "🎈" },
+          ].map((suggestion, index) => (
+            <button
+              key={index}
+              className={styles.suggestionItem}
+              onClick={() => {
+                const message = `${suggestion.emoji} ${suggestion.text} `;
+                handleInputChange("Message", message, true, "");
+              }}
+            >
+              {suggestion.emoji} {suggestion.text}
+            </button>
+          ))}
+        </div>
+
+        <div
+          style={{ display: "flex", flexDirection: "column", width: "100%" }}
+        >
+          <p>Send wishes in :</p>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                margin: "15px 0px 0px 0px",
+                background: "#e9e8f4",
+                // border: "1px solid #7b83eb",
+                borderRadius: "4px",
+                padding: "8px",
+              }}
+            >
+              <Checkbox
+                inputId="teamsOption"
+                value="Teams"
+                onChange={(e: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "isTeams",
+                    e.checked,
+                    formData?.Message?.validationRule
+                  );
+                  handleInputChange("isTeams", e.checked, isValid, errorMsg);
+                }}
+                checked={formData?.isTeams?.value}
+              />
+              <label
+                htmlFor="teamsOption"
+                className="ml-2"
+                style={{
+                  display: "flex",
+                  gap: "5px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  alignItems: "center",
+                  color: "#7b83eb",
+                }}
+              >
+                <img
+                  src={teamsImg}
+                  alt="teamsimg"
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Send in Teams
+              </label>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                margin: "15px 0px 0px 0px",
+                background: "#e9e8f4",
+                // border: "1px solid #7b83eb",
+                borderRadius: "4px",
+                padding: "8px",
+              }}
+            >
+              <Checkbox
+                inputId="outlookOption"
+                value="Outlook"
+                onChange={(e: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "isOutlook",
+                    e.checked,
+                    formData?.Message?.validationRule
+                  );
+                  handleInputChange("isOutlook", e.checked, isValid, errorMsg);
+                }}
+                checked={formData?.isOutlook?.value}
+              />
+              <label
+                htmlFor="outlookOption"
+                className="ml-2"
+                style={{
+                  display: "flex",
+                  gap: "5px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  alignItems: "center",
+                  color: "#117ad6",
+                }}
+              >
+                <img
+                  src={outlookImg}
+                  alt=""
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Send in Outlook
+              </label>
+            </div>
+          </div>
+        </div>
+        {/* 
         <div className={styles.actionBtns}>
           {!formData?.isTeams?.value && (
             <button
@@ -377,10 +527,18 @@ Enjoy your special day!`;
               <img src={outlookImg} /> Send in Outlook
             </button>
           )}
-        </div>
+        </div> */}
       </div>,
     ],
   ];
+  const isFormValid = (): boolean => {
+    const isMessageValid =
+      formData?.Message?.isValid && formData?.Message?.value.trim() !== "";
+    const isAnyCheckboxChecked =
+      formData?.isTeams?.value || formData?.isOutlook?.value;
+
+    return isMessageValid && isAnyCheckboxChecked;
+  };
 
   const popupActions: any[] = [
     [
@@ -412,7 +570,36 @@ Enjoy your special day!`;
         },
       },
     ],
-    [],
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[1],
+            1,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !isFormValid(),
+        // disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit("Teams");
+        },
+      },
+    ],
   ];
 
   useEffect(() => {
@@ -424,6 +611,7 @@ Enjoy your special day!`;
             moment(val?.DateOfBirth).format("DD/MM/YYYY")
         )
         .slice(0, 5);
+
       setBirthdays(filteredData);
     }
   }, [birthDaysData]);
@@ -441,6 +629,85 @@ Enjoy your special day!`;
       "_self"
     );
   };
+
+  // async function fetchUserBirthdays(context: any, filterSuffix: string) {
+  //   const client: MSGraphClient =
+  //     await context.msGraphClientFactory.getClient();
+
+  //   let allUsers: any[] = [];
+  //   let nextPageUrl: string | undefined = undefined;
+
+  //   try {
+  //     // Step 1: Fetch all users with basic details (ID, mail, displayName)
+  //     do {
+  //       const response: any = nextPageUrl
+  //         ? await client
+  //             .api(nextPageUrl)
+  //             .version("v1.0")
+  //             .top(999)
+  //             .select("id,displayName,mail")
+  //             .get()
+  //         : await client
+  //             .api("/users")
+  //             .version("v1.0")
+  //             .top(999)
+  //             .select("id,displayName,mail")
+  //             .get();
+
+  //       allUsers = allUsers.concat(response.value);
+
+  //       nextPageUrl = response["@odata.nextLink"];
+  //     } while (nextPageUrl);
+
+  //     console.log(allUsers, "Fetched all users");
+
+  //     // Step 2: Fetch birthday extension for each user
+  //     const usersWithBirthdays = await Promise.all(
+  //       allUsers.map(async (user: any) => {
+  //         try {
+  //           // Fetch extensions for the user
+  //           const userDetails = await client
+  //             .api(`/users/${user.id}?$select=birthday`)
+  //             .version("v1.0")
+  //             .get();
+
+  //           // Check if birthday exists
+  //           if (userDetails?.birthday) {
+  //             return {
+  //               id: user.id,
+  //               name: user.displayName,
+  //               mail: user.mail,
+  //               birthday: userDetails.birthday, // Directly map birthday
+  //             };
+  //           }
+
+  //           return null; // Skip users without a birthday property
+  //         } catch (error) {
+  //           console.error(
+  //             `Error fetching birthday for user ${user.id}:`,
+  //             error
+  //           );
+  //           return null;
+  //         }
+  //       })
+  //     );
+
+  //     // Step 3: Filter results based on email suffix and remove null entries
+  //     const filteredUsers = usersWithBirthdays.filter(
+  //       (user) => user && user.mail?.endsWith(filterSuffix) // Match email suffix
+  //     );
+
+  //     console.log(filteredUsers, "Users with birthdays");
+
+  //     return filteredUsers;
+  //   } catch (error) {
+  //     console.error("Error fetching user birthdays:", error);
+  //     return [];
+  //   }
+  // }
+
+  // let x = fetchUserBirthdays(props.context, "@technorucs.com");
+  // console.log(x, "birthday user");
 
   return (
     <div className={styles.container}>
@@ -490,57 +757,64 @@ Enjoy your special day!`;
                     </p>
                   </div>
 
-                  {moment(today).format("DD/MM/YYYY") ===
-                    moment(val?.DateOfBirth).format("DD/MM/YYYY") && (
-                    <div
-                      onClick={() => {
-                        setHandleForm({
-                          BirthDayID: val?.ID,
-                          BirthDayWishID: val?.BirthDayWishID
-                            ? val?.BirthDayWishID
-                            : null,
-                          Type: "SendWish",
-                        });
-                        togglePopupVisibility(
-                          setPopupController,
-                          initialPopupController[1],
-                          1,
-                          "open"
-                        );
-                        setFormData({
-                          Message: {
-                            value: val?.Message,
-                            isValid: true,
-                            errorMsg: "This field is required",
-                            validationRule: { required: true, type: "string" },
-                          },
-                          isTeams: {
-                            value: val?.isTeams,
-                            isValid: true,
-                            errorMsg: "This field is required",
-                            validationRule: {
-                              required: false,
-                              type: "boolean",
+                  {!(val?.isTeams || val?.isOutlook) &&
+                    !val.sameuser &&
+                    moment(today).format("DD/MM/YYYY") ===
+                      moment(val?.DateOfBirth).format("DD/MM/YYYY") && (
+                      <div
+                        onClick={() => {
+                          setCurrentuser(val?.EmployeeName?.name);
+                          // setSameuser(val?.sameuser);
+                          setHandleForm({
+                            BirthDayID: val?.ID,
+                            BirthDayWishID: val?.BirthDayWishID
+                              ? val?.BirthDayWishID
+                              : null,
+                            Type: "SendWish",
+                          });
+                          togglePopupVisibility(
+                            setPopupController,
+                            initialPopupController[1],
+                            1,
+                            "open"
+                          );
+                          setFormData({
+                            Message: {
+                              value: "",
+                              isValid: true,
+                              errorMsg: "This field is required",
+                              validationRule: {
+                                required: true,
+                                type: "string",
+                              },
                             },
-                          },
-                          isOutlook: {
-                            value: val?.isOutlook,
-                            isValid: true,
-                            errorMsg: "This field is required",
-                            validationRule: {
-                              required: false,
-                              type: "boolean",
+                            isTeams: {
+                              value: val?.isTeams,
+                              isValid: true,
+                              errorMsg: "This field is required",
+                              validationRule: {
+                                required: false,
+                                type: "boolean",
+                              },
                             },
-                          },
-                        });
-                      }}
-                    >
-                      <i
-                        className="pi pi-send"
-                        style={{ color: "#0b4d53", fontSize: "24px" }}
-                      />
-                    </div>
-                  )}
+                            isOutlook: {
+                              value: val?.isOutlook,
+                              isValid: true,
+                              errorMsg: "This field is required",
+                              validationRule: {
+                                required: false,
+                                type: "boolean",
+                              },
+                            },
+                          });
+                        }}
+                      >
+                        <i
+                          className="pi pi-send"
+                          style={{ color: "#0b4d53", fontSize: "24px" }}
+                        />
+                      </div>
+                    )}
                 </div>
               </div>
             </div>

@@ -1,0 +1,117 @@
+.newTicketSlide {
+  display: flex;
+  min-width: 450px;
+  height: 100%;
+  padding: 20px 30px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 20px;
+}
+.inputs {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+}
+.actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: auto;
+  padding-bottom: 25px;
+}
+.fileSource {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 13px;
+  font-size: 14px;
+  font-family: "osMedium", sans-serif !important;
+  text-decoration: none;
+  p {
+    font-size: 16px;
+    color: #adadad;
+  }
+  .fileName {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    img {
+      width: 18px;
+      height: 18px;
+    }
+    span {
+      font-size: 14px;
+      color: #0a3622;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 370px;
+      white-space: nowrap;
+      height: 18px;
+      font-family: "osMedium", sans-serif !important;
+    }
+  }
+}
+.attachmentsWrapper {
+  max-height: 250px;
+  display: flex;
+  overflow: auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.priorityWrapper {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 10px;
+  .priorityInputWrapper {
+    width: 100%;
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    img {
+      width: 25px;
+      height: 25px;
+    }
+  }
+}
+/* Define the slide-down animation */
+@keyframes slideDown {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Apply the animation to the .priorityIntimation element */
+.priorityIntimation {
+  font-size: 13px;
+  color: #ff591c;
+  background-color: #ff969620;
+  padding: 6px 10px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+  line-height: 1.35;
+  font-family: "osMedium", sans-serif !important;
+  /* Add the slide-down animation */
+  animation: slideDown 0.2s ease forwards;
+}

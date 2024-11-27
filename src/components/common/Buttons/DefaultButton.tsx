@@ -4,7 +4,7 @@ import styles from "./Buttons.module.scss";
 import { memo } from "react";
 
 interface Props extends ButtonProps {
-  text: any;
+  text?: any;
   endIcon?: any;
   startIcon?: any;
   disabled?: boolean;
