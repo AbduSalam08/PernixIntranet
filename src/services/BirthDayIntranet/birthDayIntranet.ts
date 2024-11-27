@@ -16,7 +16,13 @@ export const getBirthdayCurrentUserRole = async (
   const questionCEOAdminData: any = await sp.web.siteGroups
     .getByName(CONFIG.SPGroupName.Birthdays_Admin)
     .users.get();
-  const isAdmin = questionCEOAdminData?.some(
+
+  const isSuperAdmin: any = await sp.web.siteGroups
+    .getByName(CONFIG.SPGroupName.Pernix_Admin)
+    .users.get();
+  const usersArray = [...questionCEOAdminData, ...isSuperAdmin];
+
+  const isAdmin = usersArray?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
   if (isAdmin) {
@@ -38,6 +44,7 @@ export const getAllBirthdayData = async (dispatch: any): Promise<any> => {
   );
   try {
     const currentUser: any = await sp.web.currentUser.get();
+    console.log("currentUser: ", currentUser);
     const currentUserEmail = currentUser?.Email.toLowerCase() || "";
     // Fetch news data
     const birthdayResponse: any = await SpServices.SPReadItems({
@@ -73,12 +80,23 @@ export const getAllBirthdayData = async (dispatch: any): Promise<any> => {
     });
     console.log("birthdayResponse: ", birthdayResponse);
     console.log("wishesResponse: ", wishesResponse);
+    // const sameUser: boolean = birthdayResponse.some(
+    //   (val: any) => val.EmployeeName.EMail.toLowerCase() === currentUserEmail
+    // );
+    // console.log(sameUser, "sameUser");
     const newhireData: any = birthdayResponse?.map((item: any) => {
       const birthdayWish = wishesResponse?.filter(
         (obj: any) =>
           obj?.Author?.EMail.toLowerCase() === currentUserEmail &&
           obj?.BirthDayId === item?.ID
       );
+
+      console.log(birthdayWish, "birthdayWish");
+      let sameUser =
+        item?.EmployeeName?.EMail?.toLowerCase() === currentUserEmail;
+
+      console.log(sameUser, "sameuser");
+
       return {
         ID: item?.ID,
         EmployeeName: {
@@ -96,10 +114,13 @@ export const getAllBirthdayData = async (dispatch: any): Promise<any> => {
         createdName: item?.Author?.Title,
         imgUrl: item?.AttachmentFiles[0]?.ServerRelativeUrl,
         Attachment: item?.AttachmentFiles[0],
+        currentUser: currentUser ? currentUser.Title : "",
         BirthDayWishID: birthdayWish[0]?.ID ? birthdayWish[0]?.ID : null,
+        sameuser: sameUser,
+        // Sameuser: sameUser,
       };
     });
-
+    console.log(newhireData, "newhiredatas");
     // Dispatch the data
     dispatch?.(
       newhireData?.length === 0

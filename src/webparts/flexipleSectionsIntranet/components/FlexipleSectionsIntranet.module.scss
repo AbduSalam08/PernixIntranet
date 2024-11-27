@@ -6,10 +6,23 @@
     justify-content: flex-end;
     margin: 15px 0px;
 
-    i {
-      font-size: 1.4rem;
-      color: #0b4d53;
-      cursor: pointer;
+    .buttondiv {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 80px;
+      border-radius: 4px;
+      padding: 10px;
+      color: #ffff;
+      font-size: 1rem;
+      background: #0b4d53;
+
+      i {
+        font-size: 1rem;
+        color: #ffff;
+        cursor: pointer;
+      }
     }
   }
   .container {
@@ -40,4 +53,12 @@
       }
     }
   }
+}
+
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
 }

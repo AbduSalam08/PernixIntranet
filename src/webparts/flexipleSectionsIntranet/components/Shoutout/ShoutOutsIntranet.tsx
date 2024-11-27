@@ -190,6 +190,7 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
         >
           <div
             className={styles.inputWrapper}
+
             // style={{ width: "50%" }}
           >
             <CustomPeoplePicker
