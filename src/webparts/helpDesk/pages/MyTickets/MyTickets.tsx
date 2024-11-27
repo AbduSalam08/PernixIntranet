@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Drawer } from "@mui/material";
+// import { Drawer, Switch } from "@mui/material";
+import { Switch } from "@mui/material";
 import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
 import DataTable from "../../../../components/common/DataTable/DataTable";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
@@ -11,11 +12,11 @@ import PageHeader from "../../../../components/common/PageHeader/PageHeader";
 const reopenTicket: any = require("../../../../assets/images/svg/reopenTicket.svg");
 import EditIcon from "@mui/icons-material/Edit";
 const infoRed: any = require("../../../helpDesk/assets/images/svg/infoRed.svg");
+const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
 
 import styles from "./MyTickets.module.scss";
 import { useEffect, useMemo, useState } from "react";
 import { Add, AttachFile, OpenInNew, RestartAlt } from "@mui/icons-material";
-import CustomInput from "../../../../components/common/CustomInputFields/CustomInput";
 import {
   currentRoleBasedDataUtil,
   downloadFiles,
@@ -23,52 +24,56 @@ import {
   filterTicketsByPriority,
   filterTicketsBySearch,
   formatTicketData,
-  // filterTicketsByTimePeriod,
   generateTicketNumber,
   getCurrentRoleForTicketsRoute,
   getLastTicketNumber,
   getTicketsByKeyValue,
-  // sortByCreatedDate,
   sortTickets,
   ticketsFilter,
   validateField,
 } from "../../../../utils/commonUtils";
-import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
-// import CustomFileUpload from "../../../../components/common/CustomInputFields/CustomFileUpload";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import InfoCard from "../../components/InfoCard/InfoCard";
 import { toast } from "react-toastify";
 import {
+  initialData,
+  initialRecurrenceFormData,
+  priorityLevelIntimations,
   TicketCategories,
   TicketPriority,
+  TicketRecurrenceFrequency,
   TicketStatus,
 } from "../../../../constants/HelpDeskTicket";
 import { ToastContainer } from "react-toastify";
-import {
-  addNewTicket,
-  updateTicket,
-} from "../../../../services/HelpDeskMainServices/ticketServices";
+import { addNewTicket } from "../../../../services/HelpDeskMainServices/ticketServices";
 import { Avatar } from "primereact/avatar";
 import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
-import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
+// import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
 import { useLocation, useNavigate } from "react-router-dom";
-import { togglePopupVisibility } from "../../../../utils/popupUtils";
+import {
+  togglePopupVisibility,
+  updatePopupController,
+} from "../../../../utils/popupUtils";
 import Popup from "../../../../components/common/Popups/Popup";
 import dayjs from "dayjs";
 import { getAttachmentofTicket } from "../../../../services/HelpDeskMainServices/ticketViewServices";
-import CustomMultipleFileUpload from "../../../../components/common/CustomInputFields/CustomMultipleFileUpload";
-import { mapRowDataToFormData } from "../../../../utils/helpdeskUtils";
+import {
+  calculateNextTicketDate,
+  handleSubmit,
+  mapRowDataToFormData,
+  validateRecurrenceForm,
+} from "../../../../utils/helpdeskUtils";
 import { IinitialPopupLoaders } from "../../../../interface/interface";
-// import CustomDateInput from "../../../../components/common/CustomInputFields/CustomDateInput";
+import CustomDateInput from "../../../../components/common/CustomInputFields/CustomDateInput";
+import TicketForm from "../../components/TicketForm/TicketForm";
 // Import SVGs
 const myTickets: any = require("../../assets/images/svg/myTickets.svg");
 const openTickets: any = require("../../assets/images/svg/openTickets.svg");
 const closedTickets: any = require("../../assets/images/svg/closedTickets.svg");
 const ticketsCreatedThisWeek: any = require("../../assets/images/svg/ticketsCreatedThisWeek.svg");
 const ticketsOnHold: any = require("../../assets/images/svg/ticketsOnHold.svg");
-const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
 
 const MyTickets = (): JSX.Element => {
   const dispatch = useDispatch();
@@ -85,36 +90,10 @@ const MyTickets = (): JSX.Element => {
     data: [],
   });
 
-  const initialRecurrenceFormData = {
-    StartDate: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "array" },
-    },
-    EndDate: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-    Frequency: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid file",
-      validationRule: { required: true, type: "file" },
-    },
-    TicketDetails: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-  };
-
   const [recurrenceDetails, setRecurrenceDetails] = useState<any>(
     initialRecurrenceFormData
   );
+  console.log("recurrenceDetails: ", recurrenceDetails);
   const [hasRecurrence, setHasRecurrence] = useState(false);
   console.log("setHasRecurrence: ", setHasRecurrence);
   console.log("hasRecurrence: ", hasRecurrence);
@@ -157,15 +136,12 @@ const MyTickets = (): JSX.Element => {
 
   const isTicketManager: boolean =
     currentUserDetails?.role === "HelpDesk_Ticket_Managers";
-  // || currentUserDetails?.role === "Super Admin";
 
   const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
-  // || currentUserDetails?.role === "Super Admin";
 
   const HelpDeskTicktesData: any = useSelector(
     (state: any) => state.HelpDeskTicktesData.value
   );
-  console.log("HelpDeskTicktesData: ", HelpDeskTicktesData);
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
 
@@ -175,118 +151,32 @@ const MyTickets = (): JSX.Element => {
     `${currentRole}${location.pathname}`
   );
 
-  const initialData = {
-    TicketNumber: {
-      value: "",
-      isValid: true,
-      errorMsg: "Invalid title",
-      validationRule: { required: true, type: "string" },
-    },
-    EmployeeNameId: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid input",
-      validationRule: { required: true, type: "string" },
-    },
-    ITOwnerId: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid input",
-      validationRule: {
-        required: isTicketManager,
-        type: "string",
-      },
-    },
-    TicketManagerId: {
-      value: isTicketManager ? currentUserDetails?.id : null,
-      isValid: true,
-      errorMsg: "TicketManager is required",
-      validationRule: { required: false, type: "array" },
-    },
-    Attachment: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid file",
-      validationRule: { required: false, type: "file" },
-    },
-    Category: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-    TicketDescription: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "string" },
-    },
-    Priority: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-    TicketSource: {
-      value: "Web portal",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "string" },
-    },
-    Status: {
-      // value: isTicketManager || isITOwner ? "" : "Open",
-      // value: "Open",
-      value: isTicketManager
-        ? "In Progress"
-        : openNewTicketSlide?.data?.Status === "Open" &&
-          isTicketManager &&
-          openNewTicketSlide?.data?.ITOwnerId === null &&
-          openNewTicketSlide?.type === "update"
-        ? "In Progress"
-        : "Open",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: {
-        required: isTicketManager || isITOwner,
-        type: "string",
-      },
-    },
-    RepeatedTicket: {
-      value: false,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "boolean" },
-    },
-    RepeatedTicketSourceId: {
-      value: null,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "string" },
-    },
-    Rating: {
-      value: null,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "number" },
-    },
-    TicketClosedOn: {
-      value: null,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "date" },
-    },
-    TicketRepeatedOn: {
-      value: null,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: false, type: "date" },
-    },
-  };
+  const initialTicketsFormData = initialData(
+    isTicketManager,
+    isITOwner,
+    currentUserDetails,
+    openNewTicketSlide
+  );
 
-  const [formData, setFormData] = useState<any>(initialData);
+  const [formData, setFormData] = useState<any>(initialTicketsFormData);
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
+  console.log(
+    calculateNextTicketDate(
+      recurrenceDetails?.StartDate?.value,
+      dayjs().format("DD/MM/YYYY"),
+      recurrenceDetails?.EndDate?.value,
+      recurrenceDetails?.Frequency?.value
+    )
+  );
+
+  const nextTicketIntimation = calculateNextTicketDate(
+    recurrenceDetails?.StartDate?.value,
+    dayjs().format("DD/MM/YYYY"),
+    recurrenceDetails?.EndDate?.value,
+    recurrenceDetails?.Frequency?.value
+  );
 
   const popupActions: any = [
     [
@@ -298,6 +188,8 @@ const MyTickets = (): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: () => {
+          setHasRecurrence(false);
+          setRecurrenceDetails(initialRecurrenceFormData);
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
@@ -313,87 +205,123 @@ const MyTickets = (): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: async () => {
-          // await handleSubmit();
-          togglePopupVisibility(
-            setPopupController,
-            initialPopupController[0],
-            0,
-            "close"
-          );
           const currentRowData: any = popupController[0]?.popupData;
 
-          const formDataAppended = isTicketManager
-            ? {
-                TicketNumber: {
-                  value: currentRowData?.TicketNumber,
-                },
-                Status: {
-                  value: currentRowData?.ITOwner?.ID ? "In Progress" : "Open",
-                },
-                RepeatedTicketSourceId: { value: currentRowData?.ID },
-                RepeatedTicket: { value: true },
-                TicketRepeatedOn: { value: dayjs(new Date()) },
-                Category: { value: currentRowData?.Category },
-                Priority: { value: currentRowData?.Priority },
-                EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
-                TicketSource: { value: currentRowData?.TicketSource },
-                TicketDescription: { value: currentRowData?.TicketDescription },
-                TicketManagerId: {
-                  value: currentRowData?.TicketManagerId
-                    ? currentRowData?.TicketManager?.ID
-                    : null,
-                },
-                ITOwnerId: {
-                  value: currentRowData?.ITOwnerId
-                    ? currentRowData?.ITOwner?.ID
-                    : null,
-                },
-              }
-            : {
-                TicketNumber: {
-                  value: currentRowData?.TicketNumber,
-                },
-                Status: { value: "Open" },
-                RepeatedTicketSourceId: { value: currentRowData?.ID },
-                RepeatedTicket: { value: true },
-                TicketRepeatedOn: { value: dayjs(new Date()) },
-                Category: { value: currentRowData?.Category },
-                Priority: { value: currentRowData?.Priority },
-                EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
-                TicketSource: { value: currentRowData?.TicketSource },
-                TicketDescription: { value: currentRowData?.TicketDescription },
-                TicketManagerId: {
-                  value: null,
-                },
-                ITOwnerId: {
-                  value: null,
-                },
-              };
+          if (!hasRecurrence) {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              0,
+              "close"
+            );
+            const formDataAppended = isTicketManager
+              ? {
+                  TicketNumber: {
+                    value: currentRowData?.TicketNumber,
+                  },
+                  Status: {
+                    value: currentRowData?.ITOwner?.ID ? "In Progress" : "Open",
+                  },
+                  RepeatedTicketSourceId: { value: currentRowData?.ID },
+                  RepeatedTicket: { value: true },
+                  TicketRepeatedOn: { value: dayjs(new Date()) },
+                  Category: { value: currentRowData?.Category },
+                  Priority: { value: currentRowData?.Priority },
+                  EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
+                  TicketSource: { value: currentRowData?.TicketSource },
+                  TicketDescription: {
+                    value: currentRowData?.TicketDescription,
+                  },
+                  TicketManagerId: {
+                    value: currentRowData?.TicketManagerId
+                      ? currentRowData?.TicketManager?.ID
+                      : null,
+                  },
+                  ITOwnerId: {
+                    value: currentRowData?.ITOwnerId
+                      ? currentRowData?.ITOwner?.ID
+                      : null,
+                  },
+                }
+              : {
+                  TicketNumber: {
+                    value: currentRowData?.TicketNumber,
+                  },
+                  Status: { value: "Open" },
+                  RepeatedTicketSourceId: { value: currentRowData?.ID },
+                  RepeatedTicket: { value: true },
+                  TicketRepeatedOn: { value: dayjs(new Date()) },
+                  Category: { value: currentRowData?.Category },
+                  Priority: { value: currentRowData?.Priority },
+                  EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
+                  TicketSource: { value: currentRowData?.TicketSource },
+                  TicketDescription: {
+                    value: currentRowData?.TicketDescription,
+                  },
+                  TicketManagerId: {
+                    value: null,
+                  },
+                  ITOwnerId: {
+                    value: null,
+                  },
+                };
 
-          console.log("formDataAppended: ", formDataAppended);
-
-          // await Promise.all([
-          // ])
-
-          await addNewTicket(formDataAppended, ["Attachments"], true)
-            .then(async (res: any) => {
-              navigate(`${currentRole}/all_tickets`);
-              await getAllTickets(dispatch);
-              // navigate(location.pathname);
-              // ticketsFilter(
-              //   `${currentRole}${location.pathname}`,
-              //   HelpDeskTicktesData,
-              //   currentUserDetails,
-              //   dispatch
-              // );
-            })
-            .catch((err: any) => {
-              console.log("err: ", err);
-            });
+            await addNewTicket(formDataAppended, ["Attachments"], true)
+              .then(async (res: any) => {
+                navigate(`${currentRole}/all_tickets`);
+                await getAllTickets(dispatch);
+              })
+              .catch((err: any) => {
+                console.log("err: ", err);
+              });
+          } else if (!nextTicketIntimation?.error) {
+            validateRecurrenceForm(
+              recurrenceDetails,
+              setRecurrenceDetails,
+              setLoadingSubmit
+            );
+          }
         },
       },
     ],
   ];
+
+  const handleInputChange = (
+    field: string,
+    value: any,
+    isValid: boolean,
+    errorMsg: string = "",
+    setState?: any
+  ): void => {
+    if (
+      Object.keys(formData)
+        .filter((key) => formData[key]?.validationRule?.required)
+        .every((key) => formData[key].isValid)
+    ) {
+      setLoadingSubmit(false);
+    }
+    if (setState) {
+      setState?.((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+      }));
+    } else {
+      setFormData((prevData: any) => ({
+        ...prevData,
+        [field]: {
+          ...prevData[field],
+          value: value,
+          isValid,
+          errorMsg: isValid ? "" : errorMsg,
+        },
+      }));
+    }
+  };
 
   const popupInputs: any = [
     <div key={1} className={styles.recurrenceWrapper}>
@@ -401,105 +329,132 @@ const MyTickets = (): JSX.Element => {
         Are you sure want to repeat this ticket &quot;
         {popupController[0]?.popupData?.TicketNumber}&quot;?
       </p>
-      {/* <div className={styles.recurrenceBtn}>
+      <div className={styles.recurrenceBtn}>
         <p>Set recurrence</p>
         <Switch
           sx={{
             color: "#2d4b51",
           }}
-          onChange={(value: any) => {
-            console.log("value: ", value);
-            setHasRecurrence(value);
-            if (value) {
-              setPopupController((prev: any) => ({
-                ...prev,
-              }));
+          onChange={(value, checked) => {
+            setHasRecurrence(checked);
+            if (checked) {
+              setPopupController(
+                updatePopupController(popupController, 0, {
+                  popupWidth: "650px",
+                })
+              );
+            } else {
+              setPopupController(
+                updatePopupController(popupController, 0, {
+                  popupWidth: "450px",
+                })
+              );
             }
           }}
         />
       </div>
 
-      <div className={styles.recurrenceOptions}>
+      <div
+        className={styles.recurrenceOptions}
+        style={{ maxHeight: hasRecurrence ? "500px" : "0" }}
+      >
         <span className={styles.recurrenceLabel}>
           Recurrence details ({popupController[0]?.popupData?.TicketNumber})
         </span>
+
         <div className={styles.r1}>
           <CustomDateInput
             maxWidth="50%"
-            value={""}
+            value={recurrenceDetails.StartDate?.value || ""}
             disablePast
             label="Start date"
             hightLightInput
+            onChange={(e: any) => {
+              const value = e;
+              console.log("value: ", value);
+              const { isValid, errorMsg } = validateField(
+                "StartDate",
+                value,
+                recurrenceDetails?.StartDate?.validationRule
+              );
+              handleInputChange(
+                "StartDate",
+                value,
+                isValid,
+                errorMsg,
+                setRecurrenceDetails
+              );
+            }}
+            error={!recurrenceDetails.StartDate?.isValid}
+            errorMsg={recurrenceDetails.StartDate?.errorMsg}
           />
           <CustomDateInput
             maxWidth="50%"
-            value={""}
+            value={recurrenceDetails.EndDate?.value || ""}
             disablePast
             label="End date"
             hightLightInput
+            onChange={(e: any) => {
+              const value = e;
+              console.log("value: ", value);
+              const { isValid, errorMsg } = validateField(
+                "EndDate",
+                value,
+                recurrenceDetails?.EndDate?.validationRule
+              );
+              handleInputChange(
+                "EndDate",
+                value,
+                isValid,
+                errorMsg,
+                setRecurrenceDetails
+              );
+            }}
+            error={!recurrenceDetails.EndDate?.isValid}
+            errorMsg={recurrenceDetails.EndDate?.errorMsg}
           />
         </div>
 
         <div className={styles.r1}>
           <CustomDropDown
-            value={""}
+            value={recurrenceDetails.Frequency?.value || ""}
             placeholder="Select frequency"
             options={TicketRecurrenceFrequency}
             highlightDropdown
-            width={"50%"}
+            onChange={(e: any) => {
+              const value = e;
+              console.log("value: ", value);
+              const { isValid, errorMsg } = validateField(
+                "Frequency",
+                value,
+                recurrenceDetails?.Frequency?.validationRule
+              );
+              handleInputChange(
+                "Frequency",
+                value,
+                isValid,
+                errorMsg,
+                setRecurrenceDetails
+              );
+            }}
+            width="50%"
+            isValid={recurrenceDetails.Frequency?.isValid}
+            errorMsg={recurrenceDetails.Frequency?.errorMsg}
           />
           <div className={styles.nextTicketIntimation}>
-            <label>Next ticket on</label>
-            <span>20/12/2024</span>
+            <label>Next ticket will repeat on</label>
+            <span
+              className={`${
+                nextTicketIntimation?.error ? styles.badgeNextDateError : ""
+              }`}
+            >
+              {nextTicketIntimation?.date || "N/A"}
+            </span>
           </div>
         </div>
-      </div> */}
+      </div>
     </div>,
   ];
-
-  // const handleSubmitForRepeatTicket = async (sendBy: string): Promise<any> => {
-  //   let hasErrors = false;
-  //   // Validate each field and update the state with error messages
-  //   const updatedFormData = Object.keys(recurrenceDetails).reduce(
-  //     (acc, key) => {
-  //       const fieldData = recurrenceDetails[key];
-  //       const { isValid, errorMsg } = validateField(
-  //         key,
-  //         key === "EmployeeName"
-  //           ? fieldData?.value?.length > 0
-  //             ? fieldData.value
-  //             : fieldData.value
-  //             ? [fieldData.value]
-  //             : []
-  //           : fieldData.value,
-  //         fieldData?.validationRule
-  //       );
-
-  //       if (!isValid) {
-  //         hasErrors = true;
-  //       }
-
-  //       return {
-  //         ...acc,
-  //         [key]: {
-  //           ...fieldData,
-  //           isValid,
-  //           errorMsg,
-  //         },
-  //       };
-  //     },
-  //     {} as typeof formData
-  //   );
-
-  //   setFormData(updatedFormData);
-
-  //   if (!hasErrors) {
-  //     console.log("submitted");
-  //   } else {
-  //     console.log("has errors");
-  //   }
-  // };
-  // console.log("handleSubmitForRepeatTicket: ", handleSubmitForRepeatTicket);
 
   const [dataGridProps, setDataGridProps] = useState<{
     data: any[];
@@ -770,141 +725,6 @@ const MyTickets = (): JSX.Element => {
     },
   ];
 
-  const priorityLevelIntimations: any = {
-    Standard: null,
-    "Low Priority": "Resolution within 3-5 business days.",
-    "Medium Priority": "Resolution within 48 hours.",
-    "High Priority":
-      "Same-day resolution. (Please only select high priority if necessary. IT may adjust priority based on other business objectives.)",
-    "Critical/Impacting Multiple People":
-      "Selecting this priority will alert multiple IT personnel and senior managers for immediate resolution. Use this for business-critical issues (e.g., Vista or Internet is down).",
-  };
-
-  const handleInputChange = (
-    field: string,
-    value: any,
-    isValid: boolean,
-    errorMsg: string = ""
-  ): void => {
-    if (
-      Object.keys(formData)
-        .filter((key) => formData[key]?.validationRule?.required)
-        .every((key) => formData[key].isValid)
-    ) {
-      setLoadingSubmit(false);
-    }
-
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [field]: {
-        ...prevData[field],
-        value: value,
-        isValid,
-        errorMsg: isValid ? "" : errorMsg,
-      },
-    }));
-  };
-
-  const handleSubmit = async (): Promise<any> => {
-    let hasErrors = false;
-    if (
-      !Object.keys(formData)
-        .filter((key) => formData[key]?.validationRule?.required)
-        .every((key) => formData[key].isValid)
-    ) {
-      setLoadingSubmit(true);
-    }
-    // Validate each field and update the state with error messages
-    const updatedFormData = Object.keys(formData).reduce((acc, key) => {
-      const fieldData = formData[key];
-      const { isValid, errorMsg } = validateField(
-        key,
-        fieldData?.value,
-        fieldData?.validationRule
-      );
-
-      if (!isValid) {
-        hasErrors = true;
-      }
-
-      return {
-        ...acc,
-        [key]: {
-          ...fieldData,
-          isValid,
-          errorMsg,
-        },
-      };
-    }, {} as typeof formData);
-
-    setFormData(updatedFormData);
-    console.log("hasErrors: ", hasErrors);
-    if (!hasErrors) {
-      console.log("formData: ", formData);
-      setLoadingSubmit(true);
-      setSubmitClicked(true);
-      debugger;
-      console.log("loadingSubmit: ", loadingSubmit);
-      if (openNewTicketSlide.type === "add") {
-        await Promise.all([addNewTicket(formData, ["Attachment"])])
-          .then(async (res: any) => {
-            await getAllTickets(dispatch);
-            navigate(location.pathname);
-            ticketsFilter(
-              `${currentRole}${location.pathname}`,
-              HelpDeskTicktesData,
-              currentUserDetails,
-              dispatch
-            );
-            setFormData(initialData);
-            setOpenNewTicketSlide((prev: any) => ({
-              ...prev,
-              open: false,
-              type: "add",
-            }));
-          })
-          ?.catch((err: any) => {
-            console.log("err: ", err);
-          });
-      } else {
-        await Promise.all([
-          updateTicket(openNewTicketSlide?.data?.ID, formData, ["Attachment"]),
-        ])
-          .then(async (res: any) => {
-            await getAllTickets(dispatch);
-            // navigate(`${currentRole}/all_tickets`);
-            navigate(location.pathname);
-            ticketsFilter(
-              `${currentRole}${location.pathname}`,
-              HelpDeskTicktesData,
-              currentUserDetails,
-              dispatch
-            );
-            setFormData(initialData);
-            setOpenNewTicketSlide((prev: any) => ({
-              ...prev,
-              open: false,
-              type: "add",
-            }));
-          })
-          ?.catch((err: any) => {
-            console.log("err: ", err);
-          });
-      }
-    } else {
-      toast.warning("Please fill out all fields!", {
-        position: "top-center",
-        autoClose: 3500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-      });
-      setLoadingSubmit(true);
-    }
-  };
-
-  // Info cards array
   const infoCards: any[] = [
     {
       cardName: "My tickets",
@@ -1106,14 +926,6 @@ const MyTickets = (): JSX.Element => {
                 open: true,
                 type: "add",
               });
-              // const lastTicketID: number = Math.max(
-              //   0,
-              //   ...(HelpDeskTicktesData?.data ?? [])
-              //     ?.map((item: any) => item?.ID)
-              //     ?.filter(
-              //       (id: number | undefined) => id !== undefined && id !== null
-              //     )
-              // );
               const lastTicketID = getLastTicketNumber(
                 HelpDeskTicktesData?.AllData
               );
@@ -1167,298 +979,43 @@ const MyTickets = (): JSX.Element => {
         checkboxSelection={false}
       />
 
-      {/* new ticket slide */}
-      <Drawer
-        anchor={"right"}
-        open={openNewTicketSlide.open}
-        onClose={() => {
-          setOpenNewTicketSlide({
-            open: false,
-            type: "add",
-          });
-          setFormData(initialData);
+      <TicketForm
+        openNewTicketSlide={openNewTicketSlide}
+        setOpenNewTicketSlide={setOpenNewTicketSlide}
+        type={openNewTicketSlide.type}
+        formData={formData}
+        setFormData={setFormData}
+        handleSubmit={async () => {
+          await handleSubmit(
+            formData,
+            setLoadingSubmit,
+            setFormData,
+            setSubmitClicked,
+            openNewTicketSlide,
+            setOpenNewTicketSlide,
+            currentRole,
+            currentUserDetails,
+            HelpDeskTicktesData,
+            initialTicketsFormData,
+            dispatch,
+            navigate,
+            location
+          );
         }}
-        sx={{
-          "& .MuiPaper-root.MuiPaper-elevation": {
-            borderTopLeftRadius: "10px",
-            borderBottomLeftRadius: "10px",
-            backgroundColor: "#F7F7F7",
-          },
-        }}
-      >
-        <div className={styles.newTicketSlide}>
-          <>
-            <PageHeader
-              title={
-                openNewTicketSlide?.type === "add"
-                  ? "New ticket"
-                  : "Update ticket details"
-              }
-              headerClick={() => {
-                setOpenNewTicketSlide({ open: false, type: "add" });
-              }}
-              centered
-              underlined
-            />
-            <div className={styles.inputs}>
-              <>
-                <CustomInput
-                  value={formData?.TicketNumber?.value}
-                  // disabled
-                  readOnly
-                  placeholder="Ticket number"
-                  isValid={formData?.TicketNumber?.isValid}
-                  errorMsg={formData?.TicketNumber?.errorMsg}
-                  onChange={(e) => {
-                    const value = e;
-                    const { isValid, errorMsg } = validateField(
-                      "TicketNumber",
-                      value,
-                      formData?.TicketNumber?.validationRule
-                    );
-                    handleInputChange("TicketNumber", value, isValid, errorMsg);
-                  }}
-                />
-
-                <CustomPeoplePicker
-                  labelText="Employee Name"
-                  isValid={formData?.EmployeeNameId?.isValid}
-                  errorMsg={formData?.EmployeeNameId?.errorMsg}
-                  noErrorMsg
-                  readOnly
-                  selectedItem={[formData?.EmployeeNameId?.value?.email]}
-                  onChange={(item: any) => {
-                    const value = item[0];
-                    console.log("value: ", value);
-                    const { isValid, errorMsg } = validateField(
-                      "EmployeeNameId",
-                      value,
-                      formData?.EmployeeNameId?.validationRule
-                    );
-                    handleInputChange(
-                      "EmployeeNameId",
-                      value,
-                      isValid,
-                      errorMsg
-                    );
-                  }}
-                />
-
-                {isTicketManager && (
-                  <CustomPeoplePicker
-                    labelText="IT Owner"
-                    groupName={"HelpDesk_IT_Owners"}
-                    isValid={formData?.ITOwnerId?.isValid}
-                    errorMsg={formData?.ITOwnerId?.errorMsg}
-                    selectedItem={[formData?.ITOwnerId?.value?.email]}
-                    onChange={(item: any) => {
-                      const value = item[0];
-                      console.log("value: ", value);
-                      const { isValid, errorMsg } = validateField(
-                        "ITOwnerId",
-                        value,
-                        formData?.ITOwnerId?.validationRule
-                      );
-                      handleInputChange("ITOwnerId", value, isValid, errorMsg);
-                    }}
-                  />
-                )}
-
-                <CustomDropDown
-                  value={formData?.Category?.value}
-                  options={TicketCategories}
-                  placeholder="Category"
-                  isValid={formData?.Category?.isValid}
-                  errorMsg={formData?.Category?.errorMsg}
-                  onChange={(value) => {
-                    const { isValid, errorMsg } = validateField(
-                      "Category",
-                      value,
-                      formData?.Category?.validationRule
-                    );
-                    handleInputChange("Category", value, isValid, errorMsg);
-                  }}
-                />
-
-                <div className={styles.priorityWrapper}>
-                  <div className={styles.priorityInputWrapper}>
-                    <CustomDropDown
-                      value={formData?.Priority?.value}
-                      options={TicketPriority}
-                      placeholder="Priority"
-                      width={"100%"}
-                      isValid={formData?.Priority?.isValid}
-                      errorMsg={formData?.Priority?.errorMsg}
-                      onChange={(value) => {
-                        const { isValid, errorMsg } = validateField(
-                          "Priority",
-                          value,
-                          formData?.Priority?.validationRule
-                        );
-                        handleInputChange("Priority", value, isValid, errorMsg);
-                      }}
-                    />
-                    {priorityLevelIntimations[formData?.Priority?.value] && (
-                      <img src={infoRed} />
-                    )}
-                  </div>
-                  {priorityLevelIntimations[formData?.Priority?.value] ? (
-                    <span className={styles.priorityIntimation}>
-                      Note:{" "}
-                      {priorityLevelIntimations[formData?.Priority?.value] ??
-                        ""}
-                    </span>
-                  ) : (
-                    ""
-                  )}
-                </div>
-
-                {(isTicketManager || isITOwner) &&
-                  openNewTicketSlide?.type === "update" &&
-                  openNewTicketSlide?.data?.ITOwnerId !== null && (
-                    <CustomDropDown
-                      disabled={
-                        openNewTicketSlide?.data?.Status === "Closed" &&
-                        openNewTicketSlide?.type === "update"
-                      }
-                      value={formData?.Status?.value}
-                      options={
-                        openNewTicketSlide?.data?.Status === "In Progress"
-                          ? TicketStatus.filter((item: any) => item !== "Open")
-                          : TicketStatus
-                      }
-                      placeholder="Status"
-                      isValid={formData?.Status?.isValid}
-                      errorMsg={formData?.Status?.errorMsg}
-                      onChange={(value) => {
-                        const { isValid, errorMsg } = validateField(
-                          "Status",
-                          value,
-                          formData?.Status?.validationRule
-                        );
-                        handleInputChange("Status", value, isValid, errorMsg);
-                      }}
-                    />
-                  )}
-
-                <FloatingLabelTextarea
-                  value={formData.TicketDescription.value}
-                  placeholder="Description"
-                  rows={5}
-                  isValid={formData.TicketDescription.isValid}
-                  errorMsg={formData.TicketDescription.errorMsg}
-                  readOnly={currentUserDetails?.role !== "user"}
-                  onChange={(e: any) => {
-                    const value = e.trimStart();
-                    const { isValid, errorMsg } = validateField(
-                      "TicketDescription",
-                      value,
-                      formData.TicketDescription.validationRule
-                    );
-                    handleInputChange(
-                      "TicketDescription",
-                      value,
-                      isValid,
-                      errorMsg
-                    );
-                  }}
-                />
-
-                {openNewTicketSlide?.type === "add" ||
-                (openNewTicketSlide?.type === "update" &&
-                  openNewTicketSlide?.data?.EmployeeName?.EMail ===
-                    currentUserDetails?.email) ? (
-                  // <CustomFileUpload
-                  //   accept="image/png,image/svg"
-                  //   value={formData?.Attachment?.value?.name}
-                  //   onFileSelect={(file) => {
-                  //     console.log("file: ", file);
-                  //     const { isValid, errorMsg } = validateField(
-                  //       "Attachment",
-                  //       file ? file.name : "",
-                  //       formData?.Attachment
-                  //     );
-                  //     handleInputChange("Attachment", file, isValid, errorMsg);
-                  //   }}
-                  //   placeholder="Attachment"
-                  //   isValid={formData?.Attachment?.isValid}
-                  //   errMsg={formData?.Attachment?.errorMsg}
-                  // />
-                  <CustomMultipleFileUpload
-                    accept="image/svg, image/png, image/jpg"
-                    placeholder="Click to upload attachment(s)"
-                    multiple
-                    customFileNameWidth={"370px"}
-                    // value={formData?.Attachment?.value?.name || null}
-                    value={formData?.Attachment?.value ?? []}
-                    onFileSelect={(file) => {
-                      console.log("file: ", file);
-                      const { isValid, errorMsg } = validateField(
-                        "Attachment",
-                        file ? file?.[0]?.name : "",
-                        formData?.Attachment
-                      );
-                      handleInputChange("Attachment", file, isValid, errorMsg);
-                    }}
-                    isValid={formData.Attachment.isValid}
-                    errMsg={formData.Attachment.errorMsg}
-                  />
-                ) : formData?.Attachment?.value?.length > 0 ? (
-                  <>
-                    <p>Attachments ({formData?.Attachment?.value?.length})</p>
-                    <div className={styles.attachmentsWrapper}>
-                      {formData?.Attachment?.value?.map(
-                        (item: any, idx: number) => (
-                          <a
-                            key={idx}
-                            href={`${window.location.origin}${item?.ServerRelativeUrl}?web=1`}
-                            download
-                            className={styles.fileSource}
-                            onClick={() => {
-                              window.open(
-                                `${window.location.origin}${item?.ServerRelativeUrl}?web=1`
-                              );
-                            }}
-                          >
-                            <div className={styles.fileName} title={item?.name}>
-                              <img src={fileIcon} />
-                              <span>{item?.name}</span>
-                            </div>
-                          </a>
-                        )
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <span className={styles.fileSource}>
-                    <p>Attachment</p>
-                    <div className={styles.fileName}>
-                      <span>No attachment found.</span>
-                    </div>
-                  </span>
-                )}
-              </>
-            </div>
-          </>
-
-          <div className={styles.actions}>
-            <DefaultButton
-              btnType="darkGreyVariant"
-              text={"Cancel"}
-              onClick={() => {
-                setOpenNewTicketSlide({ open: false, type: "add" });
-                setFormData(initialData);
-              }}
-            />
-            <DefaultButton
-              btnType="primaryGreen"
-              text={"Submit"}
-              disabled={loadingSubmit}
-              onClick={handleSubmit}
-            />
-          </div>
-        </div>
-      </Drawer>
+        validateField={validateField}
+        handleInputChange={handleInputChange}
+        TicketCategories={TicketCategories}
+        TicketPriority={TicketPriority}
+        TicketStatus={TicketStatus}
+        priorityLevelIntimations={priorityLevelIntimations}
+        currentUserDetails={currentUserDetails}
+        initialData={initialTicketsFormData}
+        loadingSubmit={loadingSubmit}
+        isTicketManager={isTicketManager}
+        isITOwner={isITOwner}
+        fileIcon={fileIcon}
+        infoRed={infoRed}
+      />
 
       <ToastContainer
         position="top-center"
@@ -1486,6 +1043,7 @@ const MyTickets = (): JSX.Element => {
           // }}
           PopupType={popupData.popupType}
           onHide={() => {
+            setHasRecurrence(false);
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],

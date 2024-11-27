@@ -22,8 +22,16 @@ import dayjs from "dayjs";
 import {
   downloadFiles,
   getCurrentRoleForTicketsRoute,
+  validateField,
 } from "../../../../utils/commonUtils";
-import { imageURL, TicketStatus } from "../../../../constants/HelpDeskTicket";
+import {
+  imageURL,
+  initialData,
+  priorityLevelIntimations,
+  TicketCategories,
+  TicketPriority,
+  TicketStatus,
+} from "../../../../constants/HelpDeskTicket";
 import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 import Popup from "../../../../components/common/Popups/Popup";
@@ -34,11 +42,17 @@ import {
 } from "../../../../services/HelpDeskMainServices/ticketServices";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import ErrorElement from "../../../../components/common/ErrorElement/ErrorElement";
-import { ArrowRight } from "@mui/icons-material";
+import { ArrowRight, Edit } from "@mui/icons-material";
 import CircularSpinner from "../../../../components/common/Loaders/CircularSpinner";
+import TicketForm from "../../components/TicketForm/TicketForm";
+import {
+  handleSubmit,
+  mapRowDataToFormData,
+} from "../../../../utils/helpdeskUtils";
 // import { getTicketByTicketNumber } from "../../../../services/HelpDeskMainServices/dashboardServices";
 const leftArrow = require("../../../../assets/images/svg/headerBack.svg");
 const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
+const infoRed: any = require("../../assets/images/svg/infoRed.svg");
 
 const TicketView = (): JSX.Element => {
   const navigate = useNavigate();
@@ -75,6 +89,16 @@ const TicketView = (): JSX.Element => {
     initialPopupController
   );
 
+  const [openNewTicketSlide, setOpenNewTicketSlide] = useState<{
+    open: boolean;
+    type: "view" | "add" | "update";
+    data?: any;
+  }>({
+    open: false,
+    type: "add",
+    data: [],
+  });
+
   const [currentAttachment, setCurrentAttachment] = useState<any>(null);
 
   const ticketNumber: string | any = pageParams?.ticketid;
@@ -104,10 +128,24 @@ const TicketView = (): JSX.Element => {
 
   const isTicketManager: boolean =
     currentUserDetails?.role === "HelpDesk_Ticket_Managers";
-  // || currentUserDetails?.role === "Super Admin";
 
   const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
-  console.log("isITOwner: ", isITOwner);
+
+  const initialTicketsFormData = initialData(
+    isTicketManager,
+    isITOwner,
+    currentUserDetails,
+    openNewTicketSlide
+  );
+
+  const [formData, setFormData] = useState<any>(initialTicketsFormData);
+
+  const HelpDeskTicktesData: any = useSelector(
+    (state: any) => state.HelpDeskTicktesData.value
+  );
+
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [submitClicked, setSubmitClicked] = useState(false);
 
   const verifyTicketWithCurrentUser: any = !isTicketManager
     ? currentTicketsDataMain?.AllData?.filter(
@@ -121,18 +159,39 @@ const TicketView = (): JSX.Element => {
       )
     : currentTicketsDataMain?.AllData;
 
-  console.log("verifyTicketWithCurrentUser: ", verifyTicketWithCurrentUser);
-
   const currentTicketsData = verifyTicketWithCurrentUser?.filter(
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
-
-  console.log("currentTicketsData: ", currentTicketsData);
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
   const [toggles, setToggles] = useState({
     showDescription: true,
   });
+
+  const handleInputChange = (
+    field: string,
+    value: any,
+    isValid: boolean,
+    errorMsg: string = ""
+  ): void => {
+    if (
+      Object.keys(formData)
+        .filter((key) => formData[key]?.validationRule?.required)
+        .every((key) => formData[key].isValid)
+    ) {
+      setLoadingSubmit(false);
+    }
+
+    setFormData((prevData: any) => ({
+      ...prevData,
+      [field]: {
+        ...prevData[field],
+        value: value,
+        isValid,
+        errorMsg: isValid ? "" : errorMsg,
+      },
+    }));
+  };
 
   const popupActions: any = [
     [
@@ -241,34 +300,6 @@ const TicketView = (): JSX.Element => {
     currentTicketsData !== null &&
     currentTicketsData !== undefined;
 
-  // useEffect(() => {
-  //   console.log("reeeeeeeeeeee");
-  //   if (pageParams?.ticketid) {
-  //     const currentTicketsDataLocal = verifyTicketWithCurrentUser?.filter(
-  //       (item: any) => item?.TicketNumber === ticketNumber
-  //     )[0];
-  //     getAllComments(currentTicketsDataLocal?.ID, setConversationData, false);
-  //     console.log("currentTicketsData: ", currentTicketsDataLocal);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   getAllTickets(dispatch);
-
-  //   if (pageParams?.ticketid) {
-  //     const currentTicketsDataLocal = verifyTicketWithCurrentUser?.filter(
-  //       (item: any) => item?.TicketNumber === ticketNumber
-  //     )[0];
-
-  //     getAllComments(currentTicketsDataLocal?.ID, setConversationData, false);
-
-  //     getAttachmentofTicket(currentTicketsDataLocal?.ID)?.then((res: any) => {
-  //       setCurrentAttachment(res || null);
-  //     });
-  //     console.log("currentTicketsDataLocal: ", currentTicketsDataLocal);
-  //   }
-  // }, [pageParams?.ticketid, ticketNumber]);
-
   useEffect(() => {
     if (pageParams?.ticketid && ticketNumber) {
       const currentTicketsDataLocal = verifyTicketWithCurrentUser?.find(
@@ -288,12 +319,26 @@ const TicketView = (): JSX.Element => {
         setCurrentAttachment(res || null);
       });
     }
-  }, [pageParams?.ticketid, ticketNumber, verifyTicketWithCurrentUser]);
+  }, [pageParams?.ticketid, ticketNumber, verifyTicketWithCurrentUser?.length]);
 
   useEffect(() => {
     // Fetch all tickets on initial load
     getAllTickets(dispatch);
   }, [dispatch]);
+
+  useEffect(() => {
+    if (
+      Object.keys(formData)
+        .filter((key) => formData[key]?.validationRule?.required)
+        .every((key) => formData[key].isValid)
+    ) {
+      setLoadingSubmit(false);
+    }
+
+    if (submitClicked) {
+      setLoadingSubmit(true);
+    }
+  }, [formData]);
 
   return (
     <>
@@ -553,7 +598,55 @@ const TicketView = (): JSX.Element => {
 
           <div className={styles.tcRhs}>
             <div className={styles.detailsCard}>
-              <div className={styles.heading}>Details</div>
+              <div className={styles.heading}>
+                <div className={styles.title}>Details</div>
+                <div
+                  className={styles.editBtn}
+                  onClick={async () => {
+                    const currentAttachment = await getAttachmentofTicket(
+                      currentTicketsData?.ID
+                    );
+
+                    setLoadingSubmit(false);
+                    setSubmitClicked(false);
+                    setOpenNewTicketSlide({
+                      open: true,
+                      type: "update",
+                      data: currentTicketsData,
+                    });
+
+                    setFormData((prev: any) =>
+                      mapRowDataToFormData(
+                        currentTicketsData,
+                        prev,
+                        isTicketManager,
+                        currentUserDetails,
+                        isITOwner
+                      )
+                    );
+
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      Attachment: {
+                        ...prev?.Attachment,
+                        value: [
+                          ...currentAttachment?.map((attachment: any) => ({
+                            ...attachment,
+                            name: attachment?.FileName,
+                          })),
+                        ],
+                      },
+                    }));
+                  }}
+                >
+                  <Edit
+                    sx={{
+                      fontSize: "20px",
+                      color: "var(--primary-pernix-green)",
+                    }}
+                  />
+                </div>
+              </div>
               <div className={styles.details}>
                 <div className={styles.detailsLabel}>
                   <label>Ticket Number</label>
@@ -639,18 +732,20 @@ const TicketView = (): JSX.Element => {
                   </>
                 )}
 
-                <div className={styles.detailsLabel}>
-                  <label>Last commented on</label>
-                  <span>
-                    {conversationData?.data?.length
-                      ? dayjs(
-                          conversationData?.data?.[
-                            conversationData?.data?.length - 1
-                          ]?.Created
-                        ).format("DD MMM YYYY")
-                      : "-"}
-                  </span>
-                </div>
+                {conversationData?.data?.length && (
+                  <div className={styles.detailsLabel}>
+                    <label>Last commented on</label>
+                    <span>
+                      {conversationData?.data?.length
+                        ? dayjs(
+                            conversationData?.data?.[
+                              conversationData?.data?.length - 1
+                            ]?.Created
+                          ).format("DD MMM YYYY")
+                        : "-"}
+                    </span>
+                  </div>
+                )}
 
                 <div className={styles.detailsLabel}>
                   <label>
@@ -809,20 +904,7 @@ const TicketView = (): JSX.Element => {
             </div>
           </div>
 
-          <ToastContainer
-            position="top-center"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
-
           {/* popup */}
-
           {popupController?.map((popupData: any, index: number) => (
             <Popup
               popupCustomBgColor="#fff"
@@ -887,6 +969,56 @@ const TicketView = (): JSX.Element => {
           description="The page you're looking for could not be found, or the route may be incorrect. Please check the URL and try again."
         />
       )}
+
+      <TicketForm
+        openNewTicketSlide={openNewTicketSlide}
+        setOpenNewTicketSlide={setOpenNewTicketSlide}
+        type={openNewTicketSlide.type}
+        formData={formData}
+        setFormData={setFormData}
+        handleSubmit={async () => {
+          await handleSubmit(
+            formData,
+            setLoadingSubmit,
+            setFormData,
+            setSubmitClicked,
+            openNewTicketSlide,
+            setOpenNewTicketSlide,
+            currentRole,
+            currentUserDetails,
+            HelpDeskTicktesData,
+            initialTicketsFormData,
+            dispatch,
+            navigate,
+            location
+          );
+        }}
+        validateField={validateField}
+        handleInputChange={handleInputChange}
+        TicketCategories={TicketCategories}
+        TicketPriority={TicketPriority}
+        TicketStatus={TicketStatus}
+        priorityLevelIntimations={priorityLevelIntimations}
+        currentUserDetails={currentUserDetails}
+        initialData={initialTicketsFormData}
+        loadingSubmit={loadingSubmit}
+        isTicketManager={isTicketManager}
+        isITOwner={isITOwner}
+        fileIcon={fileIcon}
+        infoRed={infoRed}
+      />
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   );
 };

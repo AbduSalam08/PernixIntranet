@@ -1,3 +1,5 @@
+import { IinitialPopupLoaders } from "../interface/interface";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const togglePopupVisibility = (
   setPopupController: any,
@@ -93,3 +95,24 @@ export const resetPopupController = (
 };
 
 export default resetPopupController;
+
+// Utility to update specific fields in popupController
+export const updatePopupController = (
+  popupController: IinitialPopupLoaders[],
+  index: number,
+  updates: Partial<IinitialPopupLoaders>
+): IinitialPopupLoaders[] => {
+  if (index < 0 || index >= popupController.length) {
+    console.error("Invalid index provided");
+    return popupController; // Return as is if index is invalid
+  }
+
+  return popupController.map((popup, idx) =>
+    idx === index
+      ? {
+          ...popup,
+          ...updates, // Merge updates into the existing popup object
+        }
+      : popup
+  );
+};
