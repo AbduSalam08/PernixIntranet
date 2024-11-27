@@ -182,3 +182,23 @@ export const getcuruserdetails = async (): Promise<any> => {
     console.log("shanmugaraj");
   }
 };
+export const getintranettitle = async (): Promise<any> => {
+  const listname = CONFIG.ListNames.IntranetBlogs_Title;
+  return await sp.web.lists
+    .getByTitle(listname)
+    .items.select(
+      "*",
+      "AttachmentFiles",
+      "Author/ID",
+      "Author/Title",
+      "Author/EMail"
+    )
+    .expand("AttachmentFiles,Author")
+    .get();
+};
+export const getupdateintranettitle = async (text: string): Promise<any> => {
+  const listname = CONFIG.ListNames.IntranetBlogs_Title;
+  return await sp.web.lists.getByTitle(listname).items.add({
+    IntranetTitle: text,
+  });
+};

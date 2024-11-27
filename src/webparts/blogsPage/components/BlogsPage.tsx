@@ -14,8 +14,8 @@ import styles from "./BlogsPage.module.scss";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import {
   Icon,
-  SearchBox,
-  ISearchBoxStyles,
+  // SearchBox,
+  // ISearchBoxStyles,
   Persona,
   PersonaSize,
   PersonaPresence,
@@ -47,6 +47,8 @@ import {
 } from "@mui/icons-material";
 import _ from "lodash";
 import { CONFIG } from "../../../config/config";
+import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import { Paginator } from "primereact/paginator";
 // import { arrayIncludes } from "@mui/x-date-pickers/internals/utils/utils";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
@@ -80,6 +82,10 @@ const BlogsPage = (props: any): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
+  const [pagination, setPagination] = useState({
+    first: 0,
+    rows: 3,
+  });
   const popupActions: any = [
     [
       {
@@ -136,7 +142,7 @@ const BlogsPage = (props: any): JSX.Element => {
 
   // const [checkbox, setcheckbox] = useState(false);
   const [Updateid, setupdateid] = useState<any>(null);
-  console.log(Updateid);
+  // console.log(Updateid);
   const [permission, setpermission] = useState("");
   const [choices, setchoices] = useState<any>(["All"]);
   const [filterkey, setfilterkey] = useState({
@@ -151,35 +157,36 @@ const BlogsPage = (props: any): JSX.Element => {
   const [viewpage, setviewpage] = useState(false);
   const [isopen, setisopen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const searchBoxStyle: Partial<ISearchBoxStyles> = {
-    root: {
-      padding: "0 10px",
-      fontSize: 16,
-      width: "100%",
-      borderRadius: "6px",
-      border: "none !important",
+  // const searchBoxStyle: Partial<ISearchBoxStyles> = {
+  //   root: {
+  //     padding: "0 10px",
+  //     fontSize: 16,
+  //     width: "100%",
+  //     borderRadius: "6px",
+  //     border: "none !important",
 
-      ".ms-SearchBox-icon": {
-        fontWeight: 900,
-        color: "rgb(151 144 155) !important",
-      },
-      ".ms-SearchBox": {
-        border: "none !important",
-      },
-      "::after": {
-        border: "none !important",
-        backgrounColor: "white",
-      },
-      ".ms-Button-flexContainer": {
-        background: "transparent",
-      },
-    },
-  };
+  //     ".ms-SearchBox-icon": {
+  //       fontWeight: 900,
+  //       color: "rgb(151 144 155) !important",
+  //     },
+  //     ".ms-SearchBox": {
+  //       border: "none !important",
+  //     },
+  //     "::after": {
+  //       border: "none !important",
+  //       backgrounColor: "white",
+  //     },
+  //     ".ms-Button-flexContainer": {
+  //       background: "transparent",
+  //     },
+  //   },
+  // };
   const poersonaStyles = {
     root: {
       display: "revert",
     },
   };
+  const totalRecords = data?.length || 0;
 
   // function algorithmfilterfunction(value: string) {
   //   const _newdata = [...duplicatefilter];
@@ -212,9 +219,14 @@ const BlogsPage = (props: any): JSX.Element => {
   // }
 
   // this function is Approver Details/ get userDetails in Intranet_Blogs
+  function decodeHtmlEntities(encodedString: any) {
+    const parser = document.createElement("div");
+    parser.innerHTML = encodedString;
+    return parser.textContent || parser.innerText || "";
+  }
   const getdetails = async (_userpermission: string): Promise<void> => {
+    // const parser = new DOMParser();
     await usergetdetails().then((arr) => {
-      console.log(arr);
       const tempdata: any = [];
       arr.forEach((item: any) => {
         tempdata.push({
@@ -222,7 +234,7 @@ const BlogsPage = (props: any): JSX.Element => {
           Title: item.BlogsHeading,
           ParentTitle: item.BlogTitle,
           Paragraph: item.ImageDescription
-            ? JSON.parse(item.ImageDescription)
+            ? decodeHtmlEntities(item.ImageDescription)
             : "",
           Created: item.Created
             ? moment(item.Created).format("DD/MM/YYYY")
@@ -265,6 +277,7 @@ const BlogsPage = (props: any): JSX.Element => {
         //       newstring += `  ${_reitem[newitem]}`;
         //     }
         //   }
+        //}
 
         //   // eslint-disable-next-line no-debugger
         //   debugger;
@@ -277,6 +290,13 @@ const BlogsPage = (props: any): JSX.Element => {
         setdata([..._filterdata]);
         setduplicatedata([..._filterdata]);
       }
+    });
+  };
+  // This function is onChangerows function
+  const onPageChange = (event: any): void => {
+    setPagination({
+      first: event?.first || CONFIG.PaginationData.first,
+      rows: event?.rows || CONFIG.PaginationData.rows,
     });
   };
   // this function is Other Member Details/ get userDetails in Intranet_Blogs
@@ -428,7 +448,7 @@ const BlogsPage = (props: any): JSX.Element => {
   const onLoadingFunc = async (user: any): Promise<void> => {
     let _userpermission: string = "";
     await permissionhandling().then(async (arr) => {
-      if (arr?.some((item) => item.Email === user.Email)) {
+      if (arr?.some((item) => item.Email && item.Email === user.Email)) {
         _userpermission = "Admin";
         setpermission(_userpermission);
       } else {
@@ -548,12 +568,12 @@ const BlogsPage = (props: any): JSX.Element => {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
+                    gap: "18px",
                   }}
                 >
                   <div className={styles.blog}>
                     <div
-                      className={styles.roundiconbutton}
+                      // className={styles.roundiconbutton}
                       style={{ cursor: "pointer" }}
                       onClick={() => {
                         window.open(
@@ -563,7 +583,12 @@ const BlogsPage = (props: any): JSX.Element => {
                         );
                       }}
                     >
-                      <Icon iconName="SkypeArrow" className={styles.icon} />
+                      {/* <Icon iconName="SkypeArrow" className={styles.icon} />
+                       */}
+                      <i
+                        className="pi pi-arrow-circle-left"
+                        style={{ fontSize: "1.2rem", color: "#E0803D" }}
+                      />
                     </div>
                     <div>
                       <h5>Blogs</h5>
@@ -599,15 +624,28 @@ const BlogsPage = (props: any): JSX.Element => {
                     size="SM"
                     placeholder="Search path"
                   /> */}
+                  <div>
+                    <CustomInput
+                      value={filterkey._gsearch}
+                      secWidth="180px"
+                      labelText="Search"
+                      placeholder="Search"
+                      noErrorMsg
+                      onChange={(value: any) => {
+                        filterOnchangehandler("_gsearch", value);
+                      }}
+                    />
+                  </div>
 
-                  <SearchBox
+                  {/* <SearchBox
                     placeholder="Search..."
                     styles={searchBoxStyle}
                     value={filterkey._gsearch}
                     onChange={(e, value) => {
-                      filterOnchangehandler("_gsearch", value);
+                      filterOnchang
+                      ehandler("_gsearch", value);
                     }}
-                  />
+                  /> */}
 
                   {/* 
                   {permission !== "Admin" && (
@@ -637,7 +675,7 @@ const BlogsPage = (props: any): JSX.Element => {
                   </div>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: "10px", margin: "20px" }}>
+              <div style={{ display: "flex", gap: "35px", margin: "20px" }}>
                 <div>
                   <div
                     style={{
@@ -650,7 +688,7 @@ const BlogsPage = (props: any): JSX.Element => {
                       color: "#0b4d53",
                       borderRadius: "4px",
                       cursor: "pointer",
-                      fontSize: "18px",
+                      fontSize: "12px",
                       fontWeight: "500",
                     }}
                     onClick={() => {
@@ -678,7 +716,7 @@ const BlogsPage = (props: any): JSX.Element => {
                         color: "#0b4d53",
                         borderRadius: "4px",
                         cursor: "pointer",
-                        fontSize: "18px",
+                        fontSize: "12px",
                         fontWeight: "500",
                       }}
                       onClick={() => {
@@ -748,6 +786,7 @@ const BlogsPage = (props: any): JSX.Element => {
                 >
                   {data.length > 0 ? (
                     data.map((item: any, index: number) => {
+                      console.log(item.Paragraph);
                       // const checkStatus =
                       //   item.Status === "Approved" ? true : false;
                       const totaluserlikescount = item.userDetails.filter(
@@ -765,9 +804,11 @@ const BlogsPage = (props: any): JSX.Element => {
                               <img src={item.img} alt="Blog" />
                             </div>
                             <div className={styles.contenttitle}>
-                              <h4>{item.Title}</h4>
+                              <h4 title={item.Title}>{item.Title}</h4>
                               <div className={styles.parenttitle}>
-                                <h3>{item.ParentTitle}</h3>
+                                <h3 title={item.ParenTitle}>
+                                  {item.ParentTitle}
+                                </h3>
                                 <Icon
                                   iconName="ArrowUpRight8"
                                   className={styles.Arrowupicon}
@@ -784,7 +825,8 @@ const BlogsPage = (props: any): JSX.Element => {
                                 className={styles.paragraph}
                                 style={{
                                   height:
-                                    permission !== "Admin" ? "110px" : "110px",
+                                    permission !== "Admin" ? "87px" : "87px",
+                                  // fontWeight: "bold",
                                 }}
                                 dangerouslySetInnerHTML={{
                                   __html: item.Paragraph,
@@ -909,7 +951,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                   <Persona
                                     showOverflowTooltip
                                     styles={poersonaStyles}
-                                    size={PersonaSize.size40}
+                                    size={PersonaSize.size28}
                                     presence={PersonaPresence.none}
                                     showInitialsUntilImageLoads
                                     imageUrl={`/_layouts/15/userphoto.aspx?size=S&username=${item.Author?.Email}`}
@@ -943,6 +985,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                         ? "#0a4b48"
                                         : "#b3b0b0",
                                       cursor: "pointer",
+                                      fontSize: "14px",
                                     }}
                                     onClick={() =>
                                       addLikeMethod(item.Id, item.userDetails)
@@ -971,6 +1014,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                   <VisibilityOutlined
                                     style={{
                                       color: "orange",
+                                      fontSize: "20px",
                                     }}
                                   />
 
@@ -994,6 +1038,19 @@ const BlogsPage = (props: any): JSX.Element => {
                     </div>
                   )}
                 </div>
+                {data.length > 0 ? (
+                  <div className="card">
+                    <Paginator
+                      first={pagination.first}
+                      rows={pagination.rows}
+                      totalRecords={totalRecords}
+                      onPageChange={onPageChange}
+                      template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink "
+                    />
+                  </div>
+                ) : (
+                  ""
+                )}
               </div>
             </div>
           </div>
