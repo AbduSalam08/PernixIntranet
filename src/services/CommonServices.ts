@@ -96,6 +96,7 @@ export const RoleAuth = async (
   groupAdmin: any,
   dispatch?: any
 ): Promise<any> => {
+  console.log("superAdmin:", superAdmin);
   let currentUserDetails: IUserDetails;
   let currentUserID: number | null = null;
   let currentUserEmail: string = "";
@@ -127,7 +128,10 @@ export const RoleAuth = async (
       currentUserDetails = {
         userName: superAdminUsers[0]?.Title,
         email: superAdminUsers[0]?.Email,
-        role: CONFIG.RoleDetails.SuperAdmin,
+        role:
+          superAdmin === CONFIG.SPGroupName.Pernix_Admin
+            ? CONFIG.RoleDetails.SuperAdmin
+            : superAdmin,
         id: superAdminUsers[0]?.Id || currentUserID,
       };
 

@@ -473,6 +473,187 @@
 
 // export default CustomMultipleFileUpload;
 
+// working modules
+// import React, { useState, useEffect, useRef } from "react";
+// import styles from "./Inputs.module.scss";
+// import { Clear } from "@mui/icons-material";
+
+// type FileUploadProps = {
+//   accept?: string;
+//   placeholder?: string;
+//   value?: string[]; // Pre-selected file names, useful for edits
+//   onFileSelect?: (files: File[] | null) => void;
+//   isValid?: boolean;
+//   errMsg?: string | null;
+//   multiple: boolean;
+//   customFileNameWidth?: string | any;
+// };
+
+// const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
+//   accept,
+//   // accept = "image/png,image/svg+xml",
+//   placeholder = "Select files...",
+//   value = [],
+//   onFileSelect,
+//   errMsg,
+//   isValid,
+//   multiple = false,
+//   customFileNameWidth,
+// }) => {
+//   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+//   const [fileNames, setFileNames] = useState<string[]>(value);
+//   const [error, setError] = useState<string | null>(null);
+//   const [isFocused, setIsFocused] = useState(false);
+//   console.log("isFocused: ", isFocused);
+
+//   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+//   // Handle initial value from props (e.g., pre-existing files)
+//   useEffect(() => {
+//     if (value.length > 0) {
+//       setFileNames(value?.map((item: any) => item?.name));
+//       setSelectedFiles([...value]);
+//     }
+//   }, [value]);
+
+//   // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+//   //   debugger;
+//   //   const files = e.target.files ? Array.from(e.target.files) : [];
+//   //   console.log("files: ", files);
+
+//   //   if (files.length > 0) {
+//   //     const acceptedTypes = accept?.split(",");
+//   //     const validFiles = files.filter((file) =>
+//   //       acceptedTypes?.some((type) => file.type.startsWith(type.trim()))
+//   //     );
+
+//   //     if (validFiles?.length !== files?.length) {
+//   //       setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
+//   //       return;
+//   //     }
+
+//   //     setError(null);
+//   //     const updatedFiles = multiple
+//   //       ? [...selectedFiles, ...validFiles]
+//   //       : validFiles;
+
+//   //     setSelectedFiles(updatedFiles);
+//   //     setFileNames(updatedFiles.map((file) => file.name));
+//   //     onFileSelect?.(updatedFiles);
+//   //   }
+//   // };
+
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+//     const files = e.target.files ? Array.from(e.target.files) : [];
+//     console.log("files: ", files);
+
+//     if (files.length > 0) {
+//       const acceptedTypes = accept?.split(",").map((type) => type.trim()); // Split and trim accepted types
+
+//       const validFiles = files.filter((file) => {
+//         return acceptedTypes?.some((type) => {
+//           if (type.endsWith("/*")) {
+//             // Check for general MIME type (e.g., application/*)
+//             return file.type.startsWith(type.replace("/*", ""));
+//           }
+//           // Check for specific MIME type (e.g., application/pdf)
+//           return file.type === type;
+//         });
+//       });
+
+//       if (validFiles.length !== files.length) {
+//         setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
+//         return;
+//       }
+
+//       setError(null);
+//       const updatedFiles = multiple
+//         ? [...selectedFiles, ...validFiles]
+//         : validFiles;
+
+//       setSelectedFiles(updatedFiles);
+//       setFileNames(updatedFiles.map((file) => file.name));
+//       onFileSelect?.(updatedFiles);
+//     }
+//   };
+
+//   const handleRemove = (index: number): any => {
+//     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+//     setSelectedFiles(updatedFiles);
+//     setFileNames(updatedFiles.map((file) => file.name));
+//     onFileSelect?.(updatedFiles);
+//   };
+
+//   const handleClear = (): any => {
+//     setSelectedFiles([]);
+//     setFileNames([]);
+//     setError(null);
+//     onFileSelect?.(null);
+//     if (fileInputRef.current) fileInputRef.current.value = "";
+//   };
+
+//   return (
+//     <div className={styles.fileUpload}>
+//       <div className={styles.inputWrapper}>
+//         <input
+//           type="file"
+//           accept={accept}
+//           multiple={multiple}
+//           onChange={handleFileChange}
+//           className={styles.input}
+//           ref={fileInputRef}
+//           onFocus={() => setIsFocused(true)}
+//           onBlur={() => setIsFocused(false)}
+//         />
+//         <label className={styles.placeholder}>{placeholder}</label>
+//       </div>
+
+//       {error ? (
+//         <div className={styles.error}>{error}</div>
+//       ) : !isValid ? (
+//         <div className={styles.error}>{errMsg}</div>
+//       ) : (
+//         <div className={styles.acceptedInfo}>
+//           Accepted files: {accept?.replace(/,/g, ", ")}
+//         </div>
+//       )}
+
+//       {fileNames.length > 0 && (
+//         <div className={styles.fileNameAlign}>
+//           {fileNames?.map((fileName, idx) => (
+//             <div key={idx}>
+//               <span
+//                 title={fileName}
+//                 style={{
+//                   maxWidth: customFileNameWidth ?? "90%",
+//                 }}
+//               >
+//                 {fileName}
+//               </span>
+//               <div>
+//                 <Clear
+//                   onClick={async () => {
+//                     await handleRemove(idx);
+//                   }}
+//                 />
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+
+//       {fileNames.length > 0 && (
+//         <button type="button" className={styles.clearBtn} onClick={handleClear}>
+//           Clear all
+//         </button>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default CustomMultipleFileUpload;
+
+// POC for copy paste
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./Inputs.module.scss";
 import { Clear } from "@mui/icons-material";
@@ -490,7 +671,6 @@ type FileUploadProps = {
 
 const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
   accept,
-  // accept = "image/png,image/svg+xml",
   placeholder = "Select files...",
   value = [],
   onFileSelect,
@@ -500,17 +680,15 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
   customFileNameWidth,
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
-  console.log("value: ", value);
-  console.log("selectedFiles: ", selectedFiles);
   const [fileNames, setFileNames] = useState<string[]>(value);
   const [error, setError] = useState<string | null>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  console.log("isFocused: ", isFocused);
-  console.log("fileNames: ", fileNames);
+  const [dragging, setDragging] = useState<boolean>(false);
+  console.log("dragging: ", dragging);
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Handle initial value from props (e.g., pre-existing files)
+  // Handle initial value from props
   useEffect(() => {
     if (value.length > 0) {
       setFileNames(value?.map((item: any) => item?.name));
@@ -518,50 +696,106 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
     }
   }, [value]);
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
-  //   debugger;
-  //   const files = e.target.files ? Array.from(e.target.files) : [];
-  //   console.log("files: ", files);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent): any => {
+      if (e.key === "Control") {
+        setIsCtrlPressed(true);
+      }
+    };
 
-  //   if (files.length > 0) {
-  //     const acceptedTypes = accept?.split(",");
-  //     const validFiles = files.filter((file) =>
-  //       acceptedTypes?.some((type) => file.type.startsWith(type.trim()))
-  //     );
+    const handleKeyUp = (e: KeyboardEvent): any => {
+      if (e.key === "Control") {
+        setIsCtrlPressed(false);
+      }
+    };
 
-  //     if (validFiles?.length !== files?.length) {
-  //       setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
-  //       return;
-  //     }
+    const processFiles = (files: File[]): any => {
+      if (files.length > 0) {
+        const acceptedTypes = accept?.split(",").map((type) => type.trim());
+        const validFiles = files.filter((file) =>
+          acceptedTypes?.some((type) =>
+            type.endsWith("/*")
+              ? file.type.startsWith(type.replace("/*", ""))
+              : file.type === type
+          )
+        );
 
-  //     setError(null);
-  //     const updatedFiles = multiple
-  //       ? [...selectedFiles, ...validFiles]
-  //       : validFiles;
+        if (validFiles.length !== files.length) {
+          setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
+          return;
+        }
 
-  //     setSelectedFiles(updatedFiles);
-  //     setFileNames(updatedFiles.map((file) => file.name));
-  //     onFileSelect?.(updatedFiles);
-  //   }
-  // };
+        setError(null);
+        const updatedFiles = multiple
+          ? [...selectedFiles, ...validFiles]
+          : validFiles;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    console.log("files: ", files);
+        setSelectedFiles(updatedFiles);
+        setFileNames(updatedFiles.map((file) => file.name));
+        onFileSelect?.(updatedFiles);
+      }
+      setDragging(false);
+    };
 
-    if (files.length > 0) {
-      const acceptedTypes = accept?.split(",").map((type) => type.trim()); // Split and trim accepted types
+    const handlePaste = (e: ClipboardEvent): any => {
+      if (!isCtrlPressed) return;
 
-      const validFiles = files.filter((file) => {
-        return acceptedTypes?.some((type) => {
-          if (type.endsWith("/*")) {
-            // Check for general MIME type (e.g., application/*)
-            return file.type.startsWith(type.replace("/*", ""));
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const files: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i]?.kind === "file") {
+          const file = items[i].getAsFile();
+          if (file) {
+            const originalName = file.name;
+            let newName = originalName;
+            let count = 1;
+
+            // Check for duplicates and increment name if necessary
+            while (fileNames?.includes(newName)) {
+              const nameWithoutExtension = originalName?.replace(
+                /\.[^/.]+$/,
+                ""
+              ); // Remove extension
+              const extension = originalName?.slice(
+                originalName.lastIndexOf(".")
+              );
+              newName = `${nameWithoutExtension}(${count})${extension}`;
+              count++;
+            }
+
+            // Create a new file with the updated name
+            const renamedFile = new File([file], newName, { type: file.type });
+            files.push(renamedFile);
           }
-          // Check for specific MIME type (e.g., application/pdf)
-          return file.type === type;
-        });
-      });
+        }
+      }
+      processFiles(files);
+    };
+
+    // Attach global event listeners
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("paste", handlePaste);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [isCtrlPressed, fileNames]);
+
+  const processFiles = (files: File[]): any => {
+    if (files.length > 0) {
+      const acceptedTypes = accept?.split(",").map((type) => type.trim());
+      const validFiles = files.filter((file) =>
+        acceptedTypes?.some((type) =>
+          type.endsWith("/*")
+            ? file.type.startsWith(type.replace("/*", ""))
+            : file.type === type
+        )
+      );
 
       if (validFiles.length !== files.length) {
         setError(`Only ${accept?.replace(/,/g, ", ")} files are allowed.`);
@@ -579,11 +813,18 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    processFiles(files);
+    setDragging(false);
+  };
+
   const handleRemove = (index: number): any => {
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
     setFileNames(updatedFiles.map((file) => file.name));
     onFileSelect?.(updatedFiles);
+    setDragging(false);
   };
 
   const handleClear = (): any => {
@@ -591,12 +832,30 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
     setFileNames([]);
     setError(null);
     onFileSelect?.(null);
+    setDragging(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDragHightlight = (): void => {
+    setDragging(true);
+  };
+  const handleDragLeave = (): void => {
+    setDragging(false);
   };
 
   return (
     <div className={styles.fileUpload}>
-      <div className={styles.inputWrapper}>
+      <div
+        className={`${styles.inputWrapper} `}
+        style={{
+          border: !dragging ? `2px solid transparent` : `2px dashed #adadad`,
+          backgroundColor: !dragging ? `#fff` : `#adadad10`,
+        }}
+        onDragEnter={handleDragHightlight}
+        onDragOver={handleDragHightlight}
+        onDragLeave={handleDragLeave}
+        onDrag={handleDragHightlight}
+      >
         <input
           type="file"
           accept={accept}
@@ -604,8 +863,6 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
           onChange={handleFileChange}
           className={styles.input}
           ref={fileInputRef}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
         />
         <label className={styles.placeholder}>{placeholder}</label>
       </div>
