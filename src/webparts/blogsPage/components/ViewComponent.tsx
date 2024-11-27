@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
 import styles from "./ViewComponent.module.scss";
-import { Icon } from "@fluentui/react";
+// import { Icon } from "@fluentui/react";
 // import { sp } from "@pnp/sp/presets/all";
 import { Persona, PersonaSize, PersonaPresence } from "@fluentui/react";
 import { getcuruserdetails } from "../../../services/BlogsPage/BlogsPageServices";
@@ -61,12 +61,16 @@ function ViewComponent(props: any) {
     <div>
       <div className={styles.backbox}>
         <div
-          className={styles.roundiconbutton}
+          // className={styles.roundiconbutton}
           onClick={() => {
             props.resetstate();
           }}
         >
-          <Icon iconName="SkypeArrow" className={styles.icon} />
+          <i
+            className="pi pi-arrow-circle-left"
+            style={{ fontSize: "1.2rem", color: "#E0803D", cursor: "pointer" }}
+          />
+          {/* <Icon iconName="SkypeArrow" className={styles.icon} /> */}
         </div>
         {/* <h5
           style={{
@@ -85,12 +89,31 @@ function ViewComponent(props: any) {
         }}
       >
         <div className={styles.section}>
+          <div className={styles.parenttitle}>
+            <h2
+              title={props.viewitem.ParentTitle}
+              style={{
+                fontSize: "18px",
+                fontWeight: "700",
+              }}
+            >
+              {props.viewitem.ParentTitle}
+            </h2>
+            <h5
+              style={{
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "rgb(224, 128, 61)",
+              }}
+              title={props.viewitem.Title}
+            >
+              {props.viewitem.Title}
+            </h5>
+          </div>
           <div className={styles?.Imagecontainer}>
             <img src={props.viewitem.img}></img>
           </div>
           <div className={styles?.contentContainer}>
-            <h1>{props.viewitem.Title}</h1>
-            <h3>{props.viewitem.ParentTitle}</h3>
             <div
               style={{
                 overflow: "auto",
@@ -103,6 +126,7 @@ function ViewComponent(props: any) {
                 dangerouslySetInnerHTML={{
                   __html: props.viewitem.Paragraph,
                 }}
+                // title={props.viewitem.Paragraph}
                 className={styles.paragraphbox}
               />
             </div>
@@ -114,14 +138,14 @@ function ViewComponent(props: any) {
                   <Persona
                     showOverflowTooltip
                     styles={poersonaStyles}
-                    size={PersonaSize.size40}
+                    size={PersonaSize.size24}
                     presence={PersonaPresence.none}
                     showInitialsUntilImageLoads
                     imageUrl={`/_layouts/15/userphoto.aspx?size=S&username=${props.viewitem.Author?.Email}`}
                   />
                 </div>
                 <div className={styles.namediv}>
-                  <h5>{props.viewitem.Author?.Title}</h5>
+                  <h4>{props.viewitem.Author?.Title}</h4>
                   <h5 className={styles.datediv}>
                     {props.viewitem.Created || ""}
                   </h5>
@@ -152,6 +176,7 @@ function ViewComponent(props: any) {
                 <VisibilityOutlined
                   style={{
                     color: "orange",
+                    fontSize: "21px",
                   }}
                 />
                 <label style={{ cursor: "auto" }}>

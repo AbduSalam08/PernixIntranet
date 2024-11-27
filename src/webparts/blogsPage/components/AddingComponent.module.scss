@@ -26,6 +26,37 @@
       display: flex;
       margin-top: 1%;
       align-items: center;
+
+      .inputfoucsbox {
+        display: flex;
+        width: 49%;
+        position: relative;
+        .suggestionlist {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background-color: white;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          width: 100%;
+          z-index: 10;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          max-height: 150px;
+          overflow-y: auto;
+        }
+
+        .suggestionitem {
+          padding: 8px;
+          cursor: pointer;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .suggestionitem:hover {
+          background-color: #f9f9f9; /* Highlight on hover */
+        }
+      }
     }
     color: black;
     .blog {

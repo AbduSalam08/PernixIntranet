@@ -47,7 +47,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-
+      margin: 20px 0px 0px 0px;
       .datediv {
         font-weight: 400;
         color: #535252;
@@ -90,17 +90,25 @@
   }
 }
 .section {
+  .parenttitle {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    flex-direction: column;
+    margin-left: 18px;
+  }
   height: 80vh;
   overflow: auto;
+  padding: 16px 8px;
   .Imagecontainer {
     width: 100%;
-    height: 510px;
+    height: 380px;
     padding: 11px;
     position: relative;
     img {
       width: 100%;
       height: 100%;
-      border-radius: 20px;
+      border-radius: 15px;
       object-fit: fill;
       object-position: top;
     }
@@ -128,11 +136,11 @@
   }
 }
 .contentContainer {
-  margin-top: 10px;
+  // margin-top: 10px;
   color: #000;
 
   // height: 171px;
-  padding-top: 7px;
+  // padding-top: 7px;
   h1 {
     color: orange;
     font-size: 17px;
@@ -176,7 +184,16 @@
   .namediv {
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 5px;
+    h4 {
+      color: black;
+      font-size: 13px;
+    }
+    h5 {
+      font-weight: 500;
+      color: gray;
+      font-size: 10px;
+    }
   }
   .likecontainer {
     display: flex;

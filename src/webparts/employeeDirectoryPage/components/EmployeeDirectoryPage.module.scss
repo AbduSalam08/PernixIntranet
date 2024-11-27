@@ -149,7 +149,7 @@
     cursor: pointer;
   }
 }
-.phonebox {
+.detailphonebox {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -224,27 +224,30 @@
     .mailbox {
       display: flex;
       align-items: center;
-      justify-content: space-evenly;
-      width: 81%;
+      // justify-content: space-evenly;
+      // width: 81%;
+      gap: 7px;
     }
     .phonebox {
       display: flex;
       align-items: center;
-      justify-content: space-evenly;
-      width: 27%;
-      gap: 12px;
+      // justify-content: space-evenly;
+      // width: 27%;
+      gap: 7px;
     }
     .birthdaybox {
       display: flex;
       align-items: center;
-      width: 81%;
-      justify-content: space-evenly;
+      // width: 81%;
+      // justify-content: space-evenly;
+      gap: 7px;
     }
     .locationbox {
       display: flex;
       align-items: center;
-      width: 81%;
-      gap: 5px;
+      // width: 81%;
+      // gap: 5px;
+      gap: 7px;
     }
     label {
       color: #8e8e8e;
@@ -252,8 +255,108 @@
     }
   }
   .line {
-    border-top: 2px solid #8e8e8e;
+    border-top: 2px solid #c9c2c2;
     width: 100%;
-    margin: 20px 0;
+    margin: 5px 0;
+  }
+  .skillbox {
+    width: 90%;
+    height: 140px;
+    margin-left: 6%;
+    overflow: auto;
+    .skillinbox {
+      color: #0b4d53;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      margin-left: 45px;
+      font-size: 19px;
+      margin: 5% 5%;
+    }
+    .imgbox {
+      img {
+        width: 50%;
+        object-fit: cover;
+      }
+    }
+    .pillcontainer {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      // margin: 10px 37px;
+      .pill {
+        // flex-wrap: wrap;
+        gap: 0;
+        display: inline-block;
+        background-color: #d5eddb;
+        color: #0c902d;
+        font-size: 12px;
+        font-family: osSemiBold, sans-serif;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        width: 45%;
+        font-family: Arial, sans-serif;
+        padding: 8px 23px;
+        align-items: center;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        border-radius: 41px;
+        font-weight: 600;
+        text-align: center;
+        -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        height: 35px;
+      }
+    }
+  }
+}
+.buttonparentbox {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  .buttoninbox {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-pack: justify;
+    justify-content: flex-end;
+    gap: 12px;
+    margin: 10px 16px;
+
+    .submitbutton {
+      font-size: 12px;
+      border: none;
+      font-weight: 600;
+      border-radius: 7px;
+      height: 29px;
+      width: 70px;
+      color: white;
+      background: #0b4d53;
+    }
+    .cancelbutton {
+      font-size: 12px;
+      border: none;
+      font-weight: 600;
+      border-radius: 7px;
+      height: 29px;
+      width: 70px;
+      color: #fff;
+      background: #a7a7a8;
+    }
   }
 }

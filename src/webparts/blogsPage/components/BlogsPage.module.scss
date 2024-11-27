@@ -42,11 +42,14 @@
       font-weight: 600;
       font-size: 14px;
       border-radius: 5px;
+      // height: 44px;
+      // align-items: center;
       cursor: pointer;
       gap: 0px;
       transition: background-color 0.3s ease;
       span {
         width: 65px;
+        font-weight: 400;
       }
       .Addicon {
         margin-right: 8px;
@@ -58,9 +61,9 @@
       font-size: 16px;
       font-weight: 600;
     }
-    .new-blog-button:hover {
-      background-color: #006b68;
-    }
+    // .new-blog-button:hover {
+    //   background-color: #006b68;
+    // }
   }
   .blogarrowcontainer {
     color: beige;
@@ -84,7 +87,7 @@
       align-items: center;
       h5 {
         margin-left: 10px;
-        font-size: 22px;
+        font-size: 16px;
         color: #0b4d53;
       }
       .roundiconbutton {
@@ -115,7 +118,7 @@
         font-size: 15px;
       }
       h5 {
-        font-size: 22px;
+        font-size: 15px;
       }
     }
   }
@@ -134,10 +137,11 @@
 }
 .blogcontainer {
   margin: 1% 0;
-  height: 65vh;
+  // height: 65vh;
   overflow: auto;
 }
 .blogmaincontainer {
+  justify-content: flex-start;
   .emptyfile {
     display: flex;
     align-items: center;
@@ -159,7 +163,7 @@
       border-radius: 21px;
       padding: 24px;
       background-color: white;
-      height: 473px;
+      height: 423px;
       .imgbox {
         height: 183px;
         img {
@@ -168,7 +172,7 @@
         }
       }
       h4 {
-        margin: 7px 0px;
+        margin: 14px 0px 7px 0px;
         font-weight: 600;
         color: #e0803d;
       }
@@ -188,14 +192,14 @@
           cursor: pointer;
         }
         .paragraph {
-          color: #667085;
+          color: #5d5d5d;
           font-weight: 400;
           line-height: 22px;
           height: 71px;
           text-overflow: ellipsis;
           overflow: hidden;
           display: -webkit-box;
-          -webkit-line-clamp: 5;
+          -webkit-line-clamp: 4;
           -webkit-box-orient: vertical;
         }
       }
@@ -272,6 +276,8 @@
             background-color: #0a4b48;
             color: white;
             font-weight: 600;
+            // height: 44px;
+            // align-items: center;
             font-size: 14px;
             border-radius: 5px;
             cursor: pointer;
@@ -291,9 +297,9 @@
             font-size: 16px;
             font-weight: 600;
           }
-          .new-blog-button:hover {
-            background-color: #006b68;
-          }
+          // .new-blog-button:hover {
+          //   background-color: #006b68;
+          // }
         }
       }
     }
@@ -301,7 +307,7 @@
     .box {
       padding: 11px;
     }
-    width: 31%;
+    width: 28%;
     border-radius: 15px;
     // height: 485px;
   }

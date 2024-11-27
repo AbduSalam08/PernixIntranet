@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
@@ -6,10 +7,8 @@ import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
 import styles from "./EmployeeDirectoryPage.module.scss";
 import { MSGraphClient } from "@microsoft/sp-http";
-
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import DataTable from "../../../components/common/DataTable/DataTable";
-
 import {
   Icon,
   ISearchBoxStyles,
@@ -21,7 +20,12 @@ import { MailOutline, VisibilityOutlined } from "@mui/icons-material";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { TextField } from "office-ui-fabric-react";
 import { Drawer } from "@mui/material";
-import { getuserdetails } from "../../../services/EmployeeDirectory/EmployeeDirectory";
+import {
+  getuserdetails,
+  skillUpdate,
+} from "../../../services/EmployeeDirectory/EmployeeDirectory";
+import { __metadata } from "tslib";
+// import { getuserdetails } from "../../../services/employeeDirectory/EmployeeDirectory";
 
 // import { Item } from "@pnp/sp/items";
 // import { Button } from "primereact/button";
@@ -36,15 +40,19 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     Skills: "",
     Email: "",
   });
-  const [panelPopupFlag, setPanelPopupFlag] = useState(false);
+  const [panelItem, setPanelItem] = useState<any>([]);
+  const [panelPopupFlag, setPanelPopupFlag] = useState({
+    isopen: false,
+    popupedit: false,
+  });
+  const [globalfilterdata, setglobalfilterdata] = useState<any>([]);
+  console.log(panelPopupFlag, globalfilterdata);
   const [listData, setListData] = useState<any>([]);
   console.log(listData);
   const [filterFlag, setFilterFlag] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<any>([]);
   const [userDuplicateData, setUserDuplicateData] = useState<any>([]);
-
-  console.log(userData);
   const textFieldStyle = {
     fieldGroup: {
       ".ms-TextField-fieldGroup": {
@@ -120,7 +128,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         return (
           <div
             onClick={() => {
-              console.log("shanmugraj");
+              //("shanmugraj");
             }}
             className={styles.personabox}
           >
@@ -140,9 +148,9 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       headerName: "Phone number",
       width: 200,
       renderCell: (params: any) => {
-        console.log(params);
+        //(params);
         return (
-          <div className={styles.phonebox}>
+          <div className={styles.detailphonebox}>
             <Icon
               iconName="Phone"
               style={{
@@ -164,7 +172,11 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       renderCell: (params: any) => {
         return (
           <div>
-            <label>{params.row.Skills || "Software Developer"}</label>
+            <label>
+              {params.row.Skills.length > 0
+                ? params.row.Skills.join(",")
+                : "Software Developer"}
+            </label>
           </div>
         );
       },
@@ -206,7 +218,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             <div
               className={styles.visibilityicon}
               onClick={() => {
-                setPanelPopupFlag(true);
+                //;
+                setPanelPopupFlag({
+                  ...panelPopupFlag,
+                  isopen: true,
+                  popupedit: false,
+                });
+                setPanelItem(params.row);
               }}
             >
               <VisibilityOutlined
@@ -222,6 +240,15 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                   color: " #007ef2",
                 }}
                 iconName="WindowEdit"
+                onClick={() => {
+                  //;
+                  setPanelPopupFlag({
+                    ...panelPopupFlag,
+                    popupedit: true,
+                    isopen: true,
+                  });
+                  setPanelItem(params.row);
+                }}
               />
             </div>
           </div>
@@ -231,46 +258,82 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
   ];
   const onLoadingFUN = async (): Promise<void> => {
     setIsLoading(true);
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    setFilterFlag(false);
+    setfilterkey({
+      _status: "",
+      _gsearch: "",
+      Name: "",
+      Phone: "",
+      Skills: "",
+      Email: "",
+    });
+    setPanelPopupFlag({
+      isopen: false,
+      popupedit: false,
+    });
+
     getuserskills();
   };
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const getuserskills = async (): Promise<any> => {
-    await getuserdetails().then((item) => {
-      const tempdata: any = [];
-      item.forEach((useritem: any) => {
-        tempdata.push({
-          Userid: useritem.Userid ? useritem.Userid : "",
-          Skills: useritem.Skills ? useritem.Skills : "",
-        });
-      });
-      setListData([...tempdata]);
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      getallusers(tempdata);
+  // This function is userskillupdatefunction
+  const updatefunction = async (tempdata: any, listdata: any) => {
+    //;
+    const updatedList = tempdata.map((item: any) => {
+      const matchingItem = listdata.find(
+        (newitem: any) => newitem.Userid === item.Id
+      );
+
+      if (matchingItem) {
+        return {
+          ...item,
+          Skills: [...matchingItem.Skills],
+          ListId: matchingItem.ListId,
+        };
+      }
+      return item;
     });
+    //;
+    const additionaldata: { _listId: any; Searchstring: string }[] = [];
+    updatedList.map((_reitem: any) => {
+      let newstring = "";
+      for (const newitem in _reitem) {
+        if (
+          typeof _reitem[newitem] === "string" ||
+          typeof _reitem[newitem] === "number"
+        ) {
+          newstring += `  ${_reitem[newitem]}`;
+        } else if (Array.isArray(_reitem[newitem]) && _reitem[newitem]) {
+          //;
+          newstring += ` ${_reitem[newitem].join(" ")}`;
+        }
+      }
+      additionaldata.push({
+        _listId: _reitem.Id,
+        Searchstring: newstring.toLowerCase(),
+      });
+    });
+    setglobalfilterdata(additionaldata);
+    setUserData(updatedList);
+    setUserDuplicateData(updatedList);
+    setIsLoading(false);
   };
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // this function is tenentlevelallUsergetFunction
   const getallusers = async (listdata: any[]) => {
     props.context.msGraphClientFactory
       .getClient()
       .then((client: MSGraphClient) => {
         client
           .api("/users?$filter=userType eq 'Member'")
-          // .api(`https://graph.microsoft.com/v1.0/users`)
           .version("v1.0")
           .top(999)
           .get()
           .then((response) => {
             const tempdata: any = [];
-            // eslint-disable-next-line no-debugger
-            // debugger;
-            console.log(response.value);
             response.value.forEach((item: any, index: number) => {
-              // eslint-disable-next-line no-debugger
-              // debugger;
               tempdata.push({
                 id: index,
-                Skills: "",
+                Skills: [],
+                ListId: null,
+                officeLocation: item.officeLocation ? item.officeLocation : "",
                 Phone: item.businessPhones ? item.businessPhones[0] : "",
                 Name: item.displayName ? item.displayName : "",
                 Id: item.id ? item.id : null,
@@ -280,8 +343,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 Email: item.userPrincipalName ? item.userPrincipalName : "",
               });
             });
-            // setUserData([...tempdata]);
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+
             updatefunction(tempdata, listdata);
             setIsLoading(false);
           })
@@ -290,34 +352,23 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           });
       });
   };
-  const updatefunction = async (tempdata: any, listdata: any) => {
-    const updatedList = tempdata.map((item: any) => {
-      const matchingItem = listdata.find(
-        (newitem: any) => newitem.Userid === item.Id
-      );
-      if (matchingItem) {
-        return {
-          ...item,
-          Skills: matchingItem.Skills,
-        };
-      }
-      return item;
+  // This function is UsersSkill function
+
+  async function getuserskills() {
+    await getuserdetails().then((item) => {
+      const tempdata: any = [];
+      item.forEach((useritem: any) => {
+        tempdata.push({
+          Userid: useritem.Userid ? useritem.Userid : "",
+          Skills: useritem.Skills ? useritem.Skills : [],
+          ListId: useritem.Id ? useritem.Id : null,
+        });
+      });
+      setListData([...tempdata]);
+      getallusers(tempdata);
     });
-    setUserData(updatedList);
-    setUserDuplicateData(updatedList);
-
-    setIsLoading(false);
-  };
+  }
   // This function is Filterfunction
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const filterOnchangehandler = async (key: any, text: any) => {
-    const _filterkey: any = { ...filterkey };
-    _filterkey[key] = text;
-
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    filterfunction(_filterkey, text);
-  };
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const filterfunction = async (_filterkey: any, text: string) => {
     let _data: any = [...userDuplicateData];
     const searchtext = text.toLowerCase().trim();
@@ -334,14 +385,15 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           item.Phone.toLowerCase().trim().toString().includes(searchtext)
       );
     }
+
     if (_filterkey.Skills !== "") {
       _data = _data.filter(
         (item: any) =>
-          item.Skills && item.Skills.toLowerCase().trim().includes(searchtext)
+          item.Skills &&
+          item.Skills.some((newitem: any) => newitem.toLos === searchtext)
       );
     }
     if (_filterkey.Email !== "") {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _data = _data.filter(
         (item: any) =>
           item.Email && item.Email.toLowerCase().trim().includes(searchtext)
@@ -350,6 +402,63 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
 
     setfilterkey({ ..._filterkey });
     setUserData([..._data]);
+  };
+  // This function is FilterOnchangehandlerfunction
+  const filterOnchangehandler = async (key: any, text: any) => {
+    const _filterkey: any = { ...filterkey };
+    _filterkey[key] = text;
+    filterfunction(_filterkey, text);
+  };
+
+  //  This function deletepillfunction
+  const deletepill = (index: number): void => {
+    const panelfilterskills = [...panelItem.Skills];
+    const filterdata =
+      panelfilterskills &&
+      panelfilterskills.filter(
+        (newitem: any, findindex: number) => findindex !== index
+      );
+
+    setPanelItem({
+      ...panelItem,
+      Skills: [...filterdata],
+    });
+  };
+  const globalfiltersetdata = (_data: any) => {
+    const newdata: any = [];
+    const _duplicatedata = [...userDuplicateData];
+    _duplicatedata.filter((arr) => {
+      if (_data.some((newItem: any) => newItem._listId === arr.Id)) {
+        newdata.push(arr);
+      }
+    });
+    setUserData([...newdata]);
+  };
+  const globalfilterfunction = (value: any) => {
+    let _data = [...globalfilterdata];
+    if (value !== "") {
+      const findtext = value.toLowerCase().toString();
+      _data = _data.filter((item) => item.Searchstring.includes(findtext));
+      if (_data.length > 0) {
+        globalfiltersetdata(_data);
+      } else if (_data.length === 0) {
+        setUserData([..._data]);
+      }
+    } else if (value === "") {
+      const _data = [...userDuplicateData];
+      setUserData([..._data]);
+    }
+  };
+
+  // This function is Skill Update function
+  const skillupdatefunc = async (Id: number, Skills: any): Promise<any> => {
+    await skillUpdate(Id, Skills)
+      .then((item) => {
+        onLoadingFUN();
+      })
+      .catch((arr) => {
+        console.log(arr);
+      });
   };
   useEffect(() => {
     onLoadingFUN();
@@ -387,6 +496,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                         ...filterkey,
                         _gsearch: value,
                       });
+                      globalfilterfunction(value);
                     }}
                   />
                 </div>
@@ -546,9 +656,14 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       )}
       <Drawer
         anchor={"right"}
-        open={panelPopupFlag}
+        open={panelPopupFlag.isopen}
         onClose={() => {
-          setPanelPopupFlag(false);
+          setPanelItem([]);
+          setPanelPopupFlag({
+            ...panelPopupFlag,
+            isopen: false,
+            popupedit: false,
+          });
         }}
         sx={{
           "& .MuiPaper-root.MuiPaper-elevation": {
@@ -561,7 +676,16 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       >
         <div className={styles.drawcontainer}>
           <div className={styles.drawerheading}>
-            <div className={styles.drawericonbox}>
+            <div
+              className={styles.drawericonbox}
+              onClick={() => {
+                setPanelPopupFlag({
+                  ...panelPopupFlag,
+                  isopen: false,
+                  popupedit: false,
+                });
+              }}
+            >
               <Icon iconName="ChevronLeftMed" className={styles.drawerionc} />
               <h4>Profile</h4>
             </div>
@@ -571,13 +695,17 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               <div className={styles.personabox}>
                 <Persona
                   title="shanmugaraj"
-                  imageUrl={`/_layouts/15/userphoto.aspx?username=${"shanmugaraj@technorucs.com"}`}
+                  imageUrl={`/_layouts/15/userphoto.aspx?username=${
+                    panelItem.Email && panelItem.Email
+                  }`}
                   size={PersonaSize.size100}
                 />
               </div>
               <div className={styles.namebox}>
-                <h3>shanmugraj</h3>
-                <h5>Rajapalayam</h5>
+                <h3>{panelItem.Name ? panelItem.Name : "-"}</h3>
+                <h5>
+                  {panelItem.officeLocation ? panelItem.officeLocation : ""}
+                </h5>
                 <h6>Manager</h6>
               </div>
             </div>
@@ -587,48 +715,128 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               <MailOutline
                 style={{
                   color: "#0b4d53",
-                  fontSize: "27px",
+                  fontSize: "24px",
                 }}
               />
-              <label>shanmugrajmuthuvel005@gmail.com</label>
+              <label>{panelItem.Email ? panelItem.Email : "-"}</label>
             </div>
             <div className={styles.phonebox}>
               <Icon
                 iconName="Phone"
                 style={{
                   color: "#0b4d53",
-                  fontSize: "27px",
-                  marginLeft: "8px",
+                  fontSize: "24px",
+                  // marginLeft: "8px",
                 }}
               />
-              <label>8940766936</label>
+              <label> {panelItem.Phone ? panelItem.Phone : "-"}</label>
             </div>
             <div className={styles.birthdaybox}>
               <Icon
                 iconName="BirthdayCake"
                 style={{
                   color: "#0b4d53",
-                  fontSize: "27px",
+                  fontSize: "24px",
                 }}
               />
-              <label>shanmugrajmuthuvel005@gmail.com</label>
+              <label>11/2/2024</label>
             </div>
             <div className={styles.locationbox}>
               <i
                 className="pi pi-map-marker"
                 style={{
                   color: "#0b4d53",
-                  fontSize: "27px",
-                  marginLeft: "10PX",
+                  fontSize: "24px",
+                  // marginLeft: "10PX",
                 }}
               />
 
-              <label>Rajapalayam</label>
+              <label>
+                {panelItem.officeLocation ? panelItem.officeLocation : "-"}
+              </label>
             </div>
           </div>
-          <div>
+          <div
+            style={{
+              width: "80%",
+              marginLeft: "37PX",
+            }}
+          >
             <div className={styles.line} />
           </div>
+          <div className={styles.skillbox}>
+            <div className={styles.skillinbox}>
+              <h5>Skills</h5>
+            </div>
+            <div
+              className={styles.pillcontainer}
+              style={{
+                justifyContent:
+                  panelItem.Skills && panelItem.Skills.length === 0
+                    ? "center"
+                    : "",
+              }}
+            >
+              {panelItem.Skills && panelItem.Skills.length > 0 ? (
+                panelItem.Skills.map((item: string, index: number) => {
+                  return (
+                    <div key={index} className={styles.pill}>
+                      {item}
+                      {panelPopupFlag.popupedit === true && (
+                        <Icon
+                          iconName="Cancel"
+                          onClick={() => {
+                            deletepill(index);
+                          }}
+                          style={{
+                            cursor: "pointer",
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div>
+                  <label>No Skills</label>
+                </div>
+              )}
+            </div>
+          </div>
+          {panelPopupFlag.popupedit === true && panelItem.Skills.length > 0 ? (
+            <div className={styles.buttonparentbox}>
+              <div className={styles.buttoninbox}>
+                <div
+                  className={styles["new-blog-button"]}
+                  onClick={() => {
+                    // setPanelItem([]);
+                    setPanelPopupFlag({
+                      ...panelPopupFlag,
+                      isopen: false,
+                      popupedit: false,
+                    });
+                  }}
+                >
+                  <button className={styles.cancelbutton}>Cancel</button>
+                </div>
+                <div
+                  className={styles["new-blog-button"]}
+                  onClick={() => {
+                    //("shanmugaraj");
+                  }}
+                >
+                  <button
+                    className={styles.submitbutton}
+                    onClick={() => {
+                      skillupdatefunc(panelItem.ListId, panelItem.Skills);
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </Drawer>
     </div>

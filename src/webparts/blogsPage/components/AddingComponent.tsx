@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable no-debugger */
+// /* eslint-disable no-// */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import "../../../assets/styles/Style.css";
+
 import styles from "./AddingComponent.module.scss";
 import { Icon } from "@fluentui/react";
 import QuillEditor from "../../../components/common/QuillEditor/QuillEditor";
@@ -12,6 +13,10 @@ import { addfilemsg } from "../../../services/BlogsPage/BlogsPageServices";
 // import { InputText } from "primereact/inputtext";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import {
+  getintranettitle,
+  getupdateintranettitle,
+} from "../../../services/BlogsPage/BlogsPageServices";
 interface IPopupData {
   ImageDescription: string;
   Attachmentfiles: any[];
@@ -51,14 +56,21 @@ function AddingComponent(props: any) {
     "svg",
     "webp",
   ];
+  const [customInput, setcustomInput] = useState<boolean>(false);
+  console.log(customInput);
+  const [filteredSuggestions, setfilteredSuggestions] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [additionaldetails, setadditionaldetails] =
     useState(_additionaldetails);
   const [joditContent, setJoditContent] = useState("");
   const [popupData, setpoupData] = useState(_popupData);
   console.log(popupData);
+  const [intraData, setIntraData] = useState<any>([]);
+  console.log(intraData);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // This functino is OnLoaderFunction
+
   // This function is Quill onchange method
   const onChange = (key: any, text: any) => {
     if (text === "<p><br></p>") {
@@ -73,6 +85,7 @@ function AddingComponent(props: any) {
       Quill: "",
     });
   };
+
   // this parenttitleonChange method
   const headingonchange = (key: any, text: any) => {
     const _additionaldetails: any = { ...additionaldetails };
@@ -84,7 +97,12 @@ function AddingComponent(props: any) {
       Quill: "",
     });
     setadditionaldetails({ ..._additionaldetails });
+    if (key === "Title") {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      headingfilter(text);
+    }
   };
+  // this function heading autosuggesting function
 
   // This function is handle files  method
   const fnfiles = (files: any) => {
@@ -157,14 +175,15 @@ function AddingComponent(props: any) {
     } else if (Math.floor(popupData.Attachmentfiles[0].Size) > 10000) {
       _objerror.Image = "Image size no more than 10 MB";
     }
-    debugger;
+    //;
     return _objerror;
   };
+
   // This is addmsg function method
   const addmsg = async () => {
-    debugger;
+    //;
     const error = validation();
-    debugger;
+    //;
     let finderrorobj: boolean = false;
     for (const [key, value] of Object.entries(error)) {
       console.log(key);
@@ -175,7 +194,8 @@ function AddingComponent(props: any) {
     if (finderrorobj !== true) {
       setIsLoading(true);
       const _popupData = {
-        ImageDescription: JSON.stringify(joditContent),
+        ImageDescription: joditContent,
+        // ImageDescription: JSON.stringify(joditContent),
         BlogsHeading: additionaldetails.Title,
         BlogTitle: additionaldetails.ParentTitle,
         Status: "Pending",
@@ -201,9 +221,45 @@ function AddingComponent(props: any) {
     setJoditContent("");
     props.resetstate();
   };
-  const onLoader = () => {
-    console.log("shanmugaraj");
+
+  // This function is get intranettitle
+  const intranettitle = async () => {
+    await getintranettitle().then((arr) => {
+      const tempdata: any = [];
+      arr.forEach((item: any) => {
+        tempdata.push({
+          AutoTitle: item.IntranetTitle ? item.IntranetTitle : "",
+        });
+      });
+      setIntraData([...tempdata]);
+    });
   };
+  const onLoader = () => {
+    intranettitle();
+  };
+  const headingfilter = async (text: string) => {
+    //;
+    const findtext = text.toLowerCase().toString();
+    let _intranetdata: any = [...intraData];
+    debugger;
+    if (_intranetdata.length > 0) {
+      _intranetdata = _intranetdata.filter((item: any) =>
+        item.AutoTitle.includes(findtext)
+      );
+      if (_intranetdata.length > 0) {
+        setfilteredSuggestions([..._intranetdata]);
+      } else if (text.length >= 3) {
+        await getupdateintranettitle(text).then((item) => {
+          onLoader();
+        });
+      }
+    } else {
+      await getupdateintranettitle(text).then((item) => {
+        onLoader();
+      });
+    }
+  };
+
   useEffect(() => {
     onLoader();
   }, []);
@@ -219,21 +275,38 @@ function AddingComponent(props: any) {
             <div className={styles.blogparentbox}>
               <div className={styles.blog}>
                 <div
-                  className={styles.roundiconbutton}
+                  // className={styles.roundiconbutton}
                   onClick={() => {
                     props.resetstate();
                   }}
                 >
-                  <Icon iconName="SkypeArrow" className={styles.icon} />
+                  <i
+                    className="pi pi-arrow-circle-left"
+                    style={{ fontSize: "1.2rem", color: "#E0803D" }}
+                  />
                 </div>
                 <div>
-                  <h5>New blog</h5>
+                  <h5
+                    style={{
+                      fontSize: "15px",
+                    }}
+                  >
+                    New blog
+                  </h5>
                 </div>
               </div>
               {/* This is File Inputs Method */}
               <div style={{ color: "parenttitle" }}>
                 <div className={styles.inputparentbox}>
-                  <div style={{ display: "flex", width: "49%" }}>
+                  <div
+                    className={styles.inputfoucsbox}
+                    onMouseMove={(e) => {
+                      setcustomInput(true);
+                    }}
+                    onMouseLeave={(e) => {
+                      setcustomInput(false);
+                    }}
+                  >
                     <CustomInput
                       onChange={(value) => {
                         if (value.length < 250) {
@@ -254,6 +327,33 @@ function AddingComponent(props: any) {
                       size="SM"
                       placeholder="Tag"
                     />
+                    {filteredSuggestions.length > 0 && customInput && (
+                      <ul className={styles.suggestionlist}>
+                        {filteredSuggestions.map(
+                          (suggestion: any, index: number) => {
+                            // //;
+                            return (
+                              <li
+                                key={index}
+                                onClick={() => {
+                                  setadditionaldetails({
+                                    ...additionaldetails,
+                                    Title: suggestion.AutoTitle,
+                                  });
+                                  // headingonchange(
+                                  //   "Title",
+                                  //   suggestion.AutoTitle
+                                  // );
+                                }}
+                                className={styles.suggestionitem}
+                              >
+                                {suggestion.AutoTitle}
+                              </li>
+                            );
+                          }
+                        )}
+                      </ul>
+                    )}
                   </div>
                   <div style={{ width: "49%" }}>
                     <CustomInput
@@ -351,7 +451,7 @@ function AddingComponent(props: any) {
                                   Image: "",
                                   Quill: "",
                                 });
-                                // eslint-disable-next-line no-debugger
+
                                 filevalidation(event);
                               }}
                             />

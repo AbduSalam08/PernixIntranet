@@ -15,3 +15,14 @@ export const getuserdetails = async (): Promise<any> => {
     .expand("AttachmentFiles,Author")
     .get();
 };
+
+export const skillUpdate = async (Id: number, newSkills: any): Promise<any> => {
+  debugger;
+  const listname = CONFIG.ListNames.EmployeeDirectory_Config;
+  return await sp.web.lists
+    .getByTitle(listname)
+    .items.getById(Id)
+    .update({
+      Skills: { results: newSkills },
+    });
+};
