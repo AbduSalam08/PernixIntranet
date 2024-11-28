@@ -140,8 +140,8 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
     const questionsResponse = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
       Select:
-        "*, Author/Title, Author/EMail, Author/Id,AssignTo/Title, AssignTo/EMail, AssignTo/Id,AnswerBy/Title, AnswerBy/EMail, AnswerBy/Id",
-      Expand: "Author,AssignTo,AnswerBy",
+        "*, Author/Title, Author/EMail, Author/Id, AssignTo/Title, AssignTo/EMail, AssignTo/Id, AnswerBy/Title, AnswerBy/EMail, AnswerBy/Id",
+      Expand: "Author, AssignTo, AnswerBy",
     });
 
     // Fetch responses from the Intranet_Response list
@@ -173,8 +173,9 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
             {
               ID: question.ID,
               content: question?.Answer,
-              date: moment(question?.AnswerDate).format("DD/MM/YYYY"),
+              date: moment(question?.AnswerDate).format("DD MMM YYYY"),
               avatarUrl: question?.AnswerBy?.EMail || "",
+              AnswerBy: question?.AnswerBy?.Title || "",
             },
           ]
         : [];
@@ -185,9 +186,9 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
         title: question.Question || "", // Question from Intranet_QuestionsToCEO
         isActive: question.isActive ? true : false,
         date: moment(question.Created).format("DD/MM/YYYY") || null, // Format the question's created date
-        avatarUrl:
-          question.Author?.EMail ||
-          "https://randomuser.me/api/portraits/placeholder.jpg", // Author's email or placeholder
+        Author: question?.Author?.Title ?? "",
+        avatarUrl: question?.Author?.EMail ?? "",
+        // "https://randomuser.me/api/portraits/placeholder.jpg", // Author's email or placeholder
         replies: replies, // Attach filtered responses
         assignTo: question?.AssignTo
           ? {
@@ -239,16 +240,16 @@ export const addQuestionCeo = async (
     };
     return updatedState;
   });
+
   try {
     //Add item to the SharePoint list
-    const addItem: any = await SpServices.SPAddItem({
+    await SpServices.SPAddItem({
       Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
       RequestJSON: {
         Question: formData?.Description?.value,
         isAnonymous: formData?.Anonymous?.value,
       },
     }).then((res: any) => {
-      console.log(addItem, "addItem");
       // Success state after item and attachment are added
       setLoaderState((prevState: any) => {
         const updatedState = [...prevState]; // Copy state array
@@ -262,7 +263,7 @@ export const addQuestionCeo = async (
           },
           messages: {
             ...updatedState[index].messages,
-            successDescription: `The new Question has been added successfully.`,
+            successDescription: `The question has been added successfully.`,
             // successDescription: `The new Question '${formData.Description.value}' has been added successfully.`,
           },
         };

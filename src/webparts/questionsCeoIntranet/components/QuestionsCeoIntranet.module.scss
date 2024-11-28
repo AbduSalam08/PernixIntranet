@@ -12,6 +12,7 @@
   padding: 20px;
   margin: 20px;
   line-height: 1.4;
+  background-color: #fff;
 
   // height: 460px;
   // display: flex;
@@ -91,6 +92,13 @@
       }
     }
   }
+}
+
+.anonymous {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  gap: 6px;
 }
 
 .addNewsGrid {

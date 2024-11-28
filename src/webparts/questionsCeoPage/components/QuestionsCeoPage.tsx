@@ -33,11 +33,11 @@ import {
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
-// import { Tooltip } from "primereact/tooltip";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import { Checkbox } from "primereact/checkbox";
+
 interface IReplies {
   avatarUrl: string;
   content: string;
@@ -137,6 +137,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   });
 
   const totalRecords = showCEOQuestions?.length || 0;
+
   const onPageChange = (event: any): void => {
     setPagination({
       first: event?.first || CONFIG.PaginationData.first,
@@ -190,7 +191,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     },
     {
       open: false,
-      popupTitle: "New question to CEO",
+      popupTitle: "New question to leadership",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -280,7 +281,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     const updatedFormData = Object.keys(newFormData).reduce((acc, key) => {
       const fieldData = newFormData[key];
       const { isValid, errorMsg } = validateField(
-        key,
+        key === "Description" ? "Question" : key,
         fieldData.value,
         fieldData?.validationRule
       );
@@ -519,7 +520,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     [
       <div key={2}>
         <FloatingLabelTextarea
-          value={newFormData?.Description.value}
+          value={newFormData?.Description?.value ?? ""}
           size="XL"
           placeholder="Enter question"
           rows={5}
@@ -528,9 +529,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           onChange={(e: any) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
-              "Description",
+              "Question",
               value,
-              newFormData?.Description.validationRule
+              newFormData?.Description?.validationRule
             );
             handleNewFormInputChange("Description", value, isValid, errorMsg);
           }}
@@ -538,15 +539,13 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         <div className={styles.anonymous}>
           <Checkbox
             inputId="Anonymous"
-            name=""
             value="Anonymous"
-            // onChange={onIngredientsChange}
-            checked={newFormData?.Anonymous.value}
+            checked={newFormData?.Anonymous?.value}
             onChange={(e: any) => {
               const { isValid, errorMsg } = validateField(
                 "Anonymous",
                 e.checked,
-                newFormData?.Anonymous.validationRule
+                newFormData?.Anonymous?.validationRule
               );
               handleNewFormInputChange(
                 "Anonymous",
@@ -556,9 +555,38 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               );
             }}
           />
+
           <label htmlFor="Anonymous" className="ml-2">
             Anonymous
           </label>
+
+          <Tooltip
+            style={{
+              color: "red",
+            }}
+            title={
+              <div
+                style={{
+                  padding: "10px",
+                  minHeight: "50px",
+                  maxHeight: "200px",
+                  overflow: "auto",
+                  fontSize: "12px",
+                  lineHeight: "1.4",
+                }}
+              >
+                Selecting this will hide your name from the users/leadership in
+                the homepage when the question is finally displayed. However the
+                system Admin can find your submission.
+              </div>
+            }
+            placement="right"
+            arrow
+          >
+            <IconButton>
+              <InfoIcon />
+            </IconButton>
+          </Tooltip>
         </div>
       </div>,
     ],
@@ -905,7 +933,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   initialPopupController[1],
                   1,
                   "open",
-                  "Submit a question to CEO"
+                  "Create a question to leadership"
                 );
               }}
             >
@@ -918,6 +946,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           )}
         </div>
       </div>
+
       {/* tabs */}
       <div className={styles.tabsContainer}>
         {CONFIG.QuestionsPageTabsName.map((str: string, i: number) => {
@@ -1017,7 +1046,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             fontFamily: "osMedium, sans-serif",
           }}
         >
-          No questions found.
+          No questions found!
         </div>
       ) : (
         <div className={styles.bodyContainer}>
@@ -1026,69 +1055,49 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             ?.map((val: any, index: number) => {
               return (
                 <div key={index} className={styles.cardSection}>
-                  <div
-                    style={{
-                      minHeight:
-                        userDetails.role !== "User" ? "306px" : "306px",
-                      maxHeight:
-                        userDetails.role !== "User" ? "306px" : "306px",
-                    }}
-                    className={styles.cardBody}
-                  >
-                    <div className={styles.questions}>
-                      <div className={styles.imgsection}>
-                        <Avatar
-                          className="qustionceo"
-                          image={`/_layouts/15/userphoto.aspx?size=S&username=${
-                            val?.Anonymous
-                              ? "https://randomuser.me/api/portraits/placeholder.jpg"
-                              : val?.avatarUrl
-                          }`}
-                          // size="small"
-                          shape="circle"
-                          style={{
-                            width: "40px !important",
-                            height: "40px !important",
-                          }}
-                          // data-pr-tooltip={val.receiverName}
-                        />
-                      </div>
-                      <p className={styles.ques} title={val.title}>
-                        {val.title}
-                      </p>
-                    </div>
-
-                    <div>
-                      <div className={styles.answer}>
-                        <div className={styles.imgsection}>
-                          <Avatar
-                            className="qustionceo"
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies[0]?.avatarUrl}`}
-                            shape="circle"
-                          />
-                        </div>
-                        <p title={val.replies[0]?.content}>
-                          {val.replies[0]?.content}
-                        </p>
-                      </div>
-                      <p className={styles.date}>
-                        Posted on :{val.replies[0]?.date}
-                      </p>
-                    </div>
-                  </div>
-                  <div className={styles.cardFooter}>
-                    {userDetails.role === "Admin" ? (
+                  <div className={styles.cardHeader}>
+                    <div
+                      className={styles.createdByDetail}
+                      style={{
+                        background: val?.Anonymous ? "#e0803d2e" : "#0b4d532e",
+                      }}
+                    >
+                      <Avatar
+                        className={styles.avatarCreatedBy}
+                        shape="circle"
+                        image={`/_layouts/15/userphoto.aspx?size=S&username=${
+                          val?.Anonymous ? "" : val?.avatarUrl
+                        }`}
+                      />
                       <div
-                        className={
-                          val.isActive ? styles.activepill : styles.inactivepill
-                        }
+                        title={val?.Author}
+                        className={styles.createdByName}
+                        style={{
+                          color: val?.Anonymous ? "#e0803d" : "#0b4d53",
+                        }}
                       >
-                        {val.isActive ? "Active" : "In Active"}
+                        {val?.Anonymous ? "Anonymous" : val?.Author}
                       </div>
-                    ) : (
-                      <div />
-                    )}
-                    <div className={styles.actionBtns}>
+                    </div>
+                    <div className={styles.actionSec}>
+                      {userDetails.role === "Admin" &&
+                        val?.replies?.length > 0 && (
+                          <InputSwitch
+                            checked={val.isActive}
+                            className="sectionToggler"
+                            onChange={(e) => {
+                              setShowCEOQuestions((prevItems) =>
+                                prevItems.map((item: any, idx: number) =>
+                                  val?.ID === item?.ID
+                                    ? { ...item, isActive: e.value }
+                                    : item
+                                )
+                              );
+                              changeQuestionActiveStatus(val.ID, e.value);
+                            }}
+                          />
+                        )}
+
                       {((userDetails.role === "Admin" && !val.isActive) ||
                         (userDetails.email ===
                           val?.assignTo?.email?.toLowerCase() &&
@@ -1146,31 +1155,68 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                           className="pi pi-pen-to-square"
                         />
                       )}
-                      {userDetails.role === "Admin" &&
-                        val?.replies?.length > 0 && (
-                          <InputSwitch
-                            checked={val.isActive}
-                            className="sectionToggler"
-                            onChange={(e) => {
-                              setShowCEOQuestions((prevItems) =>
-                                prevItems.map((item: any, idx: number) =>
-                                  val?.ID === item?.ID
-                                    ? { ...item, isActive: e.value }
-                                    : item
-                                )
-                              );
-                              changeQuestionActiveStatus(val.ID, e.value);
-                            }}
-                          />
-                        )}
                     </div>
                   </div>
-                  {/* )} */}
+
+                  <div title={val.title} className={styles.cardQuestionSec}>
+                    {val.title}
+                  </div>
+
+                  {val?.replies?.length ? (
+                    <div className={styles.cardAnsSec}>
+                      <div className={styles.cardAnsUserSec}>
+                        <div className={styles.replayLable}>Answer :</div>
+                        <div className={styles.ansUserSec}>
+                          <Avatar
+                            className={styles.ansAvatar}
+                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies?.[0]?.avatarUrl}`}
+                            shape="circle"
+                          />
+                          <div
+                            title={val?.replies?.[0]?.AnswerBy}
+                            className={styles.ansUserLable}
+                          >
+                            {val?.replies?.[0]?.AnswerBy}
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        title={val?.replies?.[0]?.content}
+                        className={styles.cardAnsContentSec}
+                      >
+                        {val?.replies?.[0]?.content}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.cardAnsSec} />
+                  )}
+
+                  <div className={styles.cardFooterSec}>
+                    <div
+                      style={{
+                        display: userDetails.role === "Admin" ? "flex" : "none",
+                      }}
+                      className={
+                        val.isActive ? styles.activepill : styles.inactivepill
+                      }
+                    >
+                      {val.isActive ? "Active" : "In Active"}
+                    </div>
+                    <div
+                      className={styles.footerDateSec}
+                      style={{
+                        display: val?.replies?.length ? "flex" : "none",
+                      }}
+                    >
+                      {val?.replies?.[0]?.date}
+                    </div>
+                  </div>
                 </div>
               );
             })}
         </div>
       )}
+
       {showCEOQuestions.length > 0 && (
         <div
           className="card"
@@ -1187,6 +1233,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           />
         </div>
       )}
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}

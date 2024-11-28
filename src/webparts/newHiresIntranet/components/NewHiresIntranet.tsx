@@ -471,6 +471,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
     <div className={styles.newhireContainer}>
       <SectionHeaderIntranet
         label="New Hires"
+        title="Add a new hire"
         removeAdd={currentUserDetails?.role === "Admin" ? false : true}
         headerAction={() => {
           resetFormData(formData, setFormData);
