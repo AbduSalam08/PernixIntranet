@@ -21,7 +21,11 @@ import { useDispatch, useSelector } from "react-redux";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
-// import { useSelector } from "react-redux";
+import { Checkbox } from "primereact/checkbox";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
+
 const QuestionsCeoIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
 
@@ -61,7 +65,6 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
   );
   const [CEOQuestions, setCEOQuestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  console.log("CEOQuestions", CEOQuestions);
 
   // const newsIntranetData: any = useSelector((state: any) => {
   //   return state.NewsIntranetData.value;
@@ -73,6 +76,12 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
+    },
+    Anonymous: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: { required: false, type: "boolean" },
     },
   });
 
@@ -100,7 +109,7 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
-        key,
+        key === "Description" ? "Question" : key,
         fieldData.value,
         fieldData?.validationRule
       );
@@ -140,13 +149,61 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
           onChange={(e: any) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
-              "Description",
+              "Question",
               value,
               formData.Description.validationRule
             );
             handleInputChange("Description", value, isValid, errorMsg);
           }}
         />
+
+        <div className={styles.anonymous}>
+          <Checkbox
+            inputId="Anonymous"
+            value="Anonymous"
+            checked={formData?.Anonymous?.value}
+            onChange={(e: any) => {
+              const { isValid, errorMsg } = validateField(
+                "Anonymous",
+                e.checked,
+                formData?.Anonymous?.validationRule
+              );
+              handleInputChange("Anonymous", e.checked, isValid, errorMsg);
+            }}
+          />
+
+          <label htmlFor="Anonymous" className="ml-2">
+            Anonymous
+          </label>
+
+          <Tooltip
+            style={{
+              color: "red",
+            }}
+            title={
+              <div
+                style={{
+                  padding: "10px",
+                  minHeight: "50px",
+                  maxHeight: "200px",
+                  overflow: "auto",
+                  fontSize: "12px",
+                  lineHeight: "1.4",
+                }}
+              >
+                Selecting this will hide your name from the users/leadership in
+                the homepage when the question is finally displayed. However the
+                system Admin can find your submission.
+              </div>
+            }
+            placement="right"
+            arrow
+          >
+            <IconButton>
+              <InfoIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
       </div>,
     ],
   ];
@@ -270,13 +327,14 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
     <div className={styles.quesToCEOContainer}>
       <SectionHeaderIntranet
         label={"Questions to Leadership"}
+        title="Add a question"
         headerAction={() => {
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
             0,
             "open",
-            "Submit a question to CEO"
+            "Create a question to leadership"
           );
           resetFormData(formData, setFormData);
         }}

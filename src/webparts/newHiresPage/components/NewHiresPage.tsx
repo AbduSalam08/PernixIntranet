@@ -23,7 +23,7 @@ import {
 } from "../../../services/newHiresIntranet/newHiresIntranet";
 import moment from "moment";
 import { Paginator } from "primereact/paginator";
-import { Avatar } from "primereact/avatar";
+// import { Avatar } from "primereact/avatar";
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
@@ -35,9 +35,11 @@ import { resetFormData, validateField } from "../../../utils/commonUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
+import { Button } from "primereact/button";
 
 /* Images creation */
-const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
+// const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
+const defaultUserImg: string = require("../../../assets/images/svg/user2.png");
 
 /* Local interfaces */
 interface INewHiresField {
@@ -100,6 +102,26 @@ const NewHiresPage = (props: any): JSX.Element => {
         inprogress: "Deleting hire, please wait...",
       },
     },
+    {
+      open: false,
+      popupTitle: "",
+      popupWidth: "900px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "",
+        error: "",
+        successDescription: "",
+        errorDescription: "",
+        inprogress: "",
+      },
+    },
   ];
   const initialFormData: INewHiresField = {
     EmployeeName: {
@@ -160,6 +182,7 @@ const NewHiresPage = (props: any): JSX.Element => {
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
+  const [curObject, setCurObject] = useState<any>();
 
   const totalRecords = showNewHires?.length || 0;
 
@@ -268,7 +291,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                 const value = item[0];
                 console.log("value: ", value);
                 const { isValid, errorMsg } = validateField(
-                  "EmployeeName",
+                  "Employee name",
                   item,
                   formData?.EmployeeName?.validationRule
                 );
@@ -281,9 +304,8 @@ const NewHiresPage = (props: any): JSX.Element => {
               accept="image/png,image/jpeg"
               value={formData?.ProfileImage.value?.name}
               onFileSelect={async (file) => {
-                console.log("file: ", file);
                 const { isValid, errorMsg } = validateField(
-                  "ProfileImage",
+                  "Profile image",
                   file ? file.name : "",
                   formData.ProfileImage.validationRule
                 );
@@ -294,7 +316,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                   errorMsg
                 );
               }}
-              placeholder="Profile (1120 x 350)"
+              placeholder="Profile (400 x 400)"
               isValid={formData.ProfileImage.isValid}
               errMsg={formData.ProfileImage.errorMsg}
             />
@@ -317,7 +339,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               errorMsg={formData.StartDate.errorMsg}
               onChange={(date: any) => {
                 const { isValid, errorMsg } = validateField(
-                  "StartDate",
+                  "Start date",
                   date,
                   formData.StartDate.validationRule
                 );
@@ -355,7 +377,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               errorMsg={formData.EndDate.errorMsg}
               onChange={(date: any) => {
                 const { isValid, errorMsg } = validateField(
-                  "EndDate",
+                  "End date",
                   date,
                   formData.EndDate.validationRule
                 );
@@ -398,6 +420,27 @@ const NewHiresPage = (props: any): JSX.Element => {
     [
       <div key={2}>
         <p>Are you sure you want to delete this hire?</p>
+      </div>,
+    ],
+    [
+      <div className={styles.popUpContainer} key={3}>
+        <div className={styles.popUpHeaderSec}>
+          <img src={curObject?.imgUrl ?? defaultUserImg} alt="User image" />
+          <div>
+            <div>{curObject?.EmployeeName?.name ?? ""}</div>
+            <div>
+              {moment(curObject?.StartDate).format("YYYYMMDD") ===
+              moment(curObject?.EndDate).format("YYYYMMDD")
+                ? moment(curObject?.StartDate).format("DD MMM YYYY")
+                : moment(curObject?.StartDate).format("DD MMM YYYY") +
+                  " - " +
+                  moment(curObject?.EndDate).format("DD MMM YYYY")}
+            </div>
+          </div>
+        </div>
+        <div title={curObject?.Description} className={styles.popUpBodySec}>
+          {curObject?.Description ?? ""}
+        </div>
       </div>,
     ],
   ];
@@ -462,6 +505,24 @@ const NewHiresPage = (props: any): JSX.Element => {
         size: "large",
         onClick: async () => {
           await deleteHire(handleForm?.ID, setPopupController, 1);
+        },
+      },
+    ],
+    [
+      {
+        text: "Close",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[2],
+            2,
+            "close"
+          );
         },
       },
     ],
@@ -543,7 +604,7 @@ const NewHiresPage = (props: any): JSX.Element => {
     if (newHiresData?.data?.length > 0) {
       setNewHires(newHiresData?.data);
       onLoadingFUN(
-        selectedTab || CONFIG.NewHiresPageTabsName[0],
+        selectedTab ? selectedTab : CONFIG.NewHiresPageTabsName[0],
         newHiresData?.data
       );
     }
@@ -637,7 +698,7 @@ const NewHiresPage = (props: any): JSX.Element => {
       {/* tabs */}
       <div className={styles.tabsContainer}>
         {CONFIG.NewHiresPageTabsName.map((str: string, i: number) => {
-          return (
+          return userDetails?.role === "Admin" ? (
             <div
               key={i}
               style={{
@@ -646,23 +707,33 @@ const NewHiresPage = (props: any): JSX.Element => {
                 cursor: "pointer",
               }}
               onClick={(_) => {
-                // setPagination(CONFIG.PaginationData);
-                // if (selectedTab !== str) {
-                //   searchField.Search = "";
-                //   searchField.Status = "";
-                //   searchField.Date = null;
-                //   setCommonSearch({ ...searchField });
-                //   getQuestionCeo(dispatch);
-                // }
                 setSelectedTab(str);
                 onLoadingFUN(str, newHires);
               }}
             >
               {str}
             </div>
+          ) : i === 0 ? (
+            <div
+              key={i}
+              style={{
+                borderBottom:
+                  selectedTab === str ? "3px solid #e0803d" : "none",
+                cursor: "pointer",
+              }}
+              onClick={(_) => {
+                setSelectedTab(str);
+                onLoadingFUN(str, newHires);
+              }}
+            >
+              {str}
+            </div>
+          ) : (
+            ""
           );
         })}
       </div>
+
       {showNewHires?.length === 0 ? (
         <div
           style={{
@@ -676,7 +747,7 @@ const NewHiresPage = (props: any): JSX.Element => {
             fontFamily: "osMedium, sans-serif",
           }}
         >
-          No questions found.
+          No new hires found!
         </div>
       ) : (
         <div className={styles.bodyContainer}>
@@ -684,118 +755,102 @@ const NewHiresPage = (props: any): JSX.Element => {
             ?.slice(pagination.first, pagination.first + pagination.rows)
             ?.map((val: any, index: number) => {
               return (
-                <div className={styles.cardSection} key={index}>
-                  <div className={styles.cardBody}>
-                    <div className={styles.imgAndDecriptionSection}>
-                      <div className={styles.imgSection}>
-                        <img
-                          src={val.imgUrl || personImagePlaceholder}
-                          alt=""
-                        />
-                      </div>
-                      <div className={styles.descriptionSection}>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            margin: "10px 0px",
-                          }}
-                        >
-                          <p
-                            className={styles.employeeName}
-                          >{`${val.Title} ${val.EmployeeName?.name}`}</p>
-                          <div className={styles.imgandName}>
-                            <Avatar
-                              image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.createdEmail}`}
-                              // size="small"
-                              shape="circle"
-                              style={{
-                                width: "40px !important",
-                                height: "40px !important",
-                              }}
-                              data-pr-tooltip={val.receiverName}
-                            />
-                            <p>{val.createdName}</p>
-                          </div>
-                        </div>
-                        <p
-                          className={styles.description}
-                          title={val.Description}
-                        >
-                          {val.Description}
-                        </p>
+                <div key={index} className={styles.cardSection}>
+                  <div className={styles.cardHeader}>
+                    <img src={val?.imgUrl ?? defaultUserImg} alt="User image" />
+                    <div>
+                      <div>{val?.EmployeeName?.name ?? ""}</div>
+                      <div>
+                        {moment(val?.StartDate).format("YYYYMMDD") ===
+                        moment(val?.EndDate).format("YYYYMMDD")
+                          ? moment(val?.StartDate).format("DD MMM YYYY")
+                          : moment(val?.StartDate).format("DD MMM YYYY") +
+                            " - " +
+                            moment(val?.EndDate).format("DD MMM YYYY")}
                       </div>
                     </div>
-                    <div className={styles.cardFooter}>
-                      <p className={styles.dateSection}>{`${moment(
-                        val.StartDate
-                      ).format("DD/MM/YYYY")} - ${moment(val.EndDate).format(
-                        "DD/MM/YYYY"
-                      )}`}</p>
-                      {userDetails?.role === "Admin" && (
-                        <div style={{ display: "flex", gap: "10px" }}>
-                          {selectedTab !== CONFIG.NewHiresPageTabsName[2] && (
-                            <i
-                              onClick={() => {
-                                setHandleForm({ ID: val?.ID, type: "Update" });
-                                setAttachmentObject(val?.Attachment);
-                                setFormData({
-                                  EmployeeName: {
-                                    ...initialFormData.EmployeeName,
-                                    value: val?.EmployeeName?.name,
-                                  },
-                                  StartDate: {
-                                    ...initialFormData.StartDate,
-                                    value: new Date(val?.StartDate),
-                                  },
-                                  EndDate: {
-                                    ...initialFormData.EndDate,
-                                    value: new Date(val?.EndDate),
-                                  },
-                                  Description: {
-                                    ...initialFormData.Description,
-                                    value: val?.Description,
-                                  },
-                                  ProfileImage: {
-                                    ...initialFormData.ProfileImage,
-                                    value: { name: val?.Attachment?.FileName },
-                                  },
-                                });
-                                togglePopupVisibility(
-                                  setPopupController,
-                                  initialPopupController[0],
-                                  0,
-                                  "open",
-                                  "Update hire"
-                                );
-                              }}
-                              style={{
-                                color: "#adadad",
-                                fontSize: "1.2rem",
-                                cursor: "pointer",
-                              }}
-                              className="pi pi-pen-to-square"
-                            />
-                          )}
-                          <i
-                            className="pi pi-trash"
-                            style={{
-                              color: "#ff1c1c",
-                              fontSize: "1.2rem",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => {
-                              setHandleForm({ ID: val?.ID, type: "Delete" });
-                              togglePopupVisibility(
-                                setPopupController,
-                                initialPopupController[1],
-                                1,
-                                "open"
-                              );
-                            }}
-                          />
-                        </div>
-                      )}
+                  </div>
+                  <div title={val?.Description} className={styles.cardBodySec}>
+                    {val?.Description ?? ""}
+                  </div>
+                  <div className={styles.cardBTNSec}>
+                    <Button
+                      label="Read more"
+                      onClick={() => {
+                        setCurObject({ ...val });
+                        togglePopupVisibility(
+                          setPopupController,
+                          initialPopupController[2],
+                          2,
+                          "open"
+                        );
+                      }}
+                    />
+                    <div
+                      style={{
+                        display:
+                          userDetails?.role === "Admin" ? "flex" : "none",
+                      }}
+                    >
+                      <i
+                        style={{
+                          display:
+                            selectedTab !== CONFIG.NewHiresPageTabsName[2]
+                              ? "flex"
+                              : "none",
+                        }}
+                        className="pi pi-pen-to-square"
+                        onClick={() => {
+                          setHandleForm({
+                            ID: val?.ID,
+                            type: "Update",
+                          });
+                          setAttachmentObject(val?.Attachment);
+                          setFormData({
+                            EmployeeName: {
+                              ...initialFormData.EmployeeName,
+                              value: val?.EmployeeName?.name,
+                            },
+                            StartDate: {
+                              ...initialFormData.StartDate,
+                              value: new Date(val?.StartDate),
+                            },
+                            EndDate: {
+                              ...initialFormData.EndDate,
+                              value: new Date(val?.EndDate),
+                            },
+                            Description: {
+                              ...initialFormData.Description,
+                              value: val?.Description,
+                            },
+                            ProfileImage: {
+                              ...initialFormData.ProfileImage,
+                              value: {
+                                name: val?.Attachment?.FileName,
+                              },
+                            },
+                          });
+                          togglePopupVisibility(
+                            setPopupController,
+                            initialPopupController[0],
+                            0,
+                            "open",
+                            "Update hire"
+                          );
+                        }}
+                      />
+                      <i
+                        className="pi pi-trash"
+                        onClick={() => {
+                          setHandleForm({ ID: val?.ID, type: "Delete" });
+                          togglePopupVisibility(
+                            setPopupController,
+                            initialPopupController[1],
+                            1,
+                            "open"
+                          );
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
