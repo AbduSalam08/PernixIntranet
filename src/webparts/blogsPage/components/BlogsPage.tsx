@@ -14,7 +14,7 @@ import styles from "./BlogsPage.module.scss";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import {
   Icon,
-  // SearchBox,
+  // SgetearchBox,
   // ISearchBoxStyles,
   Persona,
   PersonaSize,
@@ -60,9 +60,10 @@ const BlogsPage = (props: any): JSX.Element => {
       open: false,
       popupTitle: "Confirmation",
       popupWidth: "450px",
-      popupType: "confirmation",
+      popupType: "custom",
+
       defaultCloseBtn: false,
-      confirmationTitle: "Are you sure want to Approved This Blog?",
+      confirmationTitle: "",
       popupData: "",
       isLoading: {
         inprogress: false,
@@ -86,6 +87,71 @@ const BlogsPage = (props: any): JSX.Element => {
     first: 0,
     rows: 3,
   });
+
+  const popupInputs: any[] = [
+    [
+      <div key={1}>
+        <p style={{ textAlign: "center" }}>
+          Are you sure want to Approved This Blog?
+        </p>
+
+        <div
+          style={{
+            position: "absolute",
+            top: "-20px",
+            right: 0,
+            left: "380px",
+            background: "#ccc",
+            border: "1px solid #ccc",
+            borderRadius: "50%",
+            width: "25px",
+            height: "25px",
+            padding: "4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+          title="Close"
+          onClick={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              0,
+              "close"
+            );
+          }}
+        >
+          <i
+            className="pi pi-times"
+            style={{
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "#000",
+            }}
+          ></i>
+        </div>
+
+        {/* <Button
+          icon="pi pi-times"
+          rounded
+          // severity="danger"
+          aria-label="Cancel"
+          style={{
+            position: "absolute",
+            top: "-8px",
+            right: 0,
+            left: "370px",
+            background: "#ccc",
+            border: "1px solid #cccc",
+            width: "18px",
+            height: "18px",
+            boxShadow: "none",
+          }}
+        /> */}
+      </div>,
+    ],
+  ];
   const popupActions: any = [
     [
       {
@@ -448,7 +514,7 @@ const BlogsPage = (props: any): JSX.Element => {
   const onLoadingFunc = async (user: any): Promise<void> => {
     let _userpermission: string = "";
     await permissionhandling().then(async (arr) => {
-      if (arr?.some((item) => item.Email && item.Email === user.Email)) {
+      if (arr?.some((item) => item.Email && item?.Email === user?.Email)) {
         _userpermission = "Admin";
         setpermission(_userpermission);
       } else {
@@ -568,6 +634,7 @@ const BlogsPage = (props: any): JSX.Element => {
                   style={{
                     display: "flex",
                     alignItems: "center",
+
                     gap: "18px",
                   }}
                 >
@@ -875,13 +942,20 @@ const BlogsPage = (props: any): JSX.Element => {
                                               onClick={() => {
                                                 // setcheckbox(false);
                                                 setupdateid(item.Id);
-                                                const _popupcontroller = [
-                                                  ...popupController,
-                                                ];
-                                                _popupcontroller[0].open = true;
-                                                setPopupController([
-                                                  ..._popupcontroller,
-                                                ]);
+
+                                                togglePopupVisibility(
+                                                  setPopupController,
+                                                  initialPopupController[0],
+                                                  0,
+                                                  "open"
+                                                );
+                                                // const _popupcontroller = [
+                                                //   ...popupController,
+                                                // ];
+                                                // _popupcontroller[0].open = true;
+                                                // setPopupController([
+                                                //   ..._popupcontroller,
+                                                // ]);
                                                 // approverStatusFunc(
                                                 //   item.Id
                                                 // );
@@ -1078,7 +1152,7 @@ const BlogsPage = (props: any): JSX.Element => {
           centerActionBtn={true}
           popupActions={popupActions[index]}
           visibility={popupData.open}
-          // content={popupInputs[index]}
+          content={popupInputs[index]}
           popupWidth={popupData.popupWidth}
           defaultCloseBtn={popupData.defaultCloseBtn || false}
           confirmationTitle={popupData?.confirmationTitle}

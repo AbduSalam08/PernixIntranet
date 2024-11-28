@@ -111,7 +111,7 @@ const Popup = ({
       className={`popupWrapper ${styles.popupWrapper}`}
       visible={visibility}
       modal
-      header={PopupType !== "confirmation" && defaultCloseBtn && headerElement}
+      header={defaultCloseBtn && headerElement}
       style={{ width: popupWidth }}
       onHide={onHide}
     >

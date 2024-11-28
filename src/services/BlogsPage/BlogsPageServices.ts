@@ -1,7 +1,9 @@
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { CONFIG } from "../../config/config";
 import { sp } from "@pnp/sp/presets/all";
+import SpServices from "../SPServices/SpServices";
 // This function is User like functionality Update Method
 export const addlikemethod = async (
   Id: number,
@@ -201,4 +203,36 @@ export const getupdateintranettitle = async (text: string): Promise<any> => {
   return await sp.web.lists.getByTitle(listname).items.add({
     IntranetTitle: text,
   });
+};
+
+export const addComments = async (
+  comment: string,
+  id: number,
+  setAllComment: any,
+  allComment: any,
+  curuser: any
+): Promise<any> => {
+  try {
+    let res = await SpServices.SPAddItem({
+      Listname: "Intranet_BlogComments",
+      RequestJSON: {
+        Comments: comment,
+        BlogIdId: id,
+      },
+    });
+
+    return res?.data?.Id;
+  } catch {
+    console.log("failed to add comments");
+  }
+};
+
+export const getComments = async (id: number): Promise<any> => {
+  const getComment = await sp.web.lists
+    .getByTitle("Intranet_BlogComments")
+    .items.select("*,Author/EMail,Author/Title,Author/ID,BlogId/ID")
+    .expand("Author,BlogId")
+    .filter(`BlogIdId eq ${id}`)
+    .get();
+  return getComment;
 };
