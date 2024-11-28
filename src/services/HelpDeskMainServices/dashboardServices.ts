@@ -16,12 +16,11 @@ export const getAllTickets = async (
   await SpServices.SPReadItems({
     Listname: CONFIG.ListNames.HelpDesk_AllTickets,
     Select:
-      "*, EmployeeName/ID, EmployeeName/Title, EmployeeName/EMail, ITOwner/ID, ITOwner/Title, ITOwner/EMail, TicketManager/ID, TicketManager/Title, TicketManager/EMail, RepeatedTicketSource/ID,TaggedPerson/Title, TaggedPerson/EMail, TaggedPerson/ID",
+      "*, EmployeeName/ID, EmployeeName/Title, EmployeeName/EMail, ITOwner/ID, ITOwner/Title, ITOwner/EMail, TicketManager/ID, TicketManager/Title, TicketManager/EMail, RepeatedTicketSource/ID,TaggedPerson/Title, TaggedPerson/EMail, TaggedPerson/ID, RecurrenceConfigDetails/ID",
     Expand:
-      "EmployeeName,ITOwner,TicketManager,RepeatedTicketSource, TaggedPerson",
+      "EmployeeName,ITOwner,TicketManager,RepeatedTicketSource, TaggedPerson, RecurrenceConfigDetails",
   })
     ?.then((res: any) => {
-      console.log("res: ", res);
       if (res?.length !== 0) {
         dispatch?.(
           setHelpDeskTickets({

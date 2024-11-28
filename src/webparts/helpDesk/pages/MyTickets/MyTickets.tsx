@@ -47,7 +47,10 @@ import {
   TicketStatus,
 } from "../../../../constants/HelpDeskTicket";
 import { ToastContainer } from "react-toastify";
-import { addNewTicket } from "../../../../services/HelpDeskMainServices/ticketServices";
+import {
+  addNewTicket,
+  getRecurrenceConfigDetails,
+} from "../../../../services/HelpDeskMainServices/ticketServices";
 import { Avatar } from "primereact/avatar";
 import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
 // import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
@@ -63,6 +66,7 @@ import {
   calculateNextTicketDate,
   handleSubmit,
   mapRowDataToFormData,
+  mapRowDataToRecurrenceFormData,
   validateRecurrenceForm,
 } from "../../../../utils/helpdeskUtils";
 import { IinitialPopupLoaders } from "../../../../interface/interface";
@@ -95,10 +99,6 @@ const MyTickets = (): JSX.Element => {
   );
   console.log("recurrenceDetails: ", recurrenceDetails);
   const [hasRecurrence, setHasRecurrence] = useState(false);
-  console.log("setHasRecurrence: ", setHasRecurrence);
-  console.log("hasRecurrence: ", hasRecurrence);
-  console.log("recurrenceDetails: ", recurrenceDetails);
-  console.log("setRecurrenceDetails: ", setRecurrenceDetails);
 
   const initialPopupController: IinitialPopupLoaders[] = [
     {
@@ -129,6 +129,7 @@ const MyTickets = (): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
+  console.log("popupController: ", popupController);
 
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
@@ -162,14 +163,6 @@ const MyTickets = (): JSX.Element => {
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
-  console.log(
-    calculateNextTicketDate(
-      recurrenceDetails?.StartDate?.value,
-      dayjs().format("DD/MM/YYYY"),
-      recurrenceDetails?.EndDate?.value,
-      recurrenceDetails?.Frequency?.value
-    )
-  );
 
   const nextTicketIntimation = calculateNextTicketDate(
     recurrenceDetails?.StartDate?.value,
@@ -204,8 +197,10 @@ const MyTickets = (): JSX.Element => {
         endIcon: false,
         startIcon: false,
         size: "large",
+        disabled: submitClicked,
         onClick: async () => {
           const currentRowData: any = popupController[0]?.popupData;
+          console.log("currentRowData: ", currentRowData);
 
           if (!hasRecurrence) {
             togglePopupVisibility(
@@ -214,6 +209,7 @@ const MyTickets = (): JSX.Element => {
               0,
               "close"
             );
+
             const formDataAppended = isTicketManager
               ? {
                   TicketNumber: {
@@ -274,11 +270,38 @@ const MyTickets = (): JSX.Element => {
               .catch((err: any) => {
                 console.log("err: ", err);
               });
-          } else if (!nextTicketIntimation?.error) {
+          }
+          if (!nextTicketIntimation?.error) {
+            const query: "add" | "update" = popupController[0]?.popupData
+              ?.RecurrenceConfigDetailsId
+              ? "update"
+              : "add";
             validateRecurrenceForm(
-              recurrenceDetails,
+              query,
+              {
+                ...recurrenceDetails,
+                TicketDetails: {
+                  value: {
+                    ID: currentRowData?.ID,
+                  },
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: false, type: "string" },
+                },
+                IsActive: {
+                  value: hasRecurrence,
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: false, type: "string" },
+                },
+              },
               setRecurrenceDetails,
-              setLoadingSubmit
+              popupController[0]?.popupData?.RecurrenceConfigDetailsId,
+              setLoadingSubmit,
+              setSubmitClicked,
+              popupController,
+              setPopupController,
+              dispatch
             );
           }
         },
@@ -335,6 +358,7 @@ const MyTickets = (): JSX.Element => {
           sx={{
             color: "#2d4b51",
           }}
+          checked={hasRecurrence}
           onChange={(value, checked) => {
             setHasRecurrence(checked);
             if (checked) {
@@ -581,6 +605,7 @@ const MyTickets = (): JSX.Element => {
               `${params?.row?.ticket_number} - Attachments`,
               mappedFiles
             );
+
             if (mappedFiles?.length !== 0) {
               toast.success("Attachment downloaded!", {
                 position: "top-center",
@@ -624,12 +649,26 @@ const MyTickets = (): JSX.Element => {
             <>
               <button
                 title="Repeat this ticket"
-                onClick={() => {
+                onClick={async () => {
                   const ticketNumber = params?.row?.ticket_number;
                   const currentRowData: any =
                     HelpDeskTicktesData?.AllData?.filter(
                       (item: any) => item?.TicketNumber === ticketNumber
                     )?.[0];
+
+                  const currentRecurrenceData: any =
+                    await getRecurrenceConfigDetails(
+                      currentRowData?.RecurrenceConfigDetailsId || ""
+                    );
+
+                  setRecurrenceDetails((prev: any) =>
+                    mapRowDataToRecurrenceFormData(currentRecurrenceData, prev)
+                  );
+
+                  setHasRecurrence(currentRowData?.HasRecurrence || false);
+
+                  setSubmitClicked(false);
+
                   togglePopupVisibility(
                     setPopupController,
                     initialPopupController[0],
@@ -830,6 +869,19 @@ const MyTickets = (): JSX.Element => {
       setLoadingSubmit(true);
     }
   }, [formData]);
+
+  useEffect(() => {
+    if (hasRecurrence && popupController[0]?.popupWidth === "450px") {
+      setPopupController((prev) =>
+        updatePopupController(prev, 0, {
+          popupWidth: "650px",
+        })
+      );
+    }
+  }, [
+    popupController[0]?.popupData?.HasRecurrence,
+    popupController[0]?.popupWidth,
+  ]);
 
   return (
     <div className={styles.mytickets}>

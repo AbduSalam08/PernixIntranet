@@ -5,11 +5,14 @@ import StatusPill from "../components/helpDesk/StatusPill/StatusPill";
 import { ticketsFilter, validateField } from "./commonUtils";
 import {
   addNewTicket,
+  addRecurrenceConfigForTicket,
+  updateRecurrenceConfigOfTicket,
   updateTicket,
 } from "../services/HelpDeskMainServices/ticketServices";
 import { getAllTickets } from "../services/HelpDeskMainServices/dashboardServices";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { togglePopupVisibility } from "./popupUtils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type FormField = {
@@ -93,6 +96,27 @@ export const mapRowDataToFormData = (
   };
 };
 
+export const mapRowDataToRecurrenceFormData = (
+  currentRowData: any,
+  initialData: Record<string, FormField>
+): Record<string, FormField> => {
+  return {
+    ...initialData,
+    StartDate: {
+      ...initialData.StartDate,
+      value: dayjs(currentRowData?.StartDate).toDate(),
+    },
+    EndDate: {
+      ...initialData.EndDate,
+      value: dayjs(currentRowData?.EndDate).toDate(),
+    },
+    Frequency: {
+      ...initialData.Frequency,
+      value: currentRowData?.Frequency,
+    },
+  };
+};
+
 export const renderUserCard = (
   styles: any,
   user: any,
@@ -160,7 +184,6 @@ export const handleSubmit = async (
   navigate: any,
   location: any
 ): Promise<any> => {
-  console.log("formData: ", formData);
   let hasErrors = false;
   if (
     !Object.keys(formData)
@@ -193,7 +216,6 @@ export const handleSubmit = async (
   }, {} as typeof formData);
 
   setFormData(updatedFormData);
-  console.log("hasErrors: ", hasErrors);
 
   if (!hasErrors) {
     setLoadingSubmit(true);
@@ -202,7 +224,6 @@ export const handleSubmit = async (
       await Promise.all([addNewTicket(formData, ["Attachment"])])
         .then(async (res: any) => {
           await getAllTickets(dispatch);
-          // navigate(location.pathname);
           ticketsFilter(
             `${currentRole}${location.pathname}`,
             HelpDeskTicktesData,
@@ -259,9 +280,15 @@ export const handleSubmit = async (
 
 // validate reccurence form
 export const validateRecurrenceForm = async (
+  query: "add" | "update",
   recurrenceDetails: any,
   setRecurrenceDetails: any,
-  setLoadingSubmit: any
+  recurrenceConfigID: number,
+  setLoadingSubmit: any,
+  setSubmitClicked: any,
+  initialPopupController: any,
+  setPopupController: any,
+  dispatch: any
 ): Promise<any> => {
   let hasErrors = false;
 
@@ -329,7 +356,43 @@ export const validateRecurrenceForm = async (
 
   if (!hasErrors) {
     setLoadingSubmit(true);
-    console.log("submitted");
+    setSubmitClicked(true);
+    if (query === "add") {
+      await addRecurrenceConfigForTicket(
+        {
+          StartDate: recurrenceDetails?.StartDate?.value,
+          EndDate: recurrenceDetails?.EndDate?.value,
+          Frequency: recurrenceDetails?.Frequency?.value,
+          isActive: true,
+        },
+        recurrenceDetails?.TicketDetails?.value?.ID
+      );
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await getAllTickets(dispatch);
+    } else if (query === "update") {
+      await updateRecurrenceConfigOfTicket(
+        {
+          StartDate: recurrenceDetails?.StartDate?.value,
+          EndDate: recurrenceDetails?.EndDate?.value,
+          Frequency: recurrenceDetails?.Frequency?.value,
+          isActive: recurrenceDetails?.IsActive?.value,
+        },
+        recurrenceDetails?.TicketDetails?.value?.ID,
+        recurrenceConfigID
+      );
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await getAllTickets(dispatch);
+    }
   } else {
     toast.warning("Please fill out all required fields!", {
       position: "top-center",

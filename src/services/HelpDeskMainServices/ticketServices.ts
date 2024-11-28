@@ -11,8 +11,6 @@ import SpServices from "../SPServices/SpServices";
 import dayjs from "dayjs";
 import { setAllUsersData } from "../../redux/features/AllUsersDataSlice";
 
-// const fetchLastTicketNumber = async (): Promise<string> => {
-
 const fetchLastTicketNumber = async (): Promise<string> => {
   try {
     const res = await sp.web.lists
@@ -29,26 +27,6 @@ const fetchLastTicketNumber = async (): Promise<string> => {
     return "";
   }
 };
-
-//   try {
-//     const res = await sp.web.lists
-//       .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-//       .items.select("*")
-//       .get();
-
-//     const lastTicketID = Math.max(
-//       0,
-//       ...(res ?? [])
-//         .map((item: any) => item?.ID)
-//         .filter((id: number | undefined) => id !== undefined && id !== null)
-//     );
-
-//     return generateTicketNumber(lastTicketID + 1);
-//   } catch (error) {
-//     console.error("Error fetching tickets:", error);
-//     return "";
-//   }
-// };
 
 export const extractPayload = async (
   formData: any,
@@ -80,38 +58,6 @@ export const extractPayload = async (
     return payload;
   }, {});
 };
-
-// const addAttachmentToTicket = async (
-//   ticketId: number,
-//   attachment: File,
-//   prevToastID: any
-// ): Promise<void> => {
-//   const toastId = prevToastID || toast.loading("Creating ticket...");
-//   try {
-//     await sp.web.lists
-//       .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-//       .items.getById(ticketId)
-//       .attachmentFiles.add(attachment.name, attachment);
-
-//     toast.update(toastId, {
-//       render: "Ticket added successfully!",
-//       type: "success",
-//       isLoading: false,
-//       autoClose: 5000,
-//       hideProgressBar: false,
-//     });
-//   } catch (error) {
-//     console.error("Error adding attachment:", error);
-//     toast.update(toastId, {
-//       render: "Error adding attachment. Please try again.",
-//       type: "error",
-//       isLoading: false,
-//       autoClose: 5000,
-//       hideProgressBar: false,
-//     });
-//     throw error;
-//   }
-// };
 
 const addAttachmentsToTicket = async (
   ticketId: number,
@@ -182,57 +128,6 @@ export const copyAttachment = async (
     throw error;
   }
 };
-
-// export const addNewTicket = async (
-//   formData: any,
-//   excludeKeys: string[],
-//   repeatTicket?: boolean
-// ): Promise<any> => {
-//   console.log("formData: ", formData);
-//   const payload = await extractPayload(formData, excludeKeys, false);
-//   const extraPayload = {
-//     TicketClosedOn: payload?.Status === "Closed" ? dayjs(new Date()) : null,
-//   };
-
-//   const toastId = toast.loading("Creating ticket...");
-//   try {
-//     const response = await sp.web.lists
-//       .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-//       .items.add({ ...payload, ...extraPayload });
-
-//     const ticketId = response.data.Id;
-
-//     if (formData?.Attachment?.value) {
-//       await s(ticketId, formData.Attachment.value, toastId);
-//     } else {
-//       toast.update(toastId, {
-//         render: "Ticket added successfully!",
-//         type: "success",
-//         isLoading: false,
-//         autoClose: 5000,
-//         hideProgressBar: false,
-//       });
-//     }
-
-//     if (repeatTicket) {
-//       await copyAttachment(
-//         payload?.RepeatedTicketSourceId,
-//         ticketId,
-//         CONFIG.ListNames.HelpDesk_AllTickets
-//       );
-//     }
-//   } catch (error) {
-//     console.error("Error adding ticket:", error);
-//     toast.update(toastId, {
-//       render: "Error adding ticket. Please try again.",
-//       type: "error",
-//       isLoading: false,
-//       autoClose: 5000,
-//       hideProgressBar: false,
-//     });
-//     throw error;
-//   }
-// };
 
 export const addNewTicket = async (
   formData: any,
@@ -523,4 +418,154 @@ export const getAllUsersList = async (dispatch: any): Promise<any> => {
     .catch((err: any) => {
       console.log("err: ", err);
     });
+};
+
+export const getRecurrenceConfigDetails = async (ID: number): Promise<any> => {
+  try {
+    const res = await sp.web.lists
+      .getByTitle(CONFIG.ListNames.HelpDesk_RecurrenceConfig)
+      .items.getById(ID)
+      .get();
+    console.log("Recurrence config retrieved:", res);
+    return res;
+  } catch (err) {
+    console.error("Error fetching recurrence config:", err);
+    throw err;
+  }
+};
+
+export const addRecurrenceConfigForTicket = async (
+  formData: any,
+  ticketID: number
+): Promise<void> => {
+  const toastId = toast.loading("Adding recurrence configuration");
+  try {
+    const res: any = await SpServices.SPAddItem({
+      Listname: CONFIG.ListNames.HelpDesk_RecurrenceConfig,
+      RequestJSON: formData,
+    });
+
+    const resp = res[0] || res;
+    console.log("Recurrence config added:", resp);
+
+    if (resp?.data?.ID) {
+      await SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+        ID: ticketID,
+        RequestJSON: {
+          RecurrenceConfigDetailsId: resp?.data?.ID,
+          HasRecurrence: true,
+        },
+      });
+    }
+
+    toast.update(toastId, {
+      render: "Recurrence configured successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.error("Error adding recurrence config for ticket:", err);
+    toast.update(toastId, {
+      render: "Failed to add recurrence!",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+    throw err;
+  }
+};
+
+export const deActivateRecurrence = async (
+  ticketID: number,
+  recurrenceConfigID: number
+): Promise<void> => {
+  const toastId = toast.loading("Deactivating recurrence");
+  try {
+    await Promise.all([
+      SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.HelpDesk_RecurrenceConfig,
+        ID: recurrenceConfigID,
+        RequestJSON: { isActive: false },
+      }),
+      SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+        ID: ticketID,
+        RequestJSON: { HasRecurrence: false },
+      }),
+    ]);
+
+    toast.update(toastId, {
+      render: "Recurrence deactivated successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.error("Error deactivating recurrence:", err);
+    toast.update(toastId, {
+      render: "Failed to deactivate recurrence.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+    throw err;
+  }
+};
+
+export const updateRecurrenceConfigOfTicket = async (
+  formData: any,
+  ticketID: number,
+  configID: number
+): Promise<void> => {
+  console.log("formData: ", formData);
+  const toastId = toast.loading("Adding recurrence configuration");
+  try {
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.HelpDesk_RecurrenceConfig,
+      RequestJSON: formData,
+      ID: configID,
+    });
+
+    if (!formData?.isActive) {
+      await SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+        ID: ticketID,
+        RequestJSON: {
+          HasRecurrence: false,
+        },
+      });
+    } else {
+      await SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+        ID: ticketID,
+        RequestJSON: {
+          HasRecurrence: true,
+        },
+      });
+    }
+
+    toast.update(toastId, {
+      render: "Recurrence updated successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.error("Error adding recurrence config for ticket:", err);
+    toast.update(toastId, {
+      render: "Failed to add recurrence!",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+    throw err;
+  }
 };

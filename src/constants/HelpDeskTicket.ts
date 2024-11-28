@@ -171,12 +171,6 @@ export const initialRecurrenceFormData = {
     errorMsg: "Frequency is required",
     validationRule: { required: true, type: "string" },
   },
-  TicketDetails: {
-    value: "",
-    isValid: true,
-    errorMsg: "This field is required",
-    validationRule: { required: false, type: "string" },
-  },
 };
 
 export const priorityLevelIntimations: any = {

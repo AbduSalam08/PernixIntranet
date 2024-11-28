@@ -27,6 +27,7 @@ export interface IListName {
   Intranet_BirthdayWishes: string;
   EmployeeDirectory_Config: string;
   IntranetBlogs_Title: string;
+  HelpDesk_RecurrenceConfig: string;
   FlexibleSection: string;
 }
 

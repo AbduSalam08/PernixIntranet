@@ -51,6 +51,7 @@ export namespace CONFIG {
     Intranet_BirthdayWishes: "Intranet_BirthdayWishes",
     EmployeeDirectory_Config: "EmployeeDirectory_Config",
     IntranetBlogs_Title: "IntranetBlogs_Title",
+    HelpDesk_RecurrenceConfig: "HelpDesk_RecurrenceConfig",
     FlexibleSection: "ShowComponent",
   };
 
