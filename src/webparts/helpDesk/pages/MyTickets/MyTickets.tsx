@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import { Drawer, Switch } from "@mui/material";
-import { Switch } from "@mui/material";
 import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
 import DataTable from "../../../../components/common/DataTable/DataTable";
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
@@ -13,7 +12,6 @@ const reopenTicket: any = require("../../../../assets/images/svg/reopenTicket.sv
 import EditIcon from "@mui/icons-material/Edit";
 const infoRed: any = require("../../../helpDesk/assets/images/svg/infoRed.svg");
 const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
-
 import styles from "./MyTickets.module.scss";
 import { useEffect, useMemo, useState } from "react";
 import { Add, AttachFile, OpenInNew, RestartAlt } from "@mui/icons-material";
@@ -50,6 +48,7 @@ import { ToastContainer } from "react-toastify";
 import {
   addNewTicket,
   getRecurrenceConfigDetails,
+  updateRecurrenceConfigOfTicket,
 } from "../../../../services/HelpDeskMainServices/ticketServices";
 import { Avatar } from "primereact/avatar";
 import StatusPill from "../../../../components/helpDesk/StatusPill/StatusPill";
@@ -72,6 +71,7 @@ import {
 import { IinitialPopupLoaders } from "../../../../interface/interface";
 import CustomDateInput from "../../../../components/common/CustomInputFields/CustomDateInput";
 import TicketForm from "../../components/TicketForm/TicketForm";
+import WeekDaysSelector from "../../../../components/common/WeekDaysSelector/WeekDaysSelector";
 // Import SVGs
 const myTickets: any = require("../../assets/images/svg/myTickets.svg");
 const openTickets: any = require("../../assets/images/svg/openTickets.svg");
@@ -129,7 +129,6 @@ const MyTickets = (): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-  console.log("popupController: ", popupController);
 
   const currentUserDetails = useSelector(
     (state: any) => state.MainSPContext.currentUserDetails
@@ -160,6 +159,7 @@ const MyTickets = (): JSX.Element => {
   );
 
   const [formData, setFormData] = useState<any>(initialTicketsFormData);
+  console.log("formData: ", formData);
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
@@ -170,6 +170,17 @@ const MyTickets = (): JSX.Element => {
     recurrenceDetails?.EndDate?.value,
     recurrenceDetails?.Frequency?.value
   );
+
+  // const [nextTicketIntimation, setNextTicketIntimation] = useState(
+  //   calculateNextTicketDate(
+  //   recurrenceDetails?.StartDate?.value,
+  //   dayjs().format("DD/MM/YYYY"),
+  //   recurrenceDetails?.EndDate?.value,
+  //   recurrenceDetails?.Frequency?.value
+  // )
+  // );
+
+  // console.log("nextTicketIntimation: ", nextTicketIntimation);
 
   const popupActions: any = [
     [
@@ -197,19 +208,40 @@ const MyTickets = (): JSX.Element => {
         endIcon: false,
         startIcon: false,
         size: "large",
-        disabled: submitClicked,
+        disabled:
+          submitClicked || recurrenceDetails?.Frequency?.value?.trim() === "",
         onClick: async () => {
           const currentRowData: any = popupController[0]?.popupData;
-          console.log("currentRowData: ", currentRowData);
 
-          if (!hasRecurrence) {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              0,
-              "close"
-            );
+          const query: "add" | "update" = popupController[0]?.popupData
+            ?.RecurrenceConfigDetailsId
+            ? "update"
+            : "add";
 
+          const ticketBaseDetails = {
+            TicketNumber: currentRowData?.TicketNumber,
+            Status: currentRowData?.ITOwner?.ID ? "In Progress" : "Open",
+            // RepeatedTicketSourceId: currentRowData?.ID,
+            // RepeatedTicket: true,
+            // TicketRepeatedOn: dayjs(new Date()),
+            Category: currentRowData?.Category,
+            Priority: currentRowData?.Priority,
+            EmployeeNameId: currentRowData?.EmployeeName?.ID,
+            TicketSource: currentRowData?.TicketSource,
+            TicketDescription: currentRowData?.TicketDescription,
+            TicketManagerId: currentRowData?.TicketManagerId
+              ? currentRowData?.TicketManager?.ID
+              : null,
+            ITOwnerId: currentRowData?.ITOwnerId
+              ? currentRowData?.ITOwner?.ID
+              : null,
+          };
+
+          if (
+            !hasRecurrence &&
+            recurrenceDetails?.Frequency?.value?.toLowerCase() === "repeat once"
+          ) {
+            const recurrenceID = currentRowData?.RecurrenceConfigDetailsId;
             const formDataAppended = isTicketManager
               ? {
                   TicketNumber: {
@@ -270,14 +302,73 @@ const MyTickets = (): JSX.Element => {
               .catch((err: any) => {
                 console.log("err: ", err);
               });
+
+            if (currentRowData?.RecurrenceConfigDetailsId) {
+              const ticketBaseDetails = {
+                TicketNumber: currentRowData?.TicketNumber,
+                Status: currentRowData?.ITOwner?.ID ? "In Progress" : "Open",
+                // RepeatedTicketSourceId: currentRowData?.ID,
+                // RepeatedTicket: true,
+                // TicketRepeatedOn: dayjs(new Date()),
+                Category: currentRowData?.Category,
+                Priority: currentRowData?.Priority,
+                EmployeeNameId: currentRowData?.EmployeeName?.ID,
+                TicketSource: currentRowData?.TicketSource,
+                TicketDescription: currentRowData?.TicketDescription,
+                TicketManagerId: currentRowData?.TicketManagerId
+                  ? currentRowData?.TicketManager?.ID
+                  : null,
+                ITOwnerId: currentRowData?.ITOwnerId
+                  ? currentRowData?.ITOwner?.ID
+                  : null,
+              };
+              await updateRecurrenceConfigOfTicket(
+                {
+                  ...ticketBaseDetails,
+                  NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+                  isActive:
+                    recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                    "repeat once",
+                },
+                currentRowData?.ID,
+                recurrenceID
+              )
+                .then((res: any) => {
+                  togglePopupVisibility(
+                    setPopupController,
+                    initialPopupController[0],
+                    0,
+                    "close"
+                  );
+                })
+                .catch((err: any) => {
+                  togglePopupVisibility(
+                    setPopupController,
+                    initialPopupController[0],
+                    0,
+                    "close"
+                  );
+                });
+              await getAllTickets(dispatch);
+            } else {
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "close"
+              );
+            }
           }
-          if (!nextTicketIntimation?.error) {
-            const query: "add" | "update" = popupController[0]?.popupData
-              ?.RecurrenceConfigDetailsId
-              ? "update"
-              : "add";
+          if (
+            // !nextTicketIntimation?.error ||
+            recurrenceDetails?.Frequency?.value?.toLowerCase() !== "repeat once"
+          ) {
             validateRecurrenceForm(
               query,
+              {
+                ...ticketBaseDetails,
+                NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+              },
               {
                 ...recurrenceDetails,
                 TicketDetails: {
@@ -353,8 +444,8 @@ const MyTickets = (): JSX.Element => {
         {popupController[0]?.popupData?.TicketNumber}&quot;?
       </p>
       <div className={styles.recurrenceBtn}>
-        <p>Set recurrence</p>
-        <Switch
+        {/* <p>Set recurrence</p> */}
+        {/* <Switch
           sx={{
             color: "#2d4b51",
           }}
@@ -375,6 +466,71 @@ const MyTickets = (): JSX.Element => {
               );
             }
           }}
+        /> */}
+        <CustomDropDown
+          value={recurrenceDetails.Frequency?.value || ""}
+          placeholder="Select frequency"
+          options={["Repeat once", ...TicketRecurrenceFrequency]}
+          highlightDropdown
+          onChange={(e: any) => {
+            const value = e;
+
+            if (value?.toLowerCase() === "repeat once") {
+              setHasRecurrence(false);
+              setPopupController(
+                updatePopupController(popupController, 0, {
+                  popupWidth: "450px",
+                })
+              );
+            } else {
+              setHasRecurrence(true);
+              setPopupController(
+                updatePopupController(popupController, 0, {
+                  popupWidth: "650px",
+                })
+              );
+            }
+
+            const { isValid, errorMsg } = validateField(
+              "Frequency",
+              value,
+              recurrenceDetails?.Frequency?.validationRule
+            );
+            handleInputChange(
+              "Frequency",
+              value,
+              isValid,
+              errorMsg,
+              setRecurrenceDetails
+            );
+
+            if (value?.toLowerCase() === "weekly") {
+              setRecurrenceDetails((prev: any) => ({
+                ...prev,
+                DayOfWeek: {
+                  ...prev?.DayOfWeek,
+                  validationRule: {
+                    ...prev?.DayOfWeek?.validationRule,
+                    required: true,
+                  },
+                },
+              }));
+            } else {
+              setRecurrenceDetails((prev: any) => ({
+                ...prev,
+                DayOfWeek: {
+                  ...prev?.DayOfWeek,
+                  validationRule: {
+                    ...prev?.DayOfWeek?.validationRule,
+                    required: false,
+                  },
+                },
+              }));
+            }
+          }}
+          // width="50%"
+          isValid={recurrenceDetails.Frequency?.isValid}
+          errorMsg={recurrenceDetails.Frequency?.errorMsg}
         />
       </div>
 
@@ -439,8 +595,8 @@ const MyTickets = (): JSX.Element => {
           />
         </div>
 
-        <div className={styles.r1}>
-          <CustomDropDown
+        <div className={styles.r2}>
+          {/* <CustomDropDown
             value={recurrenceDetails.Frequency?.value || ""}
             placeholder="Select frequency"
             options={TicketRecurrenceFrequency}
@@ -464,17 +620,80 @@ const MyTickets = (): JSX.Element => {
             width="50%"
             isValid={recurrenceDetails.Frequency?.isValid}
             errorMsg={recurrenceDetails.Frequency?.errorMsg}
-          />
-          <div className={styles.nextTicketIntimation}>
-            <label>Next ticket will repeat on</label>
-            <span
-              className={`${
-                nextTicketIntimation?.error ? styles.badgeNextDateError : ""
-              }`}
-            >
-              {nextTicketIntimation?.date || "N/A"}
-            </span>
+          /> */}
+
+          <div
+            className={styles.nextTicketIntimation}
+            style={{
+              maxHeight:
+                recurrenceDetails?.Frequency?.value !== "Weekly"
+                  ? "0px"
+                  : "150px",
+              overflow:
+                recurrenceDetails?.Frequency?.value !== "Weekly"
+                  ? "hidden"
+                  : "visible",
+            }}
+          >
+            <label>Select day</label>
+            <WeekDaysSelector
+              multiSelect={false}
+              isValid={recurrenceDetails?.DayOfWeek?.isValid}
+              selectedValue={recurrenceDetails?.DayOfWeek?.value}
+              errorMsg={recurrenceDetails?.DayOfWeek?.errorMsg}
+              onChange={(value: any) => {
+                console.log("value: ", value);
+                const { isValid, errorMsg } = validateField(
+                  "DayOfWeek",
+                  value,
+                  recurrenceDetails?.DayOfWeek?.validationRule
+                );
+                handleInputChange(
+                  "DayOfWeek",
+                  value,
+                  isValid,
+                  errorMsg,
+                  setRecurrenceDetails
+                );
+              }}
+            />
+            {recurrenceDetails?.DayOfWeek?.value && (
+              <div className={styles.dayIntimationLabelWrap}>
+                <label>
+                  This ticket occurs at every&nbsp;
+                  {recurrenceDetails?.DayOfWeek?.value}
+                  &nbsp;till&nbsp;
+                  {dayjs(recurrenceDetails?.EndDate?.value)?.format(
+                    "DD/MM/YYYY"
+                  )}
+                </label>
+                {nextTicketIntimation?.error && (
+                  <span
+                    className={`${
+                      nextTicketIntimation?.error
+                        ? styles.badgeNextDateError
+                        : ""
+                    }`}
+                  >
+                    {nextTicketIntimation?.date || "N/A"}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
+
+          {recurrenceDetails?.Frequency?.value?.toLowerCase() !== "weekly" && (
+            <div className={styles.nextTicketIntimation}>
+              <label>Next ticket will repeat on</label>
+              <span
+                className={`${
+                  nextTicketIntimation?.error ? styles.badgeNextDateError : ""
+                }`}
+              >
+                {nextTicketIntimation?.date || "N/A"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>,
@@ -489,11 +708,20 @@ const MyTickets = (): JSX.Element => {
     sortedBy: "New to old",
     sortedByOptions: ["Old to new", "New to old"],
   });
+  console.log("dataGridProps: ", dataGridProps);
+
+  console.log("dataGridProps: ", dataGridProps);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedCategory, setSelectedCategory] = useState<any>("");
   const [selectedPriority, setSelectedPriority] = useState<any>("");
+
+  const checkIsRecurringTicket = (ticketNumber: string): boolean => {
+    return HelpDeskTicktesData?.AllData?.filter((ticket: any) => {
+      return ticket?.TicketNumber === ticketNumber;
+    })[0]?.HasRecurrence;
+  };
 
   const columns = [
     {
@@ -503,8 +731,8 @@ const MyTickets = (): JSX.Element => {
       width: 170,
       renderCell: (params: any) => {
         return params?.value ? (
-          <span
-            className={styles.clickableLink}
+          <div
+            className={styles.ticketNumberWrap}
             onClick={() => {
               navigate(
                 `${currentRole}/all_tickets/${params?.row?.ticket_number}/view_ticket`,
@@ -514,8 +742,11 @@ const MyTickets = (): JSX.Element => {
               );
             }}
           >
-            {params?.value}
-          </span>
+            <span className={styles.clickableLink}>{params?.value}</span>
+            {checkIsRecurringTicket(params?.row?.ticket_number) && (
+              <div className={styles.recurringBadge}>Recurred</div>
+            )}
+          </div>
         ) : (
           ""
         );
@@ -656,19 +887,7 @@ const MyTickets = (): JSX.Element => {
                       (item: any) => item?.TicketNumber === ticketNumber
                     )?.[0];
 
-                  const currentRecurrenceData: any =
-                    await getRecurrenceConfigDetails(
-                      currentRowData?.RecurrenceConfigDetailsId || ""
-                    );
-
-                  setRecurrenceDetails((prev: any) =>
-                    mapRowDataToRecurrenceFormData(currentRecurrenceData, prev)
-                  );
-
-                  setHasRecurrence(currentRowData?.HasRecurrence || false);
-
-                  setSubmitClicked(false);
-
+                  console.log("currentRowData: ", currentRowData);
                   togglePopupVisibility(
                     setPopupController,
                     initialPopupController[0],
@@ -678,6 +897,25 @@ const MyTickets = (): JSX.Element => {
                     currentRowData,
                     `Are you sure want to repeat this ticket "${ticketNumber}" ?`
                   );
+
+                  const currentRecurrenceData: any =
+                    await getRecurrenceConfigDetails(
+                      currentRowData?.RecurrenceConfigDetailsId || ""
+                    );
+
+                  setRecurrenceDetails((prev: any) =>
+                    mapRowDataToRecurrenceFormData(currentRecurrenceData, prev)
+                  );
+
+                  console.log(
+                    "currentRowData?.HasRecurrence: ",
+                    currentRowData?.HasRecurrence
+                  );
+                  setHasRecurrence(currentRowData?.HasRecurrence ?? false);
+
+                  console.log("hasRecurrence: ", hasRecurrence);
+
+                  setSubmitClicked(false);
                 }}
                 className={styles.reopenTicket}
               >
@@ -834,7 +1072,8 @@ const MyTickets = (): JSX.Element => {
     selectedCategory,
     selectedPriority,
     dataGridProps.sortedBy,
-    currentRoleBasedData?.data?.length,
+    JSON.stringify(currentRoleBasedData?.data), //deep checking,
+    location.pathname,
   ]);
 
   // Update dataGridProps when filtered data changes
@@ -871,7 +1110,11 @@ const MyTickets = (): JSX.Element => {
   }, [formData]);
 
   useEffect(() => {
-    if (hasRecurrence && popupController[0]?.popupWidth === "450px") {
+    if (
+      popupController[0]?.popupWidth === "450px" &&
+      popupController[0]?.popupData?.HasRecurrence &&
+      recurrenceDetails?.Frequency?.value !== "Repeat once"
+    ) {
       setPopupController((prev) =>
         updatePopupController(prev, 0, {
           popupWidth: "650px",

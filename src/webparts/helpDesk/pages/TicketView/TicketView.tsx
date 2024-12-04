@@ -732,7 +732,7 @@ const TicketView = (): JSX.Element => {
                   </>
                 )}
 
-                {conversationData?.data?.length && (
+                {conversationData?.data?.length ? (
                   <div className={styles.detailsLabel}>
                     <label>Last commented on</label>
                     <span>
@@ -745,6 +745,8 @@ const TicketView = (): JSX.Element => {
                         : "-"}
                     </span>
                   </div>
+                ) : (
+                  ""
                 )}
 
                 <div className={styles.detailsLabel}>

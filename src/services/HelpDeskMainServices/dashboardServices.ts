@@ -122,3 +122,14 @@ export const getTicketByTicketNumber = async (
       );
     });
 };
+
+export const getAllTicketsData = async (): Promise<any> => {
+  const res: any = await SpServices.SPReadItems({
+    Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+    Select:
+      "*, EmployeeName/ID, EmployeeName/Title, EmployeeName/EMail, ITOwner/ID, ITOwner/Title, ITOwner/EMail, TicketManager/ID, TicketManager/Title, TicketManager/EMail, RepeatedTicketSource/ID,TaggedPerson/Title, TaggedPerson/EMail, TaggedPerson/ID, RecurrenceConfigDetails/ID",
+    Expand:
+      "EmployeeName,ITOwner,TicketManager,RepeatedTicketSource, TaggedPerson, RecurrenceConfigDetails",
+  });
+  return res;
+};

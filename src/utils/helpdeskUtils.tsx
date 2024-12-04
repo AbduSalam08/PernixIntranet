@@ -9,7 +9,10 @@ import {
   updateRecurrenceConfigOfTicket,
   updateTicket,
 } from "../services/HelpDeskMainServices/ticketServices";
-import { getAllTickets } from "../services/HelpDeskMainServices/dashboardServices";
+import {
+  getAllTickets,
+  getAllTicketsData,
+} from "../services/HelpDeskMainServices/dashboardServices";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { togglePopupVisibility } from "./popupUtils";
@@ -100,6 +103,7 @@ export const mapRowDataToRecurrenceFormData = (
   currentRowData: any,
   initialData: Record<string, FormField>
 ): Record<string, FormField> => {
+  console.log("currentRowData: ", currentRowData);
   return {
     ...initialData,
     StartDate: {
@@ -112,7 +116,14 @@ export const mapRowDataToRecurrenceFormData = (
     },
     Frequency: {
       ...initialData.Frequency,
-      value: currentRowData?.Frequency,
+      value:
+        currentRowData?.Frequency !== "Repeat once" && currentRowData?.isActive
+          ? currentRowData?.Frequency
+          : "Repeat once",
+    },
+    DayOfWeek: {
+      ...initialData.DayOfWeek,
+      value: currentRowData?.DayOfWeek,
     },
   };
 };
@@ -224,6 +235,11 @@ export const handleSubmit = async (
       await Promise.all([addNewTicket(formData, ["Attachment"])])
         .then(async (res: any) => {
           await getAllTickets(dispatch);
+          navigate(
+            `${currentRole}/${
+              currentRole !== "user" ? "all_tickets" : "my_tickets"
+            }`
+          );
           ticketsFilter(
             `${currentRole}${location.pathname}`,
             HelpDeskTicktesData,
@@ -244,13 +260,17 @@ export const handleSubmit = async (
       await Promise.all([
         updateTicket(openNewTicketSlide?.data?.ID, formData, ["Attachment"]),
       ])
-        .then(async (res: any) => {
-          await getAllTickets(dispatch);
-          // navigate(`${currentRole}/all_tickets`);
-          // navigate(location.pathname);
+        ?.then(async (res: any) => {
+          navigate(location.pathname);
+
+          const updatedTickets = await getAllTicketsData();
+
           ticketsFilter(
             `${currentRole}${location.pathname}`,
-            HelpDeskTicktesData,
+            {
+              ...HelpDeskTicktesData,
+              AllData: updatedTickets,
+            },
             currentUserDetails,
             dispatch
           );
@@ -281,6 +301,7 @@ export const handleSubmit = async (
 // validate reccurence form
 export const validateRecurrenceForm = async (
   query: "add" | "update",
+  ticketDetails: any,
   recurrenceDetails: any,
   setRecurrenceDetails: any,
   recurrenceConfigID: number,
@@ -364,6 +385,8 @@ export const validateRecurrenceForm = async (
           EndDate: recurrenceDetails?.EndDate?.value,
           Frequency: recurrenceDetails?.Frequency?.value,
           isActive: true,
+          DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+          ...ticketDetails,
         },
         recurrenceDetails?.TicketDetails?.value?.ID
       );
@@ -381,6 +404,8 @@ export const validateRecurrenceForm = async (
           EndDate: recurrenceDetails?.EndDate?.value,
           Frequency: recurrenceDetails?.Frequency?.value,
           isActive: recurrenceDetails?.IsActive?.value,
+          DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+          ...ticketDetails,
         },
         recurrenceDetails?.TicketDetails?.value?.ID,
         recurrenceConfigID
@@ -429,14 +454,14 @@ export const calculateNextTicketDate = (
   };
 
   const intervalDays = intervals[frequency];
-  if (!intervalDays) return null; // Handle invalid frequency
+  if (!intervalDays) return null;
 
   let nextDate = start;
 
   nextDate = nextDate.add(intervalDays, "day");
 
   if (nextDate.isAfter(end)) {
-    const message = `The recurrence exceeds the end date`;
+    const message = `The selected date range is too short for the recurrence cycle.`;
     return {
       date: message,
       error: true,
@@ -448,3 +473,102 @@ export const calculateNextTicketDate = (
     error: false,
   };
 };
+
+// Helper function to get the next 7 days starting from today
+
+// export const getDaysFromToday = (
+//   startDate: any
+// ): { date: string; day: string }[] => {
+//   console.log("startDate: ", startDate);
+//   const days = [];
+
+//   for (let i = 0; i <= 7; i++) {
+//     const currentDate = dayjs(startDate)?.add(i, "day");
+//     days.push({
+//       date: currentDate.format("DD/MM/YYYY"),
+//       day: currentDate.format("dddd"), // Full day name
+//     });
+//   }
+
+//   return days;
+// };
+
+// // Main function to calculate the next ticket date
+// export const calculateNextTicketDate = (
+//   startDate: string,
+//   todayDate: string,
+//   endDate: string,
+//   frequency: string
+// ): string | any => {
+//   if (!startDate || !endDate || !frequency) return null;
+
+//   const start = dayjs(startDate, "DD/MM/YYYY");
+//   const end = dayjs(endDate, "DD/MM/YYYY");
+//   // const today = dayjs(todayDate, "DD/MM/YYYY");
+
+//   // Validate that startDate is not after endDate
+//   if (start.isAfter(end)) {
+//     return "Start date cannot be after end date";
+//   }
+
+//   const intervals: Record<string, number> = {
+//     Weekly: 7,
+//     Quarterly: 90,
+//     "Semi Annual": 182,
+//     Annual: 365,
+//   };
+
+//   const intervalDays = intervals[frequency];
+//   if (!intervalDays) return null;
+
+//   let nextDate = start;
+
+//   // Weekly frequency calculation
+//   if (frequency?.toLowerCase() === "weekly") {
+//     const next7Days: any = getDaysFromToday(startDate);
+//     const nextDateBasedOnDay = next7Days.find(
+//       (day: any) => day.date === todayDate
+//     );
+
+//     console.log("nextDateBasedOnDay: ", nextDateBasedOnDay);
+
+//     if (nextDateBasedOnDay) {
+//       const nextDay = dayjs(nextDateBasedOnDay.date, "DD/MM/YYYY");
+//       if (!nextDay.isValid()) {
+//         return {
+//           date: "The selected day is not a valid date.",
+//           error: true,
+//         };
+//       }
+//       nextDate = nextDay.add(intervalDays, "day");
+//     } else {
+//       return {
+//         date: "The selected day does not fall within the next 7 days.",
+//         error: true,
+//       };
+//     }
+//   } else {
+//     nextDate = nextDate.add(intervalDays, "day");
+//   }
+
+//   // Check if nextDate is after end date
+//   if (nextDate.isAfter(end)) {
+//     return {
+//       date: "The selected date range is too short for the recurrence cycle.",
+//       error: true,
+//     };
+//   }
+
+//   // Ensure the final nextDate is valid
+//   if (!nextDate.isValid()) {
+//     return {
+//       date: "The calculated date is invalid.",
+//       error: true,
+//     };
+//   }
+
+//   return {
+//     date: nextDate.format("DD/MM/YYYY"),
+//     error: false,
+//   };
+// };

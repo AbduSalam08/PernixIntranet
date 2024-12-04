@@ -272,9 +272,9 @@ const CustomDropDown: React.FC<Props> = ({
         MuiFilledInput: {
           styleOverrides: {
             root: {
-              border: highlightDropdown
-                ? "1px solid #eeeeee !important"
-                : "none !important",
+              // border: highlightDropdown
+              //   ? "1px solid #eeeeee !important"
+              //   : "none !important",
               borderRadius: "4px", // Optional: Add a border-radius if needed
               "&:hover": {
                 borderColor: "none",

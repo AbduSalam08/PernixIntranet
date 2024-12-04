@@ -9,7 +9,7 @@ export const addComment = async (
   formData: any,
   alltaggedPersons: any
 ): Promise<any> => {
-  const toastId = toast.loading("Creating ticket...");
+  const toastId = toast.loading("Adding comment...");
   try {
     await SpServices.SPAddItem({
       Listname: CONFIG.ListNames.HelpDesk_TicketConversations,

@@ -476,6 +476,7 @@ export const ticketsFilter = async (
   currentUserDetails: any,
   dispatch: any
 ): Promise<void> => {
+  console.log("helpDeskTicketsData: ", helpDeskTicketsData);
   if (currentPath.split("/").pop() === "all_tickets") {
     await getAllTickets(dispatch);
   }

@@ -96,7 +96,6 @@ export const RoleAuth = async (
   groupAdmin: any,
   dispatch?: any
 ): Promise<any> => {
-  console.log("superAdmin:", superAdmin);
   let currentUserDetails: IUserDetails;
   let currentUserID: number | null = null;
   let currentUserEmail: string = "";
@@ -117,6 +116,7 @@ export const RoleAuth = async (
     const superAdminUsers: any = await sp.web.siteGroups
       .getByName(superAdmin)
       .users.get();
+    console.log("superAdminUsers: ", superAdminUsers);
 
     const isSuperAdmin: boolean =
       superAdminUsers?.some(
@@ -125,14 +125,17 @@ export const RoleAuth = async (
       ) || false;
 
     if (isSuperAdmin) {
+      const currentLoggedSuperAdmin = superAdminUsers?.filter(
+        (item: any) => item?.Id === currentUserID
+      )[0];
       currentUserDetails = {
-        userName: superAdminUsers[0]?.Title,
-        email: superAdminUsers[0]?.Email,
+        userName: currentLoggedSuperAdmin?.Title,
+        email: currentLoggedSuperAdmin?.Email,
         role:
           superAdmin === CONFIG.SPGroupName.Pernix_Admin
             ? CONFIG.RoleDetails.SuperAdmin
             : superAdmin,
-        id: superAdminUsers[0]?.Id || currentUserID,
+        id: currentLoggedSuperAdmin?.Id || currentUserID,
       };
 
       _isAdmin = true;

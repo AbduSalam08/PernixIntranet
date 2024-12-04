@@ -446,7 +446,6 @@ export const addRecurrenceConfigForTicket = async (
     });
 
     const resp = res[0] || res;
-    console.log("Recurrence config added:", resp);
 
     if (resp?.data?.ID) {
       await SpServices.SPUpdateItem({
@@ -524,7 +523,7 @@ export const updateRecurrenceConfigOfTicket = async (
   configID: number
 ): Promise<void> => {
   console.log("formData: ", formData);
-  const toastId = toast.loading("Adding recurrence configuration");
+  const toastId = toast.loading("Updating recurrence configuration");
   try {
     await SpServices.SPUpdateItem({
       Listname: CONFIG.ListNames.HelpDesk_RecurrenceConfig,
@@ -558,9 +557,9 @@ export const updateRecurrenceConfigOfTicket = async (
       hideProgressBar: false,
     });
   } catch (err) {
-    console.error("Error adding recurrence config for ticket:", err);
+    console.error("Error update recurrence config for ticket:", err);
     toast.update(toastId, {
-      render: "Failed to add recurrence!",
+      render: "Failed to update recurrence!",
       type: "error",
       isLoading: false,
       autoClose: 5000,
