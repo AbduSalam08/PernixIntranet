@@ -43,7 +43,6 @@ import {
   updatePopupController,
 } from "../../../../utils/popupUtils";
 import {
-  addNewTicket,
   getRecurrenceConfigDetails,
   updateRecurrenceConfigOfTicket,
   // getAllUsersList,
@@ -198,7 +197,7 @@ const TicketView = (): JSX.Element => {
   )[0];
   console.log("currentTicketsData: ", currentTicketsData);
 
-  const [recurrenceConfigData, setRecurrenceConfigData] = useState();
+  const [recurrenceConfigData, setRecurrenceConfigData] = useState<any>();
   console.log("recurrenceConfigData: ", recurrenceConfigData);
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
@@ -336,9 +335,9 @@ const TicketView = (): JSX.Element => {
         disabled:
           submitClicked || recurrenceDetails?.Frequency?.value?.trim() === "",
         onClick: async () => {
-          const currentRowData: any = popupController[0]?.popupData;
+          const currentRowData: any = popupController[1]?.popupData;
 
-          const query: "add" | "update" = popupController[0]?.popupData
+          const query: "add" | "update" = popupController[1]?.popupData
             ?.RecurrenceConfigDetailsId
             ? "update"
             : "add";
@@ -363,218 +362,103 @@ const TicketView = (): JSX.Element => {
           };
 
           const recurrenceID = currentRowData?.RecurrenceConfigDetailsId;
-          const formDataAppended = isTicketManager
-            ? {
-                TicketNumber: {
-                  value: currentRowData?.TicketNumber,
-                },
-                Status: {
-                  value: currentRowData?.ITOwner?.ID ? "In Progress" : "Open",
-                },
-                RepeatedTicketSourceId: { value: currentRowData?.ID },
-                RepeatedTicket: { value: true },
-                TicketRepeatedOn: { value: dayjs(new Date()) },
-                Category: { value: currentRowData?.Category },
-                Priority: { value: currentRowData?.Priority },
-                EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
-                TicketSource: { value: currentRowData?.TicketSource },
-                TicketDescription: {
-                  value: currentRowData?.TicketDescription,
-                },
-                TicketManagerId: {
-                  value: currentRowData?.TicketManagerId
-                    ? currentRowData?.TicketManager?.ID
-                    : null,
-                },
-                ITOwnerId: {
-                  value: currentRowData?.ITOwnerId
-                    ? currentRowData?.ITOwner?.ID
-                    : null,
-                },
-              }
-            : {
-                TicketNumber: {
-                  value: currentRowData?.TicketNumber,
-                },
-                Status: { value: "Open" },
-                RepeatedTicketSourceId: { value: currentRowData?.ID },
-                RepeatedTicket: { value: true },
-                TicketRepeatedOn: { value: dayjs(new Date()) },
-                Category: { value: currentRowData?.Category },
-                Priority: { value: currentRowData?.Priority },
-                EmployeeNameId: { value: currentRowData?.EmployeeName?.ID },
-                TicketSource: { value: currentRowData?.TicketSource },
-                TicketDescription: {
-                  value: currentRowData?.TicketDescription,
-                },
-                TicketManagerId: {
-                  value: null,
-                },
-                ITOwnerId: {
-                  value: null,
-                },
-              };
 
-          if (!isUser && !isITOwner) {
-            if (
-              !hasRecurrence &&
-              recurrenceDetails?.Frequency?.value?.toLowerCase() ===
-                "repeat once" &&
-              recurrenceDetails?.Frequency?.value?.toLowerCase() !==
-                "does not repeat"
-            ) {
-              await addNewTicket(formDataAppended, ["Attachments"], true)
-                .then(async (res: any) => {
-                  navigate(`${currentRole}/all_tickets`);
-                  await getAllTickets(dispatch);
-                })
-                .catch((err: any) => {
-                  console.log("err: ", err);
-                });
-
-              if (currentRowData?.RecurrenceConfigDetailsId) {
-                await updateRecurrenceConfigOfTicket(
-                  {
-                    ...ticketBaseDetails,
-                    NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
-                    isActive:
-                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
-                      "repeat once",
-                  },
-                  currentRowData?.ID,
-                  recurrenceID
-                )
-                  .then((res: any) => {
-                    togglePopupVisibility(
-                      setPopupController,
-                      initialPopupController[0],
-                      0,
-                      "close"
-                    );
-                  })
-                  .catch((err: any) => {
-                    togglePopupVisibility(
-                      setPopupController,
-                      initialPopupController[0],
-                      0,
-                      "close"
-                    );
-                  });
-                await getAllTickets(dispatch);
-              } else {
-                togglePopupVisibility(
-                  setPopupController,
-                  initialPopupController[0],
-                  0,
-                  "close"
-                );
-              }
-            }
-            if (
-              !hasRecurrence &&
-              recurrenceDetails?.Frequency?.value?.toLowerCase() ===
-                "does not repeat"
-            ) {
-              if (currentRowData?.RecurrenceConfigDetailsId) {
-                await updateRecurrenceConfigOfTicket(
-                  {
-                    ...ticketBaseDetails,
-                    NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
-                    isActive:
-                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
-                        "repeat once" &&
-                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
-                        "does not repeat",
-                  },
-                  currentRowData?.ID,
-                  recurrenceID
-                )
-                  .then((res: any) => {
-                    togglePopupVisibility(
-                      setPopupController,
-                      initialPopupController[0],
-                      0,
-                      "close"
-                    );
-                  })
-                  .catch((err: any) => {
-                    togglePopupVisibility(
-                      setPopupController,
-                      initialPopupController[0],
-                      0,
-                      "close"
-                    );
-                  });
-                await getAllTickets(dispatch);
-              } else {
-                togglePopupVisibility(
-                  setPopupController,
-                  initialPopupController[0],
-                  0,
-                  "close"
-                );
-              }
-            }
-            if (
-              !nextTicketIntimation?.error &&
-              recurrenceDetails?.Frequency?.value?.toLowerCase() !==
-                "repeat once" &&
-              recurrenceDetails?.Frequency?.value?.toLowerCase() !==
-                "does not repeat"
-            ) {
-              validateRecurrenceForm(
-                query,
+          if (
+            !hasRecurrence &&
+            recurrenceDetails?.Frequency?.value?.toLowerCase() ===
+              "does not repeat"
+          ) {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[1],
+              1,
+              "close"
+            );
+            if (currentRowData?.RecurrenceConfigDetailsId) {
+              await updateRecurrenceConfigOfTicket(
                 {
                   ...ticketBaseDetails,
                   NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+                  isActive:
+                    recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                      "repeat once" &&
+                    recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                      "does not repeat",
                 },
-                {
-                  ...recurrenceDetails,
-                  TicketDetails: {
-                    value: {
-                      ID: currentRowData?.ID,
-                    },
-                    isValid: true,
-                    errorMsg: "This field is required",
-                    validationRule: { required: false, type: "string" },
-                  },
-                  IsActive: {
-                    value: hasRecurrence,
-                    isValid: true,
-                    errorMsg: "This field is required",
-                    validationRule: { required: false, type: "string" },
-                  },
-                },
-                setRecurrenceDetails,
-                popupController[0]?.popupData?.RecurrenceConfigDetailsId,
-                setLoadingSubmit,
-                setSubmitClicked,
-                popupController,
-                setPopupController,
-                dispatch
+                currentRowData?.ID,
+                recurrenceID
               );
+              // .then((res: any) => {
+              //   togglePopupVisibility(
+              //     setPopupController,
+              //     initialPopupController[1],
+              //     1,
+              //     "close"
+              //   );
+              // })
+              // .catch((err: any) => {
+              //   togglePopupVisibility(
+              //     setPopupController,
+              //     initialPopupController[1],
+              //     1,
+              //     "close"
+              //   );
+              // });
+              await getAllTickets(dispatch);
             }
-          } else {
-            await addNewTicket(formDataAppended, ["Attachments"], true)
-              .then(async (res: any) => {
-                navigate(`${currentRole}/all_tickets`);
-                await getAllTickets(dispatch);
-                togglePopupVisibility(
-                  setPopupController,
-                  initialPopupController[0],
-                  0,
-                  "close"
-                );
-              })
-              .catch((err: any) => {
-                console.log("err: ", err);
-                togglePopupVisibility(
-                  setPopupController,
-                  initialPopupController[0],
-                  0,
-                  "close"
-                );
-              });
+            // else {
+            //   togglePopupVisibility(
+            //     setPopupController,
+            //     initialPopupController[1],
+            //     1,
+            //     "close"
+            //   );
+            // }
+          }
+          if (
+            !nextTicketIntimation?.error &&
+            recurrenceDetails?.Frequency?.value?.toLowerCase() !==
+              "repeat once" &&
+            recurrenceDetails?.Frequency?.value?.toLowerCase() !==
+              "does not repeat"
+          ) {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[1],
+              1,
+              "close"
+            );
+            validateRecurrenceForm(
+              query,
+              {
+                ...ticketBaseDetails,
+                NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+              },
+              {
+                ...recurrenceDetails,
+                TicketDetails: {
+                  value: {
+                    ID: currentRowData?.ID,
+                  },
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: false, type: "string" },
+                },
+                IsActive: {
+                  value: hasRecurrence,
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: false, type: "string" },
+                },
+              },
+              setRecurrenceDetails,
+              popupController[1]?.popupData?.RecurrenceConfigDetailsId,
+              setLoadingSubmit,
+              setSubmitClicked,
+              popupController,
+              setPopupController,
+              dispatch
+            );
           }
         },
       },
@@ -595,11 +479,7 @@ const TicketView = (): JSX.Element => {
               value={recurrenceDetails.Frequency?.value || ""}
               placeholder="Select frequency"
               disabled={isUser}
-              options={
-                popupController[0]?.popupData?.HasRecurrence
-                  ? ["Does not repeat", ...TicketRecurrenceFrequency]
-                  : TicketRecurrenceFrequency
-              }
+              options={["Does not repeat", ...TicketRecurrenceFrequency]}
               highlightDropdown
               onChange={(e: any) => {
                 const value = e;
@@ -889,19 +769,20 @@ const TicketView = (): JSX.Element => {
   useEffect(() => {
     // Fetch all tickets on initial load
     getAllTickets(dispatch);
-    (async () => {
-      if (currentTicketsData?.HasRecurrence) {
-        await getRecurrenceConfigDetails(currentTicketsData?.ID)
-          .then((res: any) => {
-            console.log("res: ", res);
-            setRecurrenceConfigData(res || []);
-          })
-          .catch((err: any) => {
-            console.log("err: ", err);
-          });
-      }
-    })();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (currentTicketsData?.HasRecurrence) {
+      getRecurrenceConfigDetails(currentTicketsData?.RecurrenceConfigDetailsId)
+        .then((res: any) => {
+          console.log("res: ", res);
+          setRecurrenceConfigData(res || []);
+        })
+        .catch((err: any) => {
+          console.log("err: ", err);
+        });
+    }
+  }, [currentTicketsData?.RecurrenceConfigDetailsId]);
 
   useEffect(() => {
     if (
@@ -918,16 +799,8 @@ const TicketView = (): JSX.Element => {
   }, [formData]);
 
   useEffect(() => {
-    console.log("popupController: ", popupController);
-    console.log(
-      "popupController[1]?.popupData: ",
-      popupController[1]?.popupWidth === "450px" &&
-        popupController[1]?.popupData?.HasRecurrence &&
-        recurrenceDetails?.Frequency?.value !== "Does not repeat"
-    );
     if (
       popupController[1]?.popupWidth === "450px" &&
-      popupController[1]?.popupData?.HasRecurrence &&
       recurrenceDetails?.Frequency?.value !== "Does not repeat"
     ) {
       setPopupController((prev: any) =>
@@ -936,10 +809,7 @@ const TicketView = (): JSX.Element => {
         })
       );
     }
-  }, [
-    popupController[1]?.popupData?.HasRecurrence,
-    popupController[1]?.popupWidth,
-  ]);
+  }, [popupController[1]?.popupWidth]);
 
   return (
     <>
@@ -975,55 +845,70 @@ const TicketView = (): JSX.Element => {
                         currentTicketsData?.TicketClosedOn
                       )?.format("DD MMM YYYY")}`}
                   </div>
-                  <div className={styles.ticketOneLineNote}>
-                    This is a scheduled ticket that occurs weekly.
-                    <button
-                      className={styles.ticketOneLineButton}
-                      onClick={async () => {
-                        const currentRowData: any =
-                          HelpDeskTicktesData?.AllData?.filter(
-                            (item: any) => item?.TicketNumber === ticketNumber
-                          )?.[0];
-
-                        togglePopupVisibility(
-                          setPopupController,
-                          initialPopupController[1],
-                          1,
-                          "open",
-                          "",
-                          currentRowData,
-                          `Modify recurrence details - "${ticketNumber}"`
-                        );
-
-                        const currentRecurrenceData: any =
-                          await getRecurrenceConfigDetails(
-                            currentRowData?.RecurrenceConfigDetailsId || ""
-                          );
-
-                        setRecurrenceDetails((prev: any) =>
-                          mapRowDataToRecurrenceFormData(
-                            currentRecurrenceData,
-                            prev
-                          )
-                        );
-
-                        setNextTicketIntimation({
-                          date: dayjs(
-                            currentRecurrenceData?.NextTicketDate
-                          ).format("MM/DD/YYYY"),
-                          error: false,
-                        });
-
-                        setHasRecurrence(
-                          currentRowData?.HasRecurrence ?? false
-                        );
-
-                        setSubmitClicked(false);
+                  {currentTicketsData?.HasRecurrence && (
+                    <div
+                      style={{
+                        paddingRight: isTicketManager ? "5px" : "10px",
                       }}
+                      className={styles.ticketOneLineNote}
                     >
-                      Modify recurrence
-                    </button>
-                  </div>
+                      This is a scheduled ticket that occurs{" "}
+                      {recurrenceConfigData?.Frequency}
+                      &nbsp;till{" "}
+                      {dayjs(recurrenceConfigData?.EndDate).format(
+                        "DD/MM/YYYY"
+                      )}
+                      {isTicketManager && (
+                        <button
+                          className={styles.ticketOneLineButton}
+                          onClick={async () => {
+                            const currentRowData: any =
+                              HelpDeskTicktesData?.AllData?.filter(
+                                (item: any) =>
+                                  item?.TicketNumber === ticketNumber
+                              )?.[0];
+
+                            togglePopupVisibility(
+                              setPopupController,
+                              initialPopupController[1],
+                              1,
+                              "open",
+                              "",
+                              currentRowData,
+                              `Modify recurrence details - "${ticketNumber}"`
+                            );
+
+                            const currentRecurrenceData: any =
+                              await getRecurrenceConfigDetails(
+                                currentRowData?.RecurrenceConfigDetailsId || ""
+                              );
+
+                            setRecurrenceDetails((prev: any) =>
+                              mapRowDataToRecurrenceFormData(
+                                currentRecurrenceData,
+                                prev
+                              )
+                            );
+
+                            setNextTicketIntimation({
+                              date: dayjs(
+                                currentRecurrenceData?.NextTicketDate
+                              ).format("MM/DD/YYYY"),
+                              error: false,
+                            });
+
+                            setHasRecurrence(
+                              currentRowData?.HasRecurrence ?? false
+                            );
+
+                            setSubmitClicked(false);
+                          }}
+                        >
+                          Modify recurrence
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {currentTicketsData?.Status !== "Closed" && isUserTagged ? (
@@ -1368,8 +1253,17 @@ const TicketView = (): JSX.Element => {
                     </div>
 
                     <div className={styles.detailsLabel}>
-                      <label>Repeated ticket from</label>
-                      <span>{repeatedTicketNumber ?? "-"}</span>
+                      <label>Repeated ticket source</label>
+                      <span
+                        className={styles.routeLink}
+                        onClick={() => {
+                          navigate(
+                            `${currentRole}/all_tickets/${repeatedTicketNumber}/view_ticket`
+                          );
+                        }}
+                      >
+                        {repeatedTicketNumber ?? "-"}
+                      </span>
                     </div>
 
                     <div className={styles.detailsLabel}>
