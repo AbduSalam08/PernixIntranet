@@ -1,25 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-floating-promises */
-
 import { Avatar } from "primereact/avatar";
-//import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
-// import styles from "./QuestionsCeoIntranet.module.scss";
 import styles from "../QuestionCeo/QuestionCeoIntranet.module.scss";
 import { Carousel } from "primereact/carousel";
-// import resetPopupController, {
-//   togglePopupVisibility,
-// } from "../../../utils/popupUtils";
-//import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useEffect, useState } from "react";
 import "../../../../assets/styles/style.css";
-
-//import Popup from "../../../components/common/Popups/Popup";
-// import "../../../assets/styles/style.css";
-// import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
-// import {
-//   addQuestionCeo,
-//   getQuestionCeo,
-// } from "../../../services/QuestionCEOIntranet/QuestionCEOIntranet";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addQuestionCeo,
@@ -37,15 +22,10 @@ import Popup from "../../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../../utils/commonUtils";
 import { ToastContainer } from "react-toastify";
 import { Checkbox } from "primereact/checkbox";
-
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 
-//import ViewAll from "../../../components/common/ViewAll/ViewAll";
-//import { CONFIG } from "../../../config/config";
-//import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
-// import { useSelector } from "react-redux";
 const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
   const dispatch = useDispatch();
 
@@ -53,7 +33,6 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
     return state.QuestionCEOIntranetData.value;
   });
 
-  // const dispatch = useDispatch();
   // popup properties
   const initialPopupController = [
     {
@@ -85,11 +64,6 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
   );
   const [CEOQuestions, setCEOQuestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // const newsIntranetData: any = useSelector((state: any) => {
-  //   return state.NewsIntranetData.value;
-  // });
-
   const [formData, setFormData] = useState<any>({
     Description: {
       value: "",

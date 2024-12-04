@@ -30,15 +30,12 @@ const CustomPeoplePicker: React.FC<any> = ({
   const mainContext: any = useSelector(
     (state: any) => state.MainSPContext.value
   );
-  console.log("mainContext: ", mainContext);
 
   const selectedUserItem = selectedItem
     ? selectedItem?.filter((item: any) => item !== undefined && item !== null)
     : [];
-  console.log("selectedUserItem: ", selectedUserItem);
 
   const handleChange = (items: any[]): void => {
-    console.log("items: ", items);
     const obj = items?.map((item: any) => ({
       id: item.id,
       email: item?.secondaryText,

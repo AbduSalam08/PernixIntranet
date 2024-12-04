@@ -152,7 +152,6 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
         _isAdmin = res.some(
           (val: any) => val?.Email?.toLowerCase() === currentUser?.toLowerCase()
         );
-        console.log(_isAdmin, "_isAdmin");
         setIsLoader(false);
       })
       .catch((err: any) => {

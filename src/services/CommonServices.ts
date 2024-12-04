@@ -116,7 +116,6 @@ export const RoleAuth = async (
     const superAdminUsers: any = await sp.web.siteGroups
       .getByName(superAdmin)
       .users.get();
-    console.log("superAdminUsers: ", superAdminUsers);
 
     const isSuperAdmin: boolean =
       superAdminUsers?.some(

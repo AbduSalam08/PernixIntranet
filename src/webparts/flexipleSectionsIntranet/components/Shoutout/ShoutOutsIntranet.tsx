@@ -30,7 +30,7 @@ import { ToastContainer } from "react-toastify";
 const img: any = require("../../../../assets/images/svg/Shoutouts/bronze.png");
 const errorGrey = require("../../../../assets/images/svg/errorGrey.svg");
 
-const ShoutOutsIntranet = (props: any): JSX.Element => {
+const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
   const dispatch = useDispatch();
 
   // popup properties
