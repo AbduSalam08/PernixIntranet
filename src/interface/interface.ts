@@ -35,8 +35,6 @@ export interface ISPGroupName {
   Birthdays_Admin: string;
   Calendar_Admin: string;
   Documentrepository_Admin: string;
-  Footer_Admin: string;
-  Header_Admin: string;
   Mainbanner_Admin: string;
   Newhire_Admin: string;
   News_Admin: string;

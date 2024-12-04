@@ -30,14 +30,17 @@ import CustomPeoplePicker from "../../../components/common/CustomInputFields/Cus
 import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
-// images
-const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
-const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
-const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import moment from "moment";
 import { Checkbox } from "primereact/checkbox";
 import { ToastContainer } from "react-toastify";
+
+// images
+const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
+const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
+const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
+
+let isActivityPage: boolean = false;
 
 const BirthdayPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -136,7 +139,7 @@ const BirthdayPage = (props: any): JSX.Element => {
   const birthDaysData: any = useSelector((state: any) => {
     return state.BirthdaysData.value;
   });
-  console.log("birthDaysData", birthDaysData);
+
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
@@ -162,16 +165,10 @@ const BirthdayPage = (props: any): JSX.Element => {
   const [commonSearch, setCommonSearch] = useState<IPageSearchFields>({
     ...CONFIG.PageSearchFields,
   });
-
   const [curuser, setCurrentuser] = useState<any>("");
-  console.log("setCurrentuser: ", setCurrentuser);
-
-  console.log("formData", formData);
-  console.log("currentUserDetails", currentUserDetails);
-  console.log("attachmentObject", attachmentObject);
-  console.log(birthdays, typeBirthdays, showBirthdays);
 
   const totalRecords = showBirthdays?.length || 0;
+
   const onPageChange = (event: any): void => {
     setPagination({
       first: event?.first || CONFIG.birthdayPaginationData.first,
@@ -180,9 +177,8 @@ const BirthdayPage = (props: any): JSX.Element => {
   };
 
   const handleSearch = async (datas: any[]): Promise<void> => {
-    console.log("datas", datas);
-
     let temp: any[] = [...datas];
+
     if (searchField.Search) {
       temp = temp?.filter(
         (val: any) =>
@@ -272,9 +268,8 @@ const BirthdayPage = (props: any): JSX.Element => {
           // setPopupController,
           // 0
         );
+        console.log("reponse: ", reponse);
         await getAllBirthdayData(dispatch);
-
-        console.log("reponse", reponse);
       } else {
         let payloadJson = {};
         if (sendBy === "Teams") {
@@ -333,7 +328,6 @@ const BirthdayPage = (props: any): JSX.Element => {
               readOnly={handleForm?.Type === "Update"}
               onChange={(item: any) => {
                 const value = item[0];
-                console.log("value: ", value);
                 const message = `Dear ${value?.name},
 Wishing you a very happy birthday! I hope your day is filled with joy, celebration, and memorable moments. May the year ahead bring you great success, good health, and happiness.
 Enjoy your special day!`;
@@ -375,7 +369,6 @@ Enjoy your special day!`;
               accept="image/png,image/jpeg"
               value={formData?.Image?.value?.name}
               onFileSelect={async (file) => {
-                console.log("file: ", file);
                 const { isValid, errorMsg } = validateField(
                   "Image",
                   file ? file.name : "",
@@ -821,10 +814,15 @@ Enjoy your special day!`;
   }, [birthDaysData]);
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     dispatch(setMainSPContext(props?.context));
     getBirthdayCurrentUserRole(setCurrentUserDetails);
     getAllBirthdayData(dispatch);
   }, [dispatch]);
+
   return (
     <>
       {isLoading ? (
@@ -837,11 +835,17 @@ Enjoy your special day!`;
             <div className={styles.leftSection}>
               <i
                 onClick={() => {
-                  window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+                  isActivityPage
+                    ? window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.ApprovalsPage,
+                        "_self"
+                      )
+                    : window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.PernixIntranet,
+                        "_self"
+                      );
                 }}
                 className="pi pi-arrow-circle-left"
                 style={{ fontSize: "1.5rem", color: "#E0803D" }}
