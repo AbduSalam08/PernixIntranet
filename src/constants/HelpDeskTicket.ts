@@ -171,6 +171,12 @@ export const initialRecurrenceFormData = {
     errorMsg: "Frequency is required",
     validationRule: { required: true, type: "string" },
   },
+  DayOfWeek: {
+    value: "",
+    isValid: true,
+    errorMsg: "Day of week is required",
+    validationRule: { required: true, type: "string" },
+  },
 };
 
 export const priorityLevelIntimations: any = {

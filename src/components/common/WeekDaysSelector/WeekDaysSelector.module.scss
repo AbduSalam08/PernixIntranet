@@ -1,0 +1,52 @@
+.daysWrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+.daysBtn {
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  padding: 10px;
+  height: 33px;
+  width: 33px;
+  margin: 5px 15px 8px 0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: 0;
+  font-family: "osMedium", sans-serif;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.errorMsg {
+  margin-top: 5px;
+  height: 19px;
+  // margin-bottom: 16px;
+  color: red;
+  font-family: "osMedium", sans-serif;
+  font-size: 13px;
+  text-align: left;
+  // text-transform: lowercase;
+  animation: slideAndFade 0.17s both ease !important;
+}
+@keyframes slideAndFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    /* Start off-screen */
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    /* Slide down */
+  }
+}
+.daysBtnWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

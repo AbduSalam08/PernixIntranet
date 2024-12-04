@@ -164,13 +164,13 @@
 }
 
 .errorMsg {
-  margin-top: 5px;
-  height: 19px;
+  margin-top: 5px !important;
+  height: 19px !important;
   // margin-bottom: 16px;
-  color: red;
-  font-family: "osMedium", sans-serif;
-  font-size: 13px;
-  text-align: left;
+  color: red !important;
+  font-family: "osMedium", sans-serif !important;
+  font-size: 13px !important;
+  text-align: left !important;
   // text-transform: lowercase;
   animation: slideAndFade 0.17s both ease !important;
 }

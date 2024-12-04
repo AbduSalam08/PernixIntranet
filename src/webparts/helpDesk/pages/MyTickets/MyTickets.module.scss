@@ -236,7 +236,7 @@
   align-items: flex-start;
   justify-content: center;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   .repeatQues {
     text-align: center;
     font-size: 15px;
@@ -249,7 +249,7 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    margin-left: 10px;
+    // margin-left: 10px;
     p {
       font-size: 15px;
       font-family: "osMedium", sans-serif;
@@ -273,8 +273,8 @@
   transition-delay: 0.3s;
   .recurrenceLabel {
     font-size: 14px;
-    color: #414141;
-    background-color: #eee;
+    color: #002b30;
+    background-color: #00667210;
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;
     padding: 15px;
@@ -286,13 +286,21 @@
     width: 100%;
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .r2 {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
     gap: 10px;
   }
 }
 
 .nextTicketIntimation {
-  width: 50%;
+  width: 100%;
   height: 100%;
   font-family: "osMedium", sans-serif;
   font-size: 14px;
@@ -302,6 +310,7 @@
   justify-content: flex-start;
   flex-direction: column;
   gap: 10px;
+  transition: all 0.1s;
   label {
     font-size: 14px;
     color: #adadad;
@@ -312,6 +321,7 @@
     font-family: "osSemiBold", sans-serif;
   }
 }
+
 .closedRecurrence {
   height: 0;
   max-height: 0; /* Collapse the element */
@@ -324,10 +334,42 @@
   justify-content: center;
   flex-direction: column;
 }
+
 .badgeNextDateError {
+  width: 100%;
   color: #802a0b !important;
   background-color: #ff591c15;
-  padding: 5px 13px;
-  border-radius: 40px;
+  padding: 5px 10px;
+  border-radius: 6px;
   font-size: 13px !important;
+  text-align: left;
+  line-height: 1.3;
+}
+.dayIntimationLabelWrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+}
+.recurringBadge {
+  width: fit-content;
+  color: #80400b !important;
+  background-color: #e0803d15;
+  padding: 3px 15px;
+  border-radius: 30px;
+  font-size: 13px !important;
+  text-align: left;
+  line-height: 1.3;
+  margin: 0;
+  text-align: center;
+  font-family: "osMedium", sans-serif;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+.ticketNumberWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }

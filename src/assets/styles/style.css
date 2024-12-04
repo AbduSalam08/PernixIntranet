@@ -660,6 +660,7 @@ span[data-denotation-char="@"] {
 .ql-editor {
   padding: 10px !important;
   min-height: 100px;
+  max-height: 100px;
 }
 .ql-container li {
   list-style: disc;
