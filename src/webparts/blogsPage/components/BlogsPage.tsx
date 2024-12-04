@@ -1,30 +1,18 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable dot-notation */
-// /* eslint-disable no-// */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-// /* eslint-disable no-// */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
-
 import "../../../assets/styles/Style.css";
 import styles from "./BlogsPage.module.scss";
 import "./Style.css";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
-import {
-  Icon,
-  // SgetearchBox,
-  // ISearchBoxStyles,
-  Persona,
-  PersonaSize,
-  PersonaPresence,
-  // IconButton,
-} from "@fluentui/react";
-// import styles from "../../../components/common/CustomInputFields/Inputs.module.scss";
+import { Icon, Persona, PersonaSize, PersonaPresence } from "@fluentui/react";
 import AddingComponent from "./AddingComponent";
 import ViewComponent from "./ViewComponent";
 import {
@@ -32,34 +20,26 @@ import {
   Approved,
   changeBlogActive,
   getcuruserdetails,
-  // Approved,
   getintername,
   nooneviews,
-  // otheruserdetails,
   permissionhandling,
   usergetdetails,
   viewLikes,
 } from "../../../services/BlogsPage/BlogsPageServices";
-// import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
-// import { Checkbox } from "office-ui-fabric-react";
 import Popup from "../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../utils/popupUtils";
 import moment from "moment";
-import {
-  // ThumbUpAltOutlined
-  VisibilityOutlined,
-} from "@mui/icons-material";
+import { VisibilityOutlined } from "@mui/icons-material";
 import _ from "lodash";
 import { CONFIG } from "../../../config/config";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { Paginator } from "primereact/paginator";
 import { InputSwitch } from "primereact/inputswitch";
 import { IPaginationData } from "../../../interface/interface";
-// import { arrayIncludes } from "@mui/x-date-pickers/internals/utils/utils";
-// import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
-// import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 const emptyfile = require("../assets/EmptyFile.jpg");
+let isActivityPage: boolean = false;
+
 const BlogsPage = (props: any): JSX.Element => {
   const initialPopupController = [
     {
@@ -167,21 +147,6 @@ const BlogsPage = (props: any): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: () => {
-          // const updatedData = data.map((item: any) => {
-          //   if (item.Id === Updateid) {
-          //     return {
-          //       ...item,
-          //       UserStatus: "",
-          //     };
-          //   }
-          //   return item;
-          // });
-
-          // setdata(updatedData);
-
-          // const _popupcontroller = [...popupController];
-          // _popupcontroller[0].open = false;
-          // setPopupController([..._popupcontroller]);
           const findarray = data.find((item: any) => item.Id === Updateid);
           Approverfunc(findarray.Id, "Rejected");
         },
@@ -199,8 +164,7 @@ const BlogsPage = (props: any): JSX.Element => {
       },
     ],
   ];
-  // const [duplicatefilter, setduplicatefilter] = useState<any>([]);
-  // console.log(duplicatefilter);
+
   const [data, setdata] = useState<any>([]);
   const [admindata, setadmindata] = useState<any>([]);
   const [duplicatedata, setduplicatedata] = useState<any>([]);
@@ -210,86 +174,25 @@ const BlogsPage = (props: any): JSX.Element => {
     Title: "",
   });
   const [allBlogs, setAllBlogs] = useState("AllBlogs");
-
-  // const [checkbox, setcheckbox] = useState(false);
   const [Updateid, setupdateid] = useState<any>(null);
-  // console.log(Updateid);
   const [permission, setpermission] = useState("");
   const [choices, setchoices] = useState<any>(["All"]);
   const [filterkey, setfilterkey] = useState({
     _status: "",
     _gsearch: "",
   });
-  // const [additionalfilterkey, setadditionalfilterkey] = useState({
-  //   _status: "",
-  // });
-
   const [viewitem, setviewitem] = useState("");
   const [viewpage, setviewpage] = useState(false);
   const [isopen, setisopen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // const searchBoxStyle: Partial<ISearchBoxStyles> = {
-  //   root: {
-  //     padding: "0 10px",
-  //     fontSize: 16,
-  //     width: "100%",
-  //     borderRadius: "6px",
-  //     border: "none !important",
 
-  //     ".ms-SearchBox-icon": {
-  //       fontWeight: 900,
-  //       color: "rgb(151 144 155) !important",
-  //     },
-  //     ".ms-SearchBox": {
-  //       border: "none !important",
-  //     },
-  //     "::after": {
-  //       border: "none !important",
-  //       backgrounColor: "white",
-  //     },
-  //     ".ms-Button-flexContainer": {
-  //       background: "transparent",
-  //     },
-  //   },
-  // };
   const poersonaStyles = {
     root: {
       display: "revert",
     },
   };
+
   const totalRecords = data?.length || 0;
-
-  console.log(totalRecords, "totalRecords");
-
-  // function algorithmfilterfunction(value: string) {
-  //   const _newdata = [...duplicatefilter];
-  //   const newdata = [];
-  //   if (value.length) {
-  //     for (let i = 0; i < _newdata.length; i++) {
-  //       const matches = _newdata[i].Searchstring.includes(value.toLowerCase());
-  //       if (matches === true) {
-  //         newdata.push(_newdata[i]);
-  //       }
-  //     }
-  //     letnewfilterdata(newdata);
-  //   } else {
-  //     const _duplicatedata = [...duplicatedata];
-  //     setdata([..._duplicatedata]);
-  //   }
-  // }
-
-  // function letnewfilterdata(data: any) {
-  //   // eslint-disable-next-line no-debugger
-  //   debugger;
-  //   const newdata: any = [];
-  //   const _duplicatedata = [...duplicatedata];
-  //   _duplicatedata.filter((arr) => {
-  //     if (data.some((newItem: any) => newItem.Id === arr.Id)) {
-  //       newdata.push(arr);
-  //     }
-  //   });
-  //   setdata([...newdata]);
-  // }
 
   // this function is Approver Details/ get userDetails in Intranet_Blogs
   function decodeHtmlEntities(encodedString: any) {
@@ -297,8 +200,8 @@ const BlogsPage = (props: any): JSX.Element => {
     parser.innerHTML = encodedString;
     return parser.textContent || parser.innerText || "";
   }
+
   const getdetails = async (_userpermission: string): Promise<void> => {
-    // const parser = new DOMParser();
     await usergetdetails().then((arr) => {
       const tempdata: any = [];
       arr.forEach((item: any) => {
@@ -333,39 +236,26 @@ const BlogsPage = (props: any): JSX.Element => {
           (_admin: any) => _admin.Status === "Approved"
         );
         _filterdata.sort((a: any, b: any) => b.Id - a.Id);
-        setdata([..._filterdata]);
+        if (isActivityPage) {
+          const temp: any[] =
+            tempdata?.filter((item: any) => item.Status === "Pending") || [];
+          temp?.sort((a, b) => b.Id - a.Id);
+          setdata([...temp]);
+        } else {
+          setdata([..._filterdata]);
+        }
         setduplicatedata([..._filterdata]);
       } else {
         const _filterdata = tempdata.filter(
           (_admin: any) => _admin.Status === "Approved" && _admin.isActive
         );
         _filterdata.sort((a: any, b: any) => b.Id - a.Id);
-        // const additionaldata: { Id: any; Searchstring: string }[] = [];
-        // _filterdata.map((_reitem: any) => {
-        //   let newstring = "";
-        //   for (const newitem in _reitem) {
-        //     if (
-        //       typeof _reitem[newitem] === "string" ||
-        //       typeof _reitem[newitem] === "number"
-        //     ) {
-        //       newstring += `  ${_reitem[newitem]}`;
-        //     }
-        //   }
-        //}
-
-        //   // eslint-disable-next-line no-debugger
-        //   debugger;
-        //   additionaldata.push({
-        //     Id: _reitem.Id,
-        //     Searchstring: newstring.toLowerCase(),
-        //   });
-        // });
-        // setduplicatefilter([...additionaldata]);
         setdata([..._filterdata]);
         setduplicatedata([..._filterdata]);
       }
     });
   };
+
   // This function is onChangerows function
   const onPageChange = (event: any): void => {
     setPagination({
@@ -373,42 +263,7 @@ const BlogsPage = (props: any): JSX.Element => {
       rows: event?.rows || CONFIG.PaginationData.rows,
     });
   };
-  // this function is Other Member Details/ get userDetails in Intranet_Blogs
-  // const othermemberdetails = async (): Promise<void> => {
-  //   await otheruserdetails().then((arr) => {
-  //     console.log(arr);
-  //     const tempdata: any = [];
-  //     arr.forEach((item: any) => {
-  //       tempdata.push({
-  //         Id: item.Id,
 
-  //         Created: item.Created
-  //           ? moment(item.Created).format("DD/MM/YYYY")
-  //           : null,
-
-  //         Title: item.BlogsHeading,
-  //         ParentTitle: item.BlogTitle,
-  //         Paragraph: item.ImageDescription
-  //           ? JSON.parse(item.ImageDescription)
-  //           : "",
-  //         Author: {
-  //           Id: item.Author && item.Author ? item.Author.ID : null,
-  //           Email: item.Author ? item.Author.EMail : "",
-  //           Title: item.Author ? item.Author.Title : "",
-  //         },
-  //         Status: item.Status ? item.Status : "",
-  //         img: item.AttachmentFiles.map(
-  //           (attachment: any) => attachment.ServerRelativeUrl
-  //         ).join(""),
-  //         userDetails: item.UserLikes ? JSON.parse(item.UserLikes) : [],
-  //         viewDetails: item.ViewPerson ? JSON.parse(item.ViewPerson) : [],
-  //       });
-  //     });
-  //     tempdata.sort((a: any, b: any) => b.Id - a.Id);
-  //     setdata([...tempdata]);
-  //     setduplicatedata([...tempdata]);
-  //   });
-  // };
   // This is addlikemethod function
   const addLikeMethod = async (Id: number, userDetails: any): Promise<any> => {
     let additionaluserDetails: any = [];
@@ -438,9 +293,9 @@ const BlogsPage = (props: any): JSX.Element => {
     await addlikemethod(Id, addingdetails, onLoadingFunc);
     resetstate();
   };
+
   // This is ViewLike Method function
   const viewLikemethod = async (Id: number, userDetails: any, item: any) => {
-    //;
     let additionaluserDetails: any = [];
     if (userDetails === undefined || userDetails.length === 0) {
       additionaluserDetails.push({
@@ -488,8 +343,8 @@ const BlogsPage = (props: any): JSX.Element => {
       onLoadingFunc,
       item
     );
-    // resetstate()
   };
+
   // This function is resetstate function
   const resetstate = async () => {
     setisopen(false);
@@ -500,24 +355,11 @@ const BlogsPage = (props: any): JSX.Element => {
       _status: "",
       _gsearch: "",
     });
-    setAllBlogs("AllBlogs");
+    setAllBlogs(isActivityPage ? "PendingApprovals" : "AllBlogs");
+    // setAllBlogs("AllBlogs");
     getcurrentuser();
   };
-  // This Functino Admin Change The Status
-  // const approverStatusFunc = (value: string, Id: number) => {
-  //   let _data = [...data];
-  //   _data = _data.map((item) => {
-  //     if (item.Id === Id) {
-  //       return {
-  //         ...item,
-  //         UserStatus: value,
-  //       };
-  //     }
 
-  //     return item;
-  //   });
-  //   setdata([..._data]);
-  // };
   // This is the OnLoadingFunc
   const onLoadingFunc = async (user: any): Promise<void> => {
     let _userpermission: string = "";
@@ -529,6 +371,7 @@ const BlogsPage = (props: any): JSX.Element => {
         _userpermission = "OtherUser";
         setpermission(_userpermission);
       }
+
       // Unwanted Code
       getintername()
         .then((arr: any) => {
@@ -542,23 +385,17 @@ const BlogsPage = (props: any): JSX.Element => {
         .catch((error) => {
           console.error("Error retrieving internal names:", error);
         });
-      // if (_userpermission === "Admin") {
       getdetails(_userpermission);
-      // } else {
-      //   othermemberdetails();
-      // }
     });
   };
+
   // Approver Status Change Function
   const Approverfunc = async (
     Id: number,
     statusValue: string
   ): Promise<any> => {
     try {
-      // eslint-disable-next-line no-debugger
-      debugger;
       await Approved(Id, statusValue);
-      //;
       const _popupcontroller = [...popupController];
       _popupcontroller[0].open = false;
       setPopupController([..._popupcontroller]);
@@ -567,6 +404,7 @@ const BlogsPage = (props: any): JSX.Element => {
     }
     resetstate();
   };
+
   // This is The Filterfunction of Blogs Details
   const filterOnchangehandler = (key: string, text: any) => {
     const _filterkey: any = { ...filterkey };
@@ -599,7 +437,6 @@ const BlogsPage = (props: any): JSX.Element => {
         _gsearch: "",
       });
       setdata([..._data]);
-      //await onPageChange("");
     }
   };
 
@@ -615,7 +452,12 @@ const BlogsPage = (props: any): JSX.Element => {
       onLoadingFunc(arr);
     });
   };
+
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     resetstate();
   }, []);
 
@@ -643,24 +485,26 @@ const BlogsPage = (props: any): JSX.Element => {
                   style={{
                     display: "flex",
                     alignItems: "center",
-
                     gap: "18px",
                   }}
                 >
                   <div className={styles.blog}>
                     <div
-                      // className={styles.roundiconbutton}
                       style={{ cursor: "pointer" }}
                       onClick={() => {
-                        window.open(
-                          props.context.pageContext.web.absoluteUrl +
-                            CONFIG.NavigatePage.PernixIntranet,
-                          "_self"
-                        );
+                        isActivityPage
+                          ? window.open(
+                              props.context.pageContext.web.absoluteUrl +
+                                CONFIG.NavigatePage.ApprovalsPage,
+                              "_self"
+                            )
+                          : window.open(
+                              props.context.pageContext.web.absoluteUrl +
+                                CONFIG.NavigatePage.PernixIntranet,
+                              "_self"
+                            );
                       }}
                     >
-                      {/* <Icon iconName="SkypeArrow" className={styles.icon} />
-                       */}
                       <i
                         className="pi pi-arrow-circle-left"
                         style={{ fontSize: "1.2rem", color: "#E0803D" }}
@@ -673,33 +517,6 @@ const BlogsPage = (props: any): JSX.Element => {
                 </div>
 
                 <div className={styles.searchboxcontainer}>
-                  {permission === "Admin" && (
-                    <div>
-                      {/* <CustomDropDown
-                        value={filterkey._status}
-                        placeholder="Status"
-                        onChange={(value) => {
-                          filterOnchangehandler("_status", value);
-                          // stausfilter(value);
-                        }}
-                        noErrorMsg
-                        highlightDropdown={true}
-                        options={["All", "Pending", "Approved"]}
-                        size="SM"
-                        floatingLabel={false}
-                        width={"250px"}
-                      /> */}
-                    </div>
-                  )}
-                  {/* <CustomInput
-                    onChange={(value) => {
-                      filterfunction("_gsearch", value);
-                    }}
-                    value={filterkey._gsearch}
-                    inputWrapperClassName={styles.pathSearchFilter}
-                    size="SM"
-                    placeholder="Search path"
-                  /> */}
                   <div>
                     <CustomInput
                       value={filterkey._gsearch}
@@ -713,33 +530,6 @@ const BlogsPage = (props: any): JSX.Element => {
                     />
                   </div>
 
-                  {/* <SearchBox
-                    placeholder="Search..."
-                    styles={searchBoxStyle}
-                    value={filterkey._gsearch}
-                    onChange={(e, value) => {
-                      filterOnchang
-                      ehandler("_gsearch", value);
-                    }}
-                  /> */}
-
-                  {/* 
-                  {permission !== "Admin" && (
-                    <SearchBox
-                      placeholder="Search..."
-                      styles={searchBoxStyle}
-                      value={additionalfilterkey._status}
-                      onChange={(e, value: any) => {
-                        setadditionalfilterkey({
-                          ...additionalfilterkey,
-                          _status: value,
-                        });
-                        // filterOnchangehandler("_gsearch", value);
-                        algorithmfilterfunction(value);
-                      }}
-                    />
-                  )} */}
-
                   <div>
                     <div
                       className={styles["new-blog-button"]}
@@ -751,6 +541,7 @@ const BlogsPage = (props: any): JSX.Element => {
                   </div>
                 </div>
               </div>
+
               <div style={{ display: "flex", gap: "35px", margin: "20px" }}>
                 <div>
                   <div
@@ -759,7 +550,6 @@ const BlogsPage = (props: any): JSX.Element => {
                         allBlogs === "AllBlogs"
                           ? "3.5px solid rgb(224, 128, 61)"
                           : "",
-
                       paddingBottom: "10px",
                       color: "#0b4d53",
                       borderRadius: "4px",
@@ -790,6 +580,7 @@ const BlogsPage = (props: any): JSX.Element => {
                     All blogs
                   </div>
                 </div>
+
                 {permission === "Admin" ? (
                   <div>
                     <div
@@ -837,7 +628,6 @@ const BlogsPage = (props: any): JSX.Element => {
                         if (permission === "Admin") {
                           setAllBlogs("PendingApprovals");
                         } else {
-                          debugger;
                           const _data = [...data];
                           const _filterdata = _data.filter(
                             (item) =>
@@ -877,9 +667,6 @@ const BlogsPage = (props: any): JSX.Element => {
                         pagination.first + pagination.rows
                       )
                       .map((item: any, index: number) => {
-                        console.log(item.Paragraph);
-                        // const checkStatus =
-                        //   item.Status === "Approved" ? true : false;
                         const totaluserlikescount = item.userDetails.filter(
                           (arr: any) => arr.UserClick === true
                         ).length;
@@ -997,7 +784,6 @@ const BlogsPage = (props: any): JSX.Element => {
                                       </div>
                                       {permission === "Admin" && (
                                         <div className={styles.checkbox}>
-                                          {/* <div> */}
                                           {permission === "Admin" ? (
                                             <div>
                                               <div
@@ -1005,80 +791,19 @@ const BlogsPage = (props: any): JSX.Element => {
                                                   styles["new-blog-button"]
                                                 }
                                                 onClick={() => {
-                                                  // setcheckbox(false);
                                                   setupdateid(item.Id);
-
                                                   togglePopupVisibility(
                                                     setPopupController,
                                                     initialPopupController[0],
                                                     0,
                                                     "open"
                                                   );
-                                                  // const _popupcontroller = [
-                                                  //   ...popupController,
-                                                  // ];
-                                                  // _popupcontroller[0].open = true;
-                                                  // setPopupController([
-                                                  //   ..._popupcontroller,
-                                                  // ]);
-                                                  // approverStatusFunc(
-                                                  //   item.Id
-                                                  // );
                                                 }}
                                               >
                                                 <span>Approval</span>
                                               </div>
                                             </div>
-                                          ) : // <div>
-                                          // <CustomDropDown
-                                          //   value={item.UserStatus}
-                                          //   floatingLabel={false}
-                                          //   placeholder="Status"
-                                          //   onChange={(value) => {
-                                          // setcheckbox(false);
-                                          // approverStatusFunc(value, item.Id);
-                                          //   }}
-                                          //   highlightDropdown={true}
-                                          //   options={[
-                                          //     "Pending",
-                                          //     "Approved",
-                                          //     "Rejected",
-                                          //   ]}
-                                          //   noErrorMsg
-                                          //   size="SM"
-                                          //   width={"150px"}
-                                          // />
-                                          // </div>`
-                                          null}
-                                          {/* </div> */}
-                                          {/* <Checkbox
-                                        checked={
-                                          item.UserStatus &&
-                                          item.UserStatus !== item.Status &&
-                                          checkbox === true
-                                            ? true
-                                            : false
-                                        }
-                                        onChange={(event: any) => {
-                                          if (
-                                            item.UserStatus &&
-                                            item.UserStatus !== item.Status
-                                          ) {
-                                            setcheckbox(true);
-                                            setupdateid(item.Id);
-                                            const _popupcontroller = [
-                                              ...popupController,
-                                            ];
-                                            _popupcontroller[0].open = true;
-                                            setPopupController([
-                                              ..._popupcontroller,
-                                            ]);
-                                          } else {
-                                            setcheckbox(false);
-                                            console.log("Shanmugaraj");
-                                          }
-                                        }}
-                                      /> */}
+                                          ) : null}
                                         </div>
                                       )}
                                     </div>
@@ -1105,18 +830,6 @@ const BlogsPage = (props: any): JSX.Element => {
                                 </div>
                                 <div className={styles.likecontainer}>
                                   <div className={styles.likebox}>
-                                    {/* <Icon
-                                    iconName="LikeSolid"
-                                    style={{
-                                      color: curuserlikes
-                                        ? "#0a4b48"
-                                        : "#b3b0b0",
-                                    }}
-                                    className={styles.likeicon}
-                                    onClick={() =>
-                                      addLikeMethod(item.Id, item.userDetails)
-                                    }
-                                  /> */}
                                     <i
                                       className="pi pi-thumbs-up-fill"
                                       style={{
@@ -1130,37 +843,17 @@ const BlogsPage = (props: any): JSX.Element => {
                                         addLikeMethod(item.Id, item.userDetails)
                                       }
                                     />
-                                    {/* <ThumbUpAltOutlined
-                                    style={{
-                                      color: curuserlikes
-                                        ? "#0a4b48"
-                                        : "#b3b0b0",
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={() =>
-                                      addLikeMethod(item.Id, item.userDetails)
-                                    }
-                                  /> */}
                                     <label style={{ cursor: "auto" }}>
                                       {totaluserlikescount || "0"}
                                     </label>
                                   </div>
                                   <div className={styles.eyecontainer}>
-                                    {/* <Icon
-                                    className={styles.eyeicon}
-                                    iconName="VisibilityOutlined"
-                                  /> */}
                                     <VisibilityOutlined
                                       style={{
                                         color: "orange",
                                         fontSize: "20px",
                                       }}
                                     />
-
-                                    {/* <Icon
-                                    iconName="RedEye12"
-                                    className={styles.eyeicon}
-                                  /> */}
                                     <label style={{ cursor: "auto" }}>
                                       {userviewcounts || "0"}
                                     </label>
@@ -1195,6 +888,7 @@ const BlogsPage = (props: any): JSX.Element => {
           </div>
         </div>
       )}
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           popupCustomBgColor="#fff"
@@ -1209,7 +903,6 @@ const BlogsPage = (props: any): JSX.Element => {
               index,
               "close"
             );
-            // resetFormData(formData, setFormData);
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle
@@ -1225,6 +918,7 @@ const BlogsPage = (props: any): JSX.Element => {
           noActionBtn={true}
         />
       ))}
+
       <ToastContainer
         position="top-center"
         autoClose={3000}

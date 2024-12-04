@@ -477,7 +477,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                       formData?.assignTo?.value?.email?.toLowerCase()) &&
                   formData?.answer?.value !== ""
                 }
-                groupName="QuestionCEO"
+                groupName={CONFIG.SPGroupName.QuestionCEO}
                 onChange={(item: any) => {
                   const value = item?.[0];
                   assignedUser = value?.name ?? "";
