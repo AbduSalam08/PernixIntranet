@@ -22,9 +22,7 @@ import {
   editNews,
   getAllNewsData,
 } from "../../../services/newsIntranet/newsInranet";
-
 import { Paginator } from "primereact/paginator"; // Import Paginator
-
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
@@ -33,7 +31,8 @@ import { RoleAuth } from "../../../services/CommonServices";
 import dayjs from "dayjs";
 import moment from "moment";
 import { IPaginationData } from "../../../interface/interface";
-// const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
+import { ToastContainer } from "react-toastify";
+
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 interface SearchField {
@@ -50,7 +49,6 @@ interface FormField<T> {
     type: string;
   };
 }
-
 interface FormData {
   Title: FormField<string>;
   StartDate: FormField<string>;
@@ -80,40 +78,24 @@ interface PopupState {
     inprogress: string;
   };
 }
+
 let objFilter: SearchField = {
   selectedDate: null,
   allSearch: "",
   Status: "",
 };
+let isActivityPage: boolean = false;
+
 const NewsPage = (props: any): JSX.Element => {
-  const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<string>("");
-  const [pagination, setPagination] = useState<IPaginationData>(
-    CONFIG.PaginationData
+  const dispatch = useDispatch();
+
+  const newsIntranetData: any = useSelector((state: any) => {
+    return state.NewsIntranetData.value;
+  });
+  const currentUserDetails: any = useSelector(
+    (state: any) => state?.MainSPContext?.currentUserDetails
   );
 
-  const [isfile, setIsile] = useState<boolean>(false);
-  // const[isview,setIsview]=useState<boolean>(false)
-  const [isDelete, setisDelete] = useState<boolean>(false);
-  const [id, setID] = useState<any | null>(null);
-  const [searchField, setSearchField] = useState<SearchField>({
-    selectedDate: null,
-    allSearch: "",
-    Status: "",
-  });
-
-  const [newsData, setNewsData] = useState<any[]>([]);
-  const [shownewsData, setShowNewsData] = useState<any[]>([]);
-
-  const totalRecords = newsData?.length || 0;
-  // pagination pange change
-  const onPageChange = (event: any): void => {
-    setPagination({
-      first: event?.first || CONFIG.PaginationData.first,
-      rows: event?.rows || CONFIG.PaginationData.rows,
-    });
-  };
-  const dispatch = useDispatch();
   // popup properties
   const initialPopupController: PopupState[] = [
     {
@@ -137,7 +119,6 @@ const NewsPage = (props: any): JSX.Element => {
         inprogress: "Adding news, please wait...",
       },
     },
-
     {
       open: false,
       popupTitle: "Update",
@@ -159,7 +140,6 @@ const NewsPage = (props: any): JSX.Element => {
         inprogress: "Updated news, please wait...",
       },
     },
-
     {
       open: false,
       popupTitle: "Confirmation",
@@ -182,7 +162,6 @@ const NewsPage = (props: any): JSX.Element => {
         inprogress: "Deleting news, please wait...",
       },
     },
-
     {
       open: false,
       popupTitle: "",
@@ -209,6 +188,21 @@ const NewsPage = (props: any): JSX.Element => {
   const [popupController, setPopupController] = useState<PopupState[]>(
     initialPopupController
   );
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<string>("");
+  const [pagination, setPagination] = useState<IPaginationData>(
+    CONFIG.PaginationData
+  );
+  const [isfile, setIsile] = useState<boolean>(false);
+  const [isDelete, setisDelete] = useState<boolean>(false);
+  const [id, setID] = useState<any | null>(null);
+  const [searchField, setSearchField] = useState<SearchField>({
+    selectedDate: null,
+    allSearch: "",
+    Status: "",
+  });
+  const [newsData, setNewsData] = useState<any[]>([]);
+  const [shownewsData, setShowNewsData] = useState<any[]>([]);
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -261,12 +255,15 @@ const NewsPage = (props: any): JSX.Element => {
     },
   });
 
-  const newsIntranetData: any = useSelector((state: any) => {
-    return state.NewsIntranetData.value;
-  });
-  const currentUserDetails: any = useSelector(
-    (state: any) => state?.MainSPContext?.currentUserDetails
-  );
+  const totalRecords = newsData?.length || 0;
+
+  // pagination pange change
+  const onPageChange = (event: any): void => {
+    setPagination({
+      first: event?.first || CONFIG.PaginationData.first,
+      rows: event?.rows || CONFIG.PaginationData.rows,
+    });
+  };
 
   const handleInputChange = (
     field: string,
@@ -313,13 +310,38 @@ const NewsPage = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      (await isEdit)
-        ? editNews(formData, setPopupController, 1, id, isfile)
-        : addNews(formData, setPopupController, 0);
+      if (isEdit) {
+        setIsEdit(false);
+        setisDelete(false);
+        resetFormData(formData, setFormData);
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[1],
+          1,
+          "close"
+        );
+        await editNews(formData, id, isfile);
+        setIsile(false);
+        await getAllNewsData(dispatch);
+      } else {
+        setIsEdit(false);
+        setisDelete(false);
+        resetFormData(formData, setFormData);
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+        await addNews(formData);
+        setIsile(false);
+        await getAllNewsData(dispatch);
+      }
     } else {
       console.log("Form contains errors");
     }
   };
+
   const popupInputs: any = [
     [
       <div className={styles.addNewsGrid} key={1}>
@@ -722,13 +744,11 @@ const NewsPage = (props: any): JSX.Element => {
         onClick: async () => {
           await handleSubmit();
           setisDelete(false);
-
           setIsEdit(false);
           setID(null);
         },
       },
     ],
-
     [
       {
         text: "Cancel",
@@ -759,13 +779,11 @@ const NewsPage = (props: any): JSX.Element => {
         onClick: async () => {
           await handleSubmit();
           setisDelete(false);
-
           setIsEdit(false);
           setID(null);
         },
       },
     ],
-
     [
       {
         text: "Cancel",
@@ -791,21 +809,24 @@ const NewsPage = (props: any): JSX.Element => {
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
-        // disabled: !Object.keys(formData).every(
-        //   (key) => formData[key].isValid
-        // ),
         size: "large",
         onClick: async () => {
-          // await handleSubmit();
-
-          (await isDelete) && deleteNews(id, setPopupController, 2);
-          setIsEdit(false);
-          setID(null);
-          setisDelete(false);
+          if (isDelete) {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[2],
+              2,
+              "close"
+            );
+            await deleteNews(id);
+            setIsEdit(false);
+            setID(null);
+            setisDelete(false);
+            await getAllNewsData(dispatch);
+          }
         },
       },
     ],
-
     [
       {
         text: "Close",
@@ -923,15 +944,6 @@ const NewsPage = (props: any): JSX.Element => {
     );
   };
 
-  useEffect(() => {
-    RoleAuth(
-      CONFIG.SPGroupName.Pernix_Admin,
-      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
-      dispatch
-    );
-    getAllNewsData(dispatch);
-  }, []);
-
   const handleSearch = (val: any): void => {
     let filteredResults = [...val];
     // Apply common text search for title, status, and description
@@ -1039,6 +1051,19 @@ const NewsPage = (props: any): JSX.Element => {
   };
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
+    RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
+      dispatch
+    );
+    getAllNewsData(dispatch);
+  }, []);
+
+  useEffect(() => {
     prepareNewsData(selectedTab ? selectedTab : CONFIG.TabsName[0]);
   }, [newsIntranetData]);
 
@@ -1053,11 +1078,17 @@ const NewsPage = (props: any): JSX.Element => {
         <div className={styles.leftSection}>
           <i
             onClick={() => {
-              window.open(
-                props.context.pageContext.web.absoluteUrl +
-                  CONFIG.NavigatePage.PernixIntranet,
-                "_self"
-              );
+              isActivityPage
+                ? window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.ApprovalsPage,
+                    "_self"
+                  )
+                : window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
             }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -1292,13 +1323,13 @@ const NewsPage = (props: any): JSX.Element => {
             onHide={() => {
               setIsEdit(false);
               setisDelete(false);
+              resetFormData(formData, setFormData);
               togglePopupVisibility(
                 setPopupController,
                 initialPopupController[index],
                 index,
                 "close"
               );
-              resetFormData(formData, setFormData);
               if (popupData?.isLoading?.success) {
                 setIsile(false);
                 getAllNewsData(dispatch);
@@ -1321,6 +1352,19 @@ const NewsPage = (props: any): JSX.Element => {
           />
         ))}
       </div>
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       {/* pagination */}
       {newsData.length > 0 ? (

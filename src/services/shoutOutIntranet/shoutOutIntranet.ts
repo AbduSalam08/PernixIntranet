@@ -1,10 +1,10 @@
 /* eslint-disable no-debugger */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setShoutOutsData } from "../../redux/features/ShoutOutsSlice";
 import { sp } from "@pnp/sp";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { toast } from "react-toastify";
 
 export const getShoutOutsOptions = async (
   setShoutOutsOptions: any
@@ -15,7 +15,7 @@ export const getShoutOutsOptions = async (
       Select: "*",
       Expand: "",
     });
-    console.log("response: ", response);
+
     const shoutOutOptions: any = response?.map((item: any) => {
       return {
         ID: item?.ID,
@@ -42,8 +42,8 @@ export const getAllShoutOutsData = async (dispatch: any): Promise<any> => {
       Select:
         "*, SendTowards/ID, SendTowards/Title, SendTowards/EMail, Author/ID, Author/Title, Author/EMail",
       Expand: "SendTowards, Author",
+      Topcount: 5000,
     });
-    console.log("response: ", response);
 
     const shoutOutData: any = response?.map((item: any) => {
       return {
@@ -88,20 +88,6 @@ interface FormData {
   [key: string]: { value: any };
 }
 
-interface LoaderStateItem {
-  popupWidth: string;
-  isLoading: {
-    inprogress: boolean;
-    error: boolean;
-    success: boolean;
-  };
-  messages?: {
-    success?: string;
-    successDescription?: string;
-    errorDescription?: string;
-  };
-}
-
 export const shoutOutsCurrentUserRole = async (
   setUserRole: any
 ): Promise<any> => {
@@ -109,13 +95,20 @@ export const shoutOutsCurrentUserRole = async (
   const currentUser: any = await sp.web.currentUser.get();
   const currentUserEmail = currentUser?.Email.toLowerCase() || "";
 
+  const superAdmin: any = await sp.web.siteGroups
+    .getByName(CONFIG.SPGroupName.Pernix_Admin)
+    .users.get();
+
   const ShoutoutsAdminData: any = await sp.web.siteGroups
     .getByName(CONFIG.SPGroupName.Shoutouts_Admin)
     .users.get();
 
-  const isAdmin = ShoutoutsAdminData?.some(
+  const masUserArray: any[] = [...superAdmin, ...ShoutoutsAdminData];
+
+  const isAdmin = masUserArray?.some(
     (val: any) => val.Email.toLowerCase() === currentUserEmail
   );
+
   if (isAdmin) {
     setUserRole({ userRole: "Admin", email: currentUserEmail });
     userData.userRole = "Admin";
@@ -155,7 +148,6 @@ export const handleShoutOutStatus = async (
     RequestJSON: { Status: type },
   })
     .then(async (res) => {
-      console.log("res", res);
       await getAllShoutOutsData(dispath);
       setLoaderState((prevState: any) => {
         const updatedState = [...prevState]; // Copy state array
@@ -216,30 +208,13 @@ export const changeShoutOutActiveStatus = async (
 
 export const addShoutOut = async (
   formData: FormData,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number,
   dispath: any
 ): Promise<void> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Creating a new shout-out...");
 
   try {
-    debugger;
-
     const payload = {
-      Title: formData.Template?.value,
+      // Title: formData.Template?.value,
       Description: formData.Description?.value,
       SendTowardsId: formData.SendTowards?.value?.id,
     };
@@ -251,102 +226,55 @@ export const addShoutOut = async (
     })
       .then(async (res: any) => {
         await getAllShoutOutsData(dispath);
-        // Success state after item and attachment are added
-        setLoaderState((prevState) => {
-          const updatedState = [...prevState];
-          updatedState[index] = {
-            ...updatedState[index],
-            popupWidth: "450px",
-            isLoading: {
-              inprogress: false,
-              success: true,
-              error: false,
-            },
-            messages: {
-              ...updatedState[index].messages,
-              successDescription: `The new shout-out to '${formData.SendTowards.value?.name}' has been added successfully.`,
-            },
-          };
-          return updatedState;
+
+        toast.update(toastId, {
+          render: "The new shout-out added successfully!",
+          type: "success",
+          isLoading: false,
+          autoClose: 5000,
+          hideProgressBar: false,
         });
       })
       .catch((err: any) => {
         console.error("Error while adding shout-out:", err);
-        // Handle error state
-        setLoaderState((prevState) => {
-          const updatedState = [...prevState];
-          updatedState[index] = {
-            ...updatedState[index],
-            popupWidth: "450px",
-            isLoading: {
-              inprogress: false,
-              success: false,
-              error: true,
-            },
-            messages: {
-              ...updatedState[index].messages,
-              errorDescription:
-                "An error occurred while adding shout-out, please try again later.",
-            },
-          };
-          return updatedState;
+
+        toast.update(toastId, {
+          render: "Error adding new shout-out. Please try again.",
+          type: "error",
+          isLoading: false,
+          autoClose: 5000,
+          hideProgressBar: false,
         });
       });
   } catch (error) {
     console.error("Error while adding shout-out:", error);
-    // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding shout-out, please try again later.",
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render: "Error adding new shout-out. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
+
 export const updateShoutOut = async (
   formData: FormData,
   ID: number,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number,
   dispath: any
 ): Promise<void> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Updating the shout-out in progress...");
 
   try {
-    debugger;
     const payload = formData.SendTowards?.value?.id
       ? {
-          Title: formData.Template?.value,
+          // Title: formData.Template?.value,
           Description: formData.Description?.value,
           SendTowardsId: formData.SendTowards?.value?.id,
         }
       : {
-          Title: formData.Template?.value,
+          // Title: formData.Template?.value,
           Description: formData.Description?.value,
         };
 
@@ -357,50 +285,60 @@ export const updateShoutOut = async (
       RequestJSON: payload,
     }).then(async (res: any) => {
       await getAllShoutOutsData(dispath);
-      // Success state after item and attachment are added
-      setLoaderState((prevState) => {
-        const updatedState = [...prevState];
-        updatedState[index] = {
-          ...updatedState[index],
-          popupWidth: "450px",
-          isLoading: {
-            inprogress: false,
-            success: true,
-            error: false,
-          },
-          messages: {
-            ...updatedState[index].messages,
-            success: "Shout out update successfully!",
-            successDescription: `The new shout-out to '${
-              formData.SendTowards.value?.name
-                ? formData.SendTowards.value?.name
-                : formData.SendTowards.value
-            }' has been updated successfully.`,
-          },
-        };
-        return updatedState;
+
+      toast.update(toastId, {
+        render: "This shout-out has been successfully updated!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
       });
     });
   } catch (error) {
     console.error("Error while updating shout-out:", error);
-    // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while updating shout-out, please try again later.",
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render:
+        "An error occurred while updating this shout-out. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+export const deleteShoutOut = async (
+  ID: number,
+  dispath: any
+): Promise<void> => {
+  const toastId = toast.loading("Deleting the shout-out in progress...");
+
+  try {
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.Intranet_ShoutOuts,
+      ID: ID,
+    }).then(async (res: any) => {
+      await getAllShoutOutsData(dispath);
+
+      toast.update(toastId, {
+        render: "This shout-out has been successfully deleted!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    });
+  } catch (error) {
+    console.error("Error while updating shout-out:", error);
+
+    toast.update(toastId, {
+      render:
+        "An error occurred while deleting this shout-out. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };

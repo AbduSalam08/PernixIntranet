@@ -36,6 +36,7 @@ import Popup from "../../../components/common/Popups/Popup";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import { Button } from "primereact/button";
+import { ToastContainer } from "react-toastify";
 
 /* Images creation */
 // const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
@@ -49,6 +50,8 @@ interface INewHiresField {
   StartDate: IFormFields;
   EndDate: IFormFields;
 }
+
+let isActivityPage: boolean = false;
 
 const NewHiresPage = (props: any): JSX.Element => {
   /* Local variable creation */
@@ -228,6 +231,78 @@ const NewHiresPage = (props: any): JSX.Element => {
     }));
   };
 
+  const onLoadingFUN = async (curTab: any, data: any[]): Promise<void> => {
+    setIsLoading(true);
+    let filteredData: any[] = [];
+    const today = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate()
+    );
+    if (curTab === CONFIG.NewHiresPageTabsName[0]) {
+      filteredData = data?.filter((obj: any) => {
+        const startDate = new Date(obj?.StartDate);
+        const endDate = new Date(obj?.EndDate);
+        return (
+          today >=
+            new Date(
+              startDate.getFullYear(),
+              startDate.getMonth(),
+              startDate.getDate()
+            ) &&
+          today <=
+            new Date(
+              endDate.getFullYear(),
+              endDate.getMonth(),
+              endDate.getDate()
+            )
+        );
+      });
+    } else if (curTab === CONFIG.NewHiresPageTabsName[1]) {
+      filteredData = data?.filter((obj: any) => {
+        const startDate = new Date(obj?.StartDate);
+        const endDate = new Date(obj?.EndDate);
+        return (
+          today <
+            new Date(
+              startDate.getFullYear(),
+              startDate.getMonth(),
+              startDate.getDate()
+            ) &&
+          today <
+            new Date(
+              endDate.getFullYear(),
+              endDate.getMonth(),
+              endDate.getDate()
+            )
+        );
+      });
+    } else {
+      filteredData = data?.filter((obj: any) => {
+        const startDate = new Date(obj?.StartDate);
+        const endDate = new Date(obj?.EndDate);
+        return (
+          today >=
+            new Date(
+              startDate.getFullYear(),
+              startDate.getMonth(),
+              startDate.getDate()
+            ) &&
+          today >
+            new Date(
+              endDate.getFullYear(),
+              endDate.getMonth(),
+              endDate.getDate()
+            )
+        );
+      });
+    }
+    setTypeNewHires([...filteredData]);
+    handleSearch([...filteredData]);
+    setIsLoading(false);
+    setSelectedTab(curTab);
+  };
+
   const handleUserSubmit = async (isNew: boolean): Promise<any> => {
     let hasErrors = false;
 
@@ -262,15 +337,43 @@ const NewHiresPage = (props: any): JSX.Element => {
     setFormData(updatedFormData);
     if (!hasErrors) {
       if (isNew) {
-        await addNewHire(formData, setPopupController, 0);
-      } else {
-        await updateHire(
-          formData,
-          handleForm?.ID,
-          attachmentObject,
+        resetFormData(formData, setFormData);
+        setFormData({ ...initialFormData });
+        togglePopupVisibility(
           setPopupController,
-          0
+          initialPopupController[0],
+          0,
+          "close"
         );
+        await addNewHire(formData);
+        if (handleForm?.type === "Delete") {
+          const filteredData = newHires?.filter(
+            (val: any) => val?.ID !== handleForm?.ID
+          );
+          setNewHires([...filteredData]);
+          onLoadingFUN(selectedTab, [...filteredData]);
+        } else {
+          getAllNewHiresData(dispatch);
+        }
+      } else {
+        resetFormData(formData, setFormData);
+        setFormData({ ...initialFormData });
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+        await updateHire(formData, handleForm?.ID, attachmentObject);
+        if (handleForm?.type === "Delete") {
+          const filteredData = newHires?.filter(
+            (val: any) => val?.ID !== handleForm?.ID
+          );
+          setNewHires([...filteredData]);
+          onLoadingFUN(selectedTab, [...filteredData]);
+        } else {
+          getAllNewHiresData(dispatch);
+        }
       }
     } else {
       console.log("Form contains errors");
@@ -504,7 +607,14 @@ const NewHiresPage = (props: any): JSX.Element => {
         disabled: false,
         size: "large",
         onClick: async () => {
-          await deleteHire(handleForm?.ID, setPopupController, 1);
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[1],
+            1,
+            "close"
+          );
+          await deleteHire(handleForm?.ID);
+          getAllNewHiresData(dispatch);
         },
       },
     ],
@@ -528,78 +638,6 @@ const NewHiresPage = (props: any): JSX.Element => {
     ],
   ];
 
-  const onLoadingFUN = async (curTab: any, data: any[]): Promise<void> => {
-    setIsLoading(true);
-    let filteredData: any[] = [];
-    const today = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      new Date().getDate()
-    );
-    if (curTab === CONFIG.NewHiresPageTabsName[0]) {
-      filteredData = data?.filter((obj: any) => {
-        const startDate = new Date(obj?.StartDate);
-        const endDate = new Date(obj?.EndDate);
-        return (
-          today >=
-            new Date(
-              startDate.getFullYear(),
-              startDate.getMonth(),
-              startDate.getDate()
-            ) &&
-          today <=
-            new Date(
-              endDate.getFullYear(),
-              endDate.getMonth(),
-              endDate.getDate()
-            )
-        );
-      });
-    } else if (curTab === CONFIG.NewHiresPageTabsName[1]) {
-      filteredData = data?.filter((obj: any) => {
-        const startDate = new Date(obj?.StartDate);
-        const endDate = new Date(obj?.EndDate);
-        return (
-          today <
-            new Date(
-              startDate.getFullYear(),
-              startDate.getMonth(),
-              startDate.getDate()
-            ) &&
-          today <
-            new Date(
-              endDate.getFullYear(),
-              endDate.getMonth(),
-              endDate.getDate()
-            )
-        );
-      });
-    } else {
-      filteredData = data?.filter((obj: any) => {
-        const startDate = new Date(obj?.StartDate);
-        const endDate = new Date(obj?.EndDate);
-        return (
-          today >=
-            new Date(
-              startDate.getFullYear(),
-              startDate.getMonth(),
-              startDate.getDate()
-            ) &&
-          today >
-            new Date(
-              endDate.getFullYear(),
-              endDate.getMonth(),
-              endDate.getDate()
-            )
-        );
-      });
-    }
-    setTypeNewHires([...filteredData]);
-    handleSearch([...filteredData]);
-    setIsLoading(false);
-    setSelectedTab(curTab);
-  };
-
   useEffect(() => {
     if (newHiresData?.data?.length > 0) {
       setNewHires(newHiresData?.data);
@@ -611,6 +649,10 @@ const NewHiresPage = (props: any): JSX.Element => {
   }, [newHiresData]);
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     dispatch(setMainSPContext(props?.context));
     getCurrentUserRole(setUserDetails);
     getAllNewHiresData(dispatch);
@@ -626,11 +668,17 @@ const NewHiresPage = (props: any): JSX.Element => {
         <div className={styles.leftSection}>
           <i
             onClick={() => {
-              window.open(
-                props.context.pageContext.web.absoluteUrl +
-                  CONFIG.NavigatePage.PernixIntranet,
-                "_self"
-              );
+              isActivityPage
+                ? window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.ApprovalsPage,
+                    "_self"
+                  )
+                : window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
             }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -876,6 +924,19 @@ const NewHiresPage = (props: any): JSX.Element => {
         </div>
       )}
 
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
@@ -888,14 +949,14 @@ const NewHiresPage = (props: any): JSX.Element => {
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(formData, setFormData);
+            setFormData({ ...initialFormData });
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               index,
               "close"
             );
-            resetFormData(formData, setFormData);
-            setFormData({ ...initialFormData });
             if (popupData?.isLoading?.success) {
               if (handleForm?.type === "Delete") {
                 const filteredData = newHires?.filter(

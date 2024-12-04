@@ -38,6 +38,7 @@ import Popup from "../../../components/common/Popups/Popup";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import { ToastContainer } from "react-toastify";
 
 /* Local interfaces */
 interface IMotivateField {
@@ -53,6 +54,7 @@ const PernixBannerImage = require("../assets/PernixBannerImage.svg");
 
 let masterQuotes: IQuoteDatas[] = [];
 let isAdmin: boolean = false;
+let isActivityPage: boolean = false;
 
 const MainBannerPage = (props: any): JSX.Element => {
   /* Local variable creation */
@@ -403,7 +405,16 @@ const MainBannerPage = (props: any): JSX.Element => {
     data: any,
     tab: string = CONFIG.TabsName[0]
   ): Promise<void> => {
-    let isDeleted: boolean = await deleteMotivated(data, setPopupController, 2);
+    resetFormData(formData, setFormData);
+    setFormData({ ...initialFormData });
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[2],
+      2,
+      "close"
+    );
+
+    let isDeleted: boolean = await deleteMotivated(data);
 
     if (isDeleted) {
       let curIndex: number = masterQuotes?.findIndex(
@@ -421,11 +432,18 @@ const MainBannerPage = (props: any): JSX.Element => {
     fileData: any,
     tab: string
   ): Promise<void> => {
+    resetFormData(formData, setFormData);
+    setFormData({ ...initialFormData });
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[1],
+      1,
+      "close"
+    );
+
     let updatedJSON: any = await updateMotivated(
       data,
       fileData,
-      setPopupController,
-      1,
       isFileEdit,
       curObject
     );
@@ -445,13 +463,16 @@ const MainBannerPage = (props: any): JSX.Element => {
     fileData: any,
     tab: string
   ): Promise<void> => {
-    const addedJSON: any = await addMotivated(
-      data,
-      fileData,
+    resetFormData(formData, setFormData);
+    setFormData({ ...initialFormData });
+    togglePopupVisibility(
       setPopupController,
-      0
+      initialPopupController[0],
+      0,
+      "close"
     );
 
+    const addedJSON: any = await addMotivated(data, fileData);
     masterQuotes = [addedJSON, ...masterQuotes];
 
     await prepareDatas(tab);
@@ -931,6 +952,10 @@ const MainBannerPage = (props: any): JSX.Element => {
   ];
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     onLoadingFUN();
   }, []);
 
@@ -950,11 +975,17 @@ const MainBannerPage = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
-                  window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+                  isActivityPage
+                    ? window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.ApprovalsPage,
+                        "_self"
+                      )
+                    : window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.PernixIntranet,
+                        "_self"
+                      );
                 }}
               >
                 <i
@@ -1184,6 +1215,19 @@ const MainBannerPage = (props: any): JSX.Element => {
               No motivational quote found!
             </div>
           )}
+
+          {/* Toast message section */}
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
 
           {/* Pagination section */}
           {showQuotes.length ? (

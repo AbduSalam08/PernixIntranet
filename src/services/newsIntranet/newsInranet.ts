@@ -1,11 +1,11 @@
 /* eslint-disable no-debugger */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from "dayjs";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setNewsIntranetData } from "../../redux/features/NewsIntranetSlice";
 import { sp } from "@pnp/sp/presets/all";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { toast } from "react-toastify";
 
 export const getAllNewsData = async (dispatch: any): Promise<any> => {
   dispatch?.(
@@ -87,25 +87,9 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
   }
 };
 
-export const addNews = async (
-  formData: any,
-  setLoaderState: any,
-  index: number
-): Promise<any> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState]; // Create a copy of the array
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const addNews = async (formData: any): Promise<any> => {
+  const toastId = toast.loading("Creating news...");
+
   try {
     // Prepare payload by omitting thumbnail
     const payload = Object.keys(formData).reduce((acc: any, key: string) => {
@@ -134,70 +118,32 @@ export const addNews = async (
       });
     }
 
-    // Success state after item and attachment are added
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The news added successfully.`,
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "The new news has been added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.error("Error while adding news:", error);
 
-    // Handle error state
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding news, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error adding new news. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
 
 export const editNews = async (
   formData: any,
-  setLoaderState: any,
-  index: number,
   itemId: number,
   isfile: boolean
 ): Promise<any> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Updating the news in progress...");
 
   try {
     // Prepare payload by omitting thumbnail
@@ -212,11 +158,10 @@ export const editNews = async (
     }, {});
 
     // Update the item using PnPJS
-    const item = await sp.web.lists
+    await sp.web.lists
       .getByTitle(CONFIG.ListNames.Intranet_News)
       .items.getById(itemId)
       .update(payload);
-    console.log("item: ", item);
 
     if (isfile) {
       if (formData?.thumbnail?.value) {
@@ -241,68 +186,29 @@ export const editNews = async (
           );
       }
     }
-    // Success state after item and attachment are updated
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The news updated successfully.`,
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render: "This news has been successfully updated!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.error("Error while editing news:", error);
 
-    // Handle error state
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while updating the news, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "An error occurred while updating this news. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
 
-export const deleteNews = async (
-  newsID: number,
-  setLoaderState: any,
-  index: number
-): Promise<any> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const deleteNews = async (newsID: number): Promise<any> => {
+  const toastId = toast.loading("Deleting the news in progress...");
 
   try {
     // Delete item from the SharePoint list
@@ -314,45 +220,22 @@ export const deleteNews = async (
       },
     });
 
-    // Success state after the item is deleted
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The news deleted successfully.`,
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "This news has been successfully deleted!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.error("Error while deleting news:", error);
 
-    // Handle error state
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while deleting news, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "An error occurred while deleting this news. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };

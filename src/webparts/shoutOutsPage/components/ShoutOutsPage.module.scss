@@ -287,3 +287,17 @@
     }
   }
 }
+
+.suggestion {
+  flex-wrap: wrap;
+  gap: 10px;
+
+  button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2d4b511a;
+    color: #2d4b51;
+    font-weight: 600;
+  }
+}

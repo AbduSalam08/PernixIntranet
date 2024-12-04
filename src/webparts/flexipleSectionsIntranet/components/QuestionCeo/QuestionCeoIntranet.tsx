@@ -35,6 +35,8 @@ import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIn
 import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../../utils/commonUtils";
+import { ToastContainer } from "react-toastify";
+
 //import ViewAll from "../../../components/common/ViewAll/ViewAll";
 //import { CONFIG } from "../../../config/config";
 //import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
@@ -138,7 +140,15 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addQuestionCeo(formData, setPopupController, 0, dispatch);
+      resetFormData(formData, setFormData);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await addQuestionCeo(formData);
+      await getQuestionCeo(dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -315,6 +325,19 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
         </div>
       </div>
       <ViewAll onClick={handlenavigate} />
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup

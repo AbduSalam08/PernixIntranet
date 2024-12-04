@@ -14,9 +14,11 @@ import { sp } from "@pnp/sp/presets/all";
 import { graph } from "@pnp/graph/presets/all";
 import { Provider } from "react-redux";
 import { store } from "../../redux/store/store";
+
 require("../../assets/styles/style.css");
 require("../../components/common/CustomInputFields/customStyle.css");
 require("../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css");
+require("../../../node_modules/react-toastify/dist/ReactToastify.css");
 
 export interface IQuestionsCeoIntranetWebPartProps {
   description: string;

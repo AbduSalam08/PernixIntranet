@@ -1,10 +1,10 @@
 /* eslint-disable no-debugger */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setNewHiresData } from "../../redux/features/NewHiresIntranet";
 import { sp } from "@pnp/sp";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { toast } from "react-toastify";
 
 export const getCurrentUserRole = async (
   setCurrentUserDetails: any
@@ -59,7 +59,7 @@ export const getAllNewHiresData = async (dispatch: any): Promise<any> => {
       Orderby: "Created",
       Orderbydecorasc: false,
     });
-    console.log("response: ", response);
+
     const newhireData: any = response?.map((item: any) => {
       return {
         ID: item?.ID,
@@ -108,43 +108,10 @@ interface FormData {
   [key: string]: { value: any };
 }
 
-interface LoaderStateItem {
-  popupWidth: string;
-  isLoading: {
-    inprogress: boolean;
-    error: boolean;
-    success: boolean;
-  };
-  messages?: {
-    success?: string;
-    successDescription?: string;
-    errorDescription?: string;
-  };
-}
-
-export const addNewHire = async (
-  formData: FormData,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number
-): Promise<void> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const addNewHire = async (formData: FormData): Promise<void> => {
+  const toastId = toast.loading("Creating a new hire...");
 
   try {
-    let fileRes: any;
-
     const payload = {
       Description: formData?.Description?.value,
       EmployeeNameId: formData?.EmployeeName?.value?.id,
@@ -160,7 +127,7 @@ export const addNewHire = async (
     });
 
     if (formData?.ProfileImage?.value?.name) {
-      fileRes = await sp.web.lists
+      await sp.web.lists
         .getByTitle(CONFIG.ListNames.Intranet_NewHires)
         .items.getById(res.data.Id)
         .attachmentFiles.add(
@@ -168,48 +135,23 @@ export const addNewHire = async (
           formData?.ProfileImage?.value
         );
     }
-    console.log("fileRes", fileRes);
 
-    // Success state after item and attachment are added
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "New Hire Added Successfully",
-          successDescription: `The new hire '${formData.EmployeeName.value.name}' has been added successfully.`,
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "The new hire added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.error("Error while adding new hire:", error);
 
-    // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding new hire, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error adding new hire. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
@@ -217,24 +159,9 @@ export const addNewHire = async (
 export const updateHire = async (
   formData: FormData,
   ID: number,
-  attachmentObject: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number
+  attachmentObject: any
 ): Promise<void> => {
-  // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Updating the new hire in progress...");
 
   try {
     let fileRes: any;
@@ -317,115 +244,56 @@ export const updateHire = async (
         : null,
     };
 
-    // Success state after item and attachment are added
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Hire updated successfully!",
-          successDescription: `The hire '${
-            formData.EmployeeName?.value?.name
-              ? formData.EmployeeName.value.name
-              : formData.EmployeeName.value
-          }' has been updated successfully.`,
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "This new hire has been successfully updated!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+
     return { ...responseData };
   } catch (error) {
     console.error("Error while updating new hire:", error);
 
-    // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while updating hire, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render:
+        "An error occurred while updating this new hire. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
 
-export const deleteHire = async (
-  ID: number,
-  setLoaderState: any,
-  index: number
-): Promise<void> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const deleteHire = async (ID: number): Promise<void> => {
+  const toastId = toast.loading("Deleting the new hire in progress...");
+
   try {
     await SpServices.SPUpdateItem({
       Listname: CONFIG.ListNames.Intranet_NewHires,
       ID: ID,
       RequestJSON: { IsDelete: true },
     });
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Hire deleted successfully!",
-          successDescription: `The hire has been deleted successfully.`,
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render: "This new hire has been successfully deleted!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
-  } catch (error) {
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while deleting hire, please try again later.",
-        },
-      };
-      return updatedState;
+  } catch (err) {
+    console.log("New hire deleted error: ", err);
+
+    toast.update(toastId, {
+      render:
+        "An error occurred while deleting this new hire. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
