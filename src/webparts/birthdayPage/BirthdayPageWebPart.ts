@@ -18,6 +18,8 @@ import { Provider } from "react-redux";
 import { store } from "../../redux/store/store";
 require("../../assets/styles/style.css");
 require("../../components/common/CustomInputFields/customStyle.css");
+require("../../../node_modules/react-toastify/dist/ReactToastify.css");
+
 require("../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css");
 
 export interface IBirthdayPageWebPartProps {

@@ -18,6 +18,8 @@ import { store } from "../../redux/store/store";
 import { Provider } from "react-redux";
 require("../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css");
 require("../../assets/styles/style.css");
+require("../../../node_modules/react-toastify/dist/ReactToastify.css");
+
 require("../../components/common/CustomInputFields/customStyle.css");
 export interface IBlogsPageWebPartProps {
   description: string;

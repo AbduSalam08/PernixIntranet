@@ -32,6 +32,7 @@ import CustomInput from "../../../components/common/CustomInputFields/CustomInpu
 import { Add, Delete } from "@mui/icons-material";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import Popup from "../../../components/common/Popups/Popup";
+import { ToastContainer } from "react-toastify";
 // import { Avatar } from "primereact/avatar";
 // import { AvatarGroup } from "primereact/avatargroup";
 
@@ -267,15 +268,60 @@ const PollPage = (props: any): JSX.Element => {
     setFormData(updatedFormData);
 
     if (!hasErrors) {
-      formData?.Title?.Id
-        ? await updatePollData(
+      if (formData?.Title?.Id) {
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[2],
+          2,
+          "close"
+        ),
+          await updatePollData(
             formData,
-            setPopupController,
-            2,
+            // setPopupController,
+            // 2,
             options,
             curMasterOptions
-          )
-        : await addPollData(formData, setPopupController, 0, options);
+          );
+
+        await fetchPollData(dispatch, curUser);
+      } else {
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+
+        await addPollData(formData, options);
+        await fetchPollData(dispatch, curUser);
+      }
+
+      // formData?.Title?.Id
+      //   ?
+      //   togglePopupVisibility(
+      //     setPopupController,
+      //     initialPopupController[2],
+      //     2,
+      //     "close"
+      //   ),
+
+      //   await updatePollData(
+      //       formData,
+      //       setPopupController,
+      //       2,
+      //       options,
+      //       curMasterOptions
+      //     )
+      //   :
+      //   togglePopupVisibility(
+      //       setPopupController,
+      //       initialPopupController[0],
+      //       0,
+      //       "close"
+      //     );
+
+      // await addPollData(formData, options);
+      // await fetchPollData(dispatch, curUser);
     } else {
       console.log("Form contains errors");
     }
@@ -624,7 +670,15 @@ const PollPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          deletePollData(selectQuestionId, setPopupController, 1);
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[1],
+            1,
+            "close"
+          );
+          await deletePollData(selectQuestionId);
+          await fetchPollData(dispatch, curUser);
+
           // await handleSubmit();
         },
       },
@@ -811,7 +865,9 @@ const PollPage = (props: any): JSX.Element => {
       setCurPollID(0);
       setCurIDX(0);
       // Submit vote if there are no errors
-      await addVote(selectedOption, setPopupController, 0);
+      await addVote(selectedOption);
+      await fetchPollData(dispatch, curUser);
+
       await resetSelectedItem(selectedOption, setSelectedOption);
     } else {
       console.log("Vote submission contains errors");
@@ -1220,6 +1276,18 @@ const PollPage = (props: any): JSX.Element => {
           ))}
         </>
       )}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

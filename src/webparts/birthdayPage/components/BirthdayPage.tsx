@@ -32,11 +32,12 @@ import CustomDateInput from "../../../components/common/CustomInputFields/Custom
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 // images
 const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
-// const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.svg");
-// const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.svg");
+const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
+const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import moment from "moment";
 import { Checkbox } from "primereact/checkbox";
+import { ToastContainer } from "react-toastify";
 
 const BirthdayPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -249,15 +250,30 @@ const BirthdayPage = (props: any): JSX.Element => {
 
     if (!hasErrors) {
       if (handleForm?.Type === "New") {
-        await addBirthday(formData, setPopupController, 0);
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+        await addBirthday(formData);
+        await getAllBirthdayData(dispatch);
       } else if (handleForm?.Type === "Update") {
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
         const reponse = await updateBirthday(
           formData,
           handleForm?.BirthDayID,
-          attachmentObject,
-          setPopupController,
-          0
+          attachmentObject
+          // setPopupController,
+          // 0
         );
+        await getAllBirthdayData(dispatch);
+
         console.log("reponse", reponse);
       } else {
         let payloadJson = {};
@@ -275,12 +291,20 @@ const BirthdayPage = (props: any): JSX.Element => {
             isOutlook: true,
           };
         }
+
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[1],
+          1,
+          "close"
+        );
         await submitBirthdayWish(
           handleForm?.BirthDayWishID,
-          payloadJson,
-          setPopupController,
-          1
+          payloadJson
+          // setPopupController,
+          // 1
         );
+        await getAllBirthdayData(dispatch);
       }
     } else {
       console.log("Form contains errors");
@@ -452,8 +476,106 @@ Enjoy your special day!`;
             </button>
           ))}
         </div>
-
         <div
+          style={{ display: "flex", flexDirection: "column", width: "100%" }}
+        >
+          <p>Send wishes in :</p>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                margin: "15px 0px 0px 0px",
+                background: "#e9e8f4",
+                // border: "1px solid #7b83eb",
+                borderRadius: "4px",
+                padding: "8px",
+              }}
+            >
+              <Checkbox
+                inputId="teamsOption"
+                value="Teams"
+                onChange={(e: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "isTeams",
+                    e.checked,
+                    formData?.Message?.validationRule
+                  );
+                  handleInputChange("isTeams", e.checked, isValid, errorMsg);
+                }}
+                checked={formData?.isTeams?.value}
+              />
+              <label
+                htmlFor="teamsOption"
+                className="ml-2"
+                style={{
+                  display: "flex",
+                  gap: "5px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  alignItems: "center",
+                  color: "#7b83eb",
+                }}
+              >
+                <img
+                  src={teamsImg}
+                  alt="teamsimg"
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Teams
+              </label>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                margin: "15px 0px 0px 0px",
+                background: "#e9e8f4",
+                // border: "1px solid #7b83eb",
+                borderRadius: "4px",
+                padding: "8px",
+              }}
+            >
+              <Checkbox
+                inputId="outlookOption"
+                value="Outlook"
+                onChange={(e: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "isOutlook",
+                    e.checked,
+                    formData?.Message?.validationRule
+                  );
+                  handleInputChange("isOutlook", e.checked, isValid, errorMsg);
+                }}
+                checked={formData?.isOutlook?.value}
+              />
+              <label
+                htmlFor="outlookOption"
+                className="ml-2"
+                style={{
+                  display: "flex",
+                  gap: "5px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  alignItems: "center",
+                  color: "#117ad6",
+                }}
+              >
+                <img
+                  src={outlookImg}
+                  alt=""
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Outlook
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* <div
           style={{ display: "flex", flexDirection: "column", width: "100%" }}
         >
           <p>Send wishes in :</p>
@@ -510,7 +632,7 @@ Enjoy your special day!`;
               </label>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* <div className={styles.actionBtns}>
           {!formData?.isTeams?.value && (
@@ -628,7 +750,15 @@ Enjoy your special day!`;
         disabled: false,
         size: "large",
         onClick: async () => {
-          await deleteBirthday(handleForm?.BirthDayID, setPopupController, 2);
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[2],
+            2,
+            "close"
+          );
+          // await deleteBirthday(handleForm?.BirthDayID, setPopupController, 2);
+          await deleteBirthday(handleForm?.BirthDayID);
+          await getAllBirthdayData(dispatch);
         },
       },
     ],
@@ -695,367 +825,386 @@ Enjoy your special day!`;
     getBirthdayCurrentUserRole(setCurrentUserDetails);
     getAllBirthdayData(dispatch);
   }, [dispatch]);
-  return isLoading ? (
-    <div className={styles.LoaderContainer}>
-      <CircularSpinner />
-    </div>
-  ) : (
-    <div className={styles.boxWrapper}>
-      <div className={styles.newsHeaderContainer}>
-        <div className={styles.leftSection}>
-          <i
-            onClick={() => {
-              window.open(
-                props.context.pageContext.web.absoluteUrl +
-                  CONFIG.NavigatePage.PernixIntranet,
-                "_self"
-              );
-            }}
-            className="pi pi-arrow-circle-left"
-            style={{ fontSize: "1.5rem", color: "#E0803D" }}
-          />
-          <p>Birthdays</p>
-        </div>
-        <div className={styles.rightSection}>
-          <div>
-            <CustomInput
-              noErrorMsg
-              value={commonSearch?.Search}
-              placeholder="Search"
-              onChange={(e: any) => {
-                const value: string = e.trimStart();
-                searchField.Search = value;
-                setCommonSearch((prev: IPageSearchFields) => ({
-                  ...prev,
-                  Search: value,
-                }));
-                handleSearch([...typeBirthdays]);
-              }}
-            />
-          </div>
-          <div
-            className={styles.refreshBTN}
-            onClick={(_) => {
-              searchField.Search = "";
-              searchField.Status = "";
-              searchField.Date = null;
-              setCommonSearch({ ...searchField });
-              handleSearch([...typeBirthdays]);
-            }}
-          >
-            <i className="pi pi-refresh" />
-          </div>
-          {currentUserDetails?.role === "Admin" && (
-            <div
-              style={{
-                display: "flex",
-              }}
-              className={styles.addNewbtn}
-              onClick={() => {
-                setHandleForm({
-                  BirthDayID: null,
-                  BirthDayWishID: null,
-                  Type: "New",
-                });
-                resetFormData(initialFormData, setFormData);
-                togglePopupVisibility(
-                  setPopupController,
-                  initialPopupController[0],
-                  0,
-                  "open",
-                  "New birthday"
-                );
-              }}
-            >
-              <i
-                className="pi pi-plus"
-                style={{ fontSize: "1rem", color: "#fff" }}
-              />
-              Birthday
-            </div>
-          )}
-        </div>
-      </div>
-      {/* tabs */}
-      <div className={styles.tabsContainer}>
-        {CONFIG.BirthDayPageTabsName.map((str: string, i: number) => {
-          return (
-            <div
-              key={i}
-              style={{
-                borderBottom:
-                  selectedTab === str ? "3px solid #e0803d" : "none",
-                cursor: "pointer",
-              }}
-              onClick={(_) => {
-                // setPagination(CONFIG.PaginationData);
-                // if (selectedTab !== str) {
-                //   searchField.Search = "";
-                //   searchField.Status = "";
-                //   searchField.Date = null;
-                //   setCommonSearch({ ...searchField });
-                //   getQuestionCeo(dispatch);
-                // }
-                setSelectedTab(str);
-                onLoadingFUN(str, birthdays);
-              }}
-            >
-              {str}
-            </div>
-          );
-        })}
-      </div>
-      {showBirthdays?.length === 0 ? (
-        <div
-          style={{
-            width: "100%",
-            height: "50vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "14px",
-            color: "#adadad",
-            fontFamily: "osMedium, sans-serif",
-          }}
-        >
-          No questions found.
+  return (
+    <>
+      {isLoading ? (
+        <div className={styles.LoaderContainer}>
+          <CircularSpinner />
         </div>
       ) : (
-        <div className={styles.bodyContainer}>
-          <div className={styles.birthdaySection}>
-            {showBirthdays
-              ?.slice(pagination.first, pagination.first + pagination.rows)
-              ?.map((val: any, index: number) => {
-                return (
-                  <div key={index} className={styles.contentMain}>
-                    <div className={styles.image}>
-                      <img src={`${val?.imgUrl}`} alt="" />
-                    </div>
-                    <div className={styles.content}>
-                      <div className={styles.contentwithIconsection}>
-                        <div className={styles.Title}>
-                          <p className={styles.name}>
-                            {val?.EmployeeName?.name}
-                          </p>
-                          <p className={styles.date}>
-                            {moment(new Date()).format("DD/MM/YYYY") ===
-                            moment(val?.DateOfBirth).format("DD/MM/YYYY")
-                              ? "Birthday today"
-                              : `Birthday on ${moment(val?.DateOfBirth).format(
-                                  "LL"
-                                )}`}
-                          </p>
+        <div className={styles.boxWrapper}>
+          <div className={styles.newsHeaderContainer}>
+            <div className={styles.leftSection}>
+              <i
+                onClick={() => {
+                  window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
+                }}
+                className="pi pi-arrow-circle-left"
+                style={{ fontSize: "1.5rem", color: "#E0803D" }}
+              />
+              <p>Birthdays</p>
+            </div>
+            <div className={styles.rightSection}>
+              <div>
+                <CustomInput
+                  noErrorMsg
+                  value={commonSearch?.Search}
+                  placeholder="Search"
+                  onChange={(e: any) => {
+                    const value: string = e.trimStart();
+                    searchField.Search = value;
+                    setCommonSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Search: value,
+                    }));
+                    handleSearch([...typeBirthdays]);
+                  }}
+                />
+              </div>
+              <div
+                className={styles.refreshBTN}
+                onClick={(_) => {
+                  searchField.Search = "";
+                  searchField.Status = "";
+                  searchField.Date = null;
+                  setCommonSearch({ ...searchField });
+                  handleSearch([...typeBirthdays]);
+                }}
+              >
+                <i className="pi pi-refresh" />
+              </div>
+              {currentUserDetails?.role === "Admin" && (
+                <div
+                  style={{
+                    display: "flex",
+                  }}
+                  className={styles.addNewbtn}
+                  onClick={() => {
+                    setHandleForm({
+                      BirthDayID: null,
+                      BirthDayWishID: null,
+                      Type: "New",
+                    });
+                    resetFormData(initialFormData, setFormData);
+                    togglePopupVisibility(
+                      setPopupController,
+                      initialPopupController[0],
+                      0,
+                      "open",
+                      "New birthday"
+                    );
+                  }}
+                >
+                  <i
+                    className="pi pi-plus"
+                    style={{ fontSize: "1rem", color: "#fff" }}
+                  />
+                  Birthday
+                </div>
+              )}
+            </div>
+          </div>
+          {/* tabs */}
+          <div className={styles.tabsContainer}>
+            {CONFIG.BirthDayPageTabsName.map((str: string, i: number) => {
+              return (
+                <div
+                  key={i}
+                  style={{
+                    borderBottom:
+                      selectedTab === str ? "3px solid #e0803d" : "none",
+                    cursor: "pointer",
+                  }}
+                  onClick={(_) => {
+                    // setPagination(CONFIG.PaginationData);
+                    // if (selectedTab !== str) {
+                    //   searchField.Search = "";
+                    //   searchField.Status = "";
+                    //   searchField.Date = null;
+                    //   setCommonSearch({ ...searchField });
+                    //   getQuestionCeo(dispatch);
+                    // }
+                    setSelectedTab(str);
+                    onLoadingFUN(str, birthdays);
+                  }}
+                >
+                  {str}
+                </div>
+              );
+            })}
+          </div>
+          {showBirthdays?.length === 0 ? (
+            <div
+              style={{
+                width: "100%",
+                height: "50vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontSize: "14px",
+                color: "#adadad",
+                fontFamily: "osMedium, sans-serif",
+              }}
+            >
+              No questions found.
+            </div>
+          ) : (
+            <div className={styles.bodyContainer}>
+              <div className={styles.birthdaySection}>
+                {showBirthdays
+                  ?.slice(pagination.first, pagination.first + pagination.rows)
+                  ?.map((val: any, index: number) => {
+                    return (
+                      <div key={index} className={styles.contentMain}>
+                        <div className={styles.image}>
+                          <img src={`${val?.imgUrl}`} alt="" />
                         </div>
+                        <div className={styles.content}>
+                          <div className={styles.contentwithIconsection}>
+                            <div className={styles.Title}>
+                              <p className={styles.name}>
+                                {val?.EmployeeName?.name}
+                              </p>
+                              <p className={styles.date}>
+                                {moment(new Date()).format("DD/MM/YYYY") ===
+                                moment(val?.DateOfBirth).format("DD/MM/YYYY")
+                                  ? "Birthday today"
+                                  : `Birthday on ${moment(
+                                      val?.DateOfBirth
+                                    ).format("LL")}`}
+                              </p>
+                            </div>
 
-                        <div className={styles.actionSection}>
-                          {!(val?.isTeams || val?.isOutlook) &&
-                            !val.sameuser &&
-                            moment(new Date()).format("DD/MM/YYYY") ===
-                              moment(val?.DateOfBirth).format("DD/MM/YYYY") && (
-                              <div
-                                onClick={() => {
-                                  setCurrentuser(val?.EmployeeName?.name);
-                                  setHandleForm({
-                                    BirthDayID: val?.ID,
-                                    BirthDayWishID: val?.BirthDayWishID
-                                      ? val?.BirthDayWishID
-                                      : null,
-                                    Type: "SendWish",
-                                  });
-                                  togglePopupVisibility(
-                                    setPopupController,
-                                    initialPopupController[1],
-                                    1,
-                                    "open"
-                                  );
-                                  setFormData({
-                                    Message: {
-                                      value: "",
-                                      isValid: true,
-                                      errorMsg: "This field is required",
-                                      validationRule: {
-                                        required: true,
-                                        type: "string",
-                                      },
-                                    },
-                                    isTeams: {
-                                      value: val?.isTeams,
-                                      isValid: true,
-                                      errorMsg: "This field is required",
-                                      validationRule: {
-                                        required: false,
-                                        type: "boolean",
-                                      },
-                                    },
-                                    isOutlook: {
-                                      value: val?.isOutlook,
-                                      isValid: true,
-                                      errorMsg: "This field is required",
-                                      validationRule: {
-                                        required: false,
-                                        type: "boolean",
-                                      },
-                                    },
-                                  });
-                                }}
-                              >
+                            <div className={styles.actionSection}>
+                              {!(val?.isTeams || val?.isOutlook) &&
+                                !val.sameuser &&
+                                moment(new Date()).format("DD/MM/YYYY") ===
+                                  moment(val?.DateOfBirth).format(
+                                    "DD/MM/YYYY"
+                                  ) && (
+                                  <div
+                                    onClick={() => {
+                                      setCurrentuser(val?.EmployeeName?.name);
+                                      setHandleForm({
+                                        BirthDayID: val?.ID,
+                                        BirthDayWishID: val?.BirthDayWishID
+                                          ? val?.BirthDayWishID
+                                          : null,
+                                        Type: "SendWish",
+                                      });
+                                      togglePopupVisibility(
+                                        setPopupController,
+                                        initialPopupController[1],
+                                        1,
+                                        "open"
+                                      );
+                                      setFormData({
+                                        Message: {
+                                          value: "",
+                                          isValid: true,
+                                          errorMsg: "This field is required",
+                                          validationRule: {
+                                            required: true,
+                                            type: "string",
+                                          },
+                                        },
+                                        isTeams: {
+                                          value: val?.isTeams,
+                                          isValid: true,
+                                          errorMsg: "This field is required",
+                                          validationRule: {
+                                            required: false,
+                                            type: "boolean",
+                                          },
+                                        },
+                                        isOutlook: {
+                                          value: val?.isOutlook,
+                                          isValid: true,
+                                          errorMsg: "This field is required",
+                                          validationRule: {
+                                            required: false,
+                                            type: "boolean",
+                                          },
+                                        },
+                                      });
+                                    }}
+                                  >
+                                    <i
+                                      className="pi pi-send"
+                                      style={{
+                                        color: "#0b4d53",
+                                        fontSize: "1.2rem",
+                                        cursor: "pointer",
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              {currentUserDetails?.role === "Admin" &&
+                                selectedTab !==
+                                  CONFIG.BirthDayPageTabsName[2] &&
+                                selectedTab !==
+                                  CONFIG.BirthDayPageTabsName[0] && (
+                                  <i
+                                    onClick={() => {
+                                      setHandleForm({
+                                        BirthDayID: val?.ID,
+                                        BirthDayWishID: val?.BirthDayWishID
+                                          ? val?.BirthDayWishID
+                                          : null,
+                                        Type: "Update",
+                                      });
+                                      setAttachmentObject(val?.Attachment);
+                                      setFormData({
+                                        ...initialFormData,
+                                        EmployeeName: {
+                                          ...initialFormData?.EmployeeName,
+                                          value: val?.EmployeeName?.name,
+                                        },
+                                        DateOfBirth: {
+                                          ...initialFormData?.DateOfBirth,
+                                          value: new Date(val?.DateOfBirth),
+                                        },
+                                        Image: {
+                                          ...initialFormData?.Image,
+                                          value: {
+                                            name: val?.Attachment?.FileName,
+                                          },
+                                        },
+                                        Message: {
+                                          ...initialFormData?.Message,
+                                          value: val?.Message,
+                                        },
+                                      });
+                                      togglePopupVisibility(
+                                        setPopupController,
+                                        initialPopupController[0],
+                                        0,
+                                        "open",
+                                        "Update birthday"
+                                      );
+                                    }}
+                                    style={{
+                                      color: "#adadad",
+                                      fontSize: "1.2rem",
+                                      cursor: "pointer",
+                                    }}
+                                    className="pi pi-pen-to-square"
+                                  />
+                                )}
+                              {currentUserDetails?.role === "Admin" && (
                                 <i
-                                  className="pi pi-send"
+                                  className="pi pi-trash"
                                   style={{
-                                    color: "#0b4d53",
+                                    color: "#ff1c1c",
                                     fontSize: "1.2rem",
                                     cursor: "pointer",
                                   }}
+                                  onClick={() => {
+                                    setHandleForm({
+                                      BirthDayID: val?.ID,
+                                      BirthDayWishID: val?.BirthDayWishID
+                                        ? val?.BirthDayWishID
+                                        : null,
+                                      Type: "Delete",
+                                    });
+                                    togglePopupVisibility(
+                                      setPopupController,
+                                      initialPopupController[2],
+                                      2,
+                                      "open"
+                                    );
+                                  }}
                                 />
-                              </div>
-                            )}
-                          {currentUserDetails?.role === "Admin" &&
-                            selectedTab !== CONFIG.BirthDayPageTabsName[2] &&
-                            selectedTab !== CONFIG.BirthDayPageTabsName[0] && (
-                              <i
-                                onClick={() => {
-                                  setHandleForm({
-                                    BirthDayID: val?.ID,
-                                    BirthDayWishID: val?.BirthDayWishID
-                                      ? val?.BirthDayWishID
-                                      : null,
-                                    Type: "Update",
-                                  });
-                                  setAttachmentObject(val?.Attachment);
-                                  setFormData({
-                                    ...initialFormData,
-                                    EmployeeName: {
-                                      ...initialFormData?.EmployeeName,
-                                      value: val?.EmployeeName?.name,
-                                    },
-                                    DateOfBirth: {
-                                      ...initialFormData?.DateOfBirth,
-                                      value: new Date(val?.DateOfBirth),
-                                    },
-                                    Image: {
-                                      ...initialFormData?.Image,
-                                      value: {
-                                        name: val?.Attachment?.FileName,
-                                      },
-                                    },
-                                    Message: {
-                                      ...initialFormData?.Message,
-                                      value: val?.Message,
-                                    },
-                                  });
-                                  togglePopupVisibility(
-                                    setPopupController,
-                                    initialPopupController[0],
-                                    0,
-                                    "open",
-                                    "Update birthday"
-                                  );
-                                }}
-                                style={{
-                                  color: "#adadad",
-                                  fontSize: "1.2rem",
-                                  cursor: "pointer",
-                                }}
-                                className="pi pi-pen-to-square"
-                              />
-                            )}
-                          {currentUserDetails?.role === "Admin" && (
-                            <i
-                              className="pi pi-trash"
-                              style={{
-                                color: "#ff1c1c",
-                                fontSize: "1.2rem",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                setHandleForm({
-                                  BirthDayID: val?.ID,
-                                  BirthDayWishID: val?.BirthDayWishID
-                                    ? val?.BirthDayWishID
-                                    : null,
-                                  Type: "Delete",
-                                });
-                                togglePopupVisibility(
-                                  setPopupController,
-                                  initialPopupController[2],
-                                  2,
-                                  "open"
-                                );
-                              }}
-                            />
-                          )}
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+          {showBirthdays.length > 0 && (
+            <div
+              className="card"
+              style={{
+                padding: "4px 0px",
+              }}
+            >
+              <Paginator
+                first={pagination.first}
+                rows={pagination.rows}
+                totalRecords={totalRecords}
+                onPageChange={onPageChange}
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink "
+              />
+            </div>
+          )}
+          {popupController?.map((popupData: any, index: number) => (
+            <Popup
+              key={index}
+              isLoading={popupData?.isLoading}
+              messages={popupData?.messages}
+              resetPopup={() => {
+                setPopupController((prev: any): any => {
+                  resetPopupController(prev, index, true);
+                });
+              }}
+              PopupType={popupData.popupType}
+              onHide={() => {
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[0],
+                  index,
+                  "close"
                 );
-              })}
-          </div>
-        </div>
-      )}
-      {showBirthdays.length > 0 && (
-        <div
-          className="card"
-          style={{
-            padding: "4px 0px",
-          }}
-        >
-          <Paginator
-            first={pagination.first}
-            rows={pagination.rows}
-            totalRecords={totalRecords}
-            onPageChange={onPageChange}
-            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink "
-          />
-        </div>
-      )}
-      {popupController?.map((popupData: any, index: number) => (
-        <Popup
-          key={index}
-          isLoading={popupData?.isLoading}
-          messages={popupData?.messages}
-          resetPopup={() => {
-            setPopupController((prev: any): any => {
-              resetPopupController(prev, index, true);
-            });
-          }}
-          PopupType={popupData.popupType}
-          onHide={() => {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              index,
-              "close"
-            );
-            resetFormData(formData, setFormData);
-            if (popupData?.isLoading?.success) {
-              if (handleForm?.type === "Delete") {
-                const filteredData = birthdays?.filter(
-                  (val: any) => val?.ID !== handleForm?.BirthDayID
-                );
-                setBirthdays([...filteredData]);
-                onLoadingFUN(selectedTab, [...filteredData]);
-              } else {
-                getAllBirthdayData(dispatch);
+                resetFormData(formData, setFormData);
+                if (popupData?.isLoading?.success) {
+                  if (handleForm?.type === "Delete") {
+                    const filteredData = birthdays?.filter(
+                      (val: any) => val?.ID !== handleForm?.BirthDayID
+                    );
+                    setBirthdays([...filteredData]);
+                    onLoadingFUN(selectedTab, [...filteredData]);
+                  } else {
+                    getAllBirthdayData(dispatch);
+                  }
+                }
+              }}
+              popupTitle={
+                popupData.popupType !== "confimation" && popupData.popupTitle
               }
-            }
-          }}
-          popupTitle={
-            popupData.popupType !== "confimation" && popupData.popupTitle
-          }
-          popupActions={popupActions[index]}
-          visibility={popupData.open}
-          content={popupInputs[index]}
-          popupWidth={popupData.popupWidth}
-          defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={
-            popupData.popupType !== "custom" ? popupData.popupTitle : ""
-          }
-          popupHeight={index === 0 ? true : false}
-          noActionBtn={true}
-        />
-      ))}
-    </div>
+              popupActions={popupActions[index]}
+              visibility={popupData.open}
+              content={popupInputs[index]}
+              popupWidth={popupData.popupWidth}
+              defaultCloseBtn={popupData.defaultCloseBtn || false}
+              confirmationTitle={
+                popupData.popupType !== "custom" ? popupData.popupTitle : ""
+              }
+              popupHeight={index === 0 ? true : false}
+              noActionBtn={true}
+            />
+          ))}
+        </div>
+      )}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </>
   );
 };
 export default BirthdayPage;

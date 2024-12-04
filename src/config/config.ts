@@ -73,6 +73,8 @@ export namespace CONFIG {
     HelpDesk_IT_Owners: "HelpDesk_IT_Owners",
     Feedback_Admin: "Feedback_Admin",
     Blogs_Admin: "Blogs_Admin",
+
+    EmployeeDirectory_Admin: "EmployeeDirectory_Admin",
   };
 
   export const QuestionsPageTabsName: string[] = [

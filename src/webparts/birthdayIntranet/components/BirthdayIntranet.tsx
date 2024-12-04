@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-//import { MSGraphClient } from "@microsoft/sp-http";
+import { MSGraphClient } from "@microsoft/sp-http";
 // import { graph } from "@pnp/graph";
 
 import styles from "./BirthdayIntranet.module.scss";
@@ -41,6 +41,7 @@ import moment from "moment";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import { ToastContainer } from "react-toastify";
 
 const BirthdayIntranet = (props: any): JSX.Element => {
   let _curuser: string = props?.context._pageContext._user.email;
@@ -221,7 +222,15 @@ const BirthdayIntranet = (props: any): JSX.Element => {
 
     if (!hasErrors) {
       if (handleForm?.Type === "New") {
-        await addBirthday(formData, setPopupController, 0);
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+        // await addBirthday(formData, setPopupController, 0);
+        await addBirthday(formData);
+        await getAllBirthdayData(dispatch);
       } else {
         let payloadJson = {};
         if (sendBy === "Teams") {
@@ -238,12 +247,20 @@ const BirthdayIntranet = (props: any): JSX.Element => {
             isOutlook: true,
           };
         }
+
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[1],
+          1,
+          "close"
+        );
         await submitBirthdayWish(
           handleForm?.BirthDayWishID,
-          payloadJson,
-          setPopupController,
-          1
+          payloadJson
+          // setPopupController,
+          // 1
         );
+        await getAllBirthdayData(dispatch);
       }
     } else {
       console.log("Form contains errors");
@@ -361,6 +378,7 @@ Enjoy your special day!`;
           src={wishImg}
           style={{
             width: "calc(51% - 5px)",
+            height: "105px",
           }}
           alt="wishImg"
         />
@@ -454,7 +472,7 @@ Enjoy your special day!`;
                   alt="teamsimg"
                   style={{ width: "20px", height: "20px" }}
                 />
-                Send in Teams
+                Teams
               </label>
             </div>
 
@@ -500,7 +518,7 @@ Enjoy your special day!`;
                   alt=""
                   style={{ width: "20px", height: "20px" }}
                 />
-                Send in Outlook
+                Outlook
               </label>
             </div>
           </div>
@@ -630,84 +648,100 @@ Enjoy your special day!`;
     );
   };
 
-  // async function fetchUserBirthdays(context: any, filterSuffix: string) {
-  //   const client: MSGraphClient =
-  //     await context.msGraphClientFactory.getClient();
+  async function fetchUserBirthdays(context: any, filterSuffix: string) {
+    const client: MSGraphClient =
+      await context.msGraphClientFactory.getClient();
 
-  //   let allUsers: any[] = [];
-  //   let nextPageUrl: string | undefined = undefined;
+    let allUsers: any[] = [];
+    let nextPageUrl: string | undefined = undefined;
 
-  //   try {
-  //     // Step 1: Fetch all users with basic details (ID, mail, displayName)
-  //     do {
-  //       const response: any = nextPageUrl
-  //         ? await client
-  //             .api(nextPageUrl)
-  //             .version("v1.0")
-  //             .top(999)
-  //             .select("id,displayName,mail")
-  //             .get()
-  //         : await client
-  //             .api("/users")
-  //             .version("v1.0")
-  //             .top(999)
-  //             .select("id,displayName,mail")
-  //             .get();
+    try {
+      // Step 1: Fetch all users with basic details (ID, mail, displayName)
+      do {
+        const response: any = nextPageUrl
+          ? await client
+              .api(nextPageUrl)
+              .version("v1.0")
+              .top(999)
+              .select(
+                "department,skill,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
+              )
+              .expand("manager")
+              .get()
+          : await client
+              .api("/users")
+              .version("v1.0")
+              .top(999)
+              .select(
+                "department,skill,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
+              )
+              .expand("manager")
+              .get();
 
-  //       allUsers = allUsers.concat(response.value);
+        allUsers = allUsers.concat(response.value);
 
-  //       nextPageUrl = response["@odata.nextLink"];
-  //     } while (nextPageUrl);
+        nextPageUrl = response["@odata.nextLink"];
+      } while (nextPageUrl);
 
-  //     console.log(allUsers, "Fetched all users");
+      console.log(allUsers, "Fetched all users");
 
-  //     // Step 2: Fetch birthday extension for each user
-  //     const usersWithBirthdays = await Promise.all(
-  //       allUsers.map(async (user: any) => {
-  //         try {
-  //           // Fetch extensions for the user
-  //           const userDetails = await client
-  //             .api(`/users/${user.id}?$select=birthday`)
-  //             .version("v1.0")
-  //             .get();
+      // Step 2: Fetch birthday extension for each user
+      const usersWithBirthdays = await Promise.all(
+        allUsers.map(async (user: any) => {
+          try {
+            // Fetch extensions for the user
+            const userDetails = await client
+              .api(`/users/${user.id}?$select=birthday`)
+              .version("v1.0")
+              .get();
+            console.log(userDetails, "userdetail");
 
-  //           // Check if birthday exists
-  //           if (userDetails?.birthday) {
-  //             return {
-  //               id: user.id,
-  //               name: user.displayName,
-  //               mail: user.mail,
-  //               birthday: userDetails.birthday, // Directly map birthday
-  //             };
-  //           }
+            // Check if birthday exists
+            if (userDetails?.birthday) {
+              return {
+                officeLocation: user.officeLocation ? user.officeLocation : "",
+                Phone: user.mobilePhone ? user.mobilePhone : "",
+                Name: user.displayName ? user.displayName : "",
+                Id: user.id ? user.id : null,
+                JobTitle: user.JobTitle ? user.JobTitle : "",
+                SureName: user.surname ? user.surname : "",
+                Language: user.preferredLanguage ? user.preferredLanguage : "",
+                Email: user.userPrincipalName ? user.userPrincipalName : "",
+                Manager: {
+                  email: user.manager ? user.manager.mail : "",
+                  name: user.manager ? user.manager.displayName : "",
+                },
+                birthday: userDetails.birthday, // Directly map birthday
+              };
+            }
 
-  //           return null; // Skip users without a birthday property
-  //         } catch (error) {
-  //           console.error(
-  //             `Error fetching birthday for user ${user.id}:`,
-  //             error
-  //           );
-  //           return null;
-  //         }
-  //       })
-  //     );
+            return null; // Skip users without a birthday property
+          } catch (error) {
+            console.error(
+              `Error fetching birthday for user ${user.id}:`,
+              error
+            );
+            return null;
+          }
+        })
+      );
 
-  //     // Step 3: Filter results based on email suffix and remove null entries
-  //     const filteredUsers = usersWithBirthdays.filter(
-  //       (user) => user && user.mail?.endsWith(filterSuffix) // Match email suffix
-  //     );
+      // Step 3: Filter results based on email suffix and remove null entries
+      const filteredUsers = usersWithBirthdays.filter(
+        (user) => user && user.Email?.endsWith(filterSuffix) // Match email suffix
+      );
 
-  //     console.log(filteredUsers, "Users with birthdays");
+      console.log(filteredUsers, "Users with birthdays");
 
-  //     return filteredUsers;
-  //   } catch (error) {
-  //     console.error("Error fetching user birthdays:", error);
-  //     return [];
-  //   }
-  // }
+      return filteredUsers;
+    } catch (error) {
+      console.error("Error fetching user birthdays:", error);
+      return [];
+    }
+  }
 
-  // let x = fetchUserBirthdays(props.context, "@technorucs.com");
-  // console.log(x, "birthday user");
+  let x = fetchUserBirthdays(props.context, "@technorucs.com");
+  console.log(x, "birthday user");
 
   return (
     <div className={styles.container}>
@@ -861,6 +895,18 @@ Enjoy your special day!`;
           noActionBtn={true}
         />
       ))}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

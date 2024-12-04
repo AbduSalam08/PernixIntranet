@@ -173,6 +173,7 @@
       gap: 5px;
       .drawerionc {
         font-size: 22px;
+        cursor: pointer !important;
       }
       h4 {
         font-size: 19px;
@@ -261,7 +262,7 @@
   }
   .skillbox {
     width: 90%;
-    height: 140px;
+    height: 250px;
     margin-left: 6%;
     overflow: auto;
     .skillinbox {
@@ -295,8 +296,8 @@
         // flex-wrap: wrap;
         gap: 0;
         display: inline-block;
-        background-color: #d5eddb;
-        color: #0c902d;
+        background-color: #bfe3cf;
+        color: #000;
         font-size: 12px;
         font-family: osSemiBold, sans-serif;
         -webkit-box-align: center;

@@ -2,8 +2,12 @@
 /* eslint-disable no-debugger */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
+import "./Style.css";
+import SendIcon from "@mui/icons-material/Send";
+
 import styles from "./ViewComponent.module.scss";
 // import { Icon } from "@fluentui/react";
 // import { sp } from "@pnp/sp/presets/all";
@@ -17,13 +21,41 @@ import { VisibilityOutlined } from "@mui/icons-material";
 //import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { Avatar } from "primereact/avatar";
 import moment from "moment";
-import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
+// import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import QuillEditor from "../../../components/common/QuillEditor/QuillEditor";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllUsersList } from "../../../services/HelpDeskMainServices/ticketServices";
+import { ToastContainer } from "react-toastify";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 
+//interface
+
+interface TaggedPerson {
+  id: number | null;
+  email: string;
+  name: string;
+}
+
+interface Comment {
+  id: number | null;
+  name: string | any;
+  date: string | any;
+  comment: string;
+  email: string | any;
+  Taggedperson: TaggedPerson[];
+}
+
 function ViewComponent(props: any) {
-  console.log("viewprops: ", props);
+  const dispatch = useDispatch();
+  const AllUsersData: any = useSelector(
+    (state: any) => state.AllUsersData?.value
+  );
+
+  const [taggedPerson, setTaggedPerson] = useState({
+    results: [],
+  });
 
   const [curuser, setcuruser] = useState<any>({
     Id: null,
@@ -31,9 +63,10 @@ function ViewComponent(props: any) {
     Title: "",
   });
   const [Loading, setisLoading] = useState<boolean>(false);
-  const [allComment, setAllComment] = useState<any>([]);
+  const [allComment, setAllComment] = useState<Comment[]>([]);
 
   const [comment, setComment] = useState<string>("");
+  console.log("comment: ", comment);
   // This is The curuserhow many likes and view Concepts is show
   let totaluserlikescount: number = 0;
   let curuserlikes: boolean = false;
@@ -58,8 +91,9 @@ function ViewComponent(props: any) {
       display: "revert",
     },
   };
+
   //  This is Current User Details
-  const getcurrentuser = async (): Promise<void> => {
+  const getcurrentuser = async (): Promise<any> => {
     await getcuruserdetails().then(async (arr) => {
       setcuruser({
         ...curuser,
@@ -68,82 +102,69 @@ function ViewComponent(props: any) {
         Title: arr.Title,
       });
 
+      // get comments from which blog user click
       await getComments(props?.viewitem?.Id)
         .then((res) => {
-          let data = res?.map((val: any) => ({
+          let data: Comment[] = res?.map((val: any) => ({
             id: val.ID || null,
             name: val.Author?.Title,
             date: val?.Created,
-            comment: val?.Comments,
+            comment: val?.Comments ? val?.Comments : "",
             email: val?.Author?.EMail,
+            Taggedperson: val?.TaggedPerson
+              ? val?.TaggedPerson?.map((val: any) => ({
+                  id: val?.ID || null,
+                  email: val?.EMail || "",
+                  name: val?.Title || "",
+                }))
+              : [],
           }));
 
           setAllComment([...data]);
 
           setisLoading(false);
-
-          console.log(res, "viewres");
         })
         .catch((err) => {
+          setisLoading(false);
           console.log(err);
         });
     });
   };
-
-  // const comments = [
-  //   {
-  //     id: 1,
-  //     name: "Kumaresan M",
-  //     date: "08/11/1997",
-  //     comment:
-  //       "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates nobis fugiat illo aliquam distinctio consequatur. Dolorem ducimus totam voluptatibus.",
-  //     avatar: "P",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "John Doe",
-  //     date: "12/07/1985",
-  //     comment:
-  //       "This is a great example! Thanks for sharing. Looking forward to implementing this design.",
-  //     avatar: "J",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Jane Smith",
-  //     date: "02/15/1992",
-  //     comment:
-  //       "Awesome design! Really clean and modern. The flexibility of this component is fantastic.",
-  //     avatar: "J",
-  //   },
-  // ];
 
   const handleComment = async (): Promise<void> => {
     if (comment) {
       await addComments(
         comment,
         props.viewitem.Id,
+        taggedPerson,
         setAllComment,
         allComment,
         curuser
-      ).then((res) => {
+      ).then((res: any) => {
         if (res) {
           getComments(props?.viewitem?.Id)
-            .then((res) => {
-              let data = res?.map((val: any) => ({
+            .then((res: any) => {
+              let data: Comment[] = res?.map((val: any) => ({
                 id: val.ID || null,
                 name: val.Author?.Title,
                 date: val?.Created,
                 comment: val?.Comments,
                 email: val?.Author?.EMail,
+                Taggedperson: val?.TaggedPerson
+                  ? val?.TaggedPerson?.map((val: any) => ({
+                      id: val?.ID || null,
+                      email: val?.EMail || "",
+                      name: val?.Title || "",
+                    }))
+                  : [],
               }));
-
               setAllComment([...data]);
               setComment("");
               setisLoading(false);
-
-              console.log(res, "viewres");
             })
             .catch((err) => {
+              setisLoading(false);
+
               console.log(err);
             });
         }
@@ -155,7 +176,17 @@ function ViewComponent(props: any) {
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     getcurrentuser();
-  }, []);
+
+    getAllUsersList(dispatch);
+    // .then((val: any) => {
+    //   console.log(val, "allusers");
+
+    //   val && setAlluser([val]);
+    // })
+    // .catch((err) => {
+    //   console.log(err);
+    // });
+  }, [props]);
 
   // useEffect(() => {
   //   setisLoading(true);
@@ -299,81 +330,93 @@ function ViewComponent(props: any) {
               </div>
 
               <>
-                {allComment?.map((val: any) => (
-                  <div key={val.id}>
-                    <div
-                      className={`${styles.commentCard} ${styles.fadeIn}`}
-                      // style={{ animationDelay: `${index * 0.02}s` }} // Delay based on index
-                    >
-                      <div className={styles.userProfile}>
-                        <Avatar
-                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.email}`}
-                          // size="small"
-                          shape="circle"
-                          style={{
-                            width: "30px !important",
-                            height: "30px !important",
-                          }}
-                          data-pr-tooltip={val.receiverName}
-                        />
-                      </div>
+                {allComment?.length > 0 ? (
+                  allComment?.map((val: Comment) => (
+                    <div key={val.id}>
                       <div
-                        className={`${styles.commentCardMain} ${
-                          ""
-                          // ownComment ? styles.authorHighlightWrap : ""
-                        }`}
+                        className={`${styles.commentCard} ${styles.fadeIn}`}
+                        // style={{ animationDelay: `${index * 0.02}s` }} // Delay based on index
                       >
+                        <div className={styles.userProfile}>
+                          <Avatar
+                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.email}`}
+                            // size="small"
+                            shape="circle"
+                            style={{
+                              width: "30px !important",
+                              height: "30px !important",
+                            }}
+                            data-pr-tooltip={val?.name}
+                          />
+                        </div>
                         <div
-                          className={`${styles.commentHeader} ${
+                          className={`${styles.commentCardMain} ${
                             ""
-                            // ownComment ? styles.authorHighlight : ""
+                            // ownComment ? styles.authorHighlightWrap : ""
                           }`}
                         >
-                          <div className={styles.texts}>
-                            <div className={styles.author}>{val?.name} </div>
-                            <div className={styles.info}>
-                              {moment(val?.date).format("DD MMM YYYY HH.mm")}
+                          <div
+                            className={`${styles.commentHeader} ${
+                              ""
+                              // ownComment ? styles.authorHighlight : ""
+                            }`}
+                          >
+                            <div className={styles.texts}>
+                              <div className={styles.author}>{val?.name} </div>
+                              <div className={styles.info}>
+                                {moment(val?.date).format("DD MMM YYYY HH:mm")}
+                              </div>
+                              {/* <div className={styles.info}>Commented on {date}</div> */}
+                              {/* {edited && <div className={styles.extraInfo}>Edited</div>} */}
                             </div>
-                            {/* <div className={styles.info}>Commented on {date}</div> */}
-                            {/* {edited && <div className={styles.extraInfo}>Edited</div>} */}
-                          </div>
-                          <div className={styles.hamb}>
-                            {/* {role && <span className={styles.roleBadge}>{role}</span>} */}
-                            {/* {ownComment && (
+                            <div className={styles.hamb}>
+                              {/* {role && <span className={styles.roleBadge}>{role}</span>} */}
+                              {/* {ownComment && (
               <div onClick={handleMenuClick}>
                 <MoreVert
                   sx={{
                     color: "#555",
                     cursor: "pointer",
-                  }}
+                  }}166
                 />
               </div>
             )} */}
+                            </div>
                           </div>
-                        </div>
-                        <div
-                          className={styles.commentSpace}
-                          // dangerouslySetInnerHTML={{ __html: content }}
-                        >
-                          {val?.comment}
+                          <div
+                            className={styles.commentSpace}
+                            // dangerouslySetInnerHTML={{ __html: content }}
+                            dangerouslySetInnerHTML={{ __html: val?.comment }}
+                          ></div>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "150px",
+                      color: "#000",
+                      fontSize: "15px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {" "}
+                    No Comments Found !!!
                   </div>
-                ))}
+                )}
               </>
 
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "10px",
-                  borderTop: "1px solid #ddd",
-                  background: "#f9f9f9",
+                  position: "relative",
                 }}
+                className="blogQuill"
               >
-                <FloatingLabelTextarea
+                {/* <FloatingLabelTextarea
                   value={comment}
                   onChange={(e: any) => {
                     const value = e.trimStart();
@@ -381,20 +424,74 @@ function ViewComponent(props: any) {
                   }}
                   rows={4}
                   placeholder="Add a comment..."
-                />
+                /> */}
+                <QuillEditor
+                  style={{ width: "80% !important", position: "relative" }}
+                  suggestionList={AllUsersData ?? []}
+                  onChange={(e: any) => {
+                    // let x = e.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+                    // let x = e.replace(/<(.|\n)*?>/g, "");
+                    // console.log("x: ", x);
+                    const value: string = e?.trimStart();
+                    if (value == "<p><br></p>") {
+                      setComment("");
+                    } else if (
+                      value.replace(/<(.|\n)*?>/g, "").trim().length == 0
+                    ) {
+                      setComment("");
+                    } else {
+                      setComment(value);
+                    }
+                  }}
+                  defaultValue={comment}
+                  getMentionedEmails={(e: any) => {
+                    setTaggedPerson((prev: any) => ({
+                      ...prev,
+                      results: e?.map((item: any) => item?.id),
+                    }));
+                  }}
+                  placeHolder={"Enter Comments..."}
+                ></QuillEditor>
+
                 <DefaultButton
                   btnType="primaryGreen"
+                  title="Edit Layout"
+                  text={<SendIcon />}
+                  style={{ position: "absolute", bottom: 0, right: 0 }}
+                  disabled={!comment}
+                  onClick={async () => {
+                    await handleComment();
+                  }}
+                  onlyIcon
+                  // onClick={resetPopup}
+                />
+
+                {/* <DefaultButton
+                  btnType="primaryGreen"
+                  style={{ position: "absolute", bottom: 0, right: 0 }}
                   text={"send"}
                   disabled={!comment}
                   onClick={async () => {
                     await handleComment();
                   }}
-                />
+                /> */}
               </div>
             </div>
           </div>
         </>
       )}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }

@@ -32,6 +32,7 @@ import { CONFIG } from "../../../config/config";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { RoleAuth } from "../../../services/CommonServices";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import { ToastContainer } from "react-toastify";
 
 const PollIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -225,7 +226,15 @@ const PollIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addPollData(formData, setPopupController, 0, options);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      // await addPollData(formData, setPopupController, 0, options);
+      await addPollData(formData, options);
+      await fetchPollData(dispatch, curUser);
     } else {
       console.log("Form contains errors");
     }
@@ -517,7 +526,16 @@ const PollIntranet = (props: any): JSX.Element => {
 
     if (!hasErrors) {
       // Submit vote if there are no errors
-      await addVote(selectedOption, setPopupController, 1);
+
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[1],
+        1,
+        "close"
+      );
+      // await addVote(selectedOption, setPopupController, 1);
+      await addVote(selectedOption);
+      await fetchPollData(dispatch, curUser);
       await resetSelectedItem(selectedOption, setSelectedOption);
     } else {
       console.log("Vote submission contains errors");
@@ -735,6 +753,18 @@ const PollIntranet = (props: any): JSX.Element => {
           noActionBtn={true}
         />
       ))}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };
