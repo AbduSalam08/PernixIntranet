@@ -61,15 +61,15 @@ const TicketForm: React.FC<TicketFormProps> = ({
   isTicketManager,
   isITOwner,
 }) => {
+  console.log("formData: ", formData);
+  console.log("formData?.Attachment?.value: ", formData?.Attachment?.value);
+  console.log("openNewTicketSlide: ", openNewTicketSlide);
   return (
     <Drawer
       anchor={"right"}
       open={openNewTicketSlide.open}
       onClose={() => {
-        setOpenNewTicketSlide({
-          open: false,
-          type: "add",
-        });
+        setOpenNewTicketSlide({ open: false, type: "add", data: [] });
         setFormData(initialData);
       }}
       sx={{
@@ -89,7 +89,8 @@ const TicketForm: React.FC<TicketFormProps> = ({
                 : "Update ticket details"
             }
             headerClick={() => {
-              setOpenNewTicketSlide({ open: false, type: "add" });
+              setOpenNewTicketSlide({ open: false, type: "add", data: [] });
+              setFormData(initialData);
             }}
             centered
             underlined
@@ -211,7 +212,8 @@ const TicketForm: React.FC<TicketFormProps> = ({
                     }
                     value={formData?.Status?.value}
                     options={
-                      openNewTicketSlide?.data?.Status === "In Progress"
+                      openNewTicketSlide?.data?.Status === "In Progress" ||
+                      openNewTicketSlide?.data?.ITOwnerId !== null
                         ? TicketStatus.filter((item: any) => item !== "Open")
                         : TicketStatus
                     }
@@ -262,7 +264,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
                   multiple
                   customFileNameWidth={"370px"}
                   // value={formData?.Attachment?.value?.name || null}
-                  value={formData?.Attachment?.value ?? []}
+                  value={formData?.Attachment?.value || []}
                   onFileSelect={(file) => {
                     console.log("file: ", file);
                     const { isValid, errorMsg } = validateField(
@@ -279,26 +281,31 @@ const TicketForm: React.FC<TicketFormProps> = ({
                 <>
                   <p>Attachments ({formData?.Attachment?.value?.length})</p>
                   <div className={styles.attachmentsWrapper}>
-                    {formData?.Attachment?.value?.map(
-                      (item: any, idx: number) => (
-                        <a
-                          key={idx}
-                          href={`${window.location.origin}${item?.ServerRelativeUrl}?web=1`}
-                          download
-                          className={styles.fileSource}
-                          onClick={() => {
-                            window.open(
-                              `${window.location.origin}${item?.ServerRelativeUrl}?web=1`
-                            );
-                          }}
-                        >
-                          <div className={styles.fileName} title={item?.name}>
-                            <img src={fileIcon} />
-                            <span>{item?.name}</span>
-                          </div>
-                        </a>
-                      )
-                    )}
+                    {Array.isArray(formData?.Attachment?.value)
+                      ? formData?.Attachment?.value?.map(
+                          (item: any, idx: number) => (
+                            <a
+                              key={idx}
+                              href={`${window.location.origin}${item?.ServerRelativeUrl}?web=1`}
+                              download
+                              className={styles.fileSource}
+                              onClick={() => {
+                                window.open(
+                                  `${window.location.origin}${item?.ServerRelativeUrl}?web=1`
+                                );
+                              }}
+                            >
+                              <div
+                                className={styles.fileName}
+                                title={item?.name}
+                              >
+                                <img src={fileIcon} />
+                                <span>{item?.name}</span>
+                              </div>
+                            </a>
+                          )
+                        )
+                      : ""}
                   </div>
                 </>
               ) : (
@@ -318,7 +325,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
             btnType="darkGreyVariant"
             text={"Cancel"}
             onClick={() => {
-              setOpenNewTicketSlide({ open: false, type: "add" });
+              setOpenNewTicketSlide({ open: false, type: "add", data: [] });
               setFormData(initialData);
             }}
           />

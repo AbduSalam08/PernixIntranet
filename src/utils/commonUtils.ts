@@ -647,6 +647,20 @@ export const ticketsFilter = async (
       })
     );
   }
+  if (currentPath?.includes("scheduled_tickets")) {
+    const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
+      (item: any) => item?.HasRecurrence
+    );
+
+    dispatch(
+      setHelpDeskTickets({
+        isLoading: false,
+        data: filterHandleData,
+        AllData: helpDeskTicketsData?.AllData,
+        ticketType: "Scheduled tickets",
+      })
+    );
+  }
   if (currentPath?.includes("assigned_to_me")) {
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) =>

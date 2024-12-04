@@ -201,6 +201,10 @@ const LeftBar: React.FC = (): JSX.Element => {
                   path: `${currentRole}/all_tickets/unassigned`,
                 },
                 {
+                  label: "Scheduled tickets",
+                  path: `${currentRole}/all_tickets/scheduled_tickets`,
+                },
+                {
                   label: "My tickets in last 7 days",
                   path: `${currentRole}/all_tickets/recent`,
                 },
