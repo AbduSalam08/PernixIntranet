@@ -2,6 +2,7 @@ import { sp } from "@pnp/sp/presets/all";
 import { setPollIntranetData } from "../../redux/features/PollIntranetSlice";
 import SpServices from "../SPServices/SpServices";
 import { CONFIG } from "../../config/config";
+import { toast } from "react-toastify";
 // import moment from "moment";
 // import { LISTNAMES } from "../../config/config";
 
@@ -113,23 +114,25 @@ export const fetchPollData = async (
 
 export const addPollData = async (
   formData: any,
-  setLoaderState: any,
-  index: number,
+  // setLoaderState: any,
+  // index: number,
   options: any
 ): Promise<any> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState: any) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+
+  const toastId = toast.loading(" Adding Poll...");
 
   try {
     const res = await SpServices.SPAddItem({
@@ -165,67 +168,84 @@ export const addPollData = async (
     }
 
     // Success handling
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The new poll question added successfully with all options.`,
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState]; // Copy state array
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       successDescription: `The new poll question added successfully with all options.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `Poll Added successfully`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.log("Error adding PollQuestion:", error);
     // Handle any error in the process
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding PollQuestion, please try again later.",
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState]; // Copy state array
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while adding PollQuestion, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `An error occurred while Adding poll. Please try again.!!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
 
 export const updatePollData = async (
   formData: any,
-  setLoaderState: any,
-  index: number,
+  // setLoaderState: any,
+  // index: number,
   options: any,
   updatedOptions: any
 ): Promise<any> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState: any) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+  const toastId = toast.loading(" Updating  Poll...");
 
   try {
     await SpServices.SPUpdateItem({
@@ -332,65 +352,81 @@ export const updatePollData = async (
       }
     }
 
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The poll question updated successfully with all options.`,
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: `Poll Updated successfully`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState]; // Copy state array
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       successDescription: `The poll question updated successfully with all options.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
   } catch (err) {
-    console.log("Error updating PollQuestion: ", err);
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding PollQuestion, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: `An error occurred while updating poll. Please try again.!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+    console.log("Error updating PollQuestion: ", err);
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState]; // Copy state array
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while adding PollQuestion, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
   }
 };
 
 export const addVote = async (
-  SelectItem: any,
-  setLoaderState: any,
-  index: number
+  SelectItem: any
+  // setLoaderState: any,
+  // index: number
 ): Promise<any> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState]; // Create a copy of the array
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      open: true,
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState: any) => {
+  //   const updatedState = [...prevState]; // Create a copy of the array
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     open: true,
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+  const toastId = toast.loading(" Submitting Vote...");
 
   try {
     // Add the PollQuestion
@@ -415,65 +451,81 @@ export const addVote = async (
     }
 
     // Success handling
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The '${SelectItem.Title}' has been voted successfully with all options.`,
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState]; // Copy state array
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       successDescription: `The '${SelectItem.Title}' has been voted successfully with all options.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `Vote has been Successfully`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.log("Error adding vote:", error);
     // Handle any error in the process
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding vote, please try again later.",
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState]; // Copy state array
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while adding vote, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+    toast.update(toastId, {
+      render: `An error occurred while submitting vote. Please try again.!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
 
 export const deletePollData = async (
-  questionId: number,
-  setLoaderState: any,
-  index: number
+  questionId: number
+  // setLoaderState: any,
+  // index: number
 ): Promise<any> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState: any) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+  const toastId = toast.loading(" Deleting Poll...");
 
   try {
     await SpServices.SPUpdateItem({
@@ -485,43 +537,59 @@ export const deletePollData = async (
     });
 
     // Success handling
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `PollQuestion with ID '${questionId}' has been deleted successfully.`,
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       successDescription: `PollQuestion with ID '${questionId}' has been deleted successfully.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `Poll Deleted successfully`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.log("Error deleting PollQuestion:", error);
     // Handle error during the delete operation
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while deleting PollQuestion, please try again later.",
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while deleting PollQuestion, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `An error occurred while deleting poll. Please try again.!`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };

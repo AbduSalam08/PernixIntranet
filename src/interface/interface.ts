@@ -49,6 +49,7 @@ export interface ISPGroupName {
   HelpDesk_IT_Owners: string;
   Feedback_Admin: string;
   Blogs_Admin: string;
+  EmployeeDirectory_Admin: string;
 }
 
 export interface IRoleDetails {

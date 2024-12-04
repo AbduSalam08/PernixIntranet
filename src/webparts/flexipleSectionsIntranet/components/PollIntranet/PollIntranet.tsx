@@ -247,7 +247,15 @@ const PollIntranet = ({ props }: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addPollData(formData, setPopupController, 0, options);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+
+      await addPollData(formData, options);
+      await fetchPollData(dispatch, curUser);
     } else {
       console.log("Form contains errors");
     }
@@ -549,7 +557,15 @@ const PollIntranet = ({ props }: any): JSX.Element => {
 
     if (!hasErrors) {
       // Submit vote if there are no errors
-      await addVote(selectedOption, setPopupController, 1);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[1],
+        1,
+        "close"
+      );
+      await addVote(selectedOption);
+      await fetchPollData(dispatch, curUser);
+
       await resetSelectedItem(selectedOption, setSelectedOption);
     } else {
       console.log("Vote submission contains errors");

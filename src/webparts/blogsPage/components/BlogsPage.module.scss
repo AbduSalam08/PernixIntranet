@@ -87,7 +87,8 @@
       align-items: center;
       div > h5 {
         margin-left: 10px;
-        font-size: 22px;
+        font-size: 18px;
+        letter-spacing: 0.5px;
         color: #0b4d53;
       }
       .roundiconbutton {
@@ -156,7 +157,7 @@
   flex-wrap: wrap;
   align-items: center;
   // justify-content: space-between;
-  gap: 31px;
+  gap: 20px;
   padding: 10px;
   .smallcontainer {
     .inbox {
@@ -172,9 +173,9 @@
         }
       }
       h4 {
-        margin: 14px 0px 7px 0px;
-        font-weight: 600;
-        color: #e0803d;
+        // margin: 14px 0px 7px 0px;
+        // font-weight: 600;
+        // color: #e0803d;
       }
       h3 {
         margin: 7px 0px;
@@ -182,6 +183,25 @@
         color: #101828;
       }
       .contenttitle {
+        .titleActiveicons {
+          display: flex;
+          align-items: center;
+          margin: 10px 0px;
+          justify-content: space-between;
+          .Title {
+            color: #e0803d;
+            font-family: "osSemibold", sans-serif !important;
+          }
+
+          .pilldesign {
+            background: #ade9ad;
+            padding: 5px;
+            color: green;
+            border-radius: 5px;
+            width: 60px;
+            text-align: center;
+          }
+        }
         .parenttitle {
           display: flex;
           align-items: center;
@@ -307,7 +327,8 @@
     .box {
       padding: 11px;
     }
-    width: 28%;
+    flex: 1 1 calc((100% - 40px) / 3);
+    max-width: calc((100% - 40px) / 3);
     border-radius: 15px;
     // height: 485px;
   }

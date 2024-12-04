@@ -1,4 +1,5 @@
 /* eslint-disable no-debugger */
+import { toast } from "react-toastify";
 import { CONFIG } from "../../config/config";
 import { setBirthdaysData } from "../../redux/features/BirthdayIntranet";
 import SpServices from "../SPServices/SpServices";
@@ -150,39 +151,41 @@ interface FormData {
   [key: string]: { value: any };
 }
 
-interface LoaderStateItem {
-  popupWidth: string;
-  isLoading: {
-    inprogress: boolean;
-    error: boolean;
-    success: boolean;
-  };
-  messages?: {
-    success?: string;
-    successDescription?: string;
-    errorDescription?: string;
-  };
-}
+// interface LoaderStateItem {
+//   popupWidth: string;
+//   isLoading: {
+//     inprogress: boolean;
+//     error: boolean;
+//     success: boolean;
+//   };
+//   messages?: {
+//     success?: string;
+//     successDescription?: string;
+//     errorDescription?: string;
+//   };
+// }
 
 export const addBirthday = async (
-  formData: FormData,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number
+  formData: FormData
+  // setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
+  // index: number
 ): Promise<void> => {
   // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+
+  const toastId = toast.loading("Adding birthday, please wait...");
 
   try {
     debugger;
@@ -210,68 +213,83 @@ export const addBirthday = async (
     console.log("fileRes", fileRes);
 
     // Success state after item and attachment are added
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Birthday Added Successfully",
-          successDescription: `'${formData.EmployeeName.value.name}' birthday has been added successfully.`,
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       success: "Birthday Added Successfully",
+    //       successDescription: `'${formData.EmployeeName.value.name}' birthday has been added successfully.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `Birthday has been added successfully!`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.error("Error while adding birthday:", error);
-
-    // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding birthday, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: `An error occurred while Adding birthday. Please try again.!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+    // Handle error state
+    // setLoaderState((prevState) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while adding birthday, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
   }
 };
 export const submitBirthdayWish = async (
   ID: number,
-  payloadJson: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number
+  payloadJson: any
+  // setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
+  // index: number
 ): Promise<void> => {
   // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+  const toastId = toast.loading(" Wishing Birthday...");
 
   try {
     debugger;
@@ -289,71 +307,88 @@ export const submitBirthdayWish = async (
       });
     }
     // Success state after item and attachment are added
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Birthday wishes sended successfully",
-          successDescription: `Birthday wishes sended by ${
-            payloadJson?.isTeams ? "teams." : "outlook."
-          }`,
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       success: "Birthday wishes sended successfully",
+    //       successDescription: `Birthday wishes sended by ${
+    //         payloadJson?.isTeams ? "teams." : "outlook."
+    //       }`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `Wishes sent successfully!"`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (error) {
     console.error("Error while adding birthday:", error);
 
     // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while sending birthday wish, please try again later.",
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while sending birthday wish, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `An error occurred while submitting your wishes. Please try again.!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
 export const updateBirthday = async (
   formData: FormData,
   ID: number,
-  attachmentObject: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  index: number
+  attachmentObject: any
+  // setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
+  // index: number
 ): Promise<void> => {
   // Start loader for the specific item at the given index
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+  const toastId = toast.loading(" Updating Birthday...");
 
   try {
     debugger;
@@ -408,111 +443,145 @@ export const updateBirthday = async (
     };
 
     // Success state after item and attachment are added
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Birthday updated successfully!",
-          successDescription: `The birthday has been updated successfully.`,
-        },
-      };
-      return updatedState;
+    // setLoaderState((prevState) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       success: "Birthday updated successfully!",
+    //       successDescription: `The birthday has been updated successfully.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
+
+    toast.update(toastId, {
+      render: `Birthday updated successfully!`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
     return { ...responseData };
   } catch (error) {
     console.error("Error while updating new hire:", error);
 
-    // Handle error state
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while updating hire, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: `An error occurred while Updating birthday. Please try again.!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+
+    // Handle error state
+    // setLoaderState((prevState) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       errorDescription:
+    //         "An error occurred while updating hire, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
   }
 };
 
 export const deleteBirthday = async (
-  ID: number,
-  setLoaderState: any,
-  index: number
+  ID: number
+  // setLoaderState: any,
+  // index: number
 ): Promise<void> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  // setLoaderState((prevState: any) => {
+  //   const updatedState = [...prevState];
+  //   updatedState[index] = {
+  //     ...updatedState[index],
+  //     popupWidth: "450px",
+  //     isLoading: {
+  //       inprogress: true,
+  //       error: false,
+  //       success: false,
+  //     },
+  //   };
+  //   return updatedState;
+  // });
+
+  const toastId = toast.loading(" Deleting Birthday...");
+
   try {
     await SpServices.SPUpdateItem({
       Listname: CONFIG.ListNames.Intranet_BirthDay,
       ID: ID,
       RequestJSON: { IsDelete: true },
     });
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Birthday deleted successfully!",
-          successDescription: `The birthday has been deleted successfully.`,
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render: `Birthday deleted successfully!!`,
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: true,
+    //       error: false,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       success: "Birthday deleted successfully!",
+    //       successDescription: `The birthday has been deleted successfully.`,
+    //     },
+    //   };
+    //   return updatedState;
+    // });
   } catch (error) {
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          success: "Birthday deleted unsuccessfully!",
-          errorDescription:
-            "An error occurred while deleting birthday, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: `An error occurred while Deleting birthday. Please try again.!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+    // setLoaderState((prevState: any) => {
+    //   const updatedState = [...prevState];
+    //   updatedState[index] = {
+    //     ...updatedState[index],
+    //     popupWidth: "450px",
+    //     isLoading: {
+    //       inprogress: false,
+    //       success: false,
+    //       error: true,
+    //     },
+    //     messages: {
+    //       ...updatedState[index].messages,
+    //       success: "Birthday deleted unsuccessfully!",
+    //       errorDescription:
+    //         "An error occurred while deleting birthday, please try again later.",
+    //     },
+    //   };
+    //   return updatedState;
+    // });
   }
 };

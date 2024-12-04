@@ -9,8 +9,11 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
+
 import "../../../assets/styles/Style.css";
 import styles from "./BlogsPage.module.scss";
+import "./Style.css";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import {
   Icon,
@@ -27,6 +30,7 @@ import ViewComponent from "./ViewComponent";
 import {
   addlikemethod,
   Approved,
+  changeBlogActive,
   getcuruserdetails,
   // Approved,
   getintername,
@@ -49,6 +53,8 @@ import _ from "lodash";
 import { CONFIG } from "../../../config/config";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { Paginator } from "primereact/paginator";
+import { InputSwitch } from "primereact/inputswitch";
+import { IPaginationData } from "../../../interface/interface";
 // import { arrayIncludes } from "@mui/x-date-pickers/internals/utils/utils";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
@@ -83,10 +89,9 @@ const BlogsPage = (props: any): JSX.Element => {
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-  const [pagination, setPagination] = useState({
-    first: 0,
-    rows: 3,
-  });
+  const [pagination, setPagination] = useState<IPaginationData>(
+    CONFIG.PaginationData
+  );
 
   const popupInputs: any[] = [
     [
@@ -254,6 +259,8 @@ const BlogsPage = (props: any): JSX.Element => {
   };
   const totalRecords = data?.length || 0;
 
+  console.log(totalRecords, "totalRecords");
+
   // function algorithmfilterfunction(value: string) {
   //   const _newdata = [...duplicatefilter];
   //   const newdata = [];
@@ -317,6 +324,7 @@ const BlogsPage = (props: any): JSX.Element => {
           ).join(""),
           userDetails: item.UserLikes ? JSON.parse(item.UserLikes) : [],
           viewDetails: item.ViewPerson ? JSON.parse(item.ViewPerson) : [],
+          isActive: item.isActive ? item.isActive : false,
         });
       });
       setadmindata([...tempdata]);
@@ -329,7 +337,7 @@ const BlogsPage = (props: any): JSX.Element => {
         setduplicatedata([..._filterdata]);
       } else {
         const _filterdata = tempdata.filter(
-          (_admin: any) => _admin.Status === "Approved"
+          (_admin: any) => _admin.Status === "Approved" && _admin.isActive
         );
         _filterdata.sort((a: any, b: any) => b.Id - a.Id);
         // const additionaldata: { Id: any; Searchstring: string }[] = [];
@@ -565,7 +573,7 @@ const BlogsPage = (props: any): JSX.Element => {
     _filterkey[key] = text;
     filterfunction(_filterkey, text);
   };
-  const filterfunction = (key: any, value: any) => {
+  const filterfunction = async (key: any, value: any) => {
     let _data = [...duplicatedata];
     if (value !== "All" && key._gsearch && key._gsearch.trim() !== "") {
       const _search = key._gsearch.toLowerCase().toString().trim();
@@ -591,6 +599,7 @@ const BlogsPage = (props: any): JSX.Element => {
         _gsearch: "",
       });
       setdata([..._data]);
+      //await onPageChange("");
     }
   };
 
@@ -694,7 +703,7 @@ const BlogsPage = (props: any): JSX.Element => {
                   <div>
                     <CustomInput
                       value={filterkey._gsearch}
-                      secWidth="180px"
+                      secWidth="200px"
                       labelText="Search"
                       placeholder="Search"
                       noErrorMsg
@@ -755,17 +764,27 @@ const BlogsPage = (props: any): JSX.Element => {
                       color: "#0b4d53",
                       borderRadius: "4px",
                       cursor: "pointer",
-                      fontSize: "12px",
+                      fontSize: "18px",
                       fontWeight: "500",
                     }}
                     onClick={() => {
-                      const _data = [...admindata];
-                      const _filterdata = _data.filter(
-                        (item) => item.Status === "Approved"
-                      );
-                      _filterdata.sort((a, b) => b.Id - a.Id);
-                      setdata([..._filterdata]);
-                      setAllBlogs("AllBlogs");
+                      if (permission == "Admin") {
+                        const _data = [...admindata];
+                        const _filterdata = _data.filter(
+                          (item) => item.Status === "Approved"
+                        );
+                        _filterdata.sort((a, b) => b.Id - a.Id);
+                        setdata([..._filterdata]);
+                        setAllBlogs("AllBlogs");
+                      } else {
+                        const _data = [...admindata];
+                        const _filterdata = _data.filter(
+                          (item) => item.Status === "Approved" && item.isActive
+                        );
+                        _filterdata.sort((a, b) => b.Id - a.Id);
+                        setdata([..._filterdata]);
+                        setAllBlogs("AllBlogs");
+                      }
                     }}
                   >
                     All blogs
@@ -783,7 +802,7 @@ const BlogsPage = (props: any): JSX.Element => {
                         color: "#0b4d53",
                         borderRadius: "4px",
                         cursor: "pointer",
-                        fontSize: "12px",
+                        fontSize: "18px",
                         fontWeight: "500",
                       }}
                       onClick={() => {
@@ -852,141 +871,187 @@ const BlogsPage = (props: any): JSX.Element => {
                   }}
                 >
                   {data.length > 0 ? (
-                    data.map((item: any, index: number) => {
-                      console.log(item.Paragraph);
-                      // const checkStatus =
-                      //   item.Status === "Approved" ? true : false;
-                      const totaluserlikescount = item.userDetails.filter(
-                        (arr: any) => arr.UserClick === true
-                      ).length;
-                      const curuserlikes = item.userDetails.some(
-                        (arr: any) => arr.UserId === curuser.Id && arr.UserClick
-                      );
-                      const userviewcounts = item.viewDetails?.length || 0;
+                    data
+                      ?.slice(
+                        pagination.first,
+                        pagination.first + pagination.rows
+                      )
+                      .map((item: any, index: number) => {
+                        console.log(item.Paragraph);
+                        // const checkStatus =
+                        //   item.Status === "Approved" ? true : false;
+                        const totaluserlikescount = item.userDetails.filter(
+                          (arr: any) => arr.UserClick === true
+                        ).length;
+                        const curuserlikes = item.userDetails.some(
+                          (arr: any) =>
+                            arr.UserId === curuser.Id && arr.UserClick
+                        );
+                        const userviewcounts = item.viewDetails?.length || 0;
 
-                      return (
-                        <div className={styles.smallcontainer} key={index}>
-                          <div className={styles.inbox}>
-                            <div className={styles.imgbox}>
-                              <img src={item.img} alt="Blog" />
-                            </div>
-                            <div className={styles.contenttitle}>
-                              <h4 title={item.Title}>{item.Title}</h4>
-                              <div className={styles.parenttitle}>
-                                <h3 title={item.ParenTitle}>
-                                  {item.ParentTitle}
-                                </h3>
-                                <Icon
-                                  iconName="ArrowUpRight8"
-                                  className={styles.Arrowupicon}
-                                  onClick={() =>
-                                    viewLikemethod(
-                                      item.Id,
-                                      item.viewDetails,
-                                      item
-                                    )
-                                  }
-                                />
+                        return (
+                          <div className={styles.smallcontainer} key={index}>
+                            <div className={styles.inbox}>
+                              <div className={styles.imgbox}>
+                                <img src={item.img} alt="Blog" />
                               </div>
-                              <div
-                                className={styles.paragraph}
-                                style={{
-                                  height:
-                                    permission !== "Admin" ? "87px" : "87px",
-                                  // fontWeight: "bold",
-                                }}
-                                dangerouslySetInnerHTML={{
-                                  __html: item.Paragraph,
-                                }}
-                              />
-                              {permission === "Admin" &&
-                                item.Status === "Pending" && (
-                                  <div className={styles.approversection}>
-                                    <div>
-                                      <label
-                                        style={{
-                                          fontSize: "12px",
-                                          height: "23px",
-                                          width: "66px",
-                                          display: "inline-block",
-                                          padding: "6px",
-                                          backgroundColor:
-                                            item.Status === "Approved"
-                                              ? "green"
-                                              : item.Status === "Pending"
-                                              ? "#f3e8c9"
-                                              : "red",
-                                          color:
-                                            item.Status === "Approved"
-                                              ? "green"
-                                              : item.Status === "Pending"
-                                              ? "#c99b1b"
-                                              : "red",
-                                          borderRadius: "50px",
-                                          textAlign: "center",
-                                          fontWeight: "500",
-                                        }}
-                                      >
-                                        {item.Status}
-                                      </label>
+                              <div className={styles.contenttitle}>
+                                <div className={styles.titleActiveicons}>
+                                  <h4
+                                    className={styles.Title}
+                                    title={item.Title}
+                                  >
+                                    {item.Title}
+                                  </h4>
+                                  {permission == "Admin" ? (
+                                    <InputSwitch
+                                      checked={item?.isActive}
+                                      className="sectionToggler"
+                                      onChange={async (e: any) => {
+                                        setdata((prevItems: any) =>
+                                          prevItems.map(
+                                            (val: any, idx: number) =>
+                                              item?.Id === val?.Id
+                                                ? { ...val, isActive: e.value }
+                                                : val
+                                          )
+                                        );
+                                        await changeBlogActive(
+                                          item.Id,
+                                          e.value
+                                        );
+                                      }}
+                                    />
+                                  ) : (
+                                    <div
+                                      className={styles.pilldesign}
+                                      style={{
+                                        background:
+                                          item.isActive == "in Active"
+                                            ? "red"
+                                            : "",
+                                      }}
+                                    >
+                                      {item.isActive ? "Active" : "in Active"}
                                     </div>
-                                    {permission === "Admin" && (
-                                      <div className={styles.checkbox}>
-                                        {/* <div> */}
-                                        {permission === "Admin" ? (
-                                          <div>
-                                            <div
-                                              className={
-                                                styles["new-blog-button"]
-                                              }
-                                              onClick={() => {
-                                                // setcheckbox(false);
-                                                setupdateid(item.Id);
+                                  )}
+                                </div>
+                                <div className={styles.parenttitle}>
+                                  <h3 title={item.ParenTitle}>
+                                    {item.ParentTitle}
+                                  </h3>
+                                  <Icon
+                                    iconName="ArrowUpRight8"
+                                    className={styles.Arrowupicon}
+                                    onClick={() =>
+                                      viewLikemethod(
+                                        item.Id,
+                                        item.viewDetails,
+                                        item
+                                      )
+                                    }
+                                  />
+                                </div>
+                                <div
+                                  title={item?.Paragraph}
+                                  className={styles.paragraph}
+                                  style={{
+                                    height:
+                                      permission !== "Admin" ? "87px" : "87px",
+                                    // fontWeight: "bold",
+                                  }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.Paragraph,
+                                  }}
+                                />
+                                {permission === "Admin" &&
+                                  item.Status === "Pending" && (
+                                    <div className={styles.approversection}>
+                                      <div>
+                                        <label
+                                          style={{
+                                            fontSize: "12px",
+                                            height: "23px",
+                                            width: "66px",
+                                            display: "inline-block",
+                                            padding: "6px",
+                                            backgroundColor:
+                                              item.Status === "Approved"
+                                                ? "green"
+                                                : item.Status === "Pending"
+                                                ? "#f3e8c9"
+                                                : "red",
+                                            color:
+                                              item.Status === "Approved"
+                                                ? "green"
+                                                : item.Status === "Pending"
+                                                ? "#c99b1b"
+                                                : "red",
+                                            borderRadius: "50px",
+                                            textAlign: "center",
+                                            fontWeight: "500",
+                                          }}
+                                        >
+                                          {item.Status}
+                                        </label>
+                                      </div>
+                                      {permission === "Admin" && (
+                                        <div className={styles.checkbox}>
+                                          {/* <div> */}
+                                          {permission === "Admin" ? (
+                                            <div>
+                                              <div
+                                                className={
+                                                  styles["new-blog-button"]
+                                                }
+                                                onClick={() => {
+                                                  // setcheckbox(false);
+                                                  setupdateid(item.Id);
 
-                                                togglePopupVisibility(
-                                                  setPopupController,
-                                                  initialPopupController[0],
-                                                  0,
-                                                  "open"
-                                                );
-                                                // const _popupcontroller = [
-                                                //   ...popupController,
-                                                // ];
-                                                // _popupcontroller[0].open = true;
-                                                // setPopupController([
-                                                //   ..._popupcontroller,
-                                                // ]);
-                                                // approverStatusFunc(
-                                                //   item.Id
-                                                // );
-                                              }}
-                                            >
-                                              <span>Approval</span>
+                                                  togglePopupVisibility(
+                                                    setPopupController,
+                                                    initialPopupController[0],
+                                                    0,
+                                                    "open"
+                                                  );
+                                                  // const _popupcontroller = [
+                                                  //   ...popupController,
+                                                  // ];
+                                                  // _popupcontroller[0].open = true;
+                                                  // setPopupController([
+                                                  //   ..._popupcontroller,
+                                                  // ]);
+                                                  // approverStatusFunc(
+                                                  //   item.Id
+                                                  // );
+                                                }}
+                                              >
+                                                <span>Approval</span>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ) : // <div>
-                                        // <CustomDropDown
-                                        //   value={item.UserStatus}
-                                        //   floatingLabel={false}
-                                        //   placeholder="Status"
-                                        //   onChange={(value) => {
-                                        // setcheckbox(false);
-                                        // approverStatusFunc(value, item.Id);
-                                        //   }}
-                                        //   highlightDropdown={true}
-                                        //   options={[
-                                        //     "Pending",
-                                        //     "Approved",
-                                        //     "Rejected",
-                                        //   ]}
-                                        //   noErrorMsg
-                                        //   size="SM"
-                                        //   width={"150px"}
-                                        // />
-                                        // </div>`
-                                        null}
-                                        {/* </div> */}
-                                        {/* <Checkbox
+                                          ) : // <div>
+                                          // <CustomDropDown
+                                          //   value={item.UserStatus}
+                                          //   floatingLabel={false}
+                                          //   placeholder="Status"
+                                          //   onChange={(value) => {
+                                          // setcheckbox(false);
+                                          // approverStatusFunc(value, item.Id);
+                                          //   }}
+                                          //   highlightDropdown={true}
+                                          //   options={[
+                                          //     "Pending",
+                                          //     "Approved",
+                                          //     "Rejected",
+                                          //   ]}
+                                          //   noErrorMsg
+                                          //   size="SM"
+                                          //   width={"150px"}
+                                          // />
+                                          // </div>`
+                                          null}
+                                          {/* </div> */}
+                                          {/* <Checkbox
                                         checked={
                                           item.UserStatus &&
                                           item.UserStatus !== item.Status &&
@@ -1014,33 +1079,33 @@ const BlogsPage = (props: any): JSX.Element => {
                                           }
                                         }}
                                       /> */}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                            </div>
-                            <div className={styles.footercontainer}>
-                              <div className={styles.peoplebox}>
-                                <div>
-                                  <Persona
-                                    showOverflowTooltip
-                                    styles={poersonaStyles}
-                                    size={PersonaSize.size28}
-                                    presence={PersonaPresence.none}
-                                    showInitialsUntilImageLoads
-                                    imageUrl={`/_layouts/15/userphoto.aspx?size=S&username=${item.Author?.Email}`}
-                                  />
-                                </div>
-                                <div className={styles.namediv}>
-                                  <h5>{item.Author?.Title}</h5>
-                                  <h5 className={styles.datediv}>
-                                    {item.Created || ""}
-                                  </h5>
-                                </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                               </div>
-                              <div className={styles.likecontainer}>
-                                <div className={styles.likebox}>
-                                  {/* <Icon
+                              <div className={styles.footercontainer}>
+                                <div className={styles.peoplebox}>
+                                  <div>
+                                    <Persona
+                                      showOverflowTooltip
+                                      styles={poersonaStyles}
+                                      size={PersonaSize.size28}
+                                      presence={PersonaPresence.none}
+                                      showInitialsUntilImageLoads
+                                      imageUrl={`/_layouts/15/userphoto.aspx?size=S&username=${item.Author?.Email}`}
+                                    />
+                                  </div>
+                                  <div className={styles.namediv}>
+                                    <h5>{item.Author?.Title}</h5>
+                                    <h5 className={styles.datediv}>
+                                      {item.Created || ""}
+                                    </h5>
+                                  </div>
+                                </div>
+                                <div className={styles.likecontainer}>
+                                  <div className={styles.likebox}>
+                                    {/* <Icon
                                     iconName="LikeSolid"
                                     style={{
                                       color: curuserlikes
@@ -1052,20 +1117,20 @@ const BlogsPage = (props: any): JSX.Element => {
                                       addLikeMethod(item.Id, item.userDetails)
                                     }
                                   /> */}
-                                  <i
-                                    className="pi pi-thumbs-up-fill"
-                                    style={{
-                                      color: curuserlikes
-                                        ? "#0a4b48"
-                                        : "#b3b0b0",
-                                      cursor: "pointer",
-                                      fontSize: "14px",
-                                    }}
-                                    onClick={() =>
-                                      addLikeMethod(item.Id, item.userDetails)
-                                    }
-                                  />
-                                  {/* <ThumbUpAltOutlined
+                                    <i
+                                      className="pi pi-thumbs-up-fill"
+                                      style={{
+                                        color: curuserlikes
+                                          ? "#0a4b48"
+                                          : "#b3b0b0",
+                                        cursor: "pointer",
+                                        fontSize: "18px",
+                                      }}
+                                      onClick={() =>
+                                        addLikeMethod(item.Id, item.userDetails)
+                                      }
+                                    />
+                                    {/* <ThumbUpAltOutlined
                                     style={{
                                       color: curuserlikes
                                         ? "#0a4b48"
@@ -1076,36 +1141,36 @@ const BlogsPage = (props: any): JSX.Element => {
                                       addLikeMethod(item.Id, item.userDetails)
                                     }
                                   /> */}
-                                  <label style={{ cursor: "auto" }}>
-                                    {totaluserlikescount || "0"}
-                                  </label>
-                                </div>
-                                <div className={styles.eyecontainer}>
-                                  {/* <Icon
+                                    <label style={{ cursor: "auto" }}>
+                                      {totaluserlikescount || "0"}
+                                    </label>
+                                  </div>
+                                  <div className={styles.eyecontainer}>
+                                    {/* <Icon
                                     className={styles.eyeicon}
                                     iconName="VisibilityOutlined"
                                   /> */}
-                                  <VisibilityOutlined
-                                    style={{
-                                      color: "orange",
-                                      fontSize: "20px",
-                                    }}
-                                  />
+                                    <VisibilityOutlined
+                                      style={{
+                                        color: "orange",
+                                        fontSize: "20px",
+                                      }}
+                                    />
 
-                                  {/* <Icon
+                                    {/* <Icon
                                     iconName="RedEye12"
                                     className={styles.eyeicon}
                                   /> */}
-                                  <label style={{ cursor: "auto" }}>
-                                    {userviewcounts || "0"}
-                                  </label>
+                                    <label style={{ cursor: "auto" }}>
+                                      {userviewcounts || "0"}
+                                    </label>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })
                   ) : (
                     <div className={styles.emptyfile}>
                       <img src={emptyfile} />
@@ -1160,6 +1225,17 @@ const BlogsPage = (props: any): JSX.Element => {
           noActionBtn={true}
         />
       ))}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import "../../../assets/styles/Style.css";
+import { toast, ToastContainer } from "react-toastify";
 
 import styles from "./AddingComponent.module.scss";
 import { Icon } from "@fluentui/react";
@@ -17,6 +18,10 @@ import {
   getintranettitle,
   getupdateintranettitle,
 } from "../../../services/BlogsPage/BlogsPageServices";
+import Popup from "../../../components/common/Popups/Popup";
+import resetPopupController, {
+  togglePopupVisibility,
+} from "../../../utils/popupUtils";
 interface IPopupData {
   ImageDescription: string;
   Attachmentfiles: any[];
@@ -57,24 +62,53 @@ function AddingComponent(props: any) {
     "webp",
   ];
   const [customInput, setcustomInput] = useState<boolean>(false);
-  console.log(customInput);
   const [filteredSuggestions, setfilteredSuggestions] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [additionaldetails, setadditionaldetails] =
     useState(_additionaldetails);
   const [joditContent, setJoditContent] = useState("");
   const [popupData, setpoupData] = useState(_popupData);
-  console.log(popupData);
   const [intraData, setIntraData] = useState<any>([]);
-  console.log(intraData);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const initialPopupController: any = [
+    {
+      open: false,
+      popupTitle: "",
+      popupWidth: "720px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "blog added successfully!",
+        error: "Something went wrong!",
+        successDescription: "Blog added successfully.",
+        errorDescription:
+          "An error occured while addingBlog, please try again later.",
+        inprogress: "Adding Blog, please wait...",
+      },
+    },
+  ];
+
+  const [popupController, setPopupController] = useState<any[]>(
+    initialPopupController
+  );
+
+  const popupInputs: any[] = [[]];
+
+  const popupActions: any[] = [[]];
   // This functino is OnLoaderFunction
 
   // This function is Quill onchange method
   const onChange = (key: any, text: any) => {
     if (text === "<p><br></p>") {
-      console.log("shanmugaraj");
+      console.log("");
     } else if (text !== "<p><br></p>") {
       setJoditContent(text);
     }
@@ -186,7 +220,7 @@ function AddingComponent(props: any) {
     //;
     let finderrorobj: boolean = false;
     for (const [key, value] of Object.entries(error)) {
-      console.log(key);
+      console.log("key: ", key);
       if (value !== "") {
         finderrorobj = true;
       }
@@ -200,12 +234,24 @@ function AddingComponent(props: any) {
         BlogTitle: additionaldetails.ParentTitle,
         Status: "Pending",
       };
-      addfilemsg(_popupData, popupData)
+      addfilemsg(_popupData, popupData, setPopupController, 0)
         .then((response) => {
           setIsLoading(false);
           props.resetstate();
         })
         .catch((err) => {
+          setIsLoading(false);
+
+          props.resetstate();
+
+          toast.update("test", {
+            render: "Error while Adding Block. Please try again.",
+            type: "error",
+            isLoading: false,
+            autoClose: 5000,
+            hideProgressBar: false,
+          });
+
           console.log(err);
         });
     } else {
@@ -398,7 +444,7 @@ function AddingComponent(props: any) {
                     }}
                     value={joditContent}
                     getMentionedEmails={(e: any) => {
-                      console.log("shanmugaraj");
+                      // console.log("shanmugaraj");
                     }}
                     placeHolder={"Enter Comments..."}
                     defaultValue={commentText.value}
@@ -528,9 +574,9 @@ function AddingComponent(props: any) {
                 </div>
                 <div
                   className={styles["new-blog-button"]}
-                  onClick={() => {
-                    console.log("shanmugaraj");
-                  }}
+                  // onClick={() => {
+                  //   console.log("shanmugaraj");
+                  // }}
                 >
                   <button
                     className={styles.submitbutton}
@@ -546,6 +592,59 @@ function AddingComponent(props: any) {
           </div>
         </div>
       )}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
+      {popupController?.map((popupData: any, index: number) => (
+        <Popup
+          key={index}
+          isLoading={popupData?.isLoading}
+          messages={popupData?.messages}
+          resetPopup={() => {
+            setPopupController((prev: any): any => {
+              resetPopupController(prev, index, true);
+            });
+          }}
+          PopupType={popupData.popupType}
+          onHide={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[index],
+              index,
+              "close"
+            );
+            if (popupData?.isLoading?.success) {
+              // setIsile(false);
+              // getAllNewsData(dispatch);
+            }
+            // resetFormData(formData, setFormData);
+          }}
+          popupTitle={
+            popupData.popupType !== "confimation" && popupData.popupTitle
+          }
+          popupActions={popupActions[index]}
+          visibility={popupData.open}
+          content={popupInputs[index]}
+          popupWidth={popupData.popupWidth}
+          defaultCloseBtn={popupData.defaultCloseBtn || false}
+          confirmationTitle={
+            popupData?.confirmationTitle
+            // popupData.popupType !== "custom" ? popupData.popupTitle : ""
+          }
+          popupHeight={index === 0 ? true : false}
+          noActionBtn={true}
+        />
+      ))}
     </div>
   );
 }
