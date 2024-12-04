@@ -48,6 +48,8 @@ let objFilter: SearchField = {
 
 let curMasterOptions: any[] = [];
 
+let isActivityPage: boolean = false;
+
 const PollPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const curUser = props.context._pageContext._user.email;
@@ -920,6 +922,10 @@ const PollPage = (props: any): JSX.Element => {
   };
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
       { highPriorityGroups: [CONFIG.SPGroupName.Poll_Admin] },
@@ -945,11 +951,17 @@ const PollPage = (props: any): JSX.Element => {
             <div className={styles.leftSection}>
               <i
                 onClick={() => {
-                  window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+                  isActivityPage
+                    ? window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.ApprovalsPage,
+                        "_self"
+                      )
+                    : window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.PernixIntranet,
+                        "_self"
+                      );
                 }}
                 className="pi pi-arrow-circle-left"
                 style={{ fontSize: "1.5rem", color: "#E0803D" }}
