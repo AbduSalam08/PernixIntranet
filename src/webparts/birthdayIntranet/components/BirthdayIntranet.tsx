@@ -1,17 +1,11 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { MSGraphClient } from "@microsoft/sp-http";
-// import { graph } from "@pnp/graph";
-
 import styles from "./BirthdayIntranet.module.scss";
 import { Checkbox } from "primereact/checkbox";
-
-const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 import "../../../assets/styles/style.css";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
-// require("../../../node_modules/primereact/resources/primereact.min.css");
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useEffect, useState } from "react";
@@ -20,11 +14,6 @@ import resetPopupController, {
 } from "../../../utils/popupUtils";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import Popup from "../../../components/common/Popups/Popup";
-// images
-const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
-const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
-const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
-// icons
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,15 +32,19 @@ import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import { ToastContainer } from "react-toastify";
 
-const BirthdayIntranet = (props: any): JSX.Element => {
-  let _curuser: string = props?.context._pageContext._user.email;
-  console.log(_curuser, "curuser");
+// images
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
+const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
+const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
 
+const BirthdayIntranet = (props: any): JSX.Element => {
   const today = new Date(
     new Date().getFullYear(),
     new Date().getMonth(),
     new Date().getDate()
   );
+
   const initialFormData = {
     EmployeeName: {
       value: "",
@@ -101,7 +94,6 @@ const BirthdayIntranet = (props: any): JSX.Element => {
   const birthDaysData: any = useSelector((state: any) => {
     return state.BirthdaysData.value;
   });
-  console.log("birthDaysData", birthDaysData);
 
   // popup properties
   const initialPopupController = [
@@ -154,21 +146,16 @@ const BirthdayIntranet = (props: any): JSX.Element => {
   );
   const [birthdays, setBirthdays] = useState<any[]>([]);
   const [curuser, setCurrentuser] = useState<any>("");
-
   const [currentUserDetails, setCurrentUserDetails] = useState<any>({
     role: "User",
     email: "",
   });
-
-  console.log("currentUserDetails", currentUserDetails);
-
   const [formData, setFormData] = useState<any>(initialFormData);
   const [handleForm, setHandleForm] = useState<any>({
     BirthDayID: null,
     BirthDayWishID: null,
     Type: "",
   });
-  console.log("formData", formData);
 
   const handleInputChange = (
     field: string,
@@ -279,7 +266,6 @@ const BirthdayIntranet = (props: any): JSX.Element => {
               selectedItem={[formData?.EmployeeName?.value]}
               onChange={(item: any) => {
                 const value = item[0];
-                console.log("value: ", value);
                 const message = `Dear ${value?.name},
 Wishing you a very happy birthday! I hope your day is filled with joy, celebration, and memorable moments. May the year ahead bring you great success, good health, and happiness.
 Enjoy your special day!`;
@@ -321,7 +307,6 @@ Enjoy your special day!`;
               accept="image/png,image/jpeg"
               value={formData?.Image?.value?.name}
               onFileSelect={async (file) => {
-                console.log("file: ", file);
                 const { isValid, errorMsg } = validateField(
                   "Image",
                   file ? file.name : "",
@@ -549,6 +534,7 @@ Enjoy your special day!`;
       </div>,
     ],
   ];
+  
   const isFormValid = (): boolean => {
     const isMessageValid =
       formData?.Message?.isValid && formData?.Message?.value.trim() !== "";
@@ -647,101 +633,6 @@ Enjoy your special day!`;
       "_self"
     );
   };
-
-  async function fetchUserBirthdays(context: any, filterSuffix: string) {
-    const client: MSGraphClient =
-      await context.msGraphClientFactory.getClient();
-
-    let allUsers: any[] = [];
-    let nextPageUrl: string | undefined = undefined;
-
-    try {
-      // Step 1: Fetch all users with basic details (ID, mail, displayName)
-      do {
-        const response: any = nextPageUrl
-          ? await client
-              .api(nextPageUrl)
-              .version("v1.0")
-              .top(999)
-              .select(
-                "department,skill,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
-              )
-              .expand("manager")
-              .get()
-          : await client
-              .api("/users")
-              .version("v1.0")
-              .top(999)
-              .select(
-                "department,skill,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
-              )
-              .expand("manager")
-              .get();
-
-        allUsers = allUsers.concat(response.value);
-
-        nextPageUrl = response["@odata.nextLink"];
-      } while (nextPageUrl);
-
-      console.log(allUsers, "Fetched all users");
-
-      // Step 2: Fetch birthday extension for each user
-      const usersWithBirthdays = await Promise.all(
-        allUsers.map(async (user: any) => {
-          try {
-            // Fetch extensions for the user
-            const userDetails = await client
-              .api(`/users/${user.id}?$select=birthday`)
-              .version("v1.0")
-              .get();
-            console.log(userDetails, "userdetail");
-
-            // Check if birthday exists
-            if (userDetails?.birthday) {
-              return {
-                officeLocation: user.officeLocation ? user.officeLocation : "",
-                Phone: user.mobilePhone ? user.mobilePhone : "",
-                Name: user.displayName ? user.displayName : "",
-                Id: user.id ? user.id : null,
-                JobTitle: user.JobTitle ? user.JobTitle : "",
-                SureName: user.surname ? user.surname : "",
-                Language: user.preferredLanguage ? user.preferredLanguage : "",
-                Email: user.userPrincipalName ? user.userPrincipalName : "",
-                Manager: {
-                  email: user.manager ? user.manager.mail : "",
-                  name: user.manager ? user.manager.displayName : "",
-                },
-                birthday: userDetails.birthday, // Directly map birthday
-              };
-            }
-
-            return null; // Skip users without a birthday property
-          } catch (error) {
-            console.error(
-              `Error fetching birthday for user ${user.id}:`,
-              error
-            );
-            return null;
-          }
-        })
-      );
-
-      // Step 3: Filter results based on email suffix and remove null entries
-      const filteredUsers = usersWithBirthdays.filter(
-        (user) => user && user.Email?.endsWith(filterSuffix) // Match email suffix
-      );
-
-      console.log(filteredUsers, "Users with birthdays");
-
-      return filteredUsers;
-    } catch (error) {
-      console.error("Error fetching user birthdays:", error);
-      return [];
-    }
-  }
-
-  let x = fetchUserBirthdays(props.context, "@technorucs.com");
-  console.log(x, "birthday user");
 
   return (
     <div className={styles.container}>
