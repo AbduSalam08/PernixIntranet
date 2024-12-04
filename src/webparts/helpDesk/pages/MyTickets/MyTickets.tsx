@@ -347,6 +347,8 @@ const MyTickets = (): JSX.Element => {
             }
             if (
               !hasRecurrence &&
+              recurrenceDetails?.Frequency?.value?.toLowerCase() !==
+                "repeat once" &&
               recurrenceDetails?.Frequency?.value?.toLowerCase() ===
                 "does not repeat"
             ) {

@@ -85,6 +85,29 @@ interface Props {
   highLightBackground?: boolean;
   noErrorMsg?: boolean;
 }
+// Inner textarea component to handle floating label behavior
+const InnerTextarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>
+  // React.JSX.IntrinsicElements["textarea"]
+>(function InnerTextarea(props, ref) {
+  return (
+    <div
+      style={{
+        overflow: "auto",
+      }}
+    >
+      <StyledTextarea
+        placeholder=""
+        minRows={2}
+        {...props}
+        ref={ref}
+        id="textarea"
+      />
+      <StyledLabel htmlFor={"textarea"}>{props?.placeholder}</StyledLabel>
+    </div>
+  );
+});
 
 export default function FloatingLabelTextarea({
   value,
@@ -111,30 +134,6 @@ export default function FloatingLabelTextarea({
   noErrorMsg,
   highLightBackground,
 }: Props): JSX.Element {
-  // Inner textarea component to handle floating label behavior
-  const InnerTextarea = React.forwardRef<
-    HTMLTextAreaElement,
-    React.TextareaHTMLAttributes<HTMLTextAreaElement>
-    // React.JSX.IntrinsicElements["textarea"]
-  >(function InnerTextarea(props, ref) {
-    return (
-      <div
-        style={{
-          overflow: "auto",
-        }}
-      >
-        <StyledTextarea
-          placeholder=""
-          minRows={2}
-          {...props}
-          ref={ref}
-          id="textarea"
-        />
-        <StyledLabel htmlFor={"textarea"}>{props?.placeholder}</StyledLabel>
-      </div>
-    );
-  });
-
   return (
     <div
       className={inputWrapperClassName}
