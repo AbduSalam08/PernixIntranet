@@ -2,30 +2,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-//import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import { Carousel } from "primereact/carousel";
-//import styles from "./ShoutOutsIntranet.module.scss";
 import styles from "../Shoutout/ShoutOutsIntranet.module.scss";
 import { Avatar } from "primereact/avatar";
 import "../../../../assets/styles/style.css";
-
-// import "../../../assets/styles/style.css";
 import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 import { useDispatch, useSelector } from "react-redux";
-// import resetPopupController, {
-//   togglePopupVisibility,
-// } from "../../../utils/popupUtils";
-//import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useEffect, useState } from "react";
 import { resetFormData, validateField } from "../../../../utils/commonUtils";
 import {
   addShoutOut,
   getAllShoutOutsData,
-  getShoutOutsOptions,
 } from "../../../../services/shoutOutIntranet/shoutOutIntranet";
 import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
-import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
 import resetPopupController, {
   togglePopupVisibility,
@@ -36,35 +25,14 @@ import CircularSpinner from "../../../../components/common/Loaders/CircularSpinn
 import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
-//import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
-//import Popup from "../../../components/common/Popups/Popup";
-//import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
-//import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
-// import {
-//   addShoutOut,
-//   getAllShoutOutsData,
-//   getShoutOutsOptions,
-// } from "../../../services/shoutOutIntranet/shoutOutIntranet";
-//import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
-//import ViewAll from "../../../components/common/ViewAll/ViewAll";
-//import { CONFIG } from "../../../config/config";
-//import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
-// images
-// const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
-// const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+import { ToastContainer } from "react-toastify";
 
 const img: any = require("../../../../assets/images/svg/Shoutouts/bronze.png");
 const errorGrey = require("../../../../assets/images/svg/errorGrey.svg");
 
-interface IShoutOutOptions {
-  ID: number;
-  Title: string;
-  Description: string;
-}
-
-const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
+const ShoutOutsIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
-  console.log("dispatch: ", dispatch);
+
   // popup properties
   const initialPopupController = [
     {
@@ -94,32 +62,18 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
   const shoutOutData: any = useSelector((state: any) => {
     return state.ShoutOutsData.value;
   });
-  console.log("shoutOutData: ", shoutOutData);
 
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-
   const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
-  const [shoutOutsOptions, setShoutOutsOptions] = useState<IShoutOutOptions[]>(
-    []
-  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  console.log("shoutOutsData", shoutOutsData);
-  console.log("shoutOutsOptions", shoutOutsOptions);
-
   const [formData, setFormData] = useState<any>({
     SendTowards: {
       value: [],
       isValid: true,
       errorMsg: "Send person is required",
       validationRule: { required: true, type: "array" },
-    },
-    Template: {
-      value: "",
-      isValid: true,
-      errorMsg: "Description is required",
-      validationRule: { required: true, type: "string" },
     },
     Description: {
       value: "",
@@ -128,7 +82,6 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
       validationRule: { required: true, type: "string" },
     },
   });
-  console.log("formData: ", formData);
 
   const handleInputChange = (
     field: string,
@@ -175,8 +128,13 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
       await addShoutOut(formData, dispatch);
-      // await addShoutOut(formData, setPopupController, 0, dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -185,63 +143,29 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
   const popupInputs: any[] = [
     [
       <div className={styles.addShoutOutGrid} key={1}>
-        <div
-          className={styles.inputContainer}
-          // style={{ width: "100%", display: "flex", gap: "20px" }}
-        >
-          <div
-            className={styles.inputWrapper}
-
-            // style={{ width: "50%" }}
-          >
+        <div style={{ width: "100%" }}>
+          <div style={{ width: "50%" }}>
             <CustomPeoplePicker
               labelText="Shout-out to"
               isValid={formData.SendTowards.isValid}
               errorMsg={formData.SendTowards.errorMsg}
               selectedItem={[formData.SendTowards.value]}
               onChange={(item: any) => {
-                const value = item[0];
-                console.log("value: ", value);
+                const value = item?.[0];
                 const { isValid, errorMsg } = validateField(
-                  "SendTowards",
+                  "Send towards",
                   item,
                   formData.SendTowards.validationRule
                 );
                 handleInputChange("SendTowards", value, isValid, errorMsg);
-              }}
-            />
-          </div>
-          <div
-            className={styles.inputWrapper}
-
-            // style={{ width: "50%" }}
-          >
-            <CustomDropDown
-              value={formData.Template.value}
-              options={shoutOutsOptions.map((obj: any) => obj.Title) || []}
-              placeholder="Template"
-              isValid={formData.Template.isValid}
-              errorMsg={formData.Template.errorMsg}
-              onChange={(value) => {
-                const description = shoutOutsOptions?.filter(
-                  (obj: any) => obj?.Title === value
-                );
-                const { isValid, errorMsg } = validateField(
-                  "Template",
-                  value,
-                  formData.Template.validationRule
-                );
-                handleInputChange("Template", value, isValid, errorMsg);
-                handleInputChange(
-                  "Description",
-                  description[0]?.Description,
-                  isValid,
-                  errorMsg
-                );
+                if (!value) {
+                  handleInputChange("Description", "", true, "");
+                }
               }}
             />
           </div>
         </div>
+
         <FloatingLabelTextarea
           value={formData.Description.value}
           placeholder="Description"
@@ -249,20 +173,61 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
           isValid={formData.Description.isValid}
           errorMsg={formData.Description.errorMsg}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Description",
               value,
               formData.Description.validationRule
             );
-            handleInputChange(
-              "Description",
-              value.trimStart(),
-              isValid,
-              errorMsg
-            );
+            handleInputChange("Description", value, isValid, errorMsg);
           }}
         />
+
+        <div
+          className={styles.suggestions}
+          style={{
+            display: formData?.SendTowards?.value ? "flex" : "none",
+          }}
+        >
+          {[
+            {
+              emoji: "🎉",
+              text: `Great job, ${formData?.SendTowards?.value?.name ?? ""}!`,
+            },
+            { emoji: "👏", text: "Kudos for the amazing work!" },
+            {
+              emoji: "🌟",
+              text: `Shoutout to ${
+                formData?.SendTowards?.value?.name ?? ""
+              } for outstanding effort!`,
+            },
+            {
+              emoji: "🏆",
+              text: `Congrats on the milestone, ${
+                formData?.SendTowards?.value?.name ?? ""
+              }!`,
+            },
+            { emoji: "🎊", text: "Celebrating your success today!" },
+            { emoji: "🎯", text: "Well done on this achievement!" },
+            { emoji: "💪", text: "Exceptional service, well done!" },
+            { emoji: "💖", text: "Shoutout for making a customer’s day!" },
+          ].map((sug: any, idx: number) => {
+            return (
+              <button
+                key={idx}
+                onClick={() => {
+                  const message: string = `${sug.emoji} ${sug.text}`;
+                  const { isValid, errorMsg } = validateField(
+                    "Description",
+                    message,
+                    formData.Description.validationRule
+                  );
+                  handleInputChange("Description", message, isValid, errorMsg);
+                }}
+              >{`${sug.emoji} ${sug.text}`}</button>
+            );
+          })}
+        </div>
       </div>,
     ],
   ];
@@ -298,29 +263,6 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
       },
     ],
   ];
-
-  // const responsiveOptions = [
-  //   {
-  //     breakpoint: "1400px",
-  //     numVisible: 2,
-  //     numScroll: 1,
-  //   },
-  //   {
-  //     breakpoint: "1199px",
-  //     numVisible: 3,
-  //     numScroll: 1,
-  //   },
-  //   {
-  //     breakpoint: "767px",
-  //     numVisible: 2,
-  //     numScroll: 1,
-  //   },
-  //   {
-  //     breakpoint: "575px",
-  //     numVisible: 1,
-  //     numScroll: 1,
-  //   },
-  // ];
 
   const shoutOutTemplate = (val: any): any => {
     return (
@@ -359,7 +301,6 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
 
   useEffect(() => {
     if (shoutOutData?.data?.length > 0) {
-      setIsLoading(true);
       const filteredData = shoutOutData?.data
         ?.filter((item: any) => item.isActive)
         .reverse()
@@ -368,19 +309,12 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
       setIsLoading(false);
     }
   }, [shoutOutData]);
+
   useEffect(() => {
+    setIsLoading(true);
     dispatch(setMainSPContext(props?.context));
-    getShoutOutsOptions(setShoutOutsOptions);
     getAllShoutOutsData(dispatch);
   }, [dispatch]);
-
-  const handlenavigate = (): void => {
-    window.open(
-      props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.ShoutOutsPage,
-      "_self"
-    );
-  };
 
   return isLoading ? (
     <div className={styles.LoaderContainer}>
@@ -390,7 +324,9 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
     <div className={`Shoutout ${styles.ShoutoutContainer}`}>
       <SectionHeaderIntranet
         label={"Shout-outs"}
+        title="Add a new shout-out"
         headerAction={() => {
+          resetFormData(formData, setFormData);
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
@@ -398,7 +334,6 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
             "open",
             "New Shout-outs"
           );
-          resetFormData(formData, setFormData);
         }}
       />
 
@@ -420,13 +355,34 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
               showNavigators={false}
               autoplayInterval={shoutOutsData?.length > 1 ? 3000 : 8.64e7}
               circular
-              // responsiveOptions={responsiveOptions}
               itemTemplate={shoutOutTemplate}
             />
           )}
         </div>
       </div>
-      <ViewAll onClick={handlenavigate} />
+
+      <ViewAll
+        onClick={() => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.ShoutOutsPage,
+            "_self"
+          );
+        }}
+      />
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -469,4 +425,5 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
     </div>
   );
 };
+
 export default ShoutOutsIntranet;

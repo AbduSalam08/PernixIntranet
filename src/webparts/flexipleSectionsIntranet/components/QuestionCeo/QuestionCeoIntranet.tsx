@@ -36,6 +36,11 @@ import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../../utils/commonUtils";
 import { ToastContainer } from "react-toastify";
+import { Checkbox } from "primereact/checkbox";
+
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
 
 //import ViewAll from "../../../components/common/ViewAll/ViewAll";
 //import { CONFIG } from "../../../config/config";
@@ -80,7 +85,6 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
   );
   const [CEOQuestions, setCEOQuestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  console.log("CEOQuestions", CEOQuestions);
 
   // const newsIntranetData: any = useSelector((state: any) => {
   //   return state.NewsIntranetData.value;
@@ -92,6 +96,12 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
       isValid: true,
       errorMsg: "This field is required",
       validationRule: { required: true, type: "string" },
+    },
+    Anonymous: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: { required: false, type: "boolean" },
     },
   });
 
@@ -119,7 +129,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
-        key,
+        key === "Description" ? "Question" : key,
         fieldData.value,
         fieldData?.validationRule
       );
@@ -167,13 +177,61 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
           onChange={(e: any) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
-              "Description",
+              "Question",
               value,
               formData.Description.validationRule
             );
             handleInputChange("Description", value, isValid, errorMsg);
           }}
         />
+
+        <div className={styles.anonymous}>
+          <Checkbox
+            inputId="Anonymous"
+            value="Anonymous"
+            checked={formData?.Anonymous?.value}
+            onChange={(e: any) => {
+              const { isValid, errorMsg } = validateField(
+                "Anonymous",
+                e.checked,
+                formData?.Anonymous?.validationRule
+              );
+              handleInputChange("Anonymous", e.checked, isValid, errorMsg);
+            }}
+          />
+
+          <label htmlFor="Anonymous" className="ml-2">
+            Anonymous
+          </label>
+
+          <Tooltip
+            style={{
+              color: "red",
+            }}
+            title={
+              <div
+                style={{
+                  padding: "10px",
+                  minHeight: "50px",
+                  maxHeight: "200px",
+                  overflow: "auto",
+                  fontSize: "12px",
+                  lineHeight: "1.4",
+                }}
+              >
+                Selecting this will hide your name from the users/leadership in
+                the homepage when the question is finally displayed. However the
+                system Admin can find your submission.
+              </div>
+            }
+            placement="right"
+            arrow
+          >
+            <IconButton>
+              <InfoIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
       </div>,
     ],
   ];
@@ -226,14 +284,6 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
     getQuestionCeo(dispatch);
   }, [dispatch]);
 
-  const handlenavigate = (): void => {
-    window.open(
-      props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.QuestionsCEOPage,
-      "_self"
-    );
-  };
-
   const productTemplate = (val: any): JSX.Element => {
     return (
       <div className={styles.Container}>
@@ -246,13 +296,11 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
                   ? "https://randomuser.me/api/portraits/placeholder.jpg"
                   : val?.avatarUrl
               }`}
-              // size="small"
               shape="circle"
               style={{
                 width: "25px !important",
                 height: "25px !important",
               }}
-              // data-pr-tooltip={val.receiverName}
             />
           </div>
           <p className={styles.ques} title={val.title}>
@@ -275,15 +323,8 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
             </div>
             <p title={val.replies[0]?.content}>{val.replies[0]?.content}</p>
           </div>
-          {/* <p className={styles.date}>
-            <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
-            {val.replies[0]?.date}
-          </p> */}
 
-          <p className={styles.date}>
-            {/* <i className="pi pi-clock" style={{ fontSize: "1rem" }} /> */}
-            Posted on : {val.date}
-          </p>
+          <p className={styles.date}>Posted on : {val.date}</p>
         </div>
       </div>
     );
@@ -297,13 +338,14 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
     <div className={styles.quesToCEOContainer}>
       <SectionHeaderIntranet
         label={"Questions to Leadership"}
+        title="Add a question"
         headerAction={() => {
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
             0,
             "open",
-            "Submit a question to CEO"
+            "Create a question to leadership"
           );
           resetFormData(formData, setFormData);
         }}
@@ -324,7 +366,15 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
           />
         </div>
       </div>
-      <ViewAll onClick={handlenavigate} />
+      <ViewAll
+        onClick={() => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.QuestionsCEOPage,
+            "_self"
+          );
+        }}
+      />
 
       {/* Toast message section */}
       <ToastContainer
@@ -351,13 +401,13 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(formData, setFormData);
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               index,
               "close"
             );
-            resetFormData(formData, setFormData);
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle

@@ -50,6 +50,7 @@ import CircularSpinner from "../../../../components/common/Loaders/CircularSpinn
 import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
 import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
+import { ToastContainer } from "react-toastify";
 //import { CONFIG } from "../../../config/config";
 //import ViewAll from "../../../components/common/ViewAll/ViewAll";
 //import { RoleAuth } from "../../../services/CommonServices";
@@ -253,7 +254,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
         0,
         "close"
       );
-
+      // await addPollData(formData, setPopupController, 0, options);
       await addPollData(formData, options);
       await fetchPollData(dispatch, curUser);
     } else {
@@ -411,20 +412,14 @@ const PollIntranet = ({ props }: any): JSX.Element => {
 
       <div
         key={2}
-        className={styles.inputContainer}
-
-        // style={{
-        //   display: "flex",
-        //   gap: "20px",
-        //   alignItems: "center",
-        //   margin: "20px 0px",
-        // }}
+        style={{
+          display: "flex",
+          gap: "20px",
+          alignItems: "center",
+          margin: "20px 0px",
+        }}
       >
-        <div
-          className={styles.inputWrapper}
-
-          // style={{ width: "50%" }}
-        >
+        <div style={{ width: "50%" }}>
           <CustomDateInput
             value={formData.StartDate.value}
             label="Start Date"
@@ -447,11 +442,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
             }}
           />
         </div>
-        <div
-          className={styles.inputWrapper}
-
-          // style={{ width: "50%" }}
-        >
+        <div style={{ width: "50%" }}>
           <CustomDateInput
             value={formData.EndDate.value}
             label="End Date"
@@ -557,15 +548,16 @@ const PollIntranet = ({ props }: any): JSX.Element => {
 
     if (!hasErrors) {
       // Submit vote if there are no errors
+
       togglePopupVisibility(
         setPopupController,
         initialPopupController[1],
         1,
         "close"
       );
+      // await addVote(selectedOption, setPopupController, 1);
       await addVote(selectedOption);
       await fetchPollData(dispatch, curUser);
-
       await resetSelectedItem(selectedOption, setSelectedOption);
     } else {
       console.log("Vote submission contains errors");
@@ -723,7 +715,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
           <div
             style={{
               display: "flex",
-              alignItems: "baseline",
+              alignItems: "flex-start",
             }}
           >
             <div className={styles.voteButton}>
@@ -783,6 +775,18 @@ const PollIntranet = ({ props }: any): JSX.Element => {
           noActionBtn={true}
         />
       ))}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };
