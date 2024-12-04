@@ -2,22 +2,10 @@
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { IFolderAddResult, sp } from "@pnp/sp/presets/all";
+import { toast } from "react-toastify";
 
 interface IFormData {
   [key: string]: { value: any };
-}
-
-interface ILoaderStateItem {
-  popupWidth: string;
-  isLoading: {
-    inprogress: boolean;
-    error: boolean;
-    success: boolean;
-  };
-  messages?: {
-    successDescription?: string;
-    errorDescription?: string;
-  };
 }
 
 export const getDocRepository = async (): Promise<any[]> => {
@@ -68,23 +56,9 @@ export const pathFileORFolderCheck = async (path: string): Promise<any[]> => {
 export const addDocRepository = async (
   formData: IFormData,
   curPath: string,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number,
   folderType: string
 ): Promise<void> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Creating a new document repository...");
 
   try {
     let arrMasterFiles: any = formData?.Content || [];
@@ -137,46 +111,22 @@ export const addDocRepository = async (
       }
     }
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The folder has been added successfully.`,
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "The new document repository was added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (err) {
     console.error("Error add document:", err);
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
 
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while creating folder, please try again later.",
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error adding new document repository. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };
@@ -189,24 +139,10 @@ export const updateDocRepositoryData = async (data: any): Promise<void> => {
   });
 };
 
-export const deleteDocRepository = async (
-  id: number,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
-): Promise<void> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const deleteDocRepository = async (id: number): Promise<void> => {
+  const toastId = toast.loading(
+    "Deleting the document repository in progress..."
+  );
 
   try {
     await SpServices.SPDeleteItem({
@@ -214,46 +150,23 @@ export const deleteDocRepository = async (
       ID: id,
     });
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The folder has been deleted successfully.`,
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "The document repository has been successfully deleted!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   } catch (err) {
     console.error("Error updete document:", err);
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
 
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while creating folder, please try again later.",
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render:
+        "An error occurred while deleting this document repository. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };

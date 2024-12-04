@@ -287,7 +287,15 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
   };
 
   const handleSubmit = async (data: any): Promise<void> => {
-    const addedJSON: any = await addFeedbackQus(data, setPopupController, 0);
+    resetFormData(formData, setFormData);
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[0],
+      0,
+      "close"
+    );
+
+    const addedJSON: any = await addFeedbackQus(data);
 
     masterFeedBackQus = [addedJSON, ...masterFeedBackQus];
     await prepareDatas();
@@ -636,13 +644,13 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
               }}
               PopupType={popupData.popupType}
               onHide={() => {
+                resetFormData(formData, setFormData);
                 togglePopupVisibility(
                   setPopupController,
                   initialPopupController[index],
                   index,
                   "close"
                 );
-                resetFormData(formData, setFormData);
               }}
               popupTitle={
                 popupData.popupType !== "confimation" && popupData.popupTitle

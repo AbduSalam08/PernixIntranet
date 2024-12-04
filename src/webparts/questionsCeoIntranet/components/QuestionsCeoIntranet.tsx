@@ -25,6 +25,7 @@ import { Checkbox } from "primereact/checkbox";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
+import { ToastContainer } from "react-toastify";
 
 const QuestionsCeoIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -130,7 +131,15 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addQuestionCeo(formData, setPopupController, 0, dispatch);
+      resetFormData(formData, setFormData);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await addQuestionCeo(formData);
+      await getQuestionCeo(dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -256,14 +265,6 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
     getQuestionCeo(dispatch);
   }, [dispatch]);
 
-  const handlenavigate = (): void => {
-    window.open(
-      props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.QuestionsCEOPage,
-      "_self"
-    );
-  };
-
   const productTemplate = (val: any): JSX.Element => {
     return (
       <div className={styles.Container}>
@@ -276,13 +277,11 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
                   ? "https://randomuser.me/api/portraits/placeholder.jpg"
                   : val?.avatarUrl
               }`}
-              // size="small"
               shape="circle"
               style={{
                 width: "25px !important",
                 height: "25px !important",
               }}
-              // data-pr-tooltip={val.receiverName}
             />
           </div>
           <p className={styles.ques} title={val.title}>
@@ -305,15 +304,8 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
             </div>
             <p title={val.replies[0]?.content}>{val.replies[0]?.content}</p>
           </div>
-          {/* <p className={styles.date}>
-            <i className="pi pi-clock" style={{ fontSize: "1rem" }} />
-            {val.replies[0]?.date}
-          </p> */}
 
-          <p className={styles.date}>
-            {/* <i className="pi pi-clock" style={{ fontSize: "1rem" }} /> */}
-            Posted on : {val.date}
-          </p>
+          <p className={styles.date}>Posted on : {val.date}</p>
         </div>
       </div>
     );
@@ -355,7 +347,28 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
           />
         </div>
       </div>
-      <ViewAll onClick={handlenavigate} />
+      <ViewAll
+        onClick={() => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.QuestionsCEOPage,
+            "_self"
+          );
+        }}
+      />
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -369,13 +382,13 @@ const QuestionsCeoIntranet = (props: any): JSX.Element => {
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(formData, setFormData);
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               index,
               "close"
             );
-            resetFormData(formData, setFormData);
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle

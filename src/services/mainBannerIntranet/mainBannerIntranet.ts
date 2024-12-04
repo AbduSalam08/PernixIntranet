@@ -1,100 +1,13 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { CONFIG } from "../../config/config";
-// import { getLastQuoteBasedOnDate } from "../../utils/mainBannerIntranet";
-// // import SpServices from "../SPServices/SpServices";
-// import { sp } from "@pnp/sp";
-
-// // Helper function to check if a file is an image with specific extensions
-// const isValidImage = (filename: string): boolean => {
-//   const validExtensions = ["jpeg", "jpg", "png", "svg"];
-//   const extension = filename.split(".").pop()?.toLowerCase();
-//   return validExtensions.includes(extension ?? "");
-// };
-
-// // Function to get the attachment URLs
-// const getAttachmentsForItem = async (itemId: number): Promise<string[]> => {
-//   try {
-//     // Fetch attachments for the given item ID
-//     const attachments = await sp.web.lists
-//       .getByTitle(CONFIG.ListNames.Intranet_MotivationalQuotes)
-//       .items.getById(itemId)
-//       .attachmentFiles.get();
-
-//     return attachments
-//       .filter((attachment: any) => isValidImage(attachment.FileName))
-//       .map((attachment: any) => attachment.ServerRelativeUrl);
-//   } catch (err) {
-//     console.error("Error fetching attachments:", err);
-//     return [];
-//   }
-// };
-
-// export const getDailyQuote = async (): Promise<any> => {
-//   try {
-//     // Fetch items from the list
-//     const res = await sp.web.lists
-//       .getByTitle(CONFIG.ListNames.Intranet_MotivationalQuotes)
-//       .items.select("*")
-//       .get();
-
-//     if (!res || res.length === 0) {
-//       console.log("No items found.");
-//       return null; // Return null if no items are found
-//     }
-
-//     // Get the latest item based on the date
-//     const latestItem = getLastQuoteBasedOnDate(res);
-
-//     if (!latestItem) {
-//       console.log("No latest item found.");
-//       return null;
-//     }
-
-//     // Get attachments for the latest item
-//     const attachments = await getAttachmentsForItem(latestItem.Id);
-
-//     if (attachments.length > 0) {
-//       // Return the quote data and the URL of the first valid image
-//       return {
-//         quotesData: latestItem,
-//         bannerImage: attachments[0], // Return the first valid image URL
-//       };
-//     }
-
-//     // If no valid image attachment is found, return null
-//     return {
-//       quotesData: latestItem,
-//       bannerImage: null,
-//     };
-//   } catch (err) {
-//     // Log error and return null if there's an issue
-//     console.error("Error fetching daily quote:", err);
-//     return null;
-//   }
-// };
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import moment from "moment";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { IAttachDetails, IQuoteDatas } from "../../interface/interface";
 import { sp } from "@pnp/sp/presets/all";
+import { toast } from "react-toastify";
 
 interface IFormData {
   [key: string]: { value: any };
-}
-
-interface ILoaderStateItem {
-  popupWidth: string;
-  isLoading: {
-    inprogress: boolean;
-    error: boolean;
-    success: boolean;
-  };
-  messages?: {
-    successDescription?: string;
-    errorDescription?: string;
-  };
 }
 
 const prepareRecords = async (res: any): Promise<IQuoteDatas[]> => {
@@ -182,23 +95,9 @@ export const getChoiceData = async (): Promise<string[]> => {
 
 export const addMotivated = async (
   formData: IFormData,
-  fileData: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
+  fileData: any
 ): Promise<any> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Creating a motivation quote...");
 
   try {
     let fileRes: any;
@@ -230,49 +129,24 @@ export const addMotivated = async (
       IsDelete: false,
     };
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The motivation has been added successfully.`,
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Motivation quote added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return { ...curContent };
   } catch (err) {
     console.log("err: ", err);
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding motivation, please try again later.",
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error motivation quote. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return null;
@@ -282,24 +156,10 @@ export const addMotivated = async (
 export const updateMotivated = async (
   formData: any,
   fileData: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number,
   isFileEdit: boolean,
   curObject: IQuoteDatas
 ): Promise<any> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Udating a motivation quote...");
 
   try {
     let fileRes: any;
@@ -362,73 +222,32 @@ export const updateMotivated = async (
       IsDelete: false,
     };
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The motivation has been updated successfully.`,
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Motivation quote updated successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return { ...curContent };
   } catch (err) {
     console.log("err: ", err);
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while update motivation, please try again later.",
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error motivation quote. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return null;
   }
 };
 
-export const deleteMotivated = async (
-  formData: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
-): Promise<any> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const deleteMotivated = async (formData: any): Promise<any> => {
+  const toastId = toast.loading("deleting a motivation quote...");
 
   try {
     await SpServices.SPUpdateItem({
@@ -437,49 +256,24 @@ export const deleteMotivated = async (
       RequestJSON: { ...formData },
     });
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The motivation has been deleted successfully.`,
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Motivation quote deleted successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return true;
   } catch (err) {
     console.log("err: ", err);
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while delete motivation, please try again later.",
-        },
-      };
-
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error motivation quote. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return false;

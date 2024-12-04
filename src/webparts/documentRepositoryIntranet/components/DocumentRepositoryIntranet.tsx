@@ -28,6 +28,7 @@ import {
 } from "../../../services/docRepositoryIntranet/docRepositoryIntranet";
 import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+import { ToastContainer } from "react-toastify";
 
 /* Interface creation */
 interface IDocField {
@@ -186,14 +187,15 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
     folderPath: string = CONFIG.fileFlowPath,
     idx: number
   ): Promise<void> => {
-    await addDocRepository(
-      data,
-      folderPath,
+    resetFormData(formData, setFormData);
+    togglePopupVisibility(
       setPopupController,
+      initialPopupController[idx],
       idx,
-      "master_folder"
+      "close"
     );
 
+    await addDocRepository(data, folderPath, "master_folder");
     await getDocRepository().then(async (val: any[]) => {
       masterRes = [...val];
       await splitResponseDatas();
@@ -420,6 +422,19 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
             }}
           />
 
+          {/* Toast message section */}
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+
           {popupController?.map((popupData: any, index: number) => (
             <Popup
               key={index}
@@ -432,13 +447,13 @@ const DocumentRepositoryIntranet = (props: any): JSX.Element => {
               }}
               PopupType={popupData.popupType}
               onHide={() => {
+                resetFormData(formData, setFormData);
                 togglePopupVisibility(
                   setPopupController,
                   initialPopupController[0],
                   index,
                   "close"
                 );
-                resetFormData(formData, setFormData);
               }}
               popupTitle={
                 popupData.popupType !== "confimation" && popupData.popupTitle

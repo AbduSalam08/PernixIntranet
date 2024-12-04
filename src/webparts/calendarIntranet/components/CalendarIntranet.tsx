@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-floating-promises*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Calendar } from "@fullcalendar/core";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -13,21 +12,12 @@ import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 import "./Style.css";
 import "../../../assets/styles/style.css";
 import * as moment from "moment";
-
 import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
-
 import styles from "./CalendarIntranet.module.scss";
-interface IEvent {
-  title: string;
-  description: string;
-  start: string;
-  end: string;
-  isAllDay: boolean;
-}
 import { useEffect, useState } from "react";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
@@ -42,6 +32,15 @@ import CircularSpinner from "../../../components/common/Loaders/CircularSpinner"
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomTimePicker from "../../../components/common/CustomInputFields/CustomTimePicker";
+import { ToastContainer } from "react-toastify";
+
+interface IEvent {
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  isAllDay: boolean;
+}
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -56,8 +55,6 @@ const CalendarIntranet = (props: any): JSX.Element => {
   );
 
   const [showcalendardata, setShowcalendardata] = useState<any[]>([]);
-  // const [allcalendardata, setAllcalendardata] = useState<any[]>([]);
-
   const initialPopupController = [
     {
       open: false,
@@ -81,11 +78,9 @@ const CalendarIntranet = (props: any): JSX.Element => {
       },
     },
   ];
-
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -215,11 +210,20 @@ const CalendarIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await createOutlookEvent(formData, setPopupController, 0, dispatch);
+      resetFormData(formData, setFormData);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await createOutlookEvent(formData, dispatch);
+      await getEvents(dispatch);
     } else {
       console.log("Form contains errors");
     }
   };
+
   const popupInputs: any[] = [
     [
       <div key={1}>
@@ -448,11 +452,13 @@ const CalendarIntranet = (props: any): JSX.Element => {
   useEffect(() => {
     BindCalender(calenderIntranetData?.data);
   }, [calenderIntranetData]);
+
   return (
     <div className={styles.calenderContainer}>
       <div className={styles.header}>
         <SectionHeaderIntranet
           label="Calendar"
+          title="Create a event"
           removeAdd={
             currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
           }
@@ -500,6 +506,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
         />
         {/* <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} /> */}
       </div>
+
       <div className={styles.container}>
         <div className={styles.calenderSection}>
           <div id="myCalendar" className={styles.mycalender} />
@@ -566,6 +573,19 @@ const CalendarIntranet = (props: any): JSX.Element => {
         <p>View all</p>
       </div>
 
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
@@ -609,4 +629,5 @@ const CalendarIntranet = (props: any): JSX.Element => {
     </div>
   );
 };
+
 export default CalendarIntranet;

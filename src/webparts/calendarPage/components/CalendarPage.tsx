@@ -29,6 +29,8 @@ import Popup from "../../../components/common/Popups/Popup";
 import dayjs from "dayjs";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomTimePicker from "../../../components/common/CustomInputFields/CustomTimePicker";
+import { ToastContainer } from "react-toastify";
+
 interface IEvent {
   title: string;
   description: string;
@@ -49,31 +51,16 @@ let objFilter: SearchField = {
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 let isAdmin: boolean = false;
+let isActivityPage: boolean = false;
 
 const CalendarPage = (props: any): JSX.Element => {
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedTab, setSelectedTab] = useState<string>("");
-  const [selectvalue, setSelectvalue] = useState<any>({
-    isEdit: false,
-    id: null,
-  });
-  const [calendardata, setCalendardata] = useState<IEvent[]>([]);
-  const [showcalendardata, setShowcalendardata] = useState<IEvent[]>([]);
-  const [searchField, setSearchField] = useState<SearchField>({
-    selectedDate: null,
-    allSearch: "",
-  });
-
   const dispatch = useDispatch();
-
   const calenderIntranetData: any = useSelector((state: any) => {
     return state.CalenderIntranetData.value;
   });
-
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
-
   isAdmin = currentUserDetails.role === CONFIG.RoleDetails.user ? false : true;
 
   const initialPopupController = [
@@ -98,7 +85,6 @@ const CalendarPage = (props: any): JSX.Element => {
         inprogress: "Adding newEvent, please wait...",
       },
     },
-
     {
       open: false,
       popupTitle: "Update",
@@ -120,7 +106,6 @@ const CalendarPage = (props: any): JSX.Element => {
         inprogress: "Updating newEvent, please wait...",
       },
     },
-
     {
       open: false,
       popupTitle: "Confirmation",
@@ -145,10 +130,21 @@ const CalendarPage = (props: any): JSX.Element => {
     },
   ];
 
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedTab, setSelectedTab] = useState<string>("");
+  const [selectvalue, setSelectvalue] = useState<any>({
+    isEdit: false,
+    id: null,
+  });
+  const [calendardata, setCalendardata] = useState<IEvent[]>([]);
+  const [showcalendardata, setShowcalendardata] = useState<IEvent[]>([]);
+  const [searchField, setSearchField] = useState<SearchField>({
+    selectedDate: null,
+    allSearch: "",
+  });
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
-
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -278,18 +274,32 @@ const CalendarPage = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      selectvalue.isEdit
-        ? await updateOutlookEvent(
-            selectvalue.id,
-            formData,
-            setPopupController,
-            1
-          )
-        : await createOutlookEvent(formData, setPopupController, 0, dispatch);
+      if (selectvalue?.isEdit) {
+        resetFormData(formData, setFormData);
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[1],
+          1,
+          "close"
+        );
+        await updateOutlookEvent(selectvalue.id, formData);
+        await getEvents(dispatch);
+      } else {
+        resetFormData(formData, setFormData);
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+        await createOutlookEvent(formData, dispatch);
+        await getEvents(dispatch);
+      }
     } else {
       console.log("Form contains errors");
     }
   };
+
   const popupInputs: any[] = [
     [
       <div key={1}>
@@ -576,9 +586,15 @@ const CalendarPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          selectvalue.id &&
+          if (selectvalue.id) {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[2],
+              2,
+              "close"
+            );
             deleteOutlookEvent(selectvalue.id, setPopupController, 2);
-          // await handleSubmit();
+          }
         },
       },
     ],
@@ -722,6 +738,7 @@ const CalendarPage = (props: any): JSX.Element => {
       "open"
     );
   };
+
   const handleDelete = (val: any): any => {
     setSelectvalue({ ...selectvalue, id: val.id });
 
@@ -732,7 +749,12 @@ const CalendarPage = (props: any): JSX.Element => {
       "open"
     );
   };
+
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     getEvents(dispatch, "viewall");
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
@@ -752,11 +774,17 @@ const CalendarPage = (props: any): JSX.Element => {
         <div className={styles.leftSection}>
           <i
             onClick={() => {
-              window.open(
-                props.context.pageContext.web.absoluteUrl +
-                  CONFIG.NavigatePage.PernixIntranet,
-                "_self"
-              );
+              isActivityPage
+                ? window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.ApprovalsPage,
+                    "_self"
+                  )
+                : window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
             }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -965,6 +993,19 @@ const CalendarPage = (props: any): JSX.Element => {
           </div>
         )}
       </div>
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup

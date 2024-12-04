@@ -11,6 +11,7 @@
   padding: 20px;
   box-shadow: 0px -1px 4px 0px #b9b9b940;
   border-radius: 6px;
+  background: #fff;
 
   .carouselWrapper {
     min-height: 390px;
@@ -96,4 +97,18 @@
   align-items: center;
   justify-content: center;
   gap: 15px;
+}
+
+.suggestions {
+  flex-wrap: wrap;
+  gap: 10px;
+
+  button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2d4b511a;
+    color: #2d4b51;
+    font-weight: 600;
+  }
 }

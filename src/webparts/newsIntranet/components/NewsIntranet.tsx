@@ -25,7 +25,8 @@ import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import moment from "moment";
-// const PernixBannerImage = require("../../../assets/images/svg/PernixBannerImage.svg");
+import { ToastContainer } from "react-toastify";
+
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 const NewsIntranet = (props: any): JSX.Element => {
@@ -104,7 +105,6 @@ const NewsIntranet = (props: any): JSX.Element => {
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
-  console.log("News_Admin currentUserDetails: ", currentUserDetails);
 
   const handleInputChange = (
     field: string,
@@ -151,7 +151,16 @@ const NewsIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addNews(formData, setPopupController, 0);
+      resetFormData(formData, setFormData);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+
+      await addNews(formData);
+      await getAllNewsData(dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -327,6 +336,7 @@ const NewsIntranet = (props: any): JSX.Element => {
       },
     ],
   ];
+
   const handlenavigate = (): void => {
     window.open(
       props.context.pageContext.web.absoluteUrl + CONFIG.NavigatePage.NewsPage,
@@ -366,6 +376,7 @@ const NewsIntranet = (props: any): JSX.Element => {
     <div className={styles.newsContainer}>
       <SectionHeaderIntranet
         label={"News"}
+        title="Add a new news"
         removeAdd={
           currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
         }
@@ -406,6 +417,19 @@ const NewsIntranet = (props: any): JSX.Element => {
 
       <ViewAll onClick={handlenavigate} />
 
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
@@ -418,6 +442,7 @@ const NewsIntranet = (props: any): JSX.Element => {
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(formData, setFormData);
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
@@ -428,7 +453,6 @@ const NewsIntranet = (props: any): JSX.Element => {
             if (popupData?.isLoading?.success) {
               getAllNewsData(dispatch);
             }
-            resetFormData(formData, setFormData);
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle

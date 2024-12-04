@@ -175,7 +175,8 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addShoutOut(formData, setPopupController, 0, dispatch);
+      await addShoutOut(formData, dispatch);
+      // await addShoutOut(formData, setPopupController, 0, dispatch);
     } else {
       console.log("Form contains errors");
     }

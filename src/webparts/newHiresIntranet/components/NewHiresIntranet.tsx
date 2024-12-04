@@ -28,6 +28,7 @@ import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import moment from "moment";
 import { IFormFields } from "../../../interface/interface";
 import { Button } from "primereact/button";
+import { ToastContainer } from "react-toastify";
 
 /* Images creation */
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
@@ -191,7 +192,16 @@ const NewHiresIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      await addNewHire(formData, setPopupController, 0);
+      resetFormData(formData, setFormData);
+      setFormData({ ...initialFormData });
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await addNewHire(formData);
+      await getAllNewHiresData(dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -520,6 +530,19 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         />
       )}
 
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
           key={index}
@@ -532,14 +555,14 @@ const NewHiresIntranet = (props: any): JSX.Element => {
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(formData, setFormData);
+            setFormData({ ...initialFormData });
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               index,
               "close"
             );
-            resetFormData(formData, setFormData);
-            setFormData({ ...initialFormData });
             if (popupData?.isLoading?.success) {
               getAllNewHiresData(dispatch);
             }

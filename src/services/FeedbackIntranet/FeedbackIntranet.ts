@@ -15,19 +15,6 @@ interface IFormData {
   [key: string]: { value: any };
 }
 
-interface ILoaderStateItem {
-  popupWidth: string;
-  isLoading: {
-    inprogress: boolean;
-    error: boolean;
-    success: boolean;
-  };
-  messages?: {
-    successDescription?: string;
-    errorDescription?: string;
-  };
-}
-
 const getDataLooping = async (
   data: any[],
   nextRef: any,
@@ -83,24 +70,8 @@ export const getFeedBackDatas = async (listName: string): Promise<any[]> => {
   }
 };
 
-export const addFeedbackQus = async (
-  formData: IFormData,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
-): Promise<any> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const addFeedbackQus = async (formData: IFormData): Promise<any> => {
+  const toastId = toast.loading("Creating a new feedback question...");
 
   try {
     const res: any = await SpServices.SPAddItem({
@@ -119,70 +90,34 @@ export const addFeedbackQus = async (
         : null,
     };
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription:
-            "The feedback question has been added successfully.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "The new feedback question added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return { ...curContent };
   } catch (err) {
     console.log("Feedback question add error: ", err);
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription:
-            "An error occurred while adding feedback question, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "Error adding new feedback question. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return null;
   }
 };
 
-export const updateFeedbackQus = async (
-  formData: IFormData,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
-): Promise<any> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const updateFeedbackQus = async (formData: IFormData): Promise<any> => {
+  const toastId = toast.loading(
+    "Updating the feedback question in progress..."
+  );
 
   try {
     await SpServices.SPUpdateItem({
@@ -191,69 +126,33 @@ export const updateFeedbackQus = async (
       RequestJSON: { ...formData },
     });
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription:
-            "The feedback question has been updated successfully.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "This feedback question has been successfully updated!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return { ...formData };
   } catch (err) {
     console.log("Feedback question update error: ", err);
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription:
-            "An error occurred while updating feedback question, please try again later.",
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render:
+        "An error occurred while updating this feedback question. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return null;
   }
 };
 
-export const deleteFeedbackQus = async (
-  formData: any,
-  setLoaderState: React.Dispatch<React.SetStateAction<ILoaderStateItem[]>>,
-  index: number
-): Promise<any> => {
-  setLoaderState((prevState) => {
-    const updatedState = [...prevState];
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+export const deleteFeedbackQus = async (formData: any): Promise<any> => {
+  const toastId = toast.loading("Deleting the feedback question in progress...");
 
   try {
     await SpServices.SPDeleteItem({
@@ -261,46 +160,25 @@ export const deleteFeedbackQus = async (
       ID: Number(formData?.ID),
     });
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription:
-            "The feedback question has been deleted successfully.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render: "This feedback question has been successfully deleted!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return true;
   } catch (err) {
     console.log("Feedback question deleted error: ", err);
 
-    setLoaderState((prevState) => {
-      const updatedState = [...prevState];
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while delete feedback question, please try again later.",
-        },
-      };
-      return updatedState;
+    toast.update(toastId, {
+      render:
+        "An error occurred while deleting this feedback question. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
 
     return false;
@@ -311,7 +189,9 @@ export const addFeedbackRes = async (
   formData: IFormData,
   curUserData: IUserData
 ): Promise<any> => {
-  const toastId = toast.loading("Creating ticket...");
+  const toastId = toast.loading(
+    "Responding to the feedback question is in progress..."
+  );
 
   try {
     const res: any = await SpServices.SPAddItem({
@@ -328,7 +208,8 @@ export const addFeedbackRes = async (
     };
 
     toast.update(toastId, {
-      render: "Feedback response added successfully!",
+      render:
+        "The response to the feedback question has been added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -340,7 +221,7 @@ export const addFeedbackRes = async (
     console.log("Feedback response add error: ", err);
 
     toast.update(toastId, {
-      render: "Error feedback response. Please try again.",
+      render: "Error adding response. Please try again.",
       type: "error",
       isLoading: false,
       autoClose: 5000,

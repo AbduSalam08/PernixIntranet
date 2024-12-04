@@ -37,6 +37,7 @@ import CustomMultipleFileUpload from "../../../components/common/CustomInputFiel
 import DeleteIcon from "@mui/icons-material/Delete";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import { InputSwitch } from "primereact/inputswitch";
+import { ToastContainer } from "react-toastify";
 
 /* Interface creation */
 interface ITabObject {
@@ -59,6 +60,7 @@ let items: ITabObject[] = [{ name: "Home", path: CONFIG.fileFlowPath }];
 let isAdmin: boolean = false;
 let masterRes: any[] = [];
 let masterDocDatas: IDocRepository[] = [];
+let isActivityPage: boolean = false;
 
 const DocumentRepositoryPage = (props: any): JSX.Element => {
   /* Local variable creation */
@@ -448,8 +450,14 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     arrFileData.pop();
     const newPath: string = arrFileData.join("/");
 
-    await deleteDocRepository(id, setPopupController, 2);
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[2],
+      2,
+      "close"
+    );
 
+    await deleteDocRepository(id);
     await getDocRepository().then(async (val: any[]) => {
       masterRes = [...val];
       folderType === "master_folder"
@@ -464,14 +472,15 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     folderPath: string = CONFIG.fileFlowPath,
     idx: number
   ): Promise<void> => {
-    await addDocRepository(
-      data,
-      folderPath,
+    resetFormData(formData, setFormData);
+    togglePopupVisibility(
       setPopupController,
+      initialPopupController[idx],
       idx,
-      folderType
+      "close"
     );
 
+    await addDocRepository(data, folderPath, folderType);
     await getDocRepository().then(async (val: any[]) => {
       masterRes = [...val];
       folderType === "master_folder"
@@ -769,6 +778,10 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
   ];
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     onLoadingFUN();
   }, []);
 
@@ -789,11 +802,17 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                 }}
                 onClick={(_) => {
                   localStorage.removeItem(CONFIG.selMasterFolder);
-                  window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+                  isActivityPage
+                    ? window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.ApprovalsPage,
+                        "_self"
+                      )
+                    : window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.PernixIntranet,
+                        "_self"
+                      );
                 }}
               >
                 <i
@@ -1034,6 +1053,19 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
             )}
           </div>
 
+          {/* Toast message section */}
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+
           {/* add and edit popup section */}
           {popupController?.map((popupData: any, index: number) => (
             <Popup
@@ -1047,13 +1079,13 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
               }}
               PopupType={popupData.popupType}
               onHide={() => {
+                resetFormData(formData, setFormData);
                 togglePopupVisibility(
                   setPopupController,
                   initialPopupController[0],
                   index,
                   "close"
                 );
-                resetFormData(formData, setFormData);
               }}
               popupTitle={
                 popupData.popupType !== "confimation" && popupData.popupTitle

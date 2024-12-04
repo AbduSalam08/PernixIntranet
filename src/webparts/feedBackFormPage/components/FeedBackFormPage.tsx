@@ -36,6 +36,7 @@ import moment from "moment";
 import Edit from "@mui/icons-material/Edit";
 import Delete from "@mui/icons-material/Delete";
 import FeedBackViewPage from "./FeedBackViewPage";
+import { ToastContainer } from "react-toastify";
 
 /* Local interfaces */
 interface IFeedbackField {
@@ -50,6 +51,7 @@ const errorImg: string = require("../../../assets/images/svg/errorImg.svg");
 let isAdmin: boolean = false;
 let masterFeedBackQus: IFeedbackQusType[] = [];
 let masterFeedBackRes: IFeedbackResType[] = [];
+let isActivityPage: boolean = false;
 
 const FeedBackFormPage = (props: any): JSX.Element => {
   /* Local variable creation */
@@ -339,12 +341,15 @@ const FeedBackFormPage = (props: any): JSX.Element => {
     data: any,
     tab: string = CONFIG.TabsName[0]
   ): Promise<void> => {
-    let isDeleted: boolean = await deleteFeedbackQus(
-      data,
+    resetFormData(formData, setFormData);
+    togglePopupVisibility(
       setPopupController,
-      2
+      initialPopupController[2],
+      2,
+      "close"
     );
 
+    let isDeleted: boolean = await deleteFeedbackQus(data);
     if (isDeleted) {
       let curIndex: number = masterFeedBackQus?.findIndex(
         (val: IFeedbackQusType) => val.ID === data?.ID
@@ -357,8 +362,15 @@ const FeedBackFormPage = (props: any): JSX.Element => {
   };
 
   const handleUpdate = async (data: any, tab: string): Promise<void> => {
-    let updatedJSON: any = await updateFeedbackQus(data, setPopupController, 1);
+    resetFormData(formData, setFormData);
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[1],
+      1,
+      "close"
+    );
 
+    let updatedJSON: any = await updateFeedbackQus(data);
     let curIndex: number = masterFeedBackQus?.findIndex(
       (val: IFeedbackQusType) => val.ID === updatedJSON?.ID
     );
@@ -368,8 +380,15 @@ const FeedBackFormPage = (props: any): JSX.Element => {
   };
 
   const handleSubmit = async (data: any, tab: string): Promise<void> => {
-    const addedJSON: any = await addFeedbackQus(data, setPopupController, 0);
+    resetFormData(formData, setFormData);
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[0],
+      0,
+      "close"
+    );
 
+    const addedJSON: any = await addFeedbackQus(data);
     masterFeedBackQus = [addedJSON, ...masterFeedBackQus];
     await prepareDatas(tab);
   };
@@ -709,6 +728,10 @@ const FeedBackFormPage = (props: any): JSX.Element => {
   ];
 
   useEffect(() => {
+    const urlObj = new URL(window.location.href);
+    const params = new URLSearchParams(urlObj.search);
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     onLoadingFUN();
   }, []);
 
@@ -728,11 +751,17 @@ const FeedBackFormPage = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
-                  window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+                  isActivityPage
+                    ? window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.ApprovalsPage,
+                        "_self"
+                      )
+                    : window.open(
+                        props.context.pageContext.web.absoluteUrl +
+                          CONFIG.NavigatePage.PernixIntranet,
+                        "_self"
+                      );
                 }}
               >
                 <i
@@ -916,6 +945,19 @@ const FeedBackFormPage = (props: any): JSX.Element => {
             </div>
           )}
 
+          {/* Toast message section */}
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+
           {/* add and edit popup section */}
           {popupController?.map((popupData: any, index: number) => (
             <Popup
@@ -929,13 +971,13 @@ const FeedBackFormPage = (props: any): JSX.Element => {
               }}
               PopupType={popupData.popupType}
               onHide={() => {
+                resetFormData(formData, setFormData);
                 togglePopupVisibility(
                   setPopupController,
                   initialPopupController[index],
                   index,
                   "close"
                 );
-                resetFormData(formData, setFormData);
                 if (popupData?.isLoading?.success) {
                   prepareDatas(selectedTab || CONFIG.TabsName[0]);
                 }

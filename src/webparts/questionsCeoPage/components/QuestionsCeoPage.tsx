@@ -37,6 +37,7 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import { Checkbox } from "primereact/checkbox";
+import { ToastContainer } from "react-toastify";
 
 interface IReplies {
   avatarUrl: string;
@@ -75,6 +76,7 @@ interface PopupState {
 }
 
 let assignedUser: string = "";
+let isActivityPage: boolean = false;
 
 const QuestionsCeoPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -231,6 +233,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           value: value,
           isValid,
           errorMsg: isValid ? "" : errorMsg,
+          permission: true,
         },
       }));
     } else {
@@ -246,10 +249,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           ...prevData.answer,
           isValid: true,
           permission:
-            userDetails.email === value?.email.toLowerCase() ? true : false,
+            userDetails.email.toLowerCase() === value?.email.toLowerCase()
+              ? true
+              : false,
           validationRule: {
             required:
-              userDetails.email === value?.email.toLowerCase() ? true : false,
+              userDetails.email.toLowerCase() === value?.email.toLowerCase()
+                ? true
+                : false,
             type: "string",
           },
         },
@@ -302,7 +309,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
 
     setNewFormData(updatedFormData);
     if (!hasErrors) {
-      await addQuestionCeo(newFormData, setPopupController, 1, dispatch);
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[1],
+        1,
+        "close"
+      );
+      await addQuestionCeo(newFormData);
+      await getQuestionCeo(dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -338,7 +352,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     }, {} as typeof formData);
 
     setFormData(updatedFormData);
-
     if (!hasErrors) {
       if (submitCondition) {
         const AdminPayload =
@@ -363,12 +376,29 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   ? formData?.assignTo?.value?.id
                   : formData?.assignTo?.previousAssignTo?.id,
               };
+
+        let str: string =
+          formData?.assignTo?.value?.email && formData?.answer?.value
+            ? "response"
+            : formData?.answer?.value
+            ? "response"
+            : "";
+
+        if (str) {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+        }
         await submitCEOQuestionAnswer(
           formData,
           AdminPayload,
           setPopupController,
           0,
-          dispatch
+          dispatch,
+          str
         );
       } else {
         const userPayload = {
@@ -376,12 +406,20 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           AnswerById: userDetails?.id,
           AnswerDate: new Date(),
         };
+
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
         await submitCEOQuestionAnswer(
           formData,
           userPayload,
           setPopupController,
           0,
-          dispatch
+          dispatch,
+          "response"
         );
       }
     } else {
@@ -395,9 +433,10 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         <div>
           <p className={styles.question}>{formData?.qustion?.value}</p>
         </div>
-        {userDetails.email ===
+        {userDetails?.email?.toLowerCase() ===
           formData?.assignTo?.previousAssignTo?.email?.toLowerCase() ||
-        userDetails.email === formData?.assignTo?.value?.email?.toLowerCase() ||
+        userDetails?.email?.toLowerCase() ===
+          formData?.assignTo?.value?.email?.toLowerCase() ||
         formData?.answer?.value !== "" ? (
           <div className={styles.r4}>
             <div className={styles.item5}>
@@ -432,9 +471,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                 errorMsg={formData?.assignTo?.errorMsg}
                 selectedItem={[formData?.assignTo?.value]}
                 readOnly={
-                  (userDetails.email ===
-                    formData?.assignTo?.previousAssignTo?.email ||
-                    userDetails.email ===
+                  (userDetails.email.toLowerCase() ===
+                    formData?.assignTo?.previousAssignTo?.email.toLowerCase() ||
+                    userDetails.email.toLowerCase() ===
                       formData?.assignTo?.value?.email?.toLowerCase()) &&
                   formData?.answer?.value !== ""
                 }
@@ -668,7 +707,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   ];
 
   const onLoadingFUN = async (curTab: any): Promise<void> => {
-    setIsLoading(true);
     let filteredData: any[] = [];
     const userDetails = await questionsCurrentUserRole(
       setUserDetails,
@@ -861,11 +899,13 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   }, [QuestionCEOIntranetData]);
 
   useEffect(() => {
+    setIsLoading(true);
     const urlObj = new URL(window.location.href);
     const params = new URLSearchParams(urlObj.search);
     const ID = params.get("questionID");
+    isActivityPage = params?.get("Page") === "activity" ? true : false;
+
     setSearchParamsQusID(Number(ID));
-    // questionsCurrentUserRole(setUserDetails);
     getQuestionCeo(dispatch);
     dispatch(setMainSPContext(props?.context));
   }, [dispatch]);
@@ -880,11 +920,17 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         <div className={styles.leftSection}>
           <i
             onClick={() => {
-              window.open(
-                props.context.pageContext.web.absoluteUrl +
-                  CONFIG.NavigatePage.PernixIntranet,
-                "_self"
-              );
+              isActivityPage
+                ? window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.ApprovalsPage,
+                    "_self"
+                  )
+                : window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
             }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -961,6 +1007,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                     cursor: "pointer",
                   }}
                   onClick={(_) => {
+                    setIsLoading(true);
                     setPagination(CONFIG.PaginationData);
                     if (selectedTab !== str) {
                       searchField.Search = "";
@@ -988,6 +1035,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                     cursor: "pointer",
                   }}
                   onClick={(_) => {
+                    setIsLoading(true);
                     setPagination(CONFIG.PaginationData);
                     if (selectedTab !== str) {
                       searchField.Search = "";
@@ -1014,6 +1062,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
+                  setIsLoading(true);
                   setPagination(CONFIG.PaginationData);
                   if (selectedTab !== str) {
                     searchField.Search = "";
@@ -1117,7 +1166,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                                 isValid: true,
                                 value: val?.replies[0]?.content || "",
                                 permission:
-                                  userDetails.email ===
+                                  userDetails.email.toLowerCase() ===
                                   val?.assignTo?.email?.toLowerCase()
                                     ? true
                                     : false,
@@ -1169,14 +1218,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                         <div className={styles.ansUserSec}>
                           <Avatar
                             className={styles.ansAvatar}
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.replies?.[0]?.avatarUrl}`}
+                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.assignTo?.email}`}
                             shape="circle"
                           />
                           <div
-                            title={val?.replies?.[0]?.AnswerBy}
+                            title={val?.assignTo?.name}
                             className={styles.ansUserLable}
                           >
-                            {val?.replies?.[0]?.AnswerBy}
+                            {val?.assignTo?.name}
                           </div>
                         </div>
                       </div>
@@ -1233,6 +1282,19 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
           />
         </div>
       )}
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
