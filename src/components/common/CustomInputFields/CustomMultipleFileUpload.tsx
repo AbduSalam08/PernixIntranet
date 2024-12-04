@@ -691,7 +691,7 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
   // Handle initial value from props
   useEffect(() => {
     if (value.length > 0) {
-      setFileNames(value?.map((item: any) => item?.name));
+      setFileNames(value?.map((item: any) => item?.name ?? item?.FileName));
       setSelectedFiles([...value]);
     }
   }, [value]);

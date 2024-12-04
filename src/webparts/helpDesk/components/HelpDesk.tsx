@@ -94,6 +94,7 @@ const HelpDesk: React.FC<HelpDeskProps> = (props) => {
               <Route index Component={MyTickets} />
               <Route path="mentions" Component={MyTickets} />
               <Route path="created_by_me" Component={MyTickets} />
+              <Route path="scheduled_tickets" Component={MyTickets} />
               <Route path="all" Component={MyTickets} />
               <Route path="open" Component={MyTickets} />
               <Route path="unassigned" Component={MyTickets} />
