@@ -9,6 +9,7 @@ import isBetween from "dayjs/plugin/isBetween";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { setHelpDeskTickets } from "../redux/features/HelpDeskSlice";
 import { getAllTickets } from "../services/HelpDeskMainServices/dashboardServices";
+import { CONFIG } from "../config/config";
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
@@ -414,7 +415,7 @@ export const currentRoleBasedDataUtil: any = (
   currentPath?: any
 ) => {
   if (
-    // currentUserDetails?.role === "Pernix_Admin" ||
+    // currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
   ) {
     return {
@@ -435,7 +436,7 @@ export const currentRoleBasedDataUtil: any = (
     };
   } else if (
     currentUserDetails?.role === "Super Admin" ||
-    currentUserDetails?.role === "Pernix_Admin"
+    currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin
   ) {
     const isUser = HelpDeskTicktesData?.data?.filter(
       (item: any) => item?.EmployeeName?.EMail === currentUserDetails?.email
@@ -688,7 +689,7 @@ export const getCurrentRoleForTicketsRoute = (
     : currentUserDetails?.role === "HelpDesk_IT_Owners"
     ? "/it_owner"
     : currentUserDetails?.role === "Super Admin" ||
-      currentUserDetails?.role === "Pernix_Admin"
+      currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin
     ? "/user"
     : `/${currentUserDetails?.role}`;
 };

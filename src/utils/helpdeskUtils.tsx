@@ -261,7 +261,8 @@ export const handleSubmit = async (
         updateTicket(openNewTicketSlide?.data?.ID, formData, ["Attachment"]),
       ])
         ?.then(async (res: any) => {
-          navigate(location.pathname);
+          // navigate(location.pathname);
+          await getAllTickets(dispatch);
 
           const updatedTickets = await getAllTicketsData();
 

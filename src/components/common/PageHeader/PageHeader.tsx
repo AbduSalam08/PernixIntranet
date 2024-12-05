@@ -39,7 +39,7 @@ const PageHeader = ({
   console.log("currentUserDetails: ", currentUserDetails);
 
   // const currentRole: string =
-  //   currentUserDetails?.role === "Pernix_Admin"
+  //   currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin
   //     ? "/helpdesk_manager/dashboard"
   //     : currentUserDetails?.role === "HelpDesk_Ticket_Managers"
   //     ? "/helpdesk_manager/dashboard"
