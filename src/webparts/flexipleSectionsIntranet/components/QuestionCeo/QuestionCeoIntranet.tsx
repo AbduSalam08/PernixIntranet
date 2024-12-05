@@ -8,6 +8,7 @@ import "../../../../assets/styles/style.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addQuestionCeo,
+  getcurrentUser,
   getQuestionCeo,
 } from "../../../../services/QuestionCEOIntranet/QuestionCEOIntranet";
 import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
@@ -64,6 +65,8 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
   );
   const [CEOQuestions, setCEOQuestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [curUser, setCurUser] = useState<any>({});
+  console.log("curUser: ", curUser);
   const [formData, setFormData] = useState<any>({
     Description: {
       value: "",
@@ -131,7 +134,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
         0,
         "close"
       );
-      await addQuestionCeo(formData);
+      await addQuestionCeo(formData, curUser);
       await getQuestionCeo(dispatch);
     } else {
       console.log("Form contains errors");
@@ -256,6 +259,13 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
 
   useEffect(() => {
     getQuestionCeo(dispatch);
+    getcurrentUser()
+      .then((res: any) => {
+        res && setCurUser({ ...res });
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
   }, [dispatch]);
 
   const productTemplate = (val: any): JSX.Element => {

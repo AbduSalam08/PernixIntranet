@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import moment from "moment";
 import { setQuestionCEOIntranetData } from "../../redux/features/QuestionCEOIntranetSlice";
 import SpServices from "../SPServices/SpServices";
@@ -145,17 +146,29 @@ export const getQuestionCeo = async (dispatch: any): Promise<any> => {
   }
 };
 
-export const addQuestionCeo = async (formData: any): Promise<any> => {
+export const addQuestionCeo = async (
+  formData: any,
+  Curuser?: any
+): Promise<any> => {
   const toastId = toast.loading("Creating a new question...");
+  let payload = {
+    Question: formData?.Description?.value,
+    isAnonymous: formData?.Anonymous?.value || false,
+    SubmittedBy: formData?.Anonymous?.value ? "" : Curuser.Email,
+  };
 
   try {
     await SpServices.SPAddItem({
       Listname: CONFIG.ListNames.Intranet_QuestionsToCEO,
       RequestJSON: {
         Question: formData?.Description?.value,
-        isAnonymous: formData?.Anonymous?.value,
+        isAnonymous: formData?.Anonymous?.value || false,
+        SubmittedById: formData?.Anonymous?.value ? null : Curuser.Id,
       },
     });
+
+    await postToApi(payload);
+    debugger;
 
     toast.update(toastId, {
       render: "The new question added successfully!",
@@ -309,4 +322,43 @@ export const submitCEOQuestionAnswer = async (
         });
       }
     });
+};
+
+export const getcurrentUser = async (): Promise<any> => {
+  let res: any = await sp.web.currentUser.get();
+
+  return {
+    Id: res?.Id || null,
+    Email: res?.Email.toLowerCase() || "",
+    Name: res?.Title || "",
+  };
+};
+
+// api call when i add the Question
+
+const postToApi = async (payload: any): Promise<void> => {
+  const apiUrl =
+    "https://prod-01.centralindia.logic.azure.com:443/workflows/a909d0d3e5e74b3ebf51e15d6760d6c0/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NlthrgeWk21UKdngZuJNQeE4_-GnSvCNx5vkTEWp5Uc";
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      console.log(
+        `Request succeeded. Status: ${response.status} - ${response.statusText}`
+      );
+    } else {
+      console.error(
+        `Request failed. Status: ${response.status} - ${response.statusText}`
+      );
+    }
+  } catch (error) {
+    console.error("Error while posting to API:", error);
+  }
 };
