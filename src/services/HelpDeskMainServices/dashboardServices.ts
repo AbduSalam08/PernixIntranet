@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { sp } from "@pnp/sp";
 import { CONFIG } from "../../config/config";
 import { setHelpDeskTickets } from "../../redux/features/HelpDeskSlice";
 import SpServices from "../SPServices/SpServices";
@@ -132,4 +133,46 @@ export const getAllTicketsData = async (): Promise<any> => {
       "EmployeeName,ITOwner,TicketManager,RepeatedTicketSource, TaggedPerson, RecurrenceConfigDetails",
   });
   return res;
+};
+
+export const getAllTicketsData2 = async (): Promise<any> => {
+  const camlQuery = {
+    ViewXml: `
+      <View>
+        <Query />
+        <ViewFields>
+          <FieldRef Name='Title' />
+          <FieldRef Name='_ColorTag' />
+          <FieldRef Name='ComplianceAssetId' />
+          <FieldRef Name='TicketNumber' />
+          <FieldRef Name='EmployeeName' />
+          <FieldRef Name='ITOwner' />
+          <FieldRef Name='TicketManager' />
+          <FieldRef Name='Category' />
+          <FieldRef Name='Priority' />
+          <FieldRef Name='TicketSource' />
+          <FieldRef Name='Status' />
+          <FieldRef Name='RepeatedTicket' />
+          <FieldRef Name='TaggedPerson' />
+          <FieldRef Name='RecurrenceConfigDetails' />
+          <FieldRef Name='Modified' />
+          <FieldRef Name='Created' />
+        </ViewFields>
+        <QueryOptions />
+      </View>
+    `,
+  };
+
+  try {
+    // REST API call using sp.web.lists
+    const response = await sp.web.lists
+      .getByTitle("HelpDesk_AllTickets")
+      .getItemsByCAMLQuery(camlQuery);
+
+    // Return the fetched items
+    return response;
+  } catch (error) {
+    console.error("Error fetching tickets data:", error);
+    throw error;
+  }
 };

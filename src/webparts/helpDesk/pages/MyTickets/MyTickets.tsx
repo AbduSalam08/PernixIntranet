@@ -39,7 +39,10 @@ import {
 } from "../../../../utils/commonUtils";
 import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
+import {
+  getAllTickets,
+  getAllTicketsData2,
+} from "../../../../services/HelpDeskMainServices/dashboardServices";
 import InfoCard from "../../components/InfoCard/InfoCard";
 import { toast } from "react-toastify";
 import {
@@ -1139,6 +1142,13 @@ const MyTickets = (): JSX.Element => {
       currentUserDetails,
       dispatch
     );
+    // getAllTicketsData2()
+    console.log(
+      "getAllTicketsData2(): ",
+      getAllTicketsData2().then((res: any) => {
+        console.log(res);
+      })
+    );
     // navigate(location.pathname, { state: null });
   }, [location.pathname]);
 
@@ -1161,7 +1171,8 @@ const MyTickets = (): JSX.Element => {
       popupController[0]?.popupWidth === "450px" &&
       popupController[0]?.popupData?.HasRecurrence &&
       recurrenceDetails?.Frequency?.value !== "Repeat once" &&
-      recurrenceDetails?.Frequency?.value !== "Does not repeat"
+      recurrenceDetails?.Frequency?.value !== "Does not repeat" &&
+      isTicketManager
     ) {
       setPopupController((prev) =>
         updatePopupController(prev, 0, {

@@ -11,6 +11,7 @@ import {
 } from "../../../../utils/commonUtils";
 // import { setHelpDeskTickets } from "../../../../redux/features/HelpDeskSlice";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
+import { CONFIG } from "../../../../config/config";
 
 interface NavItem {
   label: string;
@@ -51,7 +52,7 @@ const LeftBar: React.FC = (): JSX.Element => {
     const items: NavItem[] =
       currentUserDetails?.role === "user" ||
       currentUserDetails?.role === "Super Admin" ||
-      currentUserDetails?.role === "Pernix_Admin"
+      currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin
         ? [
             {
               label: "My tickets",

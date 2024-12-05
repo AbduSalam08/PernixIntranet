@@ -21,24 +21,24 @@ const MainLayout = (): JSX.Element => {
   const MainSPContext = useSelector((state: any) => state.MainSPContext.value);
 
   const currentRole: string =
-    // currentUserDetails?.role === "Pernix_Admin" ||
+    // currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
       ? "/helpdesk_manager/dashboard"
       : currentUserDetails?.role === "HelpDesk_IT_Owners"
       ? "/it_owner/dashboard"
       : currentUserDetails?.role === "Super Admin" ||
-        currentUserDetails?.role === "Pernix_Admin"
+        currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin
       ? `/user/all_tickets`
       : `/${currentUserDetails?.role}/all_tickets`;
 
   const currentRoleInitial: string =
-    currentUserDetails?.role === "Pernix_Admin" ||
+    currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin ||
     currentUserDetails?.role === "HelpDesk_Ticket_Managers"
       ? "helpdesk_manager"
       : currentUserDetails?.role === "HelpDesk_IT_Owners"
       ? "it_owner"
       : currentUserDetails?.role === "Super Admin" ||
-        currentUserDetails?.role === "Pernix_Admin"
+        currentUserDetails?.role === CONFIG.SPGroupName.Pernix_Admin
       ? `/user/all_tickets`
       : `${currentUserDetails?.role}`;
 

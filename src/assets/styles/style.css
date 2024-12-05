@@ -717,7 +717,11 @@ em {
     /* Slide down */
   }
 }
-
+.MuiDataGrid-columnHeader:focus {
+  outline: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
 /* .p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible)
   .p-checkbox-box {
   box-shadow: none !important;

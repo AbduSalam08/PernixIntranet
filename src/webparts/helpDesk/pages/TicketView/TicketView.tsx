@@ -484,20 +484,17 @@ const TicketView = (): JSX.Element => {
               onChange={(e: any) => {
                 const value = e;
 
-                if (
-                  value?.toLowerCase() === "repeat once" ||
-                  value?.toLowerCase() === "does not repeat"
-                ) {
+                if (value?.toLowerCase() === "does not repeat") {
                   setHasRecurrence(false);
                   setPopupController(
-                    updatePopupController(popupController, 0, {
+                    updatePopupController(popupController, 1, {
                       popupWidth: "450px",
                     })
                   );
                 } else {
                   setHasRecurrence(true);
                   setPopupController(
-                    updatePopupController(popupController, 0, {
+                    updatePopupController(popupController, 1, {
                       popupWidth: "650px",
                     })
                   );
@@ -551,7 +548,7 @@ const TicketView = (): JSX.Element => {
             style={{ maxHeight: hasRecurrence ? "500px" : "0" }}
           >
             <span className={styles2.recurrenceLabel}>
-              Recurrence details ({popupController[0]?.popupData?.TicketNumber})
+              Recurrence details ({ticketNumber})
             </span>
 
             <div className={styles2.r1}>
@@ -775,7 +772,6 @@ const TicketView = (): JSX.Element => {
     if (currentTicketsData?.HasRecurrence) {
       getRecurrenceConfigDetails(currentTicketsData?.RecurrenceConfigDetailsId)
         .then((res: any) => {
-          console.log("res: ", res);
           setRecurrenceConfigData(res || []);
         })
         .catch((err: any) => {
