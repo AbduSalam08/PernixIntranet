@@ -17,7 +17,7 @@ import {
   getComments,
   getcuruserdetails,
 } from "../../../services/BlogsPage/BlogsPageServices";
-import { VisibilityOutlined } from "@mui/icons-material";
+import { Chat, VisibilityOutlined } from "@mui/icons-material";
 //import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { Avatar } from "primereact/avatar";
 import moment from "moment";
@@ -33,13 +33,13 @@ import { ToastContainer } from "react-toastify";
 //interface
 
 interface TaggedPerson {
-  id: number | null;
+  id: number | any;
   email: string;
   name: string;
 }
 
 interface Comment {
-  id: number | null;
+  id: number | any;
   name: string | any;
   date: string | any;
   comment: string;
@@ -105,7 +105,7 @@ function ViewComponent(props: any) {
       // get comments from which blog user click
       await getComments(props?.viewitem?.Id)
         .then((res) => {
-          let data: Comment[] = res?.map((val: any) => ({
+          const data: Comment[] = res?.map((val: any) => ({
             id: val.ID || null,
             name: val.Author?.Title,
             date: val?.Created,
@@ -144,7 +144,7 @@ function ViewComponent(props: any) {
         if (res) {
           getComments(props?.viewitem?.Id)
             .then((res: any) => {
-              let data: Comment[] = res?.map((val: any) => ({
+              const data: Comment[] = res?.map((val: any) => ({
                 id: val.ID || null,
                 name: val.Author?.Title,
                 date: val?.Created,
@@ -198,31 +198,6 @@ function ViewComponent(props: any) {
         <CircularSpinner></CircularSpinner>
       ) : (
         <>
-          <div className={styles.backbox}>
-            <div
-              // className={styles.roundiconbutton}
-              onClick={() => {
-                props.resetstate();
-              }}
-            >
-              <i
-                className="pi pi-arrow-circle-left"
-                style={{
-                  fontSize: "1.2rem",
-                  color: "#E0803D",
-                  cursor: "pointer",
-                }}
-              />
-              {/* <Icon iconName="SkypeArrow" className={styles.icon} /> */}
-            </div>
-            {/* <h5
-          style={{
-            textDecoration: "underline 1.5px green",
-          }}
-        >
-          View Details
-        </h5> */}
-          </div>
           <div
             style={{
               width: "100%",
@@ -233,15 +208,37 @@ function ViewComponent(props: any) {
           >
             <div className={styles.section}>
               <div className={styles.parenttitle}>
-                <h2
-                  title={props.viewitem.ParentTitle}
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "700",
-                  }}
-                >
-                  {props.viewitem.ParentTitle}
-                </h2>
+                <div className={styles.headerWrapper}>
+                  <div className={styles.backbox}>
+                    <div
+                      // className={styles.roundiconbutton}
+                      onClick={() => {
+                        props.resetstate();
+                      }}
+                    >
+                      <i
+                        className="pi pi-arrow-circle-left"
+                        style={{
+                          fontSize: "1.3rem",
+                          color: "#E0803D",
+                          cursor: "pointer",
+                          marginTop: "4px",
+                        }}
+                      />
+                      {/* <Icon iconName="SkypeArrow" className={styles.icon} /> */}
+                    </div>
+                  </div>
+                  <h2
+                    title={props.viewitem.ParentTitle}
+                    style={{
+                      fontSize: "22px",
+                      // fontWeight: "700",
+                      fontFamily: '"osSemiBold", sans-serif',
+                    }}
+                  >
+                    {props.viewitem.ParentTitle}
+                  </h2>
+                </div>
                 <h5
                   style={{
                     fontSize: "14px",
@@ -254,18 +251,16 @@ function ViewComponent(props: any) {
                 </h5>
               </div>
               <div className={styles?.Imagecontainer}>
-                <img src={props.viewitem.img}></img>
+                <img src={props.viewitem.img} />
               </div>
               <div className={styles?.contentContainer}>
                 <div
                   style={{
                     overflow: "auto",
-                    // height: "104px",
                     lineHeight: "22px",
                   }}
                 >
                   <div
-                    // style={{ padding: "0 90px 0 10px" }}
                     dangerouslySetInnerHTML={{
                       __html: props.viewitem.Paragraph,
                     }}
@@ -296,6 +291,18 @@ function ViewComponent(props: any) {
                   </div>
                 </div>
                 <div className={styles.likecontainer}>
+                  <div className={styles.eyecontainer}>
+                    {/* <Icon iconName="RedEye12" className={styles.eyeicon} /> */}
+                    <VisibilityOutlined
+                      style={{
+                        color: "orange",
+                        fontSize: "21px",
+                      }}
+                    />
+                    <label style={{ cursor: "auto" }}>
+                      {userviewcounts || "0"}
+                    </label>
+                  </div>
                   <div className={styles.likebox}>
                     <i
                       className="pi pi-thumbs-up-fill"
@@ -315,63 +322,64 @@ function ViewComponent(props: any) {
                     </label>
                   </div>
                   <div className={styles.eyecontainer}>
-                    {/* <Icon iconName="RedEye12" className={styles.eyeicon} /> */}
-                    <VisibilityOutlined
-                      style={{
-                        color: "orange",
-                        fontSize: "21px",
+                    <Chat
+                      sx={{
+                        color: "#0a4b48",
+                        width: "18px",
                       }}
                     />
                     <label style={{ cursor: "auto" }}>
-                      {userviewcounts || "0"}
+                      {/* {userviewcounts || "0"} */}
+                      10
                     </label>
                   </div>
                 </div>
               </div>
 
-              <>
+              <div className={styles.commentsWrapper}>
+                <span className={styles.commentHeaderWrapper}>Comments</span>
                 {allComment?.length > 0 ? (
                   allComment?.map((val: Comment) => (
-                    <div key={val.id}>
+                    <div
+                      className={`${styles.commentCard} ${styles.fadeIn}`}
+                      key={val.id}
+                      // style={{ animationDelay: `${index * 0.02}s` }} // Delay based on index
+                    >
+                      <div className={styles.userProfile}>
+                        <Avatar
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.email}`}
+                          // size="small"
+                          shape="circle"
+                          style={{
+                            width: "30px !important",
+                            height: "30px !important",
+                          }}
+                          data-pr-tooltip={val?.name}
+                        />
+                      </div>
                       <div
-                        className={`${styles.commentCard} ${styles.fadeIn}`}
-                        // style={{ animationDelay: `${index * 0.02}s` }} // Delay based on index
+                        className={`${styles.commentCardMain} ${
+                          ""
+                          // ownComment ? styles.authorHighlightWrap : ""
+                        }`}
                       >
-                        <div className={styles.userProfile}>
-                          <Avatar
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.email}`}
-                            // size="small"
-                            shape="circle"
-                            style={{
-                              width: "30px !important",
-                              height: "30px !important",
-                            }}
-                            data-pr-tooltip={val?.name}
-                          />
-                        </div>
                         <div
-                          className={`${styles.commentCardMain} ${
+                          className={`${styles.commentHeader} ${
                             ""
-                            // ownComment ? styles.authorHighlightWrap : ""
+                            // ownComment ? styles.authorHighlight : ""
                           }`}
                         >
-                          <div
-                            className={`${styles.commentHeader} ${
-                              ""
-                              // ownComment ? styles.authorHighlight : ""
-                            }`}
-                          >
-                            <div className={styles.texts}>
-                              <div className={styles.author}>{val?.name} </div>
-                              <div className={styles.info}>
-                                {moment(val?.date).format("DD MMM YYYY HH:mm")}
-                              </div>
-                              {/* <div className={styles.info}>Commented on {date}</div> */}
-                              {/* {edited && <div className={styles.extraInfo}>Edited</div>} */}
+                          <div className={styles.texts}>
+                            <div className={styles.author}>{val?.name} </div>
+                            <div className={styles.info}>
+                              {moment(val?.date).format("DD MMM YYYY HH:mm")}
                             </div>
-                            <div className={styles.hamb}>
-                              {/* {role && <span className={styles.roleBadge}>{role}</span>} */}
-                              {/* {ownComment && (
+                            {/* <div className={styles.info}>Commented on {date}</div> */}
+                            {/* {edited && <div className={styles.extraInfo}>Edited</div>} */}
+                          </div>
+                          <div className={styles.hamb}>
+                            {/* {role && <span className={styles.roleBadge}>{role}</span>} */}
+                            {/* {ownComment && (
               <div onClick={handleMenuClick}>
                 <MoreVert
                   sx={{
@@ -381,14 +389,13 @@ function ViewComponent(props: any) {
                 />
               </div>
             )} */}
-                            </div>
                           </div>
-                          <div
-                            className={styles.commentSpace}
-                            // dangerouslySetInnerHTML={{ __html: content }}
-                            dangerouslySetInnerHTML={{ __html: val?.comment }}
-                          ></div>
                         </div>
+                        <div
+                          className={styles.commentSpace}
+                          // dangerouslySetInnerHTML={{ __html: content }}
+                          dangerouslySetInnerHTML={{ __html: val?.comment }}
+                        ></div>
                       </div>
                     </div>
                   ))
@@ -408,15 +415,15 @@ function ViewComponent(props: any) {
                     No Comments Found !!!
                   </div>
                 )}
-              </>
 
-              <div
-                style={{
-                  position: "relative",
-                }}
-                className="blogQuill"
-              >
-                {/* <FloatingLabelTextarea
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                  }}
+                  className="blogQuill"
+                >
+                  {/* <FloatingLabelTextarea
                   value={comment}
                   onChange={(e: any) => {
                     const value = e.trimStart();
@@ -425,48 +432,48 @@ function ViewComponent(props: any) {
                   rows={4}
                   placeholder="Add a comment..."
                 /> */}
-                <QuillEditor
-                  style={{ width: "80% !important", position: "relative" }}
-                  suggestionList={AllUsersData ?? []}
-                  onChange={(e: any) => {
-                    // let x = e.replace(/<(.|\n)*?>/g, "").trim().length === 0;
-                    // let x = e.replace(/<(.|\n)*?>/g, "");
-                    // console.log("x: ", x);
-                    const value: string = e?.trimStart();
-                    if (value == "<p><br></p>") {
-                      setComment("");
-                    } else if (
-                      value.replace(/<(.|\n)*?>/g, "").trim().length == 0
-                    ) {
-                      setComment("");
-                    } else {
-                      setComment(value);
-                    }
-                  }}
-                  defaultValue={comment}
-                  getMentionedEmails={(e: any) => {
-                    setTaggedPerson((prev: any) => ({
-                      ...prev,
-                      results: e?.map((item: any) => item?.id),
-                    }));
-                  }}
-                  placeHolder={"Enter Comments..."}
-                ></QuillEditor>
+                  <QuillEditor
+                    style={{ width: "80% !important", position: "relative" }}
+                    suggestionList={AllUsersData ?? []}
+                    onChange={(e: any) => {
+                      // let x = e.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+                      // let x = e.replace(/<(.|\n)*?>/g, "");
+                      // console.log("x: ", x);
+                      const value: string = e?.trimStart();
+                      if (value === "<p><br></p>") {
+                        setComment("");
+                      } else if (
+                        value.replace(/<(.|\n)*?>/g, "").trim().length === 0
+                      ) {
+                        setComment("");
+                      } else {
+                        setComment(value);
+                      }
+                    }}
+                    defaultValue={comment}
+                    getMentionedEmails={(e: any) => {
+                      setTaggedPerson((prev: any) => ({
+                        ...prev,
+                        results: e?.map((item: any) => item?.id),
+                      }));
+                    }}
+                    placeHolder={"Enter Comments..."}
+                  ></QuillEditor>
 
-                <DefaultButton
-                  btnType="primaryGreen"
-                  title="Edit Layout"
-                  text={<SendIcon />}
-                  style={{ position: "absolute", bottom: 0, right: 0 }}
-                  disabled={!comment}
-                  onClick={async () => {
-                    await handleComment();
-                  }}
-                  onlyIcon
-                  // onClick={resetPopup}
-                />
+                  <DefaultButton
+                    btnType="primaryGreen"
+                    title="Edit Layout"
+                    text={<SendIcon />}
+                    style={{ position: "absolute", bottom: 0, right: 0 }}
+                    disabled={!comment}
+                    onClick={async () => {
+                      await handleComment();
+                    }}
+                    onlyIcon
+                    // onClick={resetPopup}
+                  />
 
-                {/* <DefaultButton
+                  {/* <DefaultButton
                   btnType="primaryGreen"
                   style={{ position: "absolute", bottom: 0, right: 0 }}
                   text={"send"}
@@ -475,6 +482,7 @@ function ViewComponent(props: any) {
                     await handleComment();
                   }}
                 /> */}
+                </div>
               </div>
             </div>
           </div>

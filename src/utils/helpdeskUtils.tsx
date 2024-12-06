@@ -193,7 +193,8 @@ export const handleSubmit = async (
   initialData: any,
   dispatch: any,
   navigate: any,
-  location: any
+  location: any,
+  viewPage?: boolean
 ): Promise<any> => {
   let hasErrors = false;
   if (
@@ -240,7 +241,7 @@ export const handleSubmit = async (
               currentRole !== "user" ? "all_tickets" : "my_tickets"
             }`
           );
-          ticketsFilter(
+          await ticketsFilter(
             `${currentRole}${location.pathname}`,
             HelpDeskTicktesData,
             currentUserDetails,
@@ -262,7 +263,9 @@ export const handleSubmit = async (
       ])
         ?.then(async (res: any) => {
           // navigate(location.pathname);
-          await getAllTickets(dispatch);
+          if (viewPage) {
+            await getAllTickets(dispatch);
+          }
 
           const updatedTickets = await getAllTicketsData();
 
@@ -276,6 +279,7 @@ export const handleSubmit = async (
             dispatch
           );
           setFormData(initialData);
+
           setOpenNewTicketSlide((prev: any) => ({
             ...prev,
             open: false,
@@ -310,8 +314,15 @@ export const validateRecurrenceForm = async (
   setSubmitClicked: any,
   initialPopupController: any,
   setPopupController: any,
-  dispatch: any
+  dispatch: any,
+  nextTicketIntimation: any,
+  popupIndex?: number,
+  ticketFilter?: any,
+  currentRole?: any,
+  currentUserDetails?: any,
+  HelpDeskTicktesData?: any
 ): Promise<any> => {
+  console.log("nextTicketIntimation: ", nextTicketIntimation);
   let hasErrors = false;
 
   const updatedFormData = Object.keys(recurrenceDetails).reduce((acc, key) => {
@@ -376,58 +387,93 @@ export const validateRecurrenceForm = async (
 
   setRecurrenceDetails(updatedFormData);
 
-  if (!hasErrors) {
+  if (!hasErrors && !nextTicketIntimation.error) {
     setLoadingSubmit(true);
     setSubmitClicked(true);
     if (query === "add") {
-      await addRecurrenceConfigForTicket(
-        {
-          StartDate: recurrenceDetails?.StartDate?.value,
-          EndDate: recurrenceDetails?.EndDate?.value,
-          Frequency: recurrenceDetails?.Frequency?.value,
-          isActive: true,
-          DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
-          ...ticketDetails,
-        },
-        recurrenceDetails?.TicketDetails?.value?.ID
-      );
+      Promise.all([
+        await addRecurrenceConfigForTicket(
+          {
+            StartDate: recurrenceDetails?.StartDate?.value,
+            EndDate: recurrenceDetails?.EndDate?.value,
+            Frequency: recurrenceDetails?.Frequency?.value,
+            isActive: true,
+            DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+            ...ticketDetails,
+          },
+          recurrenceDetails?.TicketDetails?.value?.ID
+        ),
+      ]).then(async () => {
+        await getAllTickets(dispatch);
+        const updatedTickets = await getAllTicketsData();
+        ticketsFilter(
+          `${currentRole}${location.pathname}`,
+          {
+            ...HelpDeskTicktesData,
+            AllData: updatedTickets,
+          },
+          currentUserDetails,
+          dispatch
+        );
+        ticketFilter?.();
+      });
       togglePopupVisibility(
         setPopupController,
-        initialPopupController[0],
-        0,
+        initialPopupController[popupIndex || 0],
+        popupIndex || 0,
         "close"
       );
-      await getAllTickets(dispatch);
+      // await getAllTickets(dispatch);
     } else if (query === "update") {
-      await updateRecurrenceConfigOfTicket(
-        {
-          StartDate: recurrenceDetails?.StartDate?.value,
-          EndDate: recurrenceDetails?.EndDate?.value,
-          Frequency: recurrenceDetails?.Frequency?.value,
-          isActive: recurrenceDetails?.IsActive?.value,
-          DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
-          ...ticketDetails,
-        },
-        recurrenceDetails?.TicketDetails?.value?.ID,
-        recurrenceConfigID
-      );
+      Promise.all([
+        await updateRecurrenceConfigOfTicket(
+          {
+            StartDate: recurrenceDetails?.StartDate?.value,
+            EndDate: recurrenceDetails?.EndDate?.value,
+            Frequency: recurrenceDetails?.Frequency?.value,
+            isActive: recurrenceDetails?.IsActive?.value,
+            DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+            ...ticketDetails,
+          },
+          recurrenceDetails?.TicketDetails?.value?.ID,
+          recurrenceConfigID
+        ),
+      ])?.then(async () => {
+        // await getAllTickets(dispatch);
+        const updatedTickets = await getAllTicketsData();
+        ticketsFilter(
+          `${currentRole}${location.pathname}`,
+          {
+            ...HelpDeskTicktesData,
+            AllData: updatedTickets,
+          },
+          currentUserDetails,
+          dispatch
+        );
+        ticketFilter?.();
+      });
       togglePopupVisibility(
         setPopupController,
-        initialPopupController[0],
-        0,
+        initialPopupController[popupIndex || 0],
+        popupIndex || 0,
         "close"
       );
-      await getAllTickets(dispatch);
+      // await getAllTickets(dispatch);
     }
   } else {
-    toast.warning("Please fill out all required fields!", {
-      position: "top-center",
-      autoClose: 3500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-    });
+    toast.warning(
+      hasErrors
+        ? "Please fill out all required fields!"
+        : "Invalid recurrence details!",
+      {
+        position: "top-center",
+        autoClose: 3500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      }
+    );
   }
 };
 

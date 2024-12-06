@@ -525,6 +525,7 @@ export const updateRecurrenceConfigOfTicket = async (
   console.log("formData: ", formData);
   const toastId = toast.loading("Updating recurrence configuration");
   try {
+    // have to reset here if any changes needed in update
     await SpServices.SPUpdateItem({
       Listname: CONFIG.ListNames.HelpDesk_RecurrenceConfig,
       RequestJSON: formData,

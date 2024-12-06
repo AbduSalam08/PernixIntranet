@@ -287,7 +287,6 @@ function AddingComponent(props: any) {
     //;
     const findtext = text.toLowerCase().toString();
     let _intranetdata: any = [...intraData];
-    debugger;
     if (_intranetdata.length > 0) {
       _intranetdata = _intranetdata.filter((item: any) =>
         item.AutoTitle.includes(findtext)
@@ -332,18 +331,36 @@ function AddingComponent(props: any) {
                   />
                 </div>
                 <div>
-                  <h5
-                    style={{
-                      fontSize: "15px",
-                    }}
-                  >
-                    New blog
-                  </h5>
+                  <h5>New blog</h5>
                 </div>
               </div>
               {/* This is File Inputs Method */}
               <div style={{ color: "parenttitle" }}>
                 <div className={styles.inputparentbox}>
+                  <div style={{ width: "95%" }}>
+                    <CustomInput
+                      onChange={(e) => {
+                        if (e.length < 250) {
+                          headingonchange("ParentTitle", e);
+                        } else {
+                          setobjerror({
+                            Title:
+                              "The parent title may contain up to 250 characters.",
+                            ParentTitle: "",
+                            Image: "",
+                            Quill: "",
+                          });
+                        }
+                      }}
+                      errorMsg={objerror.ParentTitle || ""}
+                      value={additionaldetails.ParentTitle}
+                      inputWrapperClassName={styles.pathSearchFilter}
+                      // size="SM"
+                      noErrorMsg
+                      placeholder="Title"
+                    />
+                  </div>
+
                   <div
                     className={styles.inputfoucsbox}
                     onMouseMove={(e) => {
@@ -370,7 +387,8 @@ function AddingComponent(props: any) {
                       errorMsg={objerror.Title || ""}
                       value={additionaldetails.Title}
                       inputWrapperClassName={styles.pathSearchFilter}
-                      size="SM"
+                      // size="SM"
+                      noErrorMsg
                       placeholder="Tag"
                     />
                     {filteredSuggestions.length > 0 && customInput && (
@@ -400,28 +418,6 @@ function AddingComponent(props: any) {
                         )}
                       </ul>
                     )}
-                  </div>
-                  <div style={{ width: "49%" }}>
-                    <CustomInput
-                      onChange={(e) => {
-                        if (e.length < 250) {
-                          headingonchange("ParentTitle", e);
-                        } else {
-                          setobjerror({
-                            Title:
-                              "The parent title may contain up to 250 characters.",
-                            ParentTitle: "",
-                            Image: "",
-                            Quill: "",
-                          });
-                        }
-                      }}
-                      errorMsg={objerror.ParentTitle || ""}
-                      value={additionaldetails.ParentTitle}
-                      inputWrapperClassName={styles.pathSearchFilter}
-                      size="SM"
-                      placeholder="Title"
-                    />
                   </div>
                 </div>
                 <div className={styles.quillparentbox}>

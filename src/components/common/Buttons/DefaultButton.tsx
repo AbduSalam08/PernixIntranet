@@ -20,6 +20,7 @@ interface Props extends ButtonProps {
     | "primaryBlue"
     | "secondaryGreen"
     | "primaryRed"
+    | "primaryPernixOrange"
     | "actionBtn";
   onlyIcon?: boolean;
   title?: string;
@@ -38,6 +39,7 @@ const DefaultButton = ({
   // Define a mapping object for btnType to CSS classes
   const btnTypeClassMap: Record<Props["btnType"], string> = {
     primaryGreen: styles.primaryGreen,
+    primaryPernixOrange: styles.primaryPernixOrange,
     secondary: styles.secondary,
     lightGreyVariant: styles.lightGreyVariant,
     darkGreyVariant: styles.darkGreyVariant,
