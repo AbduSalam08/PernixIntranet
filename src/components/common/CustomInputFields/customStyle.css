@@ -13,7 +13,7 @@
   top: -4px !important;
 }
 .MuiInputLabel-root {
-  margin-left: 6px !important;
+  /* margin-left: 6px !important; */
   top: -3px !important;
   color: #a4a4a4 !important;
   font-family: "osRegular", sans-serif !important;

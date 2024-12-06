@@ -319,8 +319,7 @@ const LeftBar: React.FC = (): JSX.Element => {
                 location.pathname === item?.path &&
                 currentRoleBasedData?.data?.length &&
                 (item?.label?.toLowerCase() === "all tickets" ||
-                  item?.label?.toLowerCase() === "my tickets" ||
-                  item?.label?.toLowerCase() === "mentioned tickets")
+                  item?.label?.toLowerCase() === "my tickets")
                   ? styles.countBadge
                   : styles.hiddenBadge
               }`}
@@ -353,7 +352,9 @@ const LeftBar: React.FC = (): JSX.Element => {
                     }`}
                   >
                     {location.pathname === child.path
-                      ? currentRoleBasedData?.data?.length
+                      ? child.label.includes("Mentions")
+                        ? HelpDeskTicktesData?.data?.length
+                        : currentRoleBasedData?.data?.length
                       : ""}
                   </span>
                 </div>

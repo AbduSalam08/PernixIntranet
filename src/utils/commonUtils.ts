@@ -481,6 +481,10 @@ export const ticketsFilter = async (
   if (currentPath.split("/").pop() === "all_tickets") {
     await getAllTickets(dispatch);
   }
+  // setHelpDeskTickets({
+  //   ...helpDeskTicketsData,
+  //   isLoading: true,
+  // });
   if (currentPath?.includes("unassigned")) {
     const filterHandleData: any = helpDeskTicketsData?.AllData?.filter(
       (item: any) => item?.ITOwnerId === null
@@ -709,7 +713,7 @@ interface TicketData {
   Status: string;
 }
 // Helper function to format ticket data
-export const formatTicketData = (data: any): any => {
+export const formatTicketData = (data: any, currentUserDetails: any): any => {
   return data?.map((item: TicketData | any) => ({
     Created: item?.Created,
     id: item?.ID,
@@ -718,6 +722,7 @@ export const formatTicketData = (data: any): any => {
     category: item?.Category,
     priority: item?.Priority,
     status: item?.Status,
+    hasOwnerShip: item?.EmployeeName?.EMail === currentUserDetails?.email,
   }));
 };
 

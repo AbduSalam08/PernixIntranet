@@ -29,8 +29,8 @@ import {
 import Popup from "../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../utils/popupUtils";
 import moment from "moment";
-import { VisibilityOutlined } from "@mui/icons-material";
-import _ from "lodash";
+import { Chat, VisibilityOutlined } from "@mui/icons-material";
+// import _ from "lodash";
 import { CONFIG } from "../../../config/config";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { Paginator } from "primereact/paginator";
@@ -114,7 +114,7 @@ const BlogsPage = (props: any): JSX.Element => {
               fontWeight: 500,
               color: "#000",
             }}
-          ></i>
+          />
         </div>
 
         {/* <Button
@@ -492,17 +492,19 @@ const BlogsPage = (props: any): JSX.Element => {
                     <div
                       style={{ cursor: "pointer" }}
                       onClick={() => {
-                        isActivityPage
-                          ? window.open(
-                              props.context.pageContext.web.absoluteUrl +
-                                CONFIG.NavigatePage.ApprovalsPage,
-                              "_self"
-                            )
-                          : window.open(
-                              props.context.pageContext.web.absoluteUrl +
-                                CONFIG.NavigatePage.PernixIntranet,
-                              "_self"
-                            );
+                        if (isActivityPage) {
+                          window.open(
+                            props.context.pageContext.web.absoluteUrl +
+                              CONFIG.NavigatePage.ApprovalsPage,
+                            "_self"
+                          );
+                        } else {
+                          window.open(
+                            props.context.pageContext.web.absoluteUrl +
+                              CONFIG.NavigatePage.PernixIntranet,
+                            "_self"
+                          );
+                        }
                       }}
                     >
                       <i
@@ -524,6 +526,7 @@ const BlogsPage = (props: any): JSX.Element => {
                       labelText="Search"
                       placeholder="Search"
                       noErrorMsg
+                      size="SM"
                       onChange={(value: any) => {
                         filterOnchangehandler("_gsearch", value);
                       }}
@@ -542,7 +545,14 @@ const BlogsPage = (props: any): JSX.Element => {
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "35px", margin: "20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "35px",
+                  margin: "20px",
+                  marginBottom: "0",
+                }}
+              >
                 <div>
                   <div
                     style={{
@@ -558,7 +568,7 @@ const BlogsPage = (props: any): JSX.Element => {
                       fontWeight: "500",
                     }}
                     onClick={() => {
-                      if (permission == "Admin") {
+                      if (permission === "Admin") {
                         const _data = [...admindata];
                         const _filterdata = _data.filter(
                           (item) => item.Status === "Approved"
@@ -690,7 +700,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                   >
                                     {item.Title}
                                   </h4>
-                                  {permission == "Admin" ? (
+                                  {permission === "Admin" ? (
                                     <InputSwitch
                                       checked={item?.isActive}
                                       className="sectionToggler"
@@ -714,7 +724,7 @@ const BlogsPage = (props: any): JSX.Element => {
                                       className={styles.pilldesign}
                                       style={{
                                         background:
-                                          item.isActive == "in Active"
+                                          item.isActive === "in Active"
                                             ? "red"
                                             : "",
                                       }}
@@ -829,6 +839,17 @@ const BlogsPage = (props: any): JSX.Element => {
                                   </div>
                                 </div>
                                 <div className={styles.likecontainer}>
+                                  <div className={styles.eyecontainer}>
+                                    <VisibilityOutlined
+                                      style={{
+                                        color: "orange",
+                                        fontSize: "20px",
+                                      }}
+                                    />
+                                    <label style={{ cursor: "auto" }}>
+                                      {userviewcounts || "0"}
+                                    </label>
+                                  </div>
                                   <div className={styles.likebox}>
                                     <i
                                       className="pi pi-thumbs-up-fill"
@@ -848,14 +869,15 @@ const BlogsPage = (props: any): JSX.Element => {
                                     </label>
                                   </div>
                                   <div className={styles.eyecontainer}>
-                                    <VisibilityOutlined
-                                      style={{
-                                        color: "orange",
-                                        fontSize: "20px",
+                                    <Chat
+                                      sx={{
+                                        color: "#0a4b48",
+                                        width: "18px",
                                       }}
                                     />
                                     <label style={{ cursor: "auto" }}>
-                                      {userviewcounts || "0"}
+                                      {/* {userviewcounts || "0"} */}
+                                      10
                                     </label>
                                   </div>
                                 </div>

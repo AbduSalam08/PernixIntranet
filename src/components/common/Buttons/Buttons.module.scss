@@ -9,11 +9,20 @@
   cursor: pointer;
   height: 34px !important;
   font-size: 15px !important;
-  font-family: "interMedium", sans-serif !important;
+  font-family: "osMedium", sans-serif !important;
 }
 .primaryGreen {
   @extend .DefaultButtonWrapper;
   background-color: var(--primary-pernix-green) !important;
+  border-radius: 4px !important;
+  color: var(--white) !important;
+  border: 0 !important;
+  height: 30px;
+  text-transform: none !important;
+}
+.primaryPernixOrange {
+  @extend .DefaultButtonWrapper;
+  background-color: var(--primary-orange) !important;
   border-radius: 4px !important;
   color: var(--white) !important;
   border: 0 !important;

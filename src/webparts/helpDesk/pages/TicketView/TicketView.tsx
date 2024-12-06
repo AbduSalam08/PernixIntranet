@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -368,12 +369,6 @@ const TicketView = (): JSX.Element => {
             recurrenceDetails?.Frequency?.value?.toLowerCase() ===
               "does not repeat"
           ) {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[1],
-              1,
-              "close"
-            );
             if (currentRowData?.RecurrenceConfigDetailsId) {
               await updateRecurrenceConfigOfTicket(
                 {
@@ -388,46 +383,22 @@ const TicketView = (): JSX.Element => {
                 currentRowData?.ID,
                 recurrenceID
               );
-              // .then((res: any) => {
-              //   togglePopupVisibility(
-              //     setPopupController,
-              //     initialPopupController[1],
-              //     1,
-              //     "close"
-              //   );
-              // })
-              // .catch((err: any) => {
-              //   togglePopupVisibility(
-              //     setPopupController,
-              //     initialPopupController[1],
-              //     1,
-              //     "close"
-              //   );
-              // });
               await getAllTickets(dispatch);
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[1],
+                1,
+                "close"
+              );
             }
-            // else {
-            //   togglePopupVisibility(
-            //     setPopupController,
-            //     initialPopupController[1],
-            //     1,
-            //     "close"
-            //   );
-            // }
           }
           if (
-            !nextTicketIntimation?.error &&
+            // !nextTicketIntimation?.error &&
             recurrenceDetails?.Frequency?.value?.toLowerCase() !==
               "repeat once" &&
             recurrenceDetails?.Frequency?.value?.toLowerCase() !==
               "does not repeat"
           ) {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[1],
-              1,
-              "close"
-            );
             validateRecurrenceForm(
               query,
               {
@@ -457,7 +428,9 @@ const TicketView = (): JSX.Element => {
               setSubmitClicked,
               popupController,
               setPopupController,
-              dispatch
+              dispatch,
+              nextTicketIntimation,
+              1
             );
           }
         },
@@ -829,7 +802,7 @@ const TicketView = (): JSX.Element => {
 
                   <div className={styles.ticketOneLine}>
                     {currentTicketsData?.EmployeeName?.Title} raised this ticket
-                    on
+                    on&nbsp;
                     {dayjs(currentTicketsData?.Created)?.format("DD MMM YYYY")}
                     <span className={styles.splitterDot} />
                     {conversationData?.data?.length} comments
@@ -1132,52 +1105,54 @@ const TicketView = (): JSX.Element => {
             <div className={styles.detailsCard}>
               <div className={styles.heading}>
                 <div className={styles.title}>Details</div>
-                <div
-                  className={styles.editBtn}
-                  onClick={async () => {
-                    const currentAttachment = await getAttachmentofTicket(
-                      currentTicketsData?.ID
-                    );
+                {currentTicketsData?.Status !== "Closed" && isUserTagged && (
+                  <div
+                    className={styles.editBtn}
+                    onClick={async () => {
+                      const currentAttachment = await getAttachmentofTicket(
+                        currentTicketsData?.ID
+                      );
 
-                    setLoadingSubmit(false);
-                    setSubmitClicked(false);
-                    setOpenNewTicketSlide({
-                      open: true,
-                      type: "update",
-                      data: currentTicketsData,
-                    });
+                      setLoadingSubmit(false);
+                      setSubmitClicked(false);
+                      setOpenNewTicketSlide({
+                        open: true,
+                        type: "update",
+                        data: currentTicketsData,
+                      });
 
-                    setFormData((prev: any) =>
-                      mapRowDataToFormData(
-                        currentTicketsData,
-                        prev,
-                        isTicketManager,
-                        currentUserDetails,
-                        isITOwner
-                      )
-                    );
+                      setFormData((prev: any) =>
+                        mapRowDataToFormData(
+                          currentTicketsData,
+                          prev,
+                          isTicketManager,
+                          currentUserDetails,
+                          isITOwner
+                        )
+                      );
 
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      Attachment: {
-                        ...prev?.Attachment,
-                        value: [
-                          ...currentAttachment?.map((attachment: any) => ({
-                            ...attachment,
-                            name: attachment?.FileName,
-                          })),
-                        ],
-                      },
-                    }));
-                  }}
-                >
-                  <Edit
-                    sx={{
-                      fontSize: "20px",
-                      color: "var(--primary-pernix-green)",
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        Attachment: {
+                          ...prev?.Attachment,
+                          value: [
+                            ...currentAttachment?.map((attachment: any) => ({
+                              ...attachment,
+                              name: attachment?.FileName,
+                            })),
+                          ],
+                        },
+                      }));
                     }}
-                  />
-                </div>
+                  >
+                    <Edit
+                      sx={{
+                        fontSize: "20px",
+                        color: "var(--primary-pernix-green)",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               <div className={styles.details}>
                 <div className={styles.detailsLabel}>
@@ -1533,7 +1508,8 @@ const TicketView = (): JSX.Element => {
             initialTicketsFormData,
             dispatch,
             navigate,
-            location
+            location,
+            true
           );
         }}
         validateField={validateField}

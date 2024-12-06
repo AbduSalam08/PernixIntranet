@@ -179,10 +179,27 @@ const CustomInput: React.FC<Props> = ({
                   ) : undefined,
                 disableUnderline: noBorderInput,
               }}
+              sx={{
+                height: size === "SM" ? "34px" : "auto",
+                "& .MuiInputLabel-root": {
+                  top: size === "SM" ? "-6px !important" : "-3px",
+                  fontSize: size === "SM" ? "13px" : "15px",
+                  transition: "top 0.2s, font-size 0.2s",
+                },
+                "& .MuiInputBase-input": {
+                  fontSize: size === "SM" ? "13px" : "15px",
+                  paddingTop: size === "SM" ? "8px !important" : "15px",
+                },
+                "&.MuiInputBase-input:focus-within .MuiInputLabel-root": {
+                  top: size === "SM" ? "-3px !important" : "-3px",
+                  fontSize: size === "SM" ? "13px" : "15px",
+                },
+              }}
               error={Boolean(!isValid)}
               // helperText={!hideErrMsg && isValid && !noErrorMsg ? errorMsg : ""}
               // helperText={"Error input"}
               variant="filled"
+              size={size === "SM" ? "small" : "medium"}
               label={placeholder}
               className={inputClassName}
               onKeyDown={onKeyDown}

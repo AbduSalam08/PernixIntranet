@@ -41,7 +41,8 @@ import CustomDropDown from "../../../../components/common/CustomInputFields/Cust
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllTickets,
-  getAllTicketsData2,
+  getAllTicketsData,
+  // getAllTicketsData2,
 } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import InfoCard from "../../components/InfoCard/InfoCard";
 import { toast } from "react-toastify";
@@ -145,6 +146,7 @@ const MyTickets = (): JSX.Element => {
 
   const isTicketManager: boolean =
     currentUserDetails?.role === "HelpDesk_Ticket_Managers";
+  console.log("isTicketManager: ", isTicketManager);
 
   const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
 
@@ -184,6 +186,7 @@ const MyTickets = (): JSX.Element => {
   const [nextTicketIntimation, setNextTicketIntimation] = useState(
     nextTicketIntimationLocal
   );
+  console.log("nextTicketIntimation: ", nextTicketIntimation);
 
   const popupActions: any = [
     [
@@ -211,8 +214,9 @@ const MyTickets = (): JSX.Element => {
         endIcon: false,
         startIcon: false,
         size: "large",
-        disabled:
-          submitClicked || recurrenceDetails?.Frequency?.value?.trim() === "",
+        disabled: isTicketManager
+          ? submitClicked || recurrenceDetails?.Frequency?.value?.trim() === ""
+          : false,
         onClick: async () => {
           const currentRowData: any = popupController[0]?.popupData;
 
@@ -359,6 +363,11 @@ const MyTickets = (): JSX.Element => {
                 await updateRecurrenceConfigOfTicket(
                   {
                     ...ticketBaseDetails,
+                    DayOfWeek:
+                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                      "weekly"
+                        ? ""
+                        : recurrenceDetails?.DayOfWeek?.value,
                     NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
                     isActive:
                       recurrenceDetails?.Frequency?.value.toLowerCase() !==
@@ -386,6 +395,18 @@ const MyTickets = (): JSX.Element => {
                     );
                   });
                 await getAllTickets(dispatch);
+
+                const updatedTickets = await getAllTicketsData();
+
+                ticketsFilter(
+                  `${currentRole}${location.pathname}`,
+                  {
+                    ...HelpDeskTicktesData,
+                    AllData: updatedTickets,
+                  },
+                  currentUserDetails,
+                  dispatch
+                );
               } else {
                 togglePopupVisibility(
                   setPopupController,
@@ -396,12 +417,24 @@ const MyTickets = (): JSX.Element => {
               }
             }
             if (
-              !nextTicketIntimation?.error &&
+              // !nextTicketIntimation?.error ||
               recurrenceDetails?.Frequency?.value?.toLowerCase() !==
                 "repeat once" &&
               recurrenceDetails?.Frequency?.value?.toLowerCase() !==
                 "does not repeat"
             ) {
+              // const updatedTickets = await getAllTicketsData();
+
+              // const ticketsUpdateCall = ticketsFilter(
+              //   `${currentRole}${location.pathname}`,
+              //   {
+              //     ...HelpDeskTicktesData,
+              //     AllData: updatedTickets,
+              //   },
+              //   currentUserDetails,
+              //   dispatch
+              // );
+              // await Promise.all([
               validateRecurrenceForm(
                 query,
                 {
@@ -431,14 +464,49 @@ const MyTickets = (): JSX.Element => {
                 setSubmitClicked,
                 popupController,
                 setPopupController,
-                dispatch
+                dispatch,
+                nextTicketIntimation,
+                0,
+                null,
+                currentRole,
+                currentUserDetails,
+                HelpDeskTicktesData
+                // ticketsUpdateCall
               );
+              // ]);
+              // .then(async (res: any) => {
+              //   const updatedTickets = await getAllTicketsData();
+
+              //   ticketsFilter(
+              //     `${currentRole}${location.pathname}`,
+              //     {
+              //       ...HelpDeskTicktesData,
+              //       AllData: updatedTickets,
+              //     },
+              //     currentUserDetails,
+              //     dispatch
+              //   );
+              // })
+              // .catch(async (err: any) => {
+              //   const updatedTickets = await getAllTicketsData();
+
+              //   ticketsFilter(
+              //     `${currentRole}${location.pathname}`,
+              //     {
+              //       ...HelpDeskTicktesData,
+              //       AllData: updatedTickets,
+              //     },
+              //     currentUserDetails,
+              //     dispatch
+              //   );
+              // });
             }
           } else {
             await addNewTicket(formDataAppended, ["Attachments"], true)
               .then(async (res: any) => {
                 navigate(`${currentRole}/all_tickets`);
                 await getAllTickets(dispatch);
+
                 togglePopupVisibility(
                   setPopupController,
                   initialPopupController[0],
@@ -908,64 +976,77 @@ const MyTickets = (): JSX.Element => {
         <div className={styles.actionButtons}>
           {!`${currentRole}${location.pathname}`?.includes("mentions") ? (
             <>
-              <button
-                title="Repeat this ticket"
-                onClick={async () => {
-                  const ticketNumber = params?.row?.ticket_number;
-                  const currentRowData: any =
-                    HelpDeskTicktesData?.AllData?.filter(
-                      (item: any) => item?.TicketNumber === ticketNumber
-                    )?.[0];
+              {(isTicketManager ||
+                (params?.row?.hasOwnerShip && !isTicketManager)) && (
+                <button
+                  title="Repeat this ticket"
+                  onClick={async () => {
+                    const ticketNumber = params?.row?.ticket_number;
+                    const currentRowData: any =
+                      HelpDeskTicktesData?.AllData?.filter(
+                        (item: any) => item?.TicketNumber === ticketNumber
+                      )?.[0];
 
-                  togglePopupVisibility(
-                    setPopupController,
-                    initialPopupController[0],
-                    0,
-                    "open",
-                    "",
-                    currentRowData,
-                    `Are you sure want to repeat this ticket "${ticketNumber}" ?`
-                  );
-
-                  const currentRecurrenceData: any =
-                    await getRecurrenceConfigDetails(
-                      currentRowData?.RecurrenceConfigDetailsId || ""
+                    togglePopupVisibility(
+                      setPopupController,
+                      initialPopupController[0],
+                      0,
+                      "open",
+                      "",
+                      currentRowData,
+                      `Are you sure want to repeat this ticket "${ticketNumber}" ?`
                     );
 
-                  setRecurrenceDetails((prev: any) =>
-                    mapRowDataToRecurrenceFormData(currentRecurrenceData, prev)
-                  );
+                    const currentRecurrenceData: any =
+                      await getRecurrenceConfigDetails(
+                        currentRowData?.RecurrenceConfigDetailsId || ""
+                      );
 
-                  setNextTicketIntimation({
-                    date: dayjs(currentRecurrenceData?.NextTicketDate).format(
-                      "MM/DD/YYYY"
-                    ),
-                    error: false,
-                  });
+                    setRecurrenceDetails((prev: any) =>
+                      mapRowDataToRecurrenceFormData(
+                        currentRecurrenceData,
+                        prev
+                      )
+                    );
 
-                  setHasRecurrence(currentRowData?.HasRecurrence ?? false);
+                    setNextTicketIntimation({
+                      date: dayjs(currentRecurrenceData?.NextTicketDate).format(
+                        "MM/DD/YYYY"
+                      ),
+                      error: false,
+                    });
 
-                  setSubmitClicked(false);
-                }}
-                className={`${
-                  checkIsRecurringTicket(params?.row?.ticket_number)
-                    ? styles.reopenTicketFilled
-                    : styles.reopenTicket
-                }`}
-              >
-                {/* <img src={checkIsRecurringTicket(params?.row?.ticket_number)?reopenTicketFilled:reopenTicket} /> */}
-                <Loop
-                  sx={{
-                    color: checkIsRecurringTicket(params?.row?.ticket_number)
-                      ? "#fff"
-                      : "#002b30",
-                    fontSize: "20px",
+                    setHasRecurrence(currentRowData?.HasRecurrence ?? false);
+
+                    setSubmitClicked(false);
                   }}
-                />
-              </button>
+                  className={`${
+                    checkIsRecurringTicket(params?.row?.ticket_number)
+                      ? styles.reopenTicketFilled
+                      : styles.reopenTicket
+                  }`}
+                >
+                  {/* <img src={checkIsRecurringTicket(params?.row?.ticket_number)?reopenTicketFilled:reopenTicket} /> */}
+                  <Loop
+                    sx={{
+                      color: checkIsRecurringTicket(params?.row?.ticket_number)
+                        ? "#fff"
+                        : "#002b30",
+                      fontSize: "20px",
+                    }}
+                  />
+                </button>
+              )}
               <button
                 title="Edit this ticket"
+                style={{
+                  marginLeft:
+                    !params?.row?.hasOwnerShip && !isTicketManager
+                      ? "30px"
+                      : "0",
+                }}
                 onClick={async () => {
+                  console.log("params: ", params);
                   const ticketNumber = params?.row?.ticket_number;
                   const currentRowData: any =
                     HelpDeskTicktesData?.AllData?.filter(
@@ -1103,7 +1184,10 @@ const MyTickets = (): JSX.Element => {
 
   // Apply filters and sorting
   const filteredData = useMemo(() => {
-    let formattedData = formatTicketData(currentRoleBasedData?.data || []);
+    let formattedData = formatTicketData(
+      currentRoleBasedData?.data || [],
+      currentUserDetails
+    );
 
     // Apply global search, category, and priority filters
     formattedData = filterTicketsBySearch(formattedData, searchTerm);
@@ -1142,14 +1226,6 @@ const MyTickets = (): JSX.Element => {
       currentUserDetails,
       dispatch
     );
-    // getAllTicketsData2()
-    console.log(
-      "getAllTicketsData2(): ",
-      getAllTicketsData2().then((res: any) => {
-        console.log(res);
-      })
-    );
-    // navigate(location.pathname, { state: null });
   }, [location.pathname]);
 
   useEffect(() => {
@@ -1257,7 +1333,7 @@ const MyTickets = (): JSX.Element => {
           {(searchTerm || selectedPriority || selectedCategory) && (
             <div className="slideUpFade">
               <DefaultButton
-                btnType="primaryGreen"
+                btnType="primaryPernixOrange"
                 onlyIcon
                 text={<RestartAlt />}
                 onClick={async () => {

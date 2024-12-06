@@ -160,7 +160,10 @@
   gap: 20px;
   padding: 10px;
   .smallcontainer {
+    box-shadow: none !important;
     .inbox {
+      border: 0;
+      box-shadow: none;
       border-radius: 21px;
       padding: 24px;
       background-color: white;
@@ -172,14 +175,16 @@
           object-fit: cover;
         }
       }
-      h4 {
-        // margin: 14px 0px 7px 0px;
-        // font-weight: 600;
-        // color: #e0803d;
-      }
+      // h4 {
+      //    margin: 14px 0px 7px 0px;
+      //    font-weight: 600;
+      //    color: #e0803d;
+      // }
       h3 {
         margin: 7px 0px;
-        font-weight: 600;
+        // font-weight: 600;
+        font-family: "osSemiBold", sans-serif;
+        font-size: 18px;
         color: #101828;
       }
       .contenttitle {
@@ -194,10 +199,12 @@
           }
 
           .pilldesign {
-            background: #ade9ad;
+            background: #daffda;
             padding: 5px;
-            color: green;
+            color: #005600;
             border-radius: 5px;
+            font-family: "osMedium";
+            font-size: 13px;
             width: 60px;
             text-align: center;
           }
@@ -215,12 +222,15 @@
           color: #5d5d5d;
           font-weight: 400;
           line-height: 22px;
-          height: 71px;
+          // height: 71px;
+          height: auto;
           text-overflow: ellipsis;
           overflow: hidden;
           display: -webkit-box;
           -webkit-line-clamp: 4;
+          line-clamp: 4;
           -webkit-box-orient: vertical;
+          font-family: "osRegular", sans-serif;
         }
       }
       .footercontainer {
@@ -234,8 +244,9 @@
           gap: 10px;
           .namediv {
             line-height: 16px;
-            font-weight: bold;
+            // font-weight: bold;
             cursor: auto;
+            font-family: "osSemiBold", sans-serif;
           }
           .datediv {
             font-weight: 400;
@@ -248,8 +259,8 @@
         .likecontainer {
           display: flex;
           align-items: center;
-          gap: 14px;
-          width: 27%;
+          gap: 25px;
+          width: 45%;
           margin-right: 4px;
           justify-content: space-between;
           .likebox {
