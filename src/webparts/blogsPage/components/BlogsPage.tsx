@@ -752,11 +752,6 @@ const BlogsPage = (props: any): JSX.Element => {
                                 <div
                                   title={item?.Paragraph}
                                   className={styles.paragraph}
-                                  style={{
-                                    height:
-                                      permission !== "Admin" ? "87px" : "87px",
-                                    // fontWeight: "bold",
-                                  }}
                                   dangerouslySetInnerHTML={{
                                     __html: item.Paragraph,
                                   }}

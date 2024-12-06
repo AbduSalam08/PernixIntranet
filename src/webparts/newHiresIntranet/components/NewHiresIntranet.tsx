@@ -27,7 +27,7 @@ import CustomPeoplePicker from "../../../components/common/CustomInputFields/Cus
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import moment from "moment";
 import { IFormFields } from "../../../interface/interface";
-// import { Button } from "primereact/button";
+import { Button } from "primereact/button";
 import { ToastContainer } from "react-toastify";
 
 /* Images creation */
@@ -427,25 +427,13 @@ const NewHiresIntranet = (props: any): JSX.Element => {
           <img src={val?.imgUrl ?? defaultUserImg} alt="User image" />
           <div>
             <div>{val?.EmployeeName?.name ?? ""}</div>
-            <div>
-              {moment(val?.StartDate).format("YYYYMMDD") ===
-              moment(val?.EndDate).format("YYYYMMDD")
-                ? moment(val?.StartDate).format("DD MMM YYYY")
-                : moment(val?.StartDate).format("DD MMM YYYY") +
-                  " - " +
-                  moment(val?.EndDate).format("DD MMM YYYY")}
-            </div>
+            <div>{moment(val?.StartDate).format("DD MMM YYYY")}</div>
           </div>
         </div>
         <div title={val?.Description} className={styles.cardBodySec}>
           {val?.Description ?? ""}
-
-          {/* {val?.Description?.length > 400 ? <span>read more</span> : ""} */}
-          {/* <span>read more</span> */}
-
-          {/* new */}
         </div>
-        {/* <div className={styles.cardBTNSec}>
+        <div className={styles.cardBTNSec}>
           <Button
             label="Read more"
             onClick={() => {
@@ -458,7 +446,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               );
             }}
           />
-        </div> */}
+        </div>
       </div>
     );
   };

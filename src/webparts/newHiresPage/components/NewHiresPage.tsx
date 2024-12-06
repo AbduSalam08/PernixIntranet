@@ -808,14 +808,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                     <img src={val?.imgUrl ?? defaultUserImg} alt="User image" />
                     <div>
                       <div>{val?.EmployeeName?.name ?? ""}</div>
-                      <div>
-                        {moment(val?.StartDate).format("YYYYMMDD") ===
-                        moment(val?.EndDate).format("YYYYMMDD")
-                          ? moment(val?.StartDate).format("DD MMM YYYY")
-                          : moment(val?.StartDate).format("DD MMM YYYY") +
-                            " - " +
-                            moment(val?.EndDate).format("DD MMM YYYY")}
-                      </div>
+                      <div>{moment(val?.StartDate).format("DD MMM YYYY")}</div>
                     </div>
                   </div>
                   <div title={val?.Description} className={styles.cardBodySec}>
