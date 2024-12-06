@@ -11,14 +11,8 @@ import styles from "./EmployeeDirectoryPage.module.scss";
 import { MSGraphClient } from "@microsoft/sp-http";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import DataTable from "../../../components/common/DataTable/DataTable";
-import {
-  Icon,
-  ISearchBoxStyles,
-  Persona,
-  PersonaSize,
-  SearchBox,
-} from "@fluentui/react";
-import { MailOutline, VisibilityOutlined } from "@mui/icons-material";
+import { Icon, Persona, PersonaSize } from "@fluentui/react";
+import { MailOutline } from "@mui/icons-material";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { TextField } from "office-ui-fabric-react";
 import { Drawer } from "@mui/material";
@@ -33,6 +27,8 @@ import SpServices from "../../../services/SPServices/SpServices";
 import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import { useDispatch, useSelector } from "react-redux";
+import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 
 // import { Item } from "@pnp/sp/items";
 // import { Button } from "primereact/button";
@@ -54,6 +50,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     _gsearch: "",
     Name: "",
     Phone: "",
+    Dropdown: "All",
     Skills: "",
     Email: "",
   });
@@ -111,30 +108,30 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       },
     },
   };
-  const searchBoxStyle: Partial<ISearchBoxStyles> = {
-    root: {
-      padding: "0 10px",
-      fontSize: 16,
-      width: "100%",
-      borderRadius: "6px",
-      border: "none !important",
+  // const searchBoxStyle: Partial<ISearchBoxStyles> = {
+  //   root: {
+  //     padding: "0 10px",
+  //     fontSize: 16,
+  //     width: "100%",
+  //     borderRadius: "6px",
+  //     border: "none !important",
 
-      ".ms-SearchBox-icon": {
-        fontWeight: 900,
-        color: "rgb(151 144 155) !important",
-      },
-      ".ms-SearchBox": {
-        border: "none !important",
-      },
-      "::after": {
-        border: "none !important",
-        backgrounColor: "white",
-      },
-      ".ms-Button-flexContainer": {
-        background: "transparent",
-      },
-    },
-  };
+  //     ".ms-SearchBox-icon": {
+  //       fontWeight: 900,
+  //       color: "rgb(151 144 155) !important",
+  //     },
+  //     ".ms-SearchBox": {
+  //       border: "none !important",
+  //     },
+  //     "::after": {
+  //       border: "none !important",
+  //       backgrounColor: "white",
+  //     },
+  //     ".ms-Button-flexContainer": {
+  //       background: "transparent",
+  //     },
+  //   },
+  // };
   const columns = [
     {
       sortable: true,
@@ -145,8 +142,16 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         return (
           <div
             onClick={() => {
+              setPanelPopupFlag({
+                ...panelPopupFlag,
+                isopen: true,
+                popupedit: false,
+              });
+              setPanelItem(params.row);
+
               //("shanmugraj");
             }}
+            style={{ cursor: "pointer" }}
             className={styles.personabox}
           >
             <Persona
@@ -302,15 +307,20 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 setPanelItem(params.row);
               }}
             >
-              <VisibilityOutlined
+              <i
+                className="pi pi-eye"
+                style={{ fontSize: "1.5rem", color: "#1ab800" }}
+              ></i>
+              {/* <VisibilityOutlined
                 style={{
                   color: "#1ab800",
                 }}
-              />
+              /> */}
             </div>
             {isAdmin && (
               <div>
                 <InputSwitch
+                  style={{ verticalAlign: "middle" }}
                   checked={params?.row?.isActive || false}
                   onChange={async (e: any) => {
                     setUserData((prevItems: any) =>
@@ -360,6 +370,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       Name: "",
       Phone: "",
       Skills: "",
+      Dropdown: "All",
       Email: "",
     });
     setPanelPopupFlag({
@@ -591,18 +602,24 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
   // This function is Filterfunction
   const filterfunction = async (_filterkey: any, text: string) => {
     let _data: any = [...userDuplicateData];
-    const searchtext = text.toLowerCase().trim();
+    // const searchtext = text.toLowerCase().trim();
     if (_filterkey.Name !== "") {
       _data = _data.filter(
         (item: any) =>
-          item.Name && item.Name.toLowerCase().trim().includes(searchtext)
+          item.Name &&
+          item.Name.toLowerCase()
+            .trim()
+            .includes(_filterkey.Name.trim().toLowerCase())
       );
     }
     if (_filterkey.Phone !== "") {
       _data = _data.filter(
         (item: any) =>
           item.Phone &&
-          item.Phone.toLowerCase().trim().toString().includes(searchtext)
+          item.Phone.toLowerCase()
+            .trim()
+            .toString()
+            .includes(_filterkey.Phone.trim())
       );
     }
 
@@ -610,13 +627,24 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       _data = _data.filter(
         (item: any) =>
           item.Skills &&
-          item.Skills.some((newitem: any) => newitem.toLos === searchtext)
+          item.Skills?.toString()
+            .toLowerCase()
+            .includes(_filterkey.Skills.trim().toLowerCase())
+
+        // item.Skills.some(
+        //   (newitem: any) =>
+        //     newitem?.Skills?.toLowerCase() ===
+        //     _filterkey.Skills.trim().toLowerCase()
+        // )
       );
     }
     if (_filterkey.Email !== "") {
       _data = _data.filter(
         (item: any) =>
-          item.Email && item.Email.toLowerCase().trim().includes(searchtext)
+          item.Email &&
+          item.Email.toLowerCase()
+            .trim()
+            .includes(_filterkey.Email.trim().toLowerCase())
       );
     }
 
@@ -644,30 +672,60 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       Skills: [...filterdata],
     });
   };
-  const globalfiltersetdata = (_data: any) => {
-    const newdata: any = [];
-    const _duplicatedata = [...userDuplicateData];
-    _duplicatedata.filter((arr) => {
-      if (_data.some((newItem: any) => newItem._listId === arr.Id)) {
-        newdata.push(arr);
-      }
+  // const globalfiltersetdata = (_data: any) => {
+  //   const newdata: any = [];
+  //   const _duplicatedata = [...userDuplicateData];
+  //   _duplicatedata.filter((arr) => {
+  //     if (_data.some((newItem: any) => newItem._listId === arr.Id)) {
+  //       newdata.push(arr);
+  //     }
+  //   });
+  //   setUserData([...newdata]);
+  // };
+  // const globalfilterfunction = (value: any) => {
+  //   let _data = [...globalfilterdata];
+  //   if (value !== "") {
+  //     const findtext = value.toLowerCase().toString();
+  //     _data = _data.filter((item) => item.Searchstring.includes(findtext));
+  //     if (_data.length > 0) {
+  //       globalfiltersetdata(_data);
+  //     } else if (_data.length === 0) {
+  //       setUserData([..._data]);
+  //     }
+  //   } else if (value === "") {
+  //     const _data = [...userDuplicateData];
+  //     setUserData([..._data]);
+  //   }
+  // };
+
+  const handleSearch = (val: any): void => {
+    const searchDropdown = val?.Dropdown || "All";
+    const searchTerm = val?._gsearch?.trim().toLowerCase() || "";
+
+    let filteredResults = userDuplicateData.filter((item: any) => {
+      return (
+        item.Skills?.toString().toLowerCase().includes(searchTerm) ||
+        item.Name?.toLowerCase().includes(searchTerm) ||
+        item.Phone?.toLowerCase().includes(searchTerm) ||
+        item.Phone?.toLowerCase().includes(searchTerm) ||
+        item.officeLocation?.toLowerCase().includes(searchTerm) ||
+        item.Manager?.email?.toLowerCase().includes(searchTerm) ||
+        item.Manager?.name?.toLowerCase().includes(searchTerm)
+      );
     });
-    setUserData([...newdata]);
-  };
-  const globalfilterfunction = (value: any) => {
-    let _data = [...globalfilterdata];
-    if (value !== "") {
-      const findtext = value.toLowerCase().toString();
-      _data = _data.filter((item) => item.Searchstring.includes(findtext));
-      if (_data.length > 0) {
-        globalfiltersetdata(_data);
-      } else if (_data.length === 0) {
-        setUserData([..._data]);
+
+    filteredResults = filteredResults.filter((item: any) => {
+      if (searchDropdown === "All") {
+        return true;
+      } else if (searchDropdown === "Active") {
+        return item.isActive === true;
+      } else if (searchDropdown === "inActive") {
+        return item.isActive === false;
       }
-    } else if (value === "") {
-      const _data = [...userDuplicateData];
-      setUserData([..._data]);
-    }
+      return true;
+    });
+
+    setUserData([...filteredResults]);
   };
 
   //active in active users
@@ -797,14 +855,82 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 className={styles.roundiconbutton}
                 style={{ cursor: "pointer" }}
               >
-                <Icon iconName="SkypeArrow" className={styles.icon} />
+                <i
+                  className="pi pi-arrow-circle-left"
+                  style={{ fontSize: "1.5rem", color: "#E0803D" }}
+                ></i>
+
+                <p>Employee Directory</p>
+                {/* <Icon iconName="SkypeArrow" className={styles.icon} /> */}
+              </div>
+
+              <div className={styles.filterbox}>
+                <div>
+                  <CustomDropDown
+                    value={filterkey?.Dropdown || "All"}
+                    options={["All", "Active", "inActive"]}
+                    placeholder="Category"
+                    onChange={(value) => {
+                      setfilterkey({
+                        ...filterkey,
+                        Dropdown: value,
+                      });
+                      console.log(value);
+                      handleSearch({ ...filterkey, Dropdown: value });
+                    }}
+                  />
+                </div>
+                <div>
+                  <CustomInput
+                    noErrorMsg
+                    value={filterkey._gsearch}
+                    placeholder="Search"
+                    onChange={(value: any) => {
+                      setfilterkey({
+                        ...filterkey,
+                        _gsearch: value,
+                      });
+                      handleSearch({ ...filterkey, _gsearch: value });
+                    }}
+                  />
+                  {/* <SearchBox
+                    placeholder="Search..."
+                    styles={searchBoxStyle}
+                    value={filterkey._gsearch}
+                    onChange={(e, value: any) => {
+                      setfilterkey({
+                        ...filterkey,
+                        _gsearch: value,
+                      });
+                      // globalfilterfunction(value);
+                      handleSearch({ ...filterkey, _gsearch: value });
+                    }}
+                  /> */}
+                </div>
+                <div>
+                  <div
+                    className={styles["new-blog-button"]}
+                    onClick={() => {
+                      setFilterFlag(!filterFlag);
+                    }}
+                  >
+                    <Icon
+                      iconName="Filter"
+                      style={{
+                        fontWeight: 700,
+                        fontSize: "16PX",
+                      }}
+                    />
+                    <span>Filter</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className={styles.headingbox}>
-              <div>
+            {/* <div className={styles.headingbox}> */}
+            {/* <div>
                 <h3>Employee Directory</h3>
-              </div>
-              <div className={styles.filterbox}>
+              </div> */}
+            {/* <div className={styles.filterbox}>
                 <div>
                   <SearchBox
                     placeholder="Search..."
@@ -836,8 +962,8 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                     <span>Filter</span>
                   </div>
                 </div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
             {filterFlag === true ? (
               <div className={styles.textfieldbox}>
                 <div>
@@ -958,7 +1084,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 </div>
               </div>
             ) : null}
-            <div>
+            <div
+              style={{
+                background: "#ffff",
+                borderRadius: "10px",
+                paddingBottom: "20px",
+              }}
+            >
               <DataTable
                 rows={userData}
                 // rows={dataGridProps?.sortedBy==="Asc (Old)"? currentRoleBasedData?.data:dataGridProps?.sortedBy==="Desc (Latest)"?DescData:[]}

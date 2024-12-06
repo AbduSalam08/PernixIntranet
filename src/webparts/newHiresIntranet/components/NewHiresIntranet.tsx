@@ -27,7 +27,7 @@ import CustomPeoplePicker from "../../../components/common/CustomInputFields/Cus
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import moment from "moment";
 import { IFormFields } from "../../../interface/interface";
-import { Button } from "primereact/button";
+// import { Button } from "primereact/button";
 import { ToastContainer } from "react-toastify";
 
 /* Images creation */
@@ -132,6 +132,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
     initialPopupController
   );
   const [curObject, setCurObject] = useState<any>();
+  console.log("setCurObject: ", setCurObject);
   const [newHires, setNewHires] = useState<any[]>([]);
   const [currentUserDetails, setCurrentUserDetails] = useState<any>({
     role: "User",
@@ -438,8 +439,13 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         </div>
         <div title={val?.Description} className={styles.cardBodySec}>
           {val?.Description ?? ""}
+
+          {/* {val?.Description?.length > 400 ? <span>read more</span> : ""} */}
+          {/* <span>read more</span> */}
+
+          {/* new */}
         </div>
-        <div className={styles.cardBTNSec}>
+        {/* <div className={styles.cardBTNSec}>
           <Button
             label="Read more"
             onClick={() => {
@@ -452,7 +458,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               );
             }}
           />
-        </div>
+        </div> */}
       </div>
     );
   };
@@ -519,15 +525,17 @@ const NewHiresIntranet = (props: any): JSX.Element => {
       </div>
 
       {!newHiresData?.isLoading && newHires.length > 0 && (
-        <ViewAll
-          onClick={() => {
-            window.open(
-              props.context.pageContext.web.absoluteUrl +
-                CONFIG.NavigatePage.NewHiresPage,
-              "_self"
-            );
-          }}
-        />
+        <div style={{ marginTop: "30px" }}>
+          <ViewAll
+            onClick={() => {
+              window.open(
+                props.context.pageContext.web.absoluteUrl +
+                  CONFIG.NavigatePage.NewHiresPage,
+                "_self"
+              );
+            }}
+          />
+        </div>
       )}
 
       {/* Toast message section */}
