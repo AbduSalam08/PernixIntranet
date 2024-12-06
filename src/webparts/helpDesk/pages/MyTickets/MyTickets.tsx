@@ -434,72 +434,144 @@ const MyTickets = (): JSX.Element => {
               //   currentUserDetails,
               //   dispatch
               // );
-              // await Promise.all([
-              validateRecurrenceForm(
-                query,
-                {
-                  ...ticketBaseDetails,
-                  NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
-                },
-                {
-                  ...recurrenceDetails,
-                  TicketDetails: {
-                    value: {
-                      ID: currentRowData?.ID,
+              let hasErrors = false;
+
+              const updatedFormData = Object.keys(recurrenceDetails).reduce(
+                (acc, key) => {
+                  const fieldData = recurrenceDetails[key];
+                  const { isValid, errorMsg } = validateField(
+                    key,
+                    fieldData?.value,
+                    fieldData?.validationRule
+                  );
+
+                  if (!isValid) {
+                    hasErrors = true;
+                  }
+
+                  return {
+                    ...acc,
+                    [key]: {
+                      ...fieldData,
+                      isValid,
+                      errorMsg,
                     },
-                    isValid: true,
-                    errorMsg: "This field is required",
-                    validationRule: { required: false, type: "string" },
-                  },
-                  IsActive: {
-                    value: hasRecurrence,
-                    isValid: true,
-                    errorMsg: "This field is required",
-                    validationRule: { required: false, type: "string" },
-                  },
+                  };
                 },
-                setRecurrenceDetails,
-                popupController[0]?.popupData?.RecurrenceConfigDetailsId,
-                setLoadingSubmit,
-                setSubmitClicked,
-                popupController,
-                setPopupController,
-                dispatch,
-                nextTicketIntimation,
-                0,
-                null,
-                currentRole,
-                currentUserDetails,
-                HelpDeskTicktesData
-                // ticketsUpdateCall
+                {} as typeof recurrenceDetails
               );
-              // ]);
-              // .then(async (res: any) => {
-              //   const updatedTickets = await getAllTicketsData();
 
-              //   ticketsFilter(
-              //     `${currentRole}${location.pathname}`,
-              //     {
-              //       ...HelpDeskTicktesData,
-              //       AllData: updatedTickets,
-              //     },
-              //     currentUserDetails,
-              //     dispatch
-              //   );
-              // })
-              // .catch(async (err: any) => {
-              //   const updatedTickets = await getAllTicketsData();
+              // Additional validation for StartDate and EndDate
+              const startDate = recurrenceDetails?.StartDate?.value;
+              const endDate = recurrenceDetails?.EndDate?.value;
 
-              //   ticketsFilter(
-              //     `${currentRole}${location.pathname}`,
-              //     {
-              //       ...HelpDeskTicktesData,
-              //       AllData: updatedTickets,
-              //     },
-              //     currentUserDetails,
-              //     dispatch
-              //   );
-              // });
+              if (startDate && endDate) {
+                const start = dayjs(startDate, "DD/MM/YYYY");
+                const end = dayjs(endDate, "DD/MM/YYYY");
+                if (
+                  dayjs(startDate)?.format("DD/MM/YYYY") ===
+                  dayjs(endDate)?.format("DD/MM/YYYY")
+                ) {
+                  hasErrors = true;
+                  updatedFormData.StartDate = {
+                    ...updatedFormData.StartDate,
+                    isValid: false,
+                    errorMsg: "Start date and End date cannot be the same.",
+                  };
+                  updatedFormData.EndDate = {
+                    ...updatedFormData.EndDate,
+                    isValid: false,
+                    errorMsg: "Start date and End date cannot be the same.",
+                  };
+                }
+                if (start.isAfter(end)) {
+                  hasErrors = true;
+                  updatedFormData.StartDate = {
+                    ...updatedFormData.StartDate,
+                    isValid: false,
+                    errorMsg: "Start date should not be after end date.",
+                  };
+                  updatedFormData.EndDate = {
+                    ...updatedFormData.EndDate,
+                    isValid: false,
+                    errorMsg: "End date should not be before start date.",
+                  };
+                }
+              }
+
+              setRecurrenceDetails(updatedFormData);
+
+              await Promise.all([
+                validateRecurrenceForm(
+                  query,
+                  {
+                    ...ticketBaseDetails,
+                    NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+                  },
+                  {
+                    ...recurrenceDetails,
+                    TicketDetails: {
+                      value: {
+                        ID: currentRowData?.ID,
+                      },
+                      isValid: true,
+                      errorMsg: "This field is required",
+                      validationRule: { required: false, type: "string" },
+                    },
+                    IsActive: {
+                      value: hasRecurrence,
+                      isValid: true,
+                      errorMsg: "This field is required",
+                      validationRule: { required: false, type: "string" },
+                    },
+                  },
+                  setRecurrenceDetails,
+                  popupController[0]?.popupData?.RecurrenceConfigDetailsId,
+                  setLoadingSubmit,
+                  setSubmitClicked,
+                  popupController,
+                  setPopupController,
+                  dispatch,
+                  nextTicketIntimation,
+                  0,
+                  null,
+                  currentRole,
+                  currentUserDetails,
+                  HelpDeskTicktesData,
+                  hasErrors
+                  // ticketsUpdateCall
+                ),
+              ])
+                .then(async (res: any) => {
+                  if (!hasErrors && !nextTicketIntimation.error) {
+                    const updatedTickets = await getAllTicketsData();
+
+                    ticketsFilter(
+                      `${currentRole}${location.pathname}`,
+                      {
+                        ...HelpDeskTicktesData,
+                        AllData: updatedTickets,
+                      },
+                      currentUserDetails,
+                      dispatch
+                    );
+                  }
+                })
+                .catch(async (err: any) => {
+                  if (!hasErrors && !nextTicketIntimation.error) {
+                    const updatedTickets = await getAllTicketsData();
+
+                    ticketsFilter(
+                      `${currentRole}${location.pathname}`,
+                      {
+                        ...HelpDeskTicktesData,
+                        AllData: updatedTickets,
+                      },
+                      currentUserDetails,
+                      dispatch
+                    );
+                  }
+                });
             }
           } else {
             await addNewTicket(formDataAppended, ["Attachments"], true)
