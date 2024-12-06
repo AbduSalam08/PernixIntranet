@@ -520,7 +520,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
 
   // this function is tenentlevelallUsergetFunction
   const getallusers = async (listdata: any[]) => {
-    let users = await fetchUser(props.context, "@technorucs.com");
+    let users = await fetchUser(props.context, CONFIG.UserMailPath.path);
 
     await updatefunction(users, listdata);
     // setIsLoading(false);

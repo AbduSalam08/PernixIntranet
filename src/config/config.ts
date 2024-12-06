@@ -13,8 +13,10 @@ import {
   IPaginationData,
   IQuoteDatas,
   IRoleDetails,
+  ISelectWish,
   ISPGroupName,
   ITenantDetail,
+  IUserMailPath,
 } from "../interface/interface";
 
 export namespace CONFIG {
@@ -72,6 +74,14 @@ export namespace CONFIG {
     Feedback_Admin: "Feedback_Admin",
     Blogs_Admin: "Blogs_Admin",
     EmployeeDirectory_Admin: "EmployeeDirectory_Admin",
+  };
+
+  export const UserMailPath: IUserMailPath = {
+    // Tech mail path
+    path: "@technorucs.com",
+
+    // UAT mail path
+    // path: "@pernixfederal.com",
   };
 
   export const QuestionsPageTabsName: string[] = [
@@ -226,4 +236,11 @@ export namespace CONFIG {
     "https://www.linkedin.com/company/pernix-group-inc-";
 
   export const TwitterURL: string = "https://x.com/PernixGroup";
+
+  export const SelectWish: ISelectWish = {
+    Idx: null,
+    ID: "",
+    Email: "",
+    Name: "",
+  };
 }
