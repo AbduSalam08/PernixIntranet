@@ -234,6 +234,7 @@ const DataTable: React.FC<DataTableProps> = ({
             border: "none", // Remove borders from cell
             fontFamily: `'osRegular',sans-serif`,
             outline: "none",
+            // background: "#fff",
             "&:focus": {
               outline: "none !important", // Remove focus outline
               border: "none",

@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addQuestionCeo,
   changeQuestionActiveStatus,
+  getcurrentUser,
   getQuestionCeo,
   questionsCurrentUserRole,
   submitCEOQuestionAnswer,
@@ -85,6 +86,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
   const QuestionCEOIntranetData: any = useSelector((state: any) => {
     return state.QuestionCEOIntranetData.value;
   });
+  const [curUser, setCurUser] = useState<any>({});
 
   const [pagination, setPagination] = useState<IPaginationData>(
     CONFIG.PaginationData
@@ -315,7 +317,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         1,
         "close"
       );
-      await addQuestionCeo(newFormData);
+      await addQuestionCeo(newFormData, curUser);
       await getQuestionCeo(dispatch);
     } else {
       console.log("Form contains errors");
@@ -908,6 +910,14 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     setSearchParamsQusID(Number(ID));
     getQuestionCeo(dispatch);
     dispatch(setMainSPContext(props?.context));
+
+    getcurrentUser()
+      .then((res: any) => {
+        res && setCurUser({ ...res });
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
   }, [dispatch]);
 
   return isLoading ? (

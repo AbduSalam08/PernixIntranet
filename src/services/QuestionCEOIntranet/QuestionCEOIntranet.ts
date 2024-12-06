@@ -168,7 +168,6 @@ export const addQuestionCeo = async (
     });
 
     await postToApi(payload);
-    debugger;
 
     toast.update(toastId, {
       render: "The new question added successfully!",
