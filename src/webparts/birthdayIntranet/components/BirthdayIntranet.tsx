@@ -15,112 +15,42 @@ import resetPopupController, {
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import Popup from "../../../components/common/Popups/Popup";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
-import { useDispatch, useSelector } from "react-redux";
 import {
-  addBirthday,
-  getAllBirthdayData,
-  getBirthdayCurrentUserRole,
-  submitBirthdayWish,
+  addBirthdayWish,
+  fetchAzureUsers,
+  fetchBirthdayData,
+  fetchBirthdayRes,
 } from "../../../services/BirthDayIntranet/birthDayIntranet";
-import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
-import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
-import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 import moment from "moment";
 import ViewAll from "../../../components/common/ViewAll/ViewAll";
 import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import { ToastContainer } from "react-toastify";
+import {
+  IBirthdayData,
+  IBirthdayRes,
+  IBirthdayUsers,
+  ISelectWish,
+} from "../../../interface/interface";
+import { sp } from "@pnp/sp/presets/all";
 
-// images
+/* Global variable creation */
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
 const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
 const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
 
+let masterUser: IBirthdayUsers[] = [];
+let masterData: IBirthdayData[] = [];
+let masterRes: IBirthdayRes[] = [];
+let filMasterUser: IBirthdayUsers[] = [];
+let logInUser: any;
+
 const BirthdayIntranet = (props: any): JSX.Element => {
-  const today = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth(),
-    new Date().getDate()
-  );
-
-  const initialFormData = {
-    EmployeeName: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "array" },
-    },
-    DateOfBirth: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-    Image: {
-      value: null,
-      isValid: true,
-      errorMsg: "Invalid file",
-      validationRule: { required: true, type: "file" },
-    },
-    Message: {
-      value: "",
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: { required: true, type: "string" },
-    },
-
-    isTeams: {
-      value: false,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: {
-        required: false,
-        type: "boolean",
-      },
-    },
-    isOutlook: {
-      value: false,
-      isValid: true,
-      errorMsg: "This field is required",
-      validationRule: {
-        required: false,
-        type: "boolean",
-      },
-    },
-  };
-  const dispatch = useDispatch();
-  const birthDaysData: any = useSelector((state: any) => {
-    return state.BirthdaysData.value;
-  });
-
-  // popup properties
-  const initialPopupController = [
+  /* popup properties */
+  const initialPopupController: any[] = [
     {
       open: false,
-      popupTitle: "New birthday",
-      popupWidth: "900px",
-      popupType: "custom",
-      defaultCloseBtn: false,
-      popupData: "",
-      isLoading: {
-        inprogress: false,
-        error: false,
-        success: false,
-      },
-      messages: {
-        success: "Birthday sended successfully!",
-        error: "Something went wrong!",
-        successDescription: "The birtha has been added successfully.",
-        errorDescription:
-          "An error occured while adding news, please try again later.",
-        inprogress: "Adding birthday, please wait...",
-      },
-    },
-    {
-      open: false,
-      // popupTitle: "Send the wish",
       popupWidth: "800px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -141,20 +71,42 @@ const BirthdayIntranet = (props: any): JSX.Element => {
     },
   ];
 
-  const [popupController, setPopupController] = useState(
+  const initialFormData: any = {
+    Message: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: { required: true, type: "string" },
+    },
+    isTeams: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "boolean",
+      },
+    },
+    isOutlook: {
+      value: false,
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "boolean",
+      },
+    },
+  };
+
+  /* State creation */
+  const [popupController, setPopupController] = useState<any[]>(
     initialPopupController
   );
-  const [birthdays, setBirthdays] = useState<any[]>([]);
-  const [curuser, setCurrentuser] = useState<any>("");
-  const [currentUserDetails, setCurrentUserDetails] = useState<any>({
-    role: "User",
-    email: "",
-  });
   const [formData, setFormData] = useState<any>(initialFormData);
-  const [handleForm, setHandleForm] = useState<any>({
-    BirthDayID: null,
-    BirthDayWishID: null,
-    Type: "",
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [arrUserDatas, setArrUserDatas] = useState<IBirthdayUsers[]>([]);
+  const [curUser, setCurrentUser] = useState<ISelectWish>({
+    ...CONFIG.SelectWish,
   });
 
   const handleInputChange = (
@@ -174,20 +126,14 @@ const BirthdayIntranet = (props: any): JSX.Element => {
     }));
   };
 
-  const handleSubmit = async (sendBy: string): Promise<any> => {
-    let hasErrors = false;
-    // Validate each field and update the state with error messages
+  const handleSubmit = async (): Promise<void> => {
+    let hasErrors: boolean = false;
+
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
         key,
-        key === "EmployeeName"
-          ? fieldData?.value?.length > 0
-            ? fieldData.value
-            : fieldData.value
-            ? [fieldData.value]
-            : []
-          : fieldData.value,
+        fieldData.value,
         fieldData?.validationRule
       );
 
@@ -206,148 +152,46 @@ const BirthdayIntranet = (props: any): JSX.Element => {
     }, {} as typeof formData);
 
     setFormData(updatedFormData);
-
     if (!hasErrors) {
-      if (handleForm?.Type === "New") {
-        togglePopupVisibility(
-          setPopupController,
-          initialPopupController[0],
-          0,
-          "close"
-        );
-        // await addBirthday(formData, setPopupController, 0);
-        await addBirthday(formData);
-        await getAllBirthdayData(dispatch);
-      } else {
-        let payloadJson = {};
-        if (sendBy === "Teams") {
-          payloadJson = {
-            Message: formData?.Message?.value,
-            BirthDayId: handleForm?.BirthDayID,
-            isTeams: formData.isTeams?.value,
-            isOutlook: formData.isOutlook?.value,
-          };
-        } else {
-          payloadJson = {
-            Message: formData?.Message?.value,
-            BirthDayId: handleForm?.BirthDayID,
-            isOutlook: true,
-          };
-        }
-
-        togglePopupVisibility(
-          setPopupController,
-          initialPopupController[1],
-          1,
-          "close"
-        );
-        await submitBirthdayWish(
-          handleForm?.BirthDayWishID,
-          payloadJson
-          // setPopupController,
-          // 1
-        );
-        await getAllBirthdayData(dispatch);
-      }
-    } else {
-      console.log("Form contains errors");
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      await addBirthdayWish(
+        updatedFormData,
+        curUser?.Email,
+        logInUser?.Email?.toLowerCase()
+      ).then(() => {
+        const idx: number = Number(curUser.Idx);
+        arrUserDatas[idx].IsShow = false;
+        setCurrentUser({ ...CONFIG.SelectWish });
+        setArrUserDatas([...arrUserDatas]);
+      });
     }
+  };
+
+  const isFormValid = (): boolean => {
+    const isMessageValid: boolean =
+      formData?.Message?.isValid && formData?.Message?.value.trim() !== "";
+    const isAnyCheckboxChecked: boolean =
+      formData?.isTeams?.value || formData?.isOutlook?.value;
+
+    return isMessageValid && isAnyCheckboxChecked;
   };
 
   const popupInputs: any[] = [
     [
-      <div className={styles.newBirthdayGrid} key={1}>
-        <div className={styles.firstRow}>
-          <div className={styles.c1}>
-            <CustomPeoplePicker
-              labelText="Employee name"
-              isValid={formData?.EmployeeName?.isValid}
-              errorMsg={formData?.EmployeeName?.errorMsg}
-              selectedItem={[formData?.EmployeeName?.value]}
-              onChange={(item: any) => {
-                const value = item[0];
-                const message = `Dear ${value?.name},
-Wishing you a very happy birthday! I hope your day is filled with joy, celebration, and memorable moments. May the year ahead bring you great success, good health, and happiness.
-Enjoy your special day!`;
-                const { isValid, errorMsg } = validateField(
-                  "EmployeeName",
-                  item,
-                  formData?.EmployeeName?.validationRule
-                );
-                handleInputChange("EmployeeName", value, isValid, errorMsg);
-                handleInputChange(
-                  "Message",
-                  value?.name ? message : "",
-                  true,
-                  ""
-                );
-              }}
-            />
-          </div>
-          <div className={styles.c1}>
-            <CustomDateInput
-              value={formData?.DateOfBirth?.value}
-              label="Date of birth"
-              isDateController={true}
-              minimumDate={new Date()}
-              error={!formData?.DateOfBirth?.isValid}
-              errorMsg={formData?.DateOfBirth?.errorMsg}
-              onChange={(date: any) => {
-                const { isValid, errorMsg } = validateField(
-                  "DateOfBirth",
-                  date,
-                  formData?.DateOfBirth?.validationRule
-                );
-                handleInputChange("DateOfBirth", date, isValid, errorMsg);
-              }}
-            />
-          </div>
-          <div className={styles.c1}>
-            <CustomFileUpload
-              accept="image/png,image/jpeg"
-              value={formData?.Image?.value?.name}
-              onFileSelect={async (file) => {
-                const { isValid, errorMsg } = validateField(
-                  "Image",
-                  file ? file.name : "",
-                  formData?.Image?.validationRule
-                );
-                await handleInputChange("Image", file, isValid, errorMsg);
-              }}
-              placeholder="Image (350 x 350)"
-              isValid={formData?.Image?.isValid}
-              errMsg={formData?.Image?.errorMsg}
-            />
-          </div>
-        </div>
-        <FloatingLabelTextarea
-          value={formData.Message.value}
-          placeholder="Message"
-          rows={5}
-          isValid={formData.Message.isValid}
-          errorMsg={formData.Message.errorMsg}
-          onChange={(e: any) => {
-            const value = e.trimStart();
-            const { isValid, errorMsg } = validateField(
-              "Message",
-              value,
-              formData.Message.validationRule
-            );
-            handleInputChange("Message", value, isValid, errorMsg);
-          }}
-        />
-      </div>,
-    ],
-    [
       <div className={styles.messageBox} key={2}>
         <div className={styles.sendWish}>
-          <span>Send Wish</span>
+          <span>Send birthday wish</span>
           <button
             onClick={() => {
               togglePopupVisibility(
                 setPopupController,
-                initialPopupController[1],
-                1,
+                initialPopupController[0],
+                0,
                 "close"
               );
             }}
@@ -359,6 +203,7 @@ Enjoy your special day!`;
             />
           </button>
         </div>
+
         <img
           src={wishImg}
           style={{
@@ -367,9 +212,9 @@ Enjoy your special day!`;
           }}
           alt="wishImg"
         />
+
         <FloatingLabelTextarea
           customBorderColor="#0B4D53"
-          // readOnly
           disabled={false}
           value={formData?.Message?.value}
           placeholder="Message"
@@ -378,7 +223,7 @@ Enjoy your special day!`;
           errorMsg={formData?.Message.errorMsg}
           noBorderInput={false}
           onChange={(e: any) => {
-            const value = e;
+            const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
               "Message",
               value,
@@ -390,8 +235,10 @@ Enjoy your special day!`;
 
         <div className={styles.suggestions}>
           {[
-            { text: `Happy Birthday ${curuser ? curuser : ""} `, emoji: "🎂" },
-
+            {
+              text: `Happy Birthday ${curUser?.Name ? curUser?.Name : ""} `,
+              emoji: "🎂",
+            },
             { text: "Wishing you a fantastic year ahead !", emoji: "🎉" },
             { text: "Cheers to another amazing year !", emoji: "🥂" },
             { text: "Hope your day is as special as you are !", emoji: "🌟" },
@@ -422,7 +269,6 @@ Enjoy your special day!`;
                 gap: "10px",
                 margin: "15px 0px 0px 0px",
                 background: "#e9e8f4",
-                // border: "1px solid #7b83eb",
                 borderRadius: "4px",
                 padding: "8px",
               }}
@@ -460,7 +306,6 @@ Enjoy your special day!`;
                 Teams
               </label>
             </div>
-
             <div
               style={{
                 display: "flex",
@@ -468,7 +313,6 @@ Enjoy your special day!`;
                 gap: "10px",
                 margin: "15px 0px 0px 0px",
                 background: "#e9e8f4",
-                // border: "1px solid #7b83eb",
                 borderRadius: "4px",
                 padding: "8px",
               }}
@@ -508,41 +352,9 @@ Enjoy your special day!`;
             </div>
           </div>
         </div>
-        {/* 
-        <div className={styles.actionBtns}>
-          {!formData?.isTeams?.value && (
-            <button
-              className={styles.teams}
-              onClick={async () => {
-                await handleSubmit("Teams");
-              }}
-            >
-              <img src={teamsImg} /> Send in Teams
-            </button>
-          )}
-          {!formData?.isOutlook?.value && (
-            <button
-              className={styles.outlook}
-              onClick={async () => {
-                await handleSubmit("Outlook");
-              }}
-            >
-              <img src={outlookImg} /> Send in Outlook
-            </button>
-          )}
-        </div> */}
       </div>,
     ],
   ];
-  
-  const isFormValid = (): boolean => {
-    const isMessageValid =
-      formData?.Message?.isValid && formData?.Message?.value.trim() !== "";
-    const isAnyCheckboxChecked =
-      formData?.isTeams?.value || formData?.isOutlook?.value;
-
-    return isMessageValid && isAnyCheckboxChecked;
-  };
 
   const popupActions: any[] = [
     [
@@ -567,84 +379,128 @@ Enjoy your special day!`;
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
-        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
-        size: "large",
-        onClick: async () => {
-          await handleSubmit("");
-        },
-      },
-    ],
-    [
-      {
-        text: "Cancel",
-        btnType: "darkGreyVariant",
-        disabled: false,
-        endIcon: false,
-        startIcon: false,
-        size: "large",
-        onClick: () => {
-          togglePopupVisibility(
-            setPopupController,
-            initialPopupController[1],
-            1,
-            "close"
-          );
-        },
-      },
-      {
-        text: "Submit",
-        btnType: "primaryGreen",
-        endIcon: false,
-        startIcon: false,
         disabled: !isFormValid(),
-        // disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleSubmit("Teams");
+          await handleSubmit();
         },
       },
     ],
   ];
 
-  useEffect(() => {
-    if (birthDaysData?.data?.length > 0) {
-      const filteredData = birthDaysData?.data
-        .filter(
-          (val: any) =>
-            moment(today).format("DD/MM/YYYY") <=
-            moment(val?.DateOfBirth).format("DD/MM/YYYY")
-        )
-        .slice(0, 5);
-
-      setBirthdays(filteredData);
-    }
-  }, [birthDaysData]);
-
-  useEffect(() => {
-    dispatch(setMainSPContext(props?.context));
-    getBirthdayCurrentUserRole(setCurrentUserDetails);
-    getAllBirthdayData(dispatch);
-  }, [dispatch]);
-
-  const handlenavigate = (): void => {
-    window.open(
-      props.context.pageContext.web.absoluteUrl +
-        CONFIG.NavigatePage.BirthdayPage,
-      "_self"
+  const filterData = async (): Promise<void> => {
+    filMasterUser = await Promise?.all(
+      masterUser?.filter(
+        (val: IBirthdayUsers) =>
+          Number(moment().format("MMDD")) <=
+            Number(moment(val?.Birthday).format("MMDD")) && val?.IsActive
+      ) || []
     );
+
+    filMasterUser?.sort(
+      (a: IBirthdayUsers, b: IBirthdayUsers) =>
+        parseInt(moment(a?.Birthday).format("MMDD")) -
+        parseInt(moment(b?.Birthday).format("MMDD"))
+    );
+    setArrUserDatas([...filMasterUser]);
+    setIsLoading(false);
   };
+
+  const resDataPrepare = async (): Promise<void> => {
+    logInUser = await sp.web.currentUser.get();
+
+    for (let i: number = 0; masterUser.length > i; i++) {
+      let isCheck: boolean = false;
+
+      if (masterRes.length) {
+        _looping: for (let j: number = 0; masterRes.length > j; j++) {
+          if (
+            masterUser[i].Email === masterRes[j].To &&
+            logInUser?.Email?.toLowerCase() === masterRes[j].From
+          ) {
+            isCheck = true;
+            break _looping;
+          }
+          if (masterUser[i].Email === logInUser?.Email?.toLowerCase()) {
+            isCheck = true;
+            break _looping;
+          }
+        }
+
+        masterUser[i].IsSameUser = isCheck;
+        if (masterUser.length === i + 1) {
+          await filterData();
+        }
+      } else {
+        if (masterUser[i].Email === logInUser?.Email?.toLowerCase()) {
+          isCheck = true;
+          masterUser[i].IsSameUser = isCheck;
+        }
+        if (masterUser.length === i + 1) {
+          await filterData();
+        }
+      }
+    }
+  };
+
+  const prepareData = async (): Promise<void> => {
+    if (masterUser.length) {
+      for (let i: number = 0; masterUser.length > i; i++) {
+        if (masterData.length) {
+          _looping: for (let j: number = 0; masterData.length > j; j++) {
+            if (masterUser[i].ID === masterData[j].UserID) {
+              masterUser[i].BirthdayUserListDataId = masterData[j].ID;
+              masterUser[i].IsActive = false;
+              break _looping;
+            } else {
+              masterUser[i].BirthdayUserListDataId = null;
+              masterUser[i].IsActive = true;
+            }
+          }
+
+          if (masterUser.length === i + 1) {
+            await resDataPrepare();
+          }
+        } else {
+          await resDataPrepare();
+        }
+      }
+    } else {
+      setArrUserDatas([]);
+      setIsLoading(false);
+    }
+  };
+
+  const initialFetchData = async (): Promise<void> => {
+    setIsLoading(true);
+
+    const fetchUsersPromise: any = fetchAzureUsers(props?.context);
+    const fetchDataPromise: any = fetchBirthdayData();
+    const fetchResPromise: any = fetchBirthdayRes();
+
+    const [users, data, res] = await Promise.all([
+      fetchUsersPromise,
+      fetchDataPromise,
+      fetchResPromise,
+    ]);
+
+    masterUser = users;
+    masterData = data;
+    masterRes = res;
+
+    await prepareData();
+  };
+
+  useEffect(() => {
+    initialFetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
       <SectionHeaderIntranet
-        label={"Birthday"}
-        removeAdd={currentUserDetails?.role === "Admin" ? false : true}
+        label="Birthday"
+        removeAdd={true}
         headerAction={() => {
-          setHandleForm({
-            BirthDayID: null,
-            BirthDayWishID: null,
-            Type: "New",
-          });
           togglePopupVisibility(
             setPopupController,
             initialPopupController[0],
@@ -654,104 +510,90 @@ Enjoy your special day!`;
           resetFormData(initialFormData, setFormData);
         }}
       />
+
       <div className={styles.contentSection}>
-        {birthDaysData?.isLoading ? (
+        {isLoading ? (
           <CircularSpinner />
-        ) : birthDaysData?.error ? (
+        ) : !arrUserDatas.length ? (
           <div className="errorWrapper">
             <img src={errorGrey} alt="Error" />
-            <span className="disabledText">{birthDaysData?.error}</span>
+            <span className="disabledText">Birthday data not found!</span>
           </div>
         ) : (
-          birthdays?.map((val: any, index: number) => (
-            <div key={index} className={styles.contentMain}>
-              <div className={styles.image}>
-                <img src={`${val?.imgUrl}`} alt="" />
-              </div>
-              <div className={styles.content}>
-                <div className={styles.contentwithIconsection}>
-                  <div className={styles.Title}>
-                    <p className={styles.name}>{val?.EmployeeName?.name}</p>
-                    <p className={styles.date}>
-                      {moment(today).format("DD/MM/YYYY") ===
-                      moment(val?.DateOfBirth).format("DD/MM/YYYY")
-                        ? "Birthday today"
-                        : `Birthday on ${moment(val?.DateOfBirth).format(
-                            "LL"
-                          )}`}
-                    </p>
+          arrUserDatas
+            ?.slice(0, 5)
+            ?.map((val: IBirthdayUsers, index: number) => {
+              return (
+                <div key={index} className={styles.contentMain}>
+                  <div className={styles.image}>
+                    <img
+                      src={`/_layouts/15/userphoto.aspx?size=S&username=${val?.Email}`}
+                      alt="User"
+                    />
                   </div>
-
-                  {!(val?.isTeams || val?.isOutlook) &&
-                    !val.sameuser &&
-                    moment(today).format("DD/MM/YYYY") ===
-                      moment(val?.DateOfBirth).format("DD/MM/YYYY") && (
-                      <div
-                        onClick={() => {
-                          setCurrentuser(val?.EmployeeName?.name);
-                          // setSameuser(val?.sameuser);
-                          setHandleForm({
-                            BirthDayID: val?.ID,
-                            BirthDayWishID: val?.BirthDayWishID
-                              ? val?.BirthDayWishID
-                              : null,
-                            Type: "SendWish",
-                          });
-                          togglePopupVisibility(
-                            setPopupController,
-                            initialPopupController[1],
-                            1,
-                            "open"
-                          );
-                          setFormData({
-                            Message: {
-                              value: "",
-                              isValid: true,
-                              errorMsg: "This field is required",
-                              validationRule: {
-                                required: true,
-                                type: "string",
-                              },
-                            },
-                            isTeams: {
-                              value: val?.isTeams,
-                              isValid: true,
-                              errorMsg: "This field is required",
-                              validationRule: {
-                                required: false,
-                                type: "boolean",
-                              },
-                            },
-                            isOutlook: {
-                              value: val?.isOutlook,
-                              isValid: true,
-                              errorMsg: "This field is required",
-                              validationRule: {
-                                required: false,
-                                type: "boolean",
-                              },
-                            },
-                          });
-                        }}
-                      >
-                        <i
-                          className="pi pi-send"
-                          style={{ color: "#0b4d53", fontSize: "24px" }}
-                        />
+                  <div className={styles.content}>
+                    <div className={styles.contentwithIconsection}>
+                      <div className={styles.Title}>
+                        <p className={styles.name}>{val?.Name}</p>
+                        <p className={styles.date}>
+                          {moment().format("MMDD") ===
+                          moment(val?.Birthday).format("MMDD")
+                            ? "Birthday today"
+                            : `Birthday on ${moment(val?.Birthday).format(
+                                "MMMM D"
+                              )}, ${moment().format("YYYY")}`}
+                        </p>
                       </div>
-                    )}
+
+                      {val.IsShow && !val.IsSameUser && val?.IsActive && (
+                        <div
+                          style={{
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setCurrentUser({
+                              Idx: index,
+                              ID: val?.ID.toString(),
+                              Email: val?.Email,
+                              Name: val?.Name,
+                            });
+                            setFormData({ ...initialFormData });
+                            togglePopupVisibility(
+                              setPopupController,
+                              initialPopupController[0],
+                              0,
+                              "open"
+                            );
+                          }}
+                        >
+                          <i
+                            className="pi pi-send"
+                            style={{ color: "#0b4d53", fontSize: "24px" }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))
+              );
+            })
         )}
       </div>
-      {!birthDaysData?.isLoading && birthdays.length > 0 && (
-        <ViewAll onClick={handlenavigate} />
+
+      {arrUserDatas.length > 0 && (
+        <ViewAll
+          onClick={() => {
+            window.open(
+              props.context.pageContext.web.absoluteUrl +
+                CONFIG.NavigatePage.BirthdayPage,
+              "_self"
+            );
+          }}
+        />
       )}
+
       {popupController?.map((popupData: any, index: number) => (
         <Popup
-          // popupCustomBgColor="#fff"
           key={index}
           isLoading={popupData?.isLoading}
           messages={popupData?.messages}
@@ -762,14 +604,13 @@ Enjoy your special day!`;
           }}
           PopupType={popupData.popupType}
           onHide={() => {
+            resetFormData(initialFormData, setFormData);
             togglePopupVisibility(
               setPopupController,
               initialPopupController[0],
               index,
               "close"
             );
-            getAllBirthdayData(dispatch);
-            resetFormData(initialFormData, setFormData);
           }}
           popupTitle={
             popupData.popupType !== "confimation" && popupData.popupTitle
@@ -801,4 +642,5 @@ Enjoy your special day!`;
     </div>
   );
 };
+
 export default BirthdayIntranet;

@@ -1,587 +1,238 @@
 /* eslint-disable no-debugger */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast } from "react-toastify";
 import { CONFIG } from "../../config/config";
-import { setBirthdaysData } from "../../redux/features/BirthdayIntranet";
 import SpServices from "../SPServices/SpServices";
-import { sp } from "@pnp/sp";
+import { MSGraphClient } from "@microsoft/sp-http";
+import moment from "moment";
+import {
+  IBirthdayData,
+  IBirthdayRes,
+  IBirthdayUsers,
+} from "../../interface/interface";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+export const fetchAzureUsers = async (
+  context: any
+): Promise<IBirthdayUsers[]> => {
+  const client: MSGraphClient = await context.msGraphClientFactory.getClient();
 
-export const getBirthdayCurrentUserRole = async (
-  setCurrentUserDetails: any
-): Promise<any> => {
-  let userDetails = {};
-  const currentUser: any = await sp.web.currentUser.get();
-  const currentUserEmail = currentUser?.Email.toLowerCase() || "";
+  let allUsers: any[] = [];
+  let nextPageUrl: string | undefined = undefined;
 
-  const questionCEOAdminData: any = await sp.web.siteGroups
-    .getByName(CONFIG.SPGroupName.Birthdays_Admin)
-    .users.get();
+  try {
+    do {
+      const response: any = nextPageUrl
+        ? await client.api(nextPageUrl).version("v1.0").top(999).get()
+        : await client.api("users/").version("v1.0").top(999).get();
 
-  const isSuperAdmin: any = await sp.web.siteGroups
-    .getByName(CONFIG.SPGroupName.Pernix_Admin)
-    .users.get();
-  const usersArray = [...questionCEOAdminData, ...isSuperAdmin];
+      const data: any = response?.value;
 
-  const isAdmin = usersArray?.some(
-    (val: any) => val.Email.toLowerCase() === currentUserEmail
-  );
-  if (isAdmin) {
-    // setCurrentUserDetails({ role: "User", email: currentUserEmail });
-    setCurrentUserDetails({ role: "Admin", email: currentUserEmail });
-    userDetails = { role: "Admin", email: currentUserEmail };
-  } else {
-    setCurrentUserDetails({ role: "User", email: currentUserEmail });
-    userDetails = { role: "User", email: currentUserEmail };
+      allUsers = allUsers.concat(data);
+      nextPageUrl = response["@odata.nextLink"];
+    } while (nextPageUrl);
+
+    const filteredData: any[] = await Promise.all(
+      allUsers?.filter((item: any) =>
+        item?.userPrincipalName
+          ?.toLowerCase()
+          .endsWith(CONFIG.UserMailPath.path.toLowerCase())
+      ) || []
+    );
+
+    const userDetailsArray: any[] | null = await Promise.all(
+      filteredData?.map(async (user: any) => {
+        const userData: any = await client
+          .api(`/users/${user.id}?$select=birthday`)
+          .version("v1.0")
+          .get();
+
+        if (userData?.birthday) {
+          return {
+            ID: user?.id ?? "",
+            Name: user?.displayName ?? "",
+            Email: user?.userPrincipalName.toLowerCase() ?? "",
+            Birthday:
+              moment(userData?.birthday).format("YYYYMMDD") !== "00010101"
+                ? moment(userData?.birthday).format()
+                : "",
+            IsTeams: false,
+            IsOutlook: false,
+            IsActive: true,
+            IsSameUser: false,
+            IsShow:
+              moment(userData?.birthday).format("MMDD") ===
+              moment().format("MMDD")
+                ? true
+                : false,
+            BirthdayUserListDataId: null,
+          };
+        } else {
+          return null;
+        }
+      }) || []
+    );
+
+    const arrUsersMasterData: IBirthdayUsers[] = await Promise.all(
+      userDetailsArray?.filter((val: IBirthdayUsers) => val.Birthday) || []
+    );
+
+    return [...arrUsersMasterData];
+  } catch (err) {
+    console.log("err: ", err);
+
+    return [];
   }
-  console.log(userDetails);
 };
 
-export const getAllBirthdayData = async (dispatch: any): Promise<any> => {
-  dispatch?.(
-    setBirthdaysData({
-      isLoading: true,
-    })
-  );
+export const fetchBirthdayData = async (): Promise<IBirthdayData[]> => {
   try {
-    const currentUser: any = await sp.web.currentUser.get();
-    console.log("currentUser: ", currentUser);
-    const currentUserEmail = currentUser?.Email.toLowerCase() || "";
-    // Fetch news data
-    const birthdayResponse: any = await SpServices.SPReadItems({
+    const res: any[] = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_BirthDay,
-      Select:
-        "*, Author/EMail, Author/Title, Author/ID,EmployeeName/EMail, EmployeeName/Title, EmployeeName/ID,AttachmentFiles",
-      Expand: "Author,EmployeeName,AttachmentFiles",
-      Filter: [
-        {
-          FilterKey: "IsDelete",
-          Operator: "ne",
-          FilterValue: "1",
-        },
-      ],
-      Topcount: 5000,
-      Orderby: "DateOfBirth",
-      Orderbydecorasc: true,
     });
-    const wishesResponse: any = await SpServices.SPReadItems({
-      Listname: CONFIG.ListNames.Intranet_BirthdayWishes,
-      Select: "*, Author/EMail, Author/Title, Author/ID,BirthDay/ID",
-      Expand: "Author,BirthDay",
-      Filter: [
-        {
-          FilterKey: "Author",
-          Operator: "ne",
-          FilterValue: currentUserEmail,
-        },
-      ],
-      Topcount: 5000,
-      Orderby: "Created",
-      Orderbydecorasc: false,
-    });
-    console.log("birthdayResponse: ", birthdayResponse);
-    console.log("wishesResponse: ", wishesResponse);
-    // const sameUser: boolean = birthdayResponse.some(
-    //   (val: any) => val.EmployeeName.EMail.toLowerCase() === currentUserEmail
-    // );
-    // console.log(sameUser, "sameUser");
-    const newhireData: any = birthdayResponse?.map((item: any) => {
-      const birthdayWish = wishesResponse?.filter(
-        (obj: any) =>
-          obj?.Author?.EMail.toLowerCase() === currentUserEmail &&
-          obj?.BirthDayId === item?.ID
-      );
 
-      console.log(birthdayWish, "birthdayWish");
-      let sameUser =
-        item?.EmployeeName?.EMail?.toLowerCase() === currentUserEmail;
-
-      console.log(sameUser, "sameuser");
-
-      return {
-        ID: item?.ID,
-        EmployeeName: {
-          id: item?.EmployeeName?.ID,
-          email: item?.EmployeeName?.EMail,
-          name: item?.EmployeeName?.Title,
-        },
-        DateOfBirth: item?.DateOfBirth,
-        Message: birthdayWish[0]?.Message
-          ? birthdayWish[0]?.Message
-          : item?.Message,
-        isTeams: birthdayWish[0]?.isTeams ? true : false,
-        isOutlook: birthdayWish[0]?.isOutlook ? true : false,
-        createdEmail: item?.Author?.EMail,
-        createdName: item?.Author?.Title,
-        imgUrl: item?.AttachmentFiles[0]?.ServerRelativeUrl,
-        Attachment: item?.AttachmentFiles[0],
-        currentUser: currentUser ? currentUser.Title : "",
-        BirthDayWishID: birthdayWish[0]?.ID ? birthdayWish[0]?.ID : null,
-        sameuser: sameUser,
-        // Sameuser: sameUser,
-      };
-    });
-    console.log(newhireData, "newhiredatas");
-    // Dispatch the data
-    dispatch?.(
-      newhireData?.length === 0
-        ? setBirthdaysData({
-            isLoading: false,
-            data: newhireData,
-            error: "No new hires data found!",
-          })
-        : setBirthdaysData({
-            isLoading: false,
-            data: newhireData,
-          })
+    const BirthdayData: IBirthdayData[] = await Promise.all(
+      res?.map((val: any) => {
+        return {
+          ID: val?.ID,
+          UserID: val?.Title ?? "",
+          IsActive: val?.IsActive ? false : true,
+        };
+      }) || []
     );
-  } catch (error) {
-    console.error("Error fetching new hire data:", error);
-    dispatch?.(
-      setBirthdaysData({
-        isLoading: false,
-        data: [],
-        error: error.message || "Error fetching new hire data",
-      })
-    );
+
+    return [...BirthdayData];
+  } catch (err) {
+    return [];
   }
 };
 
-interface FormData {
-  [key: string]: { value: any };
-}
+export const fetchBirthdayRes = async (): Promise<IBirthdayRes[]> => {
+  try {
+    const res: any[] = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_BirthdayWishes,
+    });
 
-// interface LoaderStateItem {
-//   popupWidth: string;
-//   isLoading: {
-//     inprogress: boolean;
-//     error: boolean;
-//     success: boolean;
-//   };
-//   messages?: {
-//     success?: string;
-//     successDescription?: string;
-//     errorDescription?: string;
-//   };
-// }
+    const BirthdayRes: IBirthdayRes[] = await Promise.all(
+      res?.map((val: any) => {
+        return {
+          ID: val?.ID,
+          From: val?.From ?? "",
+          To: val?.To ?? "",
+          Message: val?.Message ?? "",
+          IsTeams: val?.IsTeams ? true : false,
+          IsOutlook: val?.IsOutlook ? true : false,
+        };
+      }) || []
+    );
 
-export const addBirthday = async (
-  formData: FormData
-  // setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  // index: number
+    return [...BirthdayRes];
+  } catch (err) {
+    return [];
+  }
+};
+
+export const addBirthdayWish = async (
+  data: any,
+  selUserName: string,
+  curUserName: string
 ): Promise<void> => {
-  // Start loader for the specific item at the given index
-  // setLoaderState((prevState) => {
-  //   const updatedState = [...prevState];
-  //   updatedState[index] = {
-  //     ...updatedState[index],
-  //     popupWidth: "450px",
-  //     isLoading: {
-  //       inprogress: true,
-  //       error: false,
-  //       success: false,
-  //     },
-  //   };
-  //   return updatedState;
-  // });
-
-  const toastId = toast.loading("Adding birthday, please wait...");
+  const toastId = toast.loading(
+    "Responding to the birthday wish is in progress..."
+  );
 
   try {
-    debugger;
-    let fileRes: any;
-    const payload = {
-      EmployeeNameId: formData.EmployeeName?.value?.id,
-      Message: formData.Message?.value,
-      DateOfBirth: formData.DateOfBirth?.value,
-    };
+    await SpServices.SPAddItem({
+      Listname: CONFIG.ListNames.Intranet_BirthdayWishes,
+      RequestJSON: {
+        From: curUserName,
+        To: selUserName,
+        Message: data?.Message?.value || "",
+        IsTeams: data?.isTeams?.value || false,
+        IsOutlook: data?.isOutlook?.value || false,
+      },
+    });
 
-    // Add item to the SharePoint list
+    toast.update(toastId, {
+      render: "The response to the birthday wish has been added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error adding response. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+export const addBirthDay = async (userID: string): Promise<any> => {
+  const toastId = toast.loading("Deactivating a birthday...");
+
+  try {
     const res: any = await SpServices.SPAddItem({
       Listname: CONFIG.ListNames.Intranet_BirthDay,
-      RequestJSON: payload,
+      RequestJSON: {
+        Title: userID,
+        IsActive: true,
+      },
     });
-    if (formData?.Image?.value?.name) {
-      fileRes = await sp.web.lists
-        .getByTitle(CONFIG.ListNames.Intranet_BirthDay)
-        .items.getById(res.data.Id)
-        .attachmentFiles.add(
-          formData?.Image?.value?.name,
-          formData?.Image?.value
-        );
-    }
-    console.log("fileRes", fileRes);
-
-    // Success state after item and attachment are added
-    // setLoaderState((prevState) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: true,
-    //       error: false,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       success: "Birthday Added Successfully",
-    //       successDescription: `'${formData.EmployeeName.value.name}' birthday has been added successfully.`,
-    //     },
-    //   };
-    //   return updatedState;
-    // });
 
     toast.update(toastId, {
-      render: `Birthday has been added successfully!`,
+      render: "The user's birthday has been successfully deactivated!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
       hideProgressBar: false,
     });
-  } catch (error) {
-    console.error("Error while adding birthday:", error);
+
+    return res?.data?.ID || null;
+  } catch (err) {
+    console.log("err: ", err);
+
     toast.update(toastId, {
-      render: `An error occurred while Adding birthday. Please try again.!`,
+      render: "Error deactivating the user's birthday. Please try again.",
       type: "error",
       isLoading: false,
       autoClose: 5000,
       hideProgressBar: false,
     });
-    // Handle error state
-    // setLoaderState((prevState) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: false,
-    //       error: true,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       errorDescription:
-    //         "An error occurred while adding birthday, please try again later.",
-    //     },
-    //   };
-    //   return updatedState;
-    // });
+
+    return null;
   }
 };
-export const submitBirthdayWish = async (
-  ID: number,
-  payloadJson: any
-  // setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  // index: number
-): Promise<void> => {
-  // Start loader for the specific item at the given index
-  // setLoaderState((prevState) => {
-  //   const updatedState = [...prevState];
-  //   updatedState[index] = {
-  //     ...updatedState[index],
-  //     popupWidth: "450px",
-  //     isLoading: {
-  //       inprogress: true,
-  //       error: false,
-  //       success: false,
-  //     },
-  //   };
-  //   return updatedState;
-  // });
-  const toastId = toast.loading(" Wishing Birthday...");
+
+export const deleteBirthDay = async (Id: number): Promise<void> => {
+  const toastId = toast.loading("Activating a birthday...");
 
   try {
-    debugger;
-    // Add item to the SharePoint list
-    if (ID) {
-      await SpServices.SPUpdateItem({
-        Listname: CONFIG.ListNames.Intranet_BirthdayWishes,
-        ID: ID,
-        RequestJSON: payloadJson,
-      });
-    } else {
-      await SpServices.SPAddItem({
-        Listname: CONFIG.ListNames.Intranet_BirthdayWishes,
-        RequestJSON: payloadJson,
-      });
-    }
-    // Success state after item and attachment are added
-    // setLoaderState((prevState) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: true,
-    //       error: false,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       success: "Birthday wishes sended successfully",
-    //       successDescription: `Birthday wishes sended by ${
-    //         payloadJson?.isTeams ? "teams." : "outlook."
-    //       }`,
-    //     },
-    //   };
-    //   return updatedState;
-    // });
-
-    toast.update(toastId, {
-      render: `Wishes sent successfully!"`,
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
-  } catch (error) {
-    console.error("Error while adding birthday:", error);
-
-    // Handle error state
-    // setLoaderState((prevState) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: false,
-    //       error: true,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       errorDescription:
-    //         "An error occurred while sending birthday wish, please try again later.",
-    //     },
-    //   };
-    //   return updatedState;
-    // });
-
-    toast.update(toastId, {
-      render: `An error occurred while submitting your wishes. Please try again.!`,
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
-  }
-};
-export const updateBirthday = async (
-  formData: FormData,
-  ID: number,
-  attachmentObject: any
-  // setLoaderState: React.Dispatch<React.SetStateAction<LoaderStateItem[]>>,
-  // index: number
-): Promise<void> => {
-  // Start loader for the specific item at the given index
-  // setLoaderState((prevState) => {
-  //   const updatedState = [...prevState];
-  //   updatedState[index] = {
-  //     ...updatedState[index],
-  //     popupWidth: "450px",
-  //     isLoading: {
-  //       inprogress: true,
-  //       error: false,
-  //       success: false,
-  //     },
-  //   };
-  //   return updatedState;
-  // });
-  const toastId = toast.loading(" Updating Birthday...");
-
-  try {
-    debugger;
-    let fileRes: any;
-    const payload = {
-      Message: formData.Message?.value,
-      DateOfBirth: formData.DateOfBirth?.value,
-    };
-
-    // update item to the SharePoint list
-    const res: any = await SpServices.SPUpdateItem({
+    await SpServices.SPDeleteItem({
       Listname: CONFIG.ListNames.Intranet_BirthDay,
-      ID: ID,
-      RequestJSON: payload,
+      ID: Id,
     });
-    console.log("res", res);
-
-    if (formData?.Image?.value?.type) {
-      await sp.web.lists
-        .getByTitle(CONFIG.ListNames.Intranet_BirthDay)
-        .items.getById(Number(ID))
-        .attachmentFiles.getByName(attachmentObject.FileName)
-        .delete();
-      if (formData?.Image?.value?.name) {
-        fileRes = await sp.web.lists
-          .getByTitle(CONFIG.ListNames.Intranet_BirthDay)
-          .items.getById(Number(ID))
-          .attachmentFiles.add(
-            formData?.Image?.value?.name,
-            formData?.Image?.value
-          );
-      }
-    }
-    console.log("fileRes", fileRes);
-
-    const responseData: any = {
-      ID: ID,
-      DateOfBirth: formData.DateOfBirth?.value,
-      Message: formData.Message?.value,
-      isOutlook: false,
-      isTeams: false,
-      EmployeeName: {},
-      createdEmail: res?.Author?.EMail,
-      createdName: res?.Author?.Title,
-      imgUrl: formData?.Image?.value?.type
-        ? fileRes?.data?.ServerRelativeUrl
-        : attachmentObject?.ServerRelativeUrl,
-      Attachment: formData?.Image?.value?.type
-        ? fileRes?.data
-        : attachmentObject,
-      BirthDayWishID: null,
-    };
-
-    // Success state after item and attachment are added
-    // setLoaderState((prevState) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: true,
-    //       error: false,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       success: "Birthday updated successfully!",
-    //       successDescription: `The birthday has been updated successfully.`,
-    //     },
-    //   };
-    //   return updatedState;
-    // });
 
     toast.update(toastId, {
-      render: `Birthday updated successfully!`,
+      render: "The user's birthday has been successfully activated!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
       hideProgressBar: false,
     });
-    return { ...responseData };
-  } catch (error) {
-    console.error("Error while updating new hire:", error);
+  } catch (err) {
+    console.log("err: ", err);
 
     toast.update(toastId, {
-      render: `An error occurred while Updating birthday. Please try again.!`,
+      render: "Error activating the user's birthday. Please try again.",
       type: "error",
       isLoading: false,
       autoClose: 5000,
       hideProgressBar: false,
     });
-
-    // Handle error state
-    // setLoaderState((prevState) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: false,
-    //       error: true,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       errorDescription:
-    //         "An error occurred while updating hire, please try again later.",
-    //     },
-    //   };
-    //   return updatedState;
-    // });
-  }
-};
-
-export const deleteBirthday = async (
-  ID: number
-  // setLoaderState: any,
-  // index: number
-): Promise<void> => {
-  // setLoaderState((prevState: any) => {
-  //   const updatedState = [...prevState];
-  //   updatedState[index] = {
-  //     ...updatedState[index],
-  //     popupWidth: "450px",
-  //     isLoading: {
-  //       inprogress: true,
-  //       error: false,
-  //       success: false,
-  //     },
-  //   };
-  //   return updatedState;
-  // });
-
-  const toastId = toast.loading(" Deleting Birthday...");
-
-  try {
-    await SpServices.SPUpdateItem({
-      Listname: CONFIG.ListNames.Intranet_BirthDay,
-      ID: ID,
-      RequestJSON: { IsDelete: true },
-    });
-
-    toast.update(toastId, {
-      render: `Birthday deleted successfully!!`,
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
-    // setLoaderState((prevState: any) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: true,
-    //       error: false,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       success: "Birthday deleted successfully!",
-    //       successDescription: `The birthday has been deleted successfully.`,
-    //     },
-    //   };
-    //   return updatedState;
-    // });
-  } catch (error) {
-    toast.update(toastId, {
-      render: `An error occurred while Deleting birthday. Please try again.!`,
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
-    // setLoaderState((prevState: any) => {
-    //   const updatedState = [...prevState];
-    //   updatedState[index] = {
-    //     ...updatedState[index],
-    //     popupWidth: "450px",
-    //     isLoading: {
-    //       inprogress: false,
-    //       success: false,
-    //       error: true,
-    //     },
-    //     messages: {
-    //       ...updatedState[index].messages,
-    //       success: "Birthday deleted unsuccessfully!",
-    //       errorDescription:
-    //         "An error occurred while deleting birthday, please try again later.",
-    //     },
-    //   };
-    //   return updatedState;
-    // });
   }
 };

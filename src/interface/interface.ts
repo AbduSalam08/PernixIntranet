@@ -50,6 +50,10 @@ export interface ISPGroupName {
   EmployeeDirectory_Admin: string;
 }
 
+export interface IUserMailPath {
+  path: string;
+}
+
 export interface IRoleDetails {
   SuperAdmin: string;
   user: string;
@@ -243,4 +247,39 @@ export interface IPageURL {
   IsAdmin: boolean;
   URL: string;
   Image: string;
+}
+
+export interface IBirthdayUsers {
+  Name: string;
+  Email: string;
+  ID: string | number;
+  Birthday: string;
+  IsTeams: boolean;
+  IsOutlook: boolean;
+  IsActive: boolean;
+  IsSameUser: boolean;
+  IsShow: boolean;
+  BirthdayUserListDataId: number | null;
+}
+
+export interface IBirthdayData {
+  ID: number;
+  UserID: string;
+  IsActive: boolean;
+}
+
+export interface IBirthdayRes {
+  ID: number;
+  From: string;
+  To: string;
+  Message: string;
+  IsTeams: boolean;
+  IsOutlook: boolean;
+}
+
+export interface ISelectWish {
+  Idx: number | null;
+  ID: string;
+  Email: string;
+  Name: string;
 }
