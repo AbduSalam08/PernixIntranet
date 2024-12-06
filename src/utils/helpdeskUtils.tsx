@@ -320,72 +320,73 @@ export const validateRecurrenceForm = async (
   ticketFilter?: any,
   currentRole?: any,
   currentUserDetails?: any,
-  HelpDeskTicktesData?: any
+  HelpDeskTicktesData?: any,
+  hasErrors?: boolean
 ): Promise<any> => {
   console.log("nextTicketIntimation: ", nextTicketIntimation);
-  let hasErrors = false;
+  // let hasErrors = false;
 
-  const updatedFormData = Object.keys(recurrenceDetails).reduce((acc, key) => {
-    const fieldData = recurrenceDetails[key];
-    const { isValid, errorMsg } = validateField(
-      key,
-      fieldData?.value,
-      fieldData?.validationRule
-    );
+  // const updatedFormData = Object.keys(recurrenceDetails).reduce((acc, key) => {
+  //   const fieldData = recurrenceDetails[key];
+  //   const { isValid, errorMsg } = validateField(
+  //     key,
+  //     fieldData?.value,
+  //     fieldData?.validationRule
+  //   );
 
-    if (!isValid) {
-      hasErrors = true;
-    }
+  //   if (!isValid) {
+  //     hasErrors = true;
+  //   }
 
-    return {
-      ...acc,
-      [key]: {
-        ...fieldData,
-        isValid,
-        errorMsg,
-      },
-    };
-  }, {} as typeof recurrenceDetails);
+  //   return {
+  //     ...acc,
+  //     [key]: {
+  //       ...fieldData,
+  //       isValid,
+  //       errorMsg,
+  //     },
+  //   };
+  // }, {} as typeof recurrenceDetails);
 
-  // Additional validation for StartDate and EndDate
-  const startDate = recurrenceDetails?.StartDate?.value;
-  const endDate = recurrenceDetails?.EndDate?.value;
+  // // Additional validation for StartDate and EndDate
+  // const startDate = recurrenceDetails?.StartDate?.value;
+  // const endDate = recurrenceDetails?.EndDate?.value;
 
-  if (startDate && endDate) {
-    const start = dayjs(startDate, "DD/MM/YYYY");
-    const end = dayjs(endDate, "DD/MM/YYYY");
-    if (
-      dayjs(startDate)?.format("DD/MM/YYYY") ===
-      dayjs(endDate)?.format("DD/MM/YYYY")
-    ) {
-      hasErrors = true;
-      updatedFormData.StartDate = {
-        ...updatedFormData.StartDate,
-        isValid: false,
-        errorMsg: "Start date and End date cannot be the same.",
-      };
-      updatedFormData.EndDate = {
-        ...updatedFormData.EndDate,
-        isValid: false,
-        errorMsg: "Start date and End date cannot be the same.",
-      };
-    }
-    if (start.isAfter(end)) {
-      hasErrors = true;
-      updatedFormData.StartDate = {
-        ...updatedFormData.StartDate,
-        isValid: false,
-        errorMsg: "Start date should not be after end date.",
-      };
-      updatedFormData.EndDate = {
-        ...updatedFormData.EndDate,
-        isValid: false,
-        errorMsg: "End date should not be before start date.",
-      };
-    }
-  }
+  // if (startDate && endDate) {
+  //   const start = dayjs(startDate, "DD/MM/YYYY");
+  //   const end = dayjs(endDate, "DD/MM/YYYY");
+  //   if (
+  //     dayjs(startDate)?.format("DD/MM/YYYY") ===
+  //     dayjs(endDate)?.format("DD/MM/YYYY")
+  //   ) {
+  //     hasErrors = true;
+  //     updatedFormData.StartDate = {
+  //       ...updatedFormData.StartDate,
+  //       isValid: false,
+  //       errorMsg: "Start date and End date cannot be the same.",
+  //     };
+  //     updatedFormData.EndDate = {
+  //       ...updatedFormData.EndDate,
+  //       isValid: false,
+  //       errorMsg: "Start date and End date cannot be the same.",
+  //     };
+  //   }
+  //   if (start.isAfter(end)) {
+  //     hasErrors = true;
+  //     updatedFormData.StartDate = {
+  //       ...updatedFormData.StartDate,
+  //       isValid: false,
+  //       errorMsg: "Start date should not be after end date.",
+  //     };
+  //     updatedFormData.EndDate = {
+  //       ...updatedFormData.EndDate,
+  //       isValid: false,
+  //       errorMsg: "End date should not be before start date.",
+  //     };
+  //   }
+  // }
 
-  setRecurrenceDetails(updatedFormData);
+  // setRecurrenceDetails(updatedFormData);
 
   if (!hasErrors && !nextTicketIntimation.error) {
     setLoadingSubmit(true);
@@ -425,33 +426,33 @@ export const validateRecurrenceForm = async (
       );
       // await getAllTickets(dispatch);
     } else if (query === "update") {
-      Promise.all([
-        await updateRecurrenceConfigOfTicket(
-          {
-            StartDate: recurrenceDetails?.StartDate?.value,
-            EndDate: recurrenceDetails?.EndDate?.value,
-            Frequency: recurrenceDetails?.Frequency?.value,
-            isActive: recurrenceDetails?.IsActive?.value,
-            DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
-            ...ticketDetails,
-          },
-          recurrenceDetails?.TicketDetails?.value?.ID,
-          recurrenceConfigID
-        ),
-      ])?.then(async () => {
-        // await getAllTickets(dispatch);
-        const updatedTickets = await getAllTicketsData();
-        ticketsFilter(
-          `${currentRole}${location.pathname}`,
-          {
-            ...HelpDeskTicktesData,
-            AllData: updatedTickets,
-          },
-          currentUserDetails,
-          dispatch
-        );
-        ticketFilter?.();
-      });
+      // Promise.all([
+      await updateRecurrenceConfigOfTicket(
+        {
+          StartDate: recurrenceDetails?.StartDate?.value,
+          EndDate: recurrenceDetails?.EndDate?.value,
+          Frequency: recurrenceDetails?.Frequency?.value,
+          isActive: recurrenceDetails?.IsActive?.value,
+          DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+          ...ticketDetails,
+        },
+        recurrenceDetails?.TicketDetails?.value?.ID,
+        recurrenceConfigID
+      );
+      // ])?.then(async () => {
+      //   // await getAllTickets(dispatch);
+      //   const updatedTickets = await getAllTicketsData();
+      //   ticketsFilter(
+      //     `${currentRole}${location.pathname}`,
+      //     {
+      //       ...HelpDeskTicktesData,
+      //       AllData: updatedTickets,
+      //     },
+      //     currentUserDetails,
+      //     dispatch
+      //   );
+      //   ticketFilter?.();
+      // });
       togglePopupVisibility(
         setPopupController,
         initialPopupController[popupIndex || 0],

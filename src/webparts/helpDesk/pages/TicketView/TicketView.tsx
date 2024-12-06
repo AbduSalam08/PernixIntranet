@@ -399,6 +399,73 @@ const TicketView = (): JSX.Element => {
             recurrenceDetails?.Frequency?.value?.toLowerCase() !==
               "does not repeat"
           ) {
+            let hasErrors = false;
+
+            const updatedFormData = Object.keys(recurrenceDetails).reduce(
+              (acc, key) => {
+                const fieldData = recurrenceDetails[key];
+                const { isValid, errorMsg } = validateField(
+                  key,
+                  fieldData?.value,
+                  fieldData?.validationRule
+                );
+
+                if (!isValid) {
+                  hasErrors = true;
+                }
+
+                return {
+                  ...acc,
+                  [key]: {
+                    ...fieldData,
+                    isValid,
+                    errorMsg,
+                  },
+                };
+              },
+              {} as typeof recurrenceDetails
+            );
+
+            // Additional validation for StartDate and EndDate
+            const startDate = recurrenceDetails?.StartDate?.value;
+            const endDate = recurrenceDetails?.EndDate?.value;
+
+            if (startDate && endDate) {
+              const start = dayjs(startDate, "DD/MM/YYYY");
+              const end = dayjs(endDate, "DD/MM/YYYY");
+              if (
+                dayjs(startDate)?.format("DD/MM/YYYY") ===
+                dayjs(endDate)?.format("DD/MM/YYYY")
+              ) {
+                hasErrors = true;
+                updatedFormData.StartDate = {
+                  ...updatedFormData.StartDate,
+                  isValid: false,
+                  errorMsg: "Start date and End date cannot be the same.",
+                };
+                updatedFormData.EndDate = {
+                  ...updatedFormData.EndDate,
+                  isValid: false,
+                  errorMsg: "Start date and End date cannot be the same.",
+                };
+              }
+              if (start.isAfter(end)) {
+                hasErrors = true;
+                updatedFormData.StartDate = {
+                  ...updatedFormData.StartDate,
+                  isValid: false,
+                  errorMsg: "Start date should not be after end date.",
+                };
+                updatedFormData.EndDate = {
+                  ...updatedFormData.EndDate,
+                  isValid: false,
+                  errorMsg: "End date should not be before start date.",
+                };
+              }
+            }
+
+            setRecurrenceDetails(updatedFormData);
+
             validateRecurrenceForm(
               query,
               {
@@ -430,7 +497,12 @@ const TicketView = (): JSX.Element => {
               setPopupController,
               dispatch,
               nextTicketIntimation,
-              1
+              1,
+              null,
+              currentRole,
+              currentUserDetails,
+              HelpDeskTicktesData,
+              hasErrors
             );
           }
         },
