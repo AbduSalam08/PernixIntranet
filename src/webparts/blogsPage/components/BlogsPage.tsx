@@ -19,6 +19,7 @@ import {
   addlikemethod,
   Approved,
   changeBlogActive,
+  deleteBlog,
   getcuruserdetails,
   getintername,
   nooneviews,
@@ -202,13 +203,14 @@ const BlogsPage = (props: any): JSX.Element => {
   }
 
   const getdetails = async (_userpermission: string): Promise<void> => {
-    await usergetdetails().then((arr) => {
+    await usergetdetails().then(async (arr) => {
       const tempdata: any = [];
-      arr.forEach((item: any) => {
+      arr.forEach(async (item: any) => {
         tempdata.push({
           Id: item.Id,
           Title: item.BlogsHeading,
           ParentTitle: item.BlogTitle,
+          Comments: 0,
           Paragraph: item.ImageDescription
             ? decodeHtmlEntities(item.ImageDescription)
             : "",
@@ -253,6 +255,7 @@ const BlogsPage = (props: any): JSX.Element => {
         setdata([..._filterdata]);
         setduplicatedata([..._filterdata]);
       }
+      setIsLoading(false);
     });
   };
 
@@ -291,7 +294,7 @@ const BlogsPage = (props: any): JSX.Element => {
     }
     const addingdetails: any = JSON.stringify(additionaluserDetails);
     await addlikemethod(Id, addingdetails, onLoadingFunc);
-    resetstate();
+    //resetstate();
   };
 
   // This is ViewLike Method function
@@ -348,7 +351,7 @@ const BlogsPage = (props: any): JSX.Element => {
   // This function is resetstate function
   const resetstate = async () => {
     setisopen(false);
-    setIsLoading(false);
+    setIsLoading(true);
     setchoices(["All"]);
     setviewpage(false);
     setfilterkey({
@@ -383,6 +386,7 @@ const BlogsPage = (props: any): JSX.Element => {
           setchoices([...choices, ...temp]);
         })
         .catch((error) => {
+          setIsLoading(false);
           console.error("Error retrieving internal names:", error);
         });
       getdetails(_userpermission);
@@ -442,14 +446,23 @@ const BlogsPage = (props: any): JSX.Element => {
 
   // This is Currentuser Details
   const getcurrentuser = async (): Promise<void> => {
-    await getcuruserdetails().then((arr) => {
+    await getcuruserdetails().then(async (arr) => {
       setcuruser({
         ...curuser,
         Id: arr.Id,
         Email: arr.Email,
         Title: arr.Title,
       });
-      onLoadingFunc(arr);
+
+      // await getComments("")
+      //   .then(async (res: any) => {
+      //     res && setTotalComments(res?.length);
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //   });
+
+      await onLoadingFunc(arr);
     });
   };
 
@@ -471,7 +484,11 @@ const BlogsPage = (props: any): JSX.Element => {
         <AddingComponent resetstate={resetstate} />
       ) : viewpage ? (
         <div>
-          <ViewComponent viewitem={viewitem} resetstate={resetstate} />
+          <ViewComponent
+            viewitem={viewitem}
+            resetstate={resetstate}
+            addLikeMethod={addLikeMethod}
+          />
         </div>
       ) : (
         <div className={styles.blogbody}>
@@ -701,24 +718,39 @@ const BlogsPage = (props: any): JSX.Element => {
                                     {item.Title}
                                   </h4>
                                   {permission === "Admin" ? (
-                                    <InputSwitch
-                                      checked={item?.isActive}
-                                      className="sectionToggler"
-                                      onChange={async (e: any) => {
-                                        setdata((prevItems: any) =>
-                                          prevItems.map(
-                                            (val: any, idx: number) =>
-                                              item?.Id === val?.Id
-                                                ? { ...val, isActive: e.value }
-                                                : val
-                                          )
-                                        );
-                                        await changeBlogActive(
-                                          item.Id,
-                                          e.value
-                                        );
-                                      }}
-                                    />
+                                    <div className={styles.icons}>
+                                      <InputSwitch
+                                        checked={item?.isActive}
+                                        className="sectionToggler"
+                                        onChange={async (e: any) => {
+                                          setdata((prevItems: any) =>
+                                            prevItems.map(
+                                              (val: any, idx: number) =>
+                                                item?.Id === val?.Id
+                                                  ? {
+                                                      ...val,
+                                                      isActive: e.value,
+                                                    }
+                                                  : val
+                                            )
+                                          );
+                                          await changeBlogActive(
+                                            item.Id,
+                                            e.value
+                                          );
+                                        }}
+                                      />
+                                      {allBlogs !== "PendingApprovals" && (
+                                        <i
+                                          className="pi pi-trash"
+                                          title="Delete"
+                                          onClick={async () => {
+                                            await deleteBlog(item.Id);
+                                            await resetstate();
+                                          }}
+                                        ></i>
+                                      )}
+                                    </div>
                                   ) : (
                                     <div
                                       className={styles.pilldesign}
@@ -871,8 +903,8 @@ const BlogsPage = (props: any): JSX.Element => {
                                       }}
                                     />
                                     <label style={{ cursor: "auto" }}>
+                                      {item?.Comments ? item.Comments : 0}
                                       {/* {userviewcounts || "0"} */}
-                                      10
                                     </label>
                                   </div>
                                 </div>

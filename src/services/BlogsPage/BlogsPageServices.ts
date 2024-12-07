@@ -98,7 +98,7 @@ export const usergetdetails = async (): Promise<any> => {
       "Author/EMail"
     )
     .expand("AttachmentFiles,Author")
-    // .filter("Status eq 'Pending'")
+    .filter("isDelete ne 1 ")
     .get();
 };
 // This function Other UserDetails in NOt Approved Person
@@ -311,16 +311,64 @@ export const addComments = async (
   }
 };
 
-export const getComments = async (id: number): Promise<any> => {
-  const getComment = await sp.web.lists
-    .getByTitle("Intranet_BlogComments")
-    .items.select(
-      "*,Author/EMail,Author/Title,Author/ID,BlogId/ID ,TaggedPerson/ID, TaggedPerson/EMail,TaggedPerson/Title"
-    )
-    .expand("Author,BlogId,TaggedPerson")
-    .filter(`BlogIdId eq ${id}`)
-    .get();
-  return getComment;
+export const deleteBlog = async (id: number): Promise<void> => {
+  const toastId = toast.loading(` Deleting Blog...`);
+
+  try {
+    SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.Intranet_Blogs,
+      ID: id,
+      RequestJSON: {
+        isDelete: true,
+      },
+    });
+
+    toast.update(toastId, {
+      render: `Blog Deleted Successfully!`,
+      type: "success",
+      isLoading: false,
+      autoClose: 3000,
+      hideProgressBar: false,
+    });
+  } catch {
+    toast.update(toastId, {
+      render: `Error on Deleting Blog!`,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+    console.log("failed to add comments");
+  }
+};
+
+export const getComments = async (id: any): Promise<any> => {
+  if (id) {
+    const getComment = await sp.web.lists
+      .getByTitle("Intranet_BlogComments")
+      .items.select(
+        "*,Author/EMail,Author/Title,Author/ID,BlogId/ID ,TaggedPerson/ID, TaggedPerson/EMail,TaggedPerson/Title"
+      )
+      .expand("Author,BlogId,TaggedPerson")
+      .filter(`BlogIdId eq ${id}`)
+      .get();
+    return getComment;
+  } else {
+    const comments = SpServices.SPReadItems({
+      Listname: "Intranet_BlogComments",
+    });
+    return comments;
+  }
+};
+
+export const getCommentsLength = async (id: any): Promise<number> => {
+  try {
+    const comments = await getComments(id);
+    return (await comments?.length) || 0;
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return 0;
+  }
 };
 
 export const changeBlogActive = async (
