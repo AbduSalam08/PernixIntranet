@@ -1,3 +1,4 @@
+/* eslint-disable no-extra-label */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -67,7 +68,7 @@ const BirthdayPage = (props: any): JSX.Element => {
   const initialPopupController = [
     {
       open: false,
-      popupTitle: "Send birthday wish",
+      // popupTitle: "Send birthday wish",
       popupWidth: "800px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -166,7 +167,7 @@ const BirthdayPage = (props: any): JSX.Element => {
 
     if (value) {
       temp = temp?.filter((val: IBirthdayUsers) => {
-        let strDate: string = `${moment(val?.Birthday).format(
+        const strDate: string = `${moment(val?.Birthday).format(
           "MMMM D"
         )}, ${moment().format("YYYY")}`;
 
@@ -282,8 +283,9 @@ const BirthdayPage = (props: any): JSX.Element => {
             }}
           >
             <HighlightOffIcon
-              style={{
+              sx={{
                 fontSize: "30px",
+                color: "var(--primary-pernix-green)",
               }}
             />
           </button>
@@ -324,7 +326,7 @@ const BirthdayPage = (props: any): JSX.Element => {
               emoji: "🎂",
             },
             { text: "Wishing you a fantastic year ahead !", emoji: "🎉" },
-            { text: "Cheers to another amazing year !", emoji: "🥂" },
+            // { text: "Cheers to another amazing year !", emoji: "🥂" },
             { text: "Hope your day is as special as you are !", emoji: "🌟" },
             { text: "Have a blast on your birthday !", emoji: "🎈" },
           ].map((suggestion, index) => (
@@ -633,12 +635,13 @@ const BirthdayPage = (props: any): JSX.Element => {
     const fetchDataPromise: any = fetchBirthdayData();
     const fetchResPromise: any = fetchBirthdayRes();
 
-    const [_, users, data, res] = await Promise.all([
+    const [undefinedVar, users, data, res] = await Promise.all([
       roleAuthPromise,
       fetchUsersPromise,
       fetchDataPromise,
       fetchResPromise,
     ]);
+    console.log("undefinedVar: ", undefinedVar);
 
     masterUser = users;
     masterData = data;
@@ -667,17 +670,19 @@ const BirthdayPage = (props: any): JSX.Element => {
             <div className={styles.leftSection}>
               <i
                 onClick={() => {
-                  isActivityPage
-                    ? window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.ApprovalsPage,
-                        "_self"
-                      )
-                    : window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.PernixIntranet,
-                        "_self"
-                      );
+                  if (isActivityPage) {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.ApprovalsPage,
+                      "_self"
+                    );
+                  } else {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.PernixIntranet,
+                      "_self"
+                    );
+                  }
                 }}
                 className="pi pi-arrow-circle-left"
                 style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -695,6 +700,7 @@ const BirthdayPage = (props: any): JSX.Element => {
                     const value: string = e.trimStart();
                     handleSearch(value);
                   }}
+                  size="SM"
                 />
               </div>
               <div
@@ -753,7 +759,23 @@ const BirthdayPage = (props: any): JSX.Element => {
                   ?.map((val: IBirthdayUsers, index: number) => {
                     return (
                       <div key={index} className={styles.contentMain}>
-                        <div className={styles.image}>
+                        <div
+                          className={styles.image}
+                          style={{
+                            width:
+                              isAdmin &&
+                              moment().format("MMDD") ===
+                                moment(val?.Birthday).format("MMDD")
+                                ? "75px"
+                                : "50px",
+                            height:
+                              isAdmin &&
+                              moment().format("MMDD") ===
+                                moment(val?.Birthday).format("MMDD")
+                                ? "75px"
+                                : "50px",
+                          }}
+                        >
                           <img
                             src={`/_layouts/15/userphoto.aspx?size=S&username=${val?.Email}`}
                             alt="User"
@@ -795,6 +817,7 @@ const BirthdayPage = (props: any): JSX.Element => {
                                 !val.IsSameUser &&
                                 val?.IsActive && (
                                   <div
+                                    className={styles.sendBtn}
                                     style={{
                                       cursor: "pointer",
                                     }}
@@ -814,14 +837,15 @@ const BirthdayPage = (props: any): JSX.Element => {
                                       );
                                     }}
                                   >
-                                    <i
+                                    {/* <i
                                       className="pi pi-send"
                                       style={{
                                         color: "#0b4d53",
                                         fontSize: "1.2rem",
                                         cursor: "pointer",
                                       }}
-                                    />
+                                    /> */}
+                                    🎉
                                   </div>
                                 )}
                             </div>
