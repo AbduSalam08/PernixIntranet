@@ -1247,25 +1247,6 @@ const NewsPage = (props: any): JSX.Element => {
             ""
           );
         })}
-        {/* {CONFIG.TabsName.map((str: string, i: number) => {
-          return (
-            <div
-              key={i}
-              style={{
-                borderBottom:
-                  selectedTab === str ? "3px solid #e0803d" : "none",
-              }}
-              onClick={(_) => {
-                setSelectedTab(str);
-                prepareNewsData(str);
-
-                //prepareDatas(str);
-              }}
-            >
-              {str}
-            </div>
-          );
-        })} */}
       </div>
 
       <div className={styles.newsContainer}>
@@ -1303,6 +1284,7 @@ const NewsPage = (props: any): JSX.Element => {
                     handleViewClick={handleViewClick}
                     handleDeleteClick={handleDeleteClick}
                     item={item}
+                    selectedTab={selectedTab}
                   />
                 );
               })

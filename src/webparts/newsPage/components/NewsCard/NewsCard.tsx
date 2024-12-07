@@ -25,6 +25,7 @@ interface NewsCardProps {
   noActionsAndStatus?: boolean;
   handleEditClick?: (item: any) => void; // Modify this to accept an item
   handleViewClick?: (item: any) => void; // Modify this to accept an item
+  selectedTab?: string;
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({
@@ -46,6 +47,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   currentUserDetails,
   item,
   noActionsAndStatus = false,
+  selectedTab,
 }) => {
   const handleEdit = (): void => {
     if (handleEditClick) {
@@ -102,7 +104,12 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 <>
                   <i
                     onClick={handleEdit}
-                    style={{ color: "#adadad", fontSize: "1.2rem" }}
+                    style={{
+                      color: "#adadad",
+                      fontSize: "1.2rem",
+                      display:
+                        selectedTab === CONFIG.TabsName[2] ? "none" : "flex",
+                    }}
                     className="pi pi-pen-to-square"
                   />
                   <i
