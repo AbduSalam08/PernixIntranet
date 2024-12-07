@@ -389,11 +389,18 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     masterDocDatas = [];
 
     filMasterFolder = await Promise.all(
-      masterRes?.filter(
-        (val: any) =>
-          val.FileSystemObjectType === 1 &&
-          `${CONFIG.fileFlowPath}/${val.FileLeafRef}` === val.FileRef
-      )
+      isAdmin
+        ? masterRes?.filter(
+            (val: any) =>
+              val.FileSystemObjectType === 1 &&
+              `${CONFIG.fileFlowPath}/${val.FileLeafRef}` === val.FileRef
+          )
+        : masterRes?.filter(
+            (val: any) =>
+              val.FileSystemObjectType === 1 &&
+              `${CONFIG.fileFlowPath}/${val.FileLeafRef}` === val.FileRef &&
+              val?.IsActive
+          )
     );
 
     masterDocDatas = await Promise.all(

@@ -187,40 +187,43 @@ export const updateHire = async (
       RequestJSON: payload,
     });
 
-    if (formData?.ProfileImage?.value?.type) {
-      if (attachmentObject?.FileName) {
-        await sp.web.lists
-          .getByTitle(CONFIG.ListNames.Intranet_NewHires)
-          .items.getById(Number(ID))
-          .attachmentFiles.getByName(attachmentObject?.FileName)
-          .delete();
+    debugger;
 
-        if (formData?.ProfileImage?.value?.name) {
-          fileRes = await sp.web.lists
-            .getByTitle(CONFIG.ListNames.Intranet_NewHires)
-            .items.getById(Number(ID))
-            .attachmentFiles.add(
-              formData?.ProfileImage?.value?.name,
-              formData?.ProfileImage?.value
-            );
-        }
-      } else if (formData?.ProfileImage?.value?.name) {
-        fileRes = await sp.web.lists
-          .getByTitle(CONFIG.ListNames.Intranet_NewHires)
-          .items.getById(Number(ID))
-          .attachmentFiles.add(
-            formData?.ProfileImage?.value?.name,
-            formData?.ProfileImage?.value
-          );
-      }
-    } else {
-      if (attachmentObject?.FileName) {
-        await sp.web.lists
-          .getByTitle(CONFIG.ListNames.Intranet_NewHires)
-          .items.getById(Number(ID))
-          .attachmentFiles.getByName(attachmentObject?.FileName)
-          .delete();
-      }
+    if (
+      formData?.ProfileImage?.value?.name &&
+      formData?.ProfileImage?.value?.type &&
+      attachmentObject?.FileName
+    ) {
+      await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+        .items.getById(Number(ID))
+        .attachmentFiles.getByName(attachmentObject?.FileName)
+        .delete();
+
+      fileRes = await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+        .items.getById(Number(ID))
+        .attachmentFiles.add(
+          formData?.ProfileImage?.value?.name,
+          formData?.ProfileImage?.value
+        );
+    } else if (formData?.ProfileImage?.value?.type) {
+      fileRes = await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+        .items.getById(Number(ID))
+        .attachmentFiles.add(
+          formData?.ProfileImage?.value?.name,
+          formData?.ProfileImage?.value
+        );
+    } else if (
+      attachmentObject?.FileName &&
+      !formData?.ProfileImage?.value?.name
+    ) {
+      await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_NewHires)
+        .items.getById(Number(ID))
+        .attachmentFiles.getByName(attachmentObject?.FileName)
+        .delete();
     }
 
     const responseData: any = {
