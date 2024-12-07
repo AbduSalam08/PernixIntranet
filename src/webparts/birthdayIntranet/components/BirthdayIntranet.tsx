@@ -1,3 +1,4 @@
+/* eslint-disable no-extra-label */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -197,22 +198,31 @@ const BirthdayIntranet = (props: any): JSX.Element => {
             }}
           >
             <HighlightOffIcon
-              style={{
+              sx={{
                 fontSize: "30px",
+                color: "var(--primary-pernix-green)",
               }}
             />
           </button>
         </div>
-
         <img
           src={wishImg}
           style={{
             width: "calc(51% - 5px)",
-            height: "105px",
+            // width: "30%",
+            // height: "105px",
           }}
           alt="wishImg"
         />
-
+        {/* <div
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: "10px",
+          }}
+        > */}
         <FloatingLabelTextarea
           customBorderColor="#0B4D53"
           disabled={false}
@@ -232,6 +242,7 @@ const BirthdayIntranet = (props: any): JSX.Element => {
             handleInputChange("Message", value, isValid, errorMsg);
           }}
         />
+        {/* </div> */}
 
         <div className={styles.suggestions}>
           {[
@@ -240,7 +251,7 @@ const BirthdayIntranet = (props: any): JSX.Element => {
               emoji: "🎂",
             },
             { text: "Wishing you a fantastic year ahead !", emoji: "🎉" },
-            { text: "Cheers to another amazing year !", emoji: "🥂" },
+            // { text: "Cheers to another amazing year !", emoji: "🥂" },
             { text: "Hope your day is as special as you are !", emoji: "🌟" },
             { text: "Have a blast on your birthday !", emoji: "🎈" },
           ].map((suggestion, index) => (
@@ -260,7 +271,7 @@ const BirthdayIntranet = (props: any): JSX.Element => {
         <div
           style={{ display: "flex", flexDirection: "column", width: "100%" }}
         >
-          <p>Send wishes in :</p>
+          <p>Send wishes in </p>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <div
               style={{
@@ -547,6 +558,7 @@ const BirthdayIntranet = (props: any): JSX.Element => {
 
                       {val.IsShow && !val.IsSameUser && val?.IsActive && (
                         <div
+                          className={styles.sendBtn}
                           style={{
                             cursor: "pointer",
                           }}
@@ -566,10 +578,11 @@ const BirthdayIntranet = (props: any): JSX.Element => {
                             );
                           }}
                         >
-                          <i
+                          {/* <i
                             className="pi pi-send"
-                            style={{ color: "#0b4d53", fontSize: "24px" }}
-                          />
+                            style={{ color: "#fff", fontSize: "18px" }}
+                          /> */}
+                          🎉
                         </div>
                       )}
                     </div>
