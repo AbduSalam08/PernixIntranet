@@ -235,9 +235,7 @@
 .addNewsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* Four equal-width columns */
   gap: 16px;
-  /* Space between grid items */
 }
 
 .answer {

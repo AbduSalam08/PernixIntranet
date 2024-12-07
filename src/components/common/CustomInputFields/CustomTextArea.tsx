@@ -165,7 +165,7 @@ export default function FloatingLabelTextarea({
           height: rows ? `${rows * 20}px` : "auto",
           fontSize: "15px",
           fontFamily: "osMedium, sans-serif",
-          background: highLightBackground ? "#eee !important" : "#fff", // Ensure proper nesting with '&'
+          background: highLightBackground ? "#eeeeee70 !important" : "#fff", // Ensure proper nesting with '&'
         }}
         className={inputClassName}
       />

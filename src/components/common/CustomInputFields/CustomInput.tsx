@@ -180,10 +180,10 @@ const CustomInput: React.FC<Props> = ({
                 disableUnderline: noBorderInput,
               }}
               sx={{
-                height: size === "SM" ? "34px" : "auto",
+                height: size === "SM" ? "35px" : "auto",
                 "& .MuiInputLabel-root": {
                   top: size === "SM" ? "-6px !important" : "-3px",
-                  fontSize: size === "SM" ? "13px" : "15px",
+                  fontSize: size === "SM" ? "14px" : "15px",
                   transition: "top 0.2s, font-size 0.2s",
                 },
                 "& .MuiInputBase-input": {

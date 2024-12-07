@@ -858,7 +858,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 <i
                   className="pi pi-arrow-circle-left"
                   style={{ fontSize: "1.5rem", color: "#E0803D" }}
-                ></i>
+                />
 
                 <p>Employee Directory</p>
                 {/* <Icon iconName="SkypeArrow" className={styles.icon} /> */}
@@ -875,7 +875,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                         ...filterkey,
                         Dropdown: value,
                       });
-                      console.log(value);
                       handleSearch({ ...filterkey, Dropdown: value });
                     }}
                   />

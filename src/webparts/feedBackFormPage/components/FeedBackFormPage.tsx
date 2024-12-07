@@ -57,7 +57,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
   /* Local variable creation */
   const dispatch = useDispatch();
 
-  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const searchField: IPageSearchFields = CONFIG.PageSearchFields;
   const currentUserDetails: IUserDetails = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
@@ -116,6 +116,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
       popupType: "custom",
       defaultCloseBtn: false,
       popupData: "",
+      centerActionBtn: true,
       isLoading: {
         inprogress: false,
         error: false,
@@ -349,9 +350,9 @@ const FeedBackFormPage = (props: any): JSX.Element => {
       "close"
     );
 
-    let isDeleted: boolean = await deleteFeedbackQus(data);
+    const isDeleted: boolean = await deleteFeedbackQus(data);
     if (isDeleted) {
-      let curIndex: number = masterFeedBackQus?.findIndex(
+      const curIndex: number = masterFeedBackQus?.findIndex(
         (val: IFeedbackQusType) => val.ID === data?.ID
       );
 
@@ -370,8 +371,8 @@ const FeedBackFormPage = (props: any): JSX.Element => {
       "close"
     );
 
-    let updatedJSON: any = await updateFeedbackQus(data);
-    let curIndex: number = masterFeedBackQus?.findIndex(
+    const updatedJSON: any = await updateFeedbackQus(data);
+    const curIndex: number = masterFeedBackQus?.findIndex(
       (val: IFeedbackQusType) => val.ID === updatedJSON?.ID
     );
 
@@ -422,7 +423,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      let data: any = {};
+      const data: any = {};
       const column: IFeedbackQusColumn = CONFIG.FeedbackQusColumn;
 
       data[column.ID] = curObject?.ID || null;
@@ -430,9 +431,11 @@ const FeedBackFormPage = (props: any): JSX.Element => {
       data[column.StartDate] = formData?.StartDate?.value || null;
       data[column.EndDate] = formData?.EndDate?.value || null;
 
-      curObject?.ID
-        ? await handleUpdate({ ...data }, tab)
-        : await handleSubmit({ ...data }, tab);
+      if (curObject?.ID) {
+        await handleUpdate({ ...data }, tab);
+      } else {
+        await handleSubmit({ ...data }, tab);
+      }
     } else {
       console.log("Form contains errors");
     }
@@ -625,7 +628,13 @@ const FeedBackFormPage = (props: any): JSX.Element => {
     ],
     [
       <div key={3}>
-        <p>Are you sure you want to delete this feedback question?</p>
+        <p
+          style={{
+            textAlign: "center",
+          }}
+        >
+          Are you sure you want to delete this feedback question?
+        </p>
       </div>,
     ],
   ];
@@ -718,7 +727,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          let data: any = {};
+          const data: any = {};
           const column: IFeedbackQusColumn = CONFIG.FeedbackQusColumn;
           data[column.ID] = curObject?.ID || null;
           await handleDelete({ ...data }, selectedTab);
@@ -751,17 +760,19 @@ const FeedBackFormPage = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
-                  isActivityPage
-                    ? window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.ApprovalsPage,
-                        "_self"
-                      )
-                    : window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.PernixIntranet,
-                        "_self"
-                      );
+                  if (isActivityPage) {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.ApprovalsPage,
+                      "_self"
+                    );
+                  } else {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.PernixIntranet,
+                      "_self"
+                    );
+                  }
                 }}
               >
                 <i
@@ -784,6 +795,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
               <div>
                 <CustomInput
                   noErrorMsg
+                  size="SM"
                   value={commonSearch?.Search}
                   placeholder="Search"
                   onChange={(e: any) => {
@@ -810,6 +822,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
                     }));
                     handleSearch([...allFeedbackQuestion]);
                   }}
+                  size="SM"
                 />
               </div>
               <div
@@ -894,16 +907,23 @@ const FeedBackFormPage = (props: any): JSX.Element => {
                     (val: IFeedbackQusType, idx: number) => {
                       return (
                         <div key={idx} className={styles.bodySection}>
-                          <div className={styles.titleSec} title={val?.Title}>
+                          <div
+                            className={styles.titleSec}
+                            title={val?.Title}
+                            onClick={() => {
+                              setCurObject({ ...val });
+                              setIsQuestion(false);
+                            }}
+                          >
                             {val?.Title}
-                          </div>
-                          <div className={styles.iconSec}>
                             <OpenInNew
                               onClick={() => {
                                 setCurObject({ ...val });
                                 setIsQuestion(false);
                               }}
                             />
+                          </div>
+                          <div className={styles.iconSec}>
                             <Edit
                               style={{
                                 display:
@@ -993,6 +1013,7 @@ const FeedBackFormPage = (props: any): JSX.Element => {
               confirmationTitle={
                 popupData.popupType !== "custom" ? popupData.popupTitle : ""
               }
+              centerActionBtn={popupData.centerActionBtn}
               popupHeight={index === 0 ? true : false}
               noActionBtn={true}
             />
