@@ -305,6 +305,9 @@ function ViewComponent(props: any) {
                   </div>
                   <div className={styles.likebox}>
                     <i
+                      onClick={() => {
+                        props.addLikeMethod(props.Id, props.userDetails);
+                      }}
                       className="pi pi-thumbs-up-fill"
                       style={{
                         color: curuserlikes ? "#0a4b48" : "#b3b0b0",
