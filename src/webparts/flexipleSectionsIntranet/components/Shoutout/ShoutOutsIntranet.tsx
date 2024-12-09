@@ -25,7 +25,7 @@ import CircularSpinner from "../../../../components/common/Loaders/CircularSpinn
 import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
-import { ToastContainer } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
 
 const img: any = require("../../../../assets/images/svg/Shoutouts/bronze.png");
 const errorGrey = require("../../../../assets/images/svg/errorGrey.svg");
@@ -353,7 +353,7 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
               numVisible={1}
               showIndicators={true}
               showNavigators={false}
-              autoplayInterval={shoutOutsData?.length > 1 ? 3000 : 8.64e7}
+              autoplayInterval={shoutOutsData?.length > 1 ? 6000 : 8.64e7}
               circular
               itemTemplate={shoutOutTemplate}
             />
@@ -372,7 +372,7 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
       />
 
       {/* Toast message section */}
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -382,7 +382,7 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+      /> */}
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
