@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import {
+  IBlogColumn,
+  IBlogColumnType,
+  IBlogCommentsColumn,
+  IBlogCommentsColumnType,
   ICommonentsName,
   IDocRepositoryColumn,
   IFeedbackQusColumn,
@@ -55,6 +59,7 @@ export namespace CONFIG {
     IntranetBlogs_Title: "IntranetBlogs_Title",
     HelpDesk_RecurrenceConfig: "HelpDesk_RecurrenceConfig",
     FlexibleSection: "ShowComponent",
+    Intranet_BlogComments: "Intranet_BlogComments",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -242,5 +247,65 @@ export namespace CONFIG {
     ID: "",
     Email: "",
     Name: "",
+  };
+
+  export const BlogsTab: string[] = [
+    "All blogs",
+    "My blogs",
+    "Pending approval",
+  ];
+
+  export const blogDrop: string[] = ["Active", "Inactive"];
+
+  export const BlogColumn: IBlogColumn = {
+    ID: "ID",
+    Title: "Title",
+    Description: "Description",
+    Heading: "Heading",
+    ViewedUsers: "ViewedUsers",
+    LikedUsers: "LikedUsers",
+    CommentedUsers: "CommentedUsers",
+    Status: "Status",
+    IsActive: "IsActive",
+    Attachments: "Attachments",
+  };
+
+  export const BlogColumnType: IBlogColumnType = {
+    ID: null,
+    Tag: "",
+    Description: "",
+    Heading: "",
+    ViewedUsers: [],
+    LikedUsers: [],
+    CommentedUsers: [],
+    Status: "",
+    IsActive: false,
+    Attachments: null,
+    AuthorId: "",
+    AuthorName: "",
+    AuthorEmail: "",
+    Date: "",
+  };
+
+  export const BlogCommentsColumn: IBlogCommentsColumn = {
+    AuthorEmail: "AuthorEmail",
+    AuthorId: "AuthorId",
+    AuthorName: "AuthorName",
+    BlogId: "BlogIdId",
+    Comments: "Comments",
+    Date: "Date",
+    ID: "ID",
+    TaggedPerson: "TaggedPersonId",
+  };
+
+  export const BlogCommentsColumnType: IBlogCommentsColumnType = {
+    AuthorEmail: "",
+    AuthorId: "",
+    AuthorName: "",
+    BlogId: null,
+    Comments: "",
+    Date: "",
+    ID: null,
+    TaggedPerson: [],
   };
 }

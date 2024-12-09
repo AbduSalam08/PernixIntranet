@@ -241,6 +241,14 @@
           "manifest": "./src/webparts/footerIntranet/FooterIntranetWebPart.manifest.json"
         }
       ]
+    },
+    "blogs-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/blogs/BlogsWebPart.js",
+          "manifest": "./src/webparts/blogs/BlogsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -275,6 +283,7 @@
     "NewHiresPageWebPartStrings": "lib/webparts/newHiresPage/loc/{locale}.js",
     "BirthdayPageWebPartStrings": "lib/webparts/birthdayPage/loc/{locale}.js",
     "FlexipleSectionsIntranetWebPartStrings": "lib/webparts/flexipleSectionsIntranet/loc/{locale}.js",
-    "FooterIntranetWebPartStrings": "lib/webparts/footerIntranet/loc/{locale}.js"
+    "FooterIntranetWebPartStrings": "lib/webparts/footerIntranet/loc/{locale}.js",
+    "BlogsWebPartStrings": "lib/webparts/blogs/loc/{locale}.js"
   }
 }
