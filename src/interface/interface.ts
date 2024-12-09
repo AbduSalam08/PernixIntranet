@@ -29,6 +29,7 @@ export interface IListName {
   IntranetBlogs_Title: string;
   HelpDesk_RecurrenceConfig: string;
   FlexibleSection: string;
+  Intranet_BlogComments: string;
 }
 
 export interface ISPGroupName {
@@ -282,4 +283,62 @@ export interface ISelectWish {
   ID: string;
   Email: string;
   Name: string;
+}
+
+export interface ICurUserData {
+  ID: string;
+  Email: string;
+  Title: string;
+}
+
+export interface IBlogColumn {
+  ID: string;
+  Title: string;
+  Description: string;
+  Heading: string;
+  ViewedUsers: string;
+  LikedUsers: string;
+  CommentedUsers: string;
+  Status: string;
+  IsActive: string;
+  Attachments: string;
+}
+
+export interface IBlogCommentsColumn {
+  ID: string;
+  Comments: string;
+  BlogId: string;
+  TaggedPerson: string;
+  Date: string;
+  AuthorId: string;
+  AuthorName: string;
+  AuthorEmail: string;
+}
+
+export interface IBlogColumnType {
+  ID: number | null;
+  Tag: string;
+  Description: string;
+  Heading: string;
+  ViewedUsers: string[];
+  LikedUsers: string[];
+  CommentedUsers: string[];
+  Status: string;
+  IsActive: boolean;
+  Attachments: any;
+  AuthorId: string;
+  AuthorName: string;
+  AuthorEmail: string;
+  Date: string;
+}
+
+export interface IBlogCommentsColumnType {
+  ID: number | null;
+  Comments: string;
+  BlogId: any;
+  TaggedPerson: any[];
+  Date: string;
+  AuthorId: string;
+  AuthorName: string;
+  AuthorEmail: string;
 }

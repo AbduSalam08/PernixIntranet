@@ -5,6 +5,16 @@ import { CONFIG } from "../../config/config";
 import { sp } from "@pnp/sp/presets/all";
 import SpServices from "../SPServices/SpServices";
 import { toast } from "react-toastify";
+import {
+  IAttachDetails,
+  IBlogColumnType,
+  IBlogCommentsColumnType,
+  ICurUserData,
+} from "../../interface/interface";
+import moment from "moment";
+import { ReactText } from "react";
+import { setAllUsersData } from "../../redux/features/AllUsersDataSlice";
+
 // This function is User like functionality Update Method
 export const addlikemethod = async (
   Id: number,
@@ -388,19 +398,332 @@ export const changeBlogActive = async (
   }
 };
 
-export const getAllUsersList = async (): Promise<any> => {
+export const getAllUsersList = async (dispatch: any): Promise<any> => {
+  await SpServices.getAllUsers()
+    .then((res: any) => {
+      const allUsers: any = res
+        ?.map((user: any) => ({
+          id: user?.Id,
+          value: user?.Title,
+          email: user?.Email,
+        }))
+        ?.filter((item: any) => item?.email?.trim() !== "");
+      dispatch(setAllUsersData(allUsers));
+    })
+    .catch((err: any) => {
+      console.log("err: ", err);
+    });
+};
+
+export const fetchCurUserData = async (): Promise<ICurUserData[]> => {
   try {
-    const res = await SpServices.getAllUsers(); // Wait for the service call to complete
-    const allUsers = res
-      ?.map((user: any) => ({
-        id: user?.Id,
-        value: user?.Title,
-        email: user?.Email,
-      }))
-      ?.filter((item: any) => item?.email?.trim() !== ""); // Filter out users without emails
-    return allUsers; // Return the processed list
+    const res: any = await sp.web.currentUser.get();
+
+    return [
+      {
+        ID: res?.Id.toString() || "",
+        Email: res?.Email.toLowerCase() || "",
+        Title: res?.Title || "",
+      },
+    ];
   } catch (err) {
-    console.error("Error fetching all users: ", err);
-    return []; // Return an empty array in case of an error
+    console.log("fetchCurUserData: ", err);
+    return [];
+  }
+};
+
+export const fetchBlogDatas = async (): Promise<IBlogColumnType[]> => {
+  try {
+    const res: any[] = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_Blogs,
+      Select: "*, AttachmentFiles, Author/ID, Author/Title, Author/EMail",
+      Expand: "AttachmentFiles, Author",
+      Filter: [
+        {
+          FilterKey: "Status",
+          Operator: "ne",
+          FilterValue: "Rejected",
+        },
+      ],
+      Topcount: 5000,
+      Orderby: "Created",
+      Orderbydecorasc: false,
+    });
+
+    const resData: IBlogColumnType[] = await Promise.all(
+      res?.map(async (val: any) => {
+        const arrGetAttach: IAttachDetails[] = [];
+
+        await val?.AttachmentFiles?.forEach((attach: any) => {
+          arrGetAttach.push({
+            fileName: attach.FileName,
+            content: null,
+            serverRelativeUrl: attach.ServerRelativeUrl,
+          });
+        });
+
+        return {
+          ID: val?.ID || null,
+          Tag: val?.Title || "",
+          Heading: val?.Heading || "",
+          Description: val?.Description || "",
+          ViewedUsers: val?.ViewedUsers ? JSON.parse(val?.ViewedUsers) : [],
+          LikedUsers: val?.LikedUsers ? JSON.parse(val?.LikedUsers) : [],
+          CommentedUsers: val?.CommentedUsers
+            ? JSON.parse(val?.CommentedUsers)
+            : [],
+          Status: val?.Status || "",
+          IsActive: val?.IsActive || false,
+          Attachments: arrGetAttach?.[0]?.serverRelativeUrl,
+          AuthorId: val?.AuthorId.toString() || "",
+          AuthorEmail: val?.Author?.EMail.toLowerCase() || "",
+          AuthorName: val?.Author?.Title || "",
+          Date: moment(val?.Created).format("DD MMM YYYY"),
+        };
+      }) || []
+    );
+
+    return [...resData];
+  } catch (err) {
+    console.log("fetchBlogDatas: ", err);
+
+    return [];
+  }
+};
+
+export const fecthBlogComments = async (
+  Id: number
+): Promise<IBlogCommentsColumnType[]> => {
+  try {
+    const res: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_BlogComments,
+      Select:
+        "*, Author/EMail, Author/Title, Author/ID, BlogId/ID ,TaggedPerson/ID, TaggedPerson/EMail, TaggedPerson/Title",
+      Expand: "Author, BlogId, TaggedPerson",
+      Filter: [
+        {
+          FilterKey: "BlogIdId",
+          Operator: "eq",
+          FilterValue: Id,
+        },
+      ],
+      Topcount: 5000,
+    });
+
+    const comDatas: IBlogCommentsColumnType[] = await Promise.all(
+      res?.map((val: any) => {
+        return {
+          AuthorId: val?.AuthorId.toString() || "",
+          AuthorEmail: val?.Author?.EMail.toLowerCase() || "",
+          AuthorName: val?.Author?.Title || "",
+          BlogId: val?.BlogIdId || null,
+          Comments: val?.Comments || "",
+          Date: moment(val?.Created).format("DD MMM YYYY, H:mm"),
+          ID: val?.ID || null,
+          TaggedPerson: val?.TaggedPerson
+            ? val?.TaggedPerson?.map((val: any) => ({
+                id: val?.ID || null,
+                email: val?.EMail || "",
+                name: val?.Title || "",
+              }))
+            : [],
+        };
+      })
+    );
+
+    return [...comDatas];
+  } catch (err) {
+    console.log("fecthBlogComments: ", err);
+
+    return [];
+  }
+};
+
+export const addBlogData = async (
+  data: any,
+  fileData: any,
+  curUser: ICurUserData
+): Promise<IBlogColumnType[]> => {
+  const toastId = toast.loading("Creating a new blog...");
+
+  try {
+    let fileRes: any;
+
+    const res: any = await SpServices.SPAddItem({
+      Listname: CONFIG.ListNames.Intranet_Blogs,
+      RequestJSON: { ...data },
+    });
+
+    if (fileData?.Attachments?.name) {
+      fileRes = await sp.web.lists
+        .getByTitle(CONFIG.ListNames.Intranet_Blogs)
+        .items.getById(res?.data?.Id)
+        .attachmentFiles.add(fileData.Attachments.name, fileData.Attachments);
+    }
+
+    const resData: IBlogColumnType[] = [
+      {
+        ID: res?.data?.Id || null,
+        Tag: data?.Title || "",
+        Heading: data?.Heading || "",
+        Description: data?.Description || "",
+        ViewedUsers: [],
+        LikedUsers: [],
+        CommentedUsers: [],
+        Status: "",
+        IsActive: false,
+        Attachments: fileRes?.data?.ServerRelativeUrl || null,
+        AuthorId: curUser?.ID || "",
+        AuthorEmail: curUser?.Email || "",
+        AuthorName: curUser?.Title || "",
+        Date: moment().format("DD MMM YYYY"),
+      },
+    ];
+
+    toast.update(toastId, {
+      render: "The new blog has been added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+
+    return [...resData];
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error adding the new blog. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+
+    return [];
+  }
+};
+
+export const updateBlogData = async (
+  Id: number,
+  data: any,
+  isToast: boolean
+): Promise<void> => {
+  let toastId: ReactText = "";
+
+  if (isToast) {
+    toastId = toast.loading("Blog update in progress...");
+  }
+
+  try {
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.Intranet_Blogs,
+      ID: Id,
+      RequestJSON: { ...data },
+    });
+
+    isToast &&
+      toast.update(toastId, {
+        render: "The blog has been updated successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+  } catch (err) {
+    console.log("err: ", err);
+
+    isToast &&
+      toast.update(toastId, {
+        render: "Error updating the blog. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+  }
+};
+
+export const deleteBlogData = async (ID: number): Promise<void> => {
+  const toastId = toast.loading("Blog deletion in progress...");
+
+  try {
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.Intranet_Blogs,
+      ID: ID,
+    });
+
+    toast.update(toastId, {
+      render: "The blog has been deleted successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error deleting the blog. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+export const addBlogCommentsData = async (
+  data: any,
+  curUser: ICurUserData
+): Promise<IBlogCommentsColumnType[]> => {
+  const toastId = toast.loading("Adding a comments...");
+
+  try {
+    const res: any = await SpServices.SPAddItem({
+      Listname: CONFIG.ListNames.Intranet_BlogComments,
+      RequestJSON: { ...data },
+    });
+
+    const resData: IBlogCommentsColumnType[] = [
+      {
+        AuthorId: curUser?.ID || "",
+        AuthorEmail: curUser?.Email || "",
+        AuthorName: curUser?.Title || "",
+        BlogId: data?.BlogIdId || null,
+        Comments: data?.Comments || "",
+        Date: moment().format("DD MMM YYYY, H:mm"),
+        ID: res?.data?.Id || null,
+        TaggedPerson: res?.data?.TaggedPerson
+          ? res?.data?.TaggedPerson?.map((val: any) => ({
+              id: val?.ID || null,
+              email: val?.EMail || "",
+              name: val?.Title || "",
+            }))
+          : [],
+      },
+    ];
+
+    toast.update(toastId, {
+      render: "The blog comment has been added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+
+    return [...resData];
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error adding the blog comment. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+
+    return [];
   }
 };
