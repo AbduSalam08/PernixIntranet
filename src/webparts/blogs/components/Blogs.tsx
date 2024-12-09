@@ -97,6 +97,7 @@ const Blogs = (props: any): JSX.Element => {
       popupWidth: "450px",
       popupType: "custom",
       defaultCloseBtn: false,
+      centerActionBtn: true,
       popupData: "",
       isLoading: {
         inprogress: false,
@@ -114,9 +115,10 @@ const Blogs = (props: any): JSX.Element => {
     },
     {
       open: false,
-      popupTitle: "",
+      popupTitle: "Confirmation",
       popupWidth: "450px",
       popupType: "custom",
+      centerActionBtn: true,
       defaultCloseBtn: false,
       popupData: "",
       isLoading: {
@@ -469,7 +471,13 @@ const Blogs = (props: any): JSX.Element => {
   const popupInputs: any[] = [
     [
       <div key={0}>
-        <p>Are you sure you want to delete this blog?</p>
+        <p
+          style={{
+            textAlign: "center",
+          }}
+        >
+          Are you sure you want to delete this blog?
+        </p>
       </div>,
     ],
     [
@@ -837,7 +845,11 @@ const Blogs = (props: any): JSX.Element => {
             </div>
 
             <div className={styles.searchContainer}>
-              <div>
+              <div
+                style={{
+                  display: isAdmin ? "flex" : "none",
+                }}
+              >
                 <CustomDropDown
                   noErrorMsg
                   floatingLabel={false}
@@ -1328,6 +1340,7 @@ const Blogs = (props: any): JSX.Element => {
           }
           popupHeight={index === 0 ? true : false}
           noActionBtn={true}
+          centerActionBtn={popupData.centerActionBtn}
         />
       ))}
     </div>

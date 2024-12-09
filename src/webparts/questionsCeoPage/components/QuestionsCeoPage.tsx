@@ -1119,8 +1119,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             ?.map((val: any, index: number) => {
               return (
                 <div key={index} className={styles.cardSection}>
-                  <div title={val.title} className={styles.cardQuestionSec}>
+                  <div className={styles.cardQuestionSec}>
                     <Avatar
+                      title={val?.Anonymous ? "Anonymous" : val?.Author}
                       className={styles.avatarCreatedBy}
                       shape="circle"
                       image={`/_layouts/15/userphoto.aspx?size=S&username=${
@@ -1136,6 +1137,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                         <div className={styles.replayLable}>Answer :</div>
                       </div> */}
                       <Avatar
+                        title={val?.assignTo?.name}
                         className={styles.ansAvatar}
                         image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.assignTo?.email}`}
                         shape="circle"
@@ -1148,7 +1150,15 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                       </div>
                     </div>
                   ) : (
-                    <div className={styles.cardAnsSec} />
+                    <div
+                      className={styles.cardAnsSec}
+                      style={{
+                        color: "#adadad",
+                        justifyContent: "center",
+                      }}
+                    >
+                      Not answered yet!
+                    </div>
                   )}
 
                   <div className={styles.cardFooterSec}>
