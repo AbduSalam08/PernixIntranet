@@ -4,15 +4,10 @@ import SpServices from "../SPServices/SpServices";
 export const ShowHide = async (
   SelectItem: any,
   componentsList: any
-  // setLoaderState: any,
-  // index: number,
-  // currentUser: any
 ): Promise<any> => {
   const toastId = toast.loading("Flexible Section Adding ...");
 
   try {
-    // Add the PollQuestion
-
     const pollComponent = componentsList.find(
       (component: any) => component.title === "Poll"
     );
@@ -23,22 +18,17 @@ export const ShowHide = async (
         ID: pollComponent.Id,
         RequestJSON: { isActive: SelectItem },
       });
-      console.log("FlexibleSection component updated successfully!");
     }
 
-    // Success handling
-
     toast.update(toastId, {
-      render: "The Flexible Section Updated successfully",
+      render: "Layout updated successfully",
       type: "success",
       isLoading: false,
       autoClose: 5000,
       hideProgressBar: false,
     });
-    debugger;
   } catch (error) {
-    // console.log("Error adding vote:", error);
-    // Handle any error in the process
+    console.log("error: ", error);
 
     toast.update(toastId, {
       render: "Error while Updating Flexible section",

@@ -864,7 +864,11 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               </div>
 
               <div className={styles.filterbox}>
-                <div>
+                <div
+                  style={{
+                    display: isAdmin ? "flex" : "none",
+                  }}
+                >
                   <CustomDropDown
                     value={filterkey?.Dropdown || "All"}
                     options={["All", "Active", "inActive"]}
@@ -1022,7 +1026,11 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                     />
                   </div>
                 </div>
-                <div>
+                <div
+                  style={{
+                    display: "none",
+                  }}
+                >
                   <div
                     style={{
                       position: "relative",
