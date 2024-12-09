@@ -21,7 +21,7 @@ import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIn
 import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../../utils/commonUtils";
-import { ToastContainer } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
 import { Checkbox } from "primereact/checkbox";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
@@ -344,7 +344,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
             showIndicators={true}
             showNavigators={false}
             circular
-            autoplayInterval={CEOQuestions?.length > 1 ? 8.64e7 : 8.64e7}
+            autoplayInterval={CEOQuestions?.length > 1 ? 6000 : 8.64e7}
             // responsiveOptions={responsiveOptions}
             itemTemplate={productTemplate}
           />
@@ -361,7 +361,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
       />
 
       {/* Toast message section */}
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -371,7 +371,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+      /> */}
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup

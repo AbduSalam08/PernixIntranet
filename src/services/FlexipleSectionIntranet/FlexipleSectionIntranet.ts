@@ -1,26 +1,14 @@
+import { toast } from "react-toastify";
 import SpServices from "../SPServices/SpServices";
 
 export const ShowHide = async (
   SelectItem: any,
-  componentsList: any,
-  setLoaderState: any,
-  index: number,
-  currentUser: any
+  componentsList: any
+  // setLoaderState: any,
+  // index: number,
+  // currentUser: any
 ): Promise<any> => {
-  setLoaderState((prevState: any) => {
-    const updatedState = [...prevState]; // Create a copy of the array
-    updatedState[index] = {
-      ...updatedState[index],
-      popupWidth: "450px",
-      open: true,
-      isLoading: {
-        inprogress: true,
-        error: false,
-        success: false,
-      },
-    };
-    return updatedState;
-  });
+  const toastId = toast.loading("Flexible Section Adding ...");
 
   try {
     // Add the PollQuestion
@@ -39,43 +27,25 @@ export const ShowHide = async (
     }
 
     // Success handling
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: true,
-          error: false,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          successDescription: `The Flexile option has been Updated successfully with all options.`,
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render: "The Flexible Section Updated successfully",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
+    debugger;
   } catch (error) {
-    console.log("Error adding vote:", error);
+    // console.log("Error adding vote:", error);
     // Handle any error in the process
-    setLoaderState((prevState: any) => {
-      const updatedState = [...prevState]; // Copy state array
-      updatedState[index] = {
-        ...updatedState[index],
-        popupWidth: "450px",
-        isLoading: {
-          inprogress: false,
-          success: false,
-          error: true,
-        },
-        messages: {
-          ...updatedState[index].messages,
-          errorDescription:
-            "An error occurred while adding Flexiblesection, please try again later.",
-        },
-      };
-      return updatedState;
+
+    toast.update(toastId, {
+      render: "Error while Updating Flexible section",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
     });
   }
 };

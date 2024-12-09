@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable  @typescript-eslint/no-use-before-define */
 
 import QuestionCeo from "../components/QuestionCeo/QuestionCeoIntranet";
 import PollIntranet from "../components/PollIntranet/PollIntranet";
@@ -22,6 +23,7 @@ import { sp } from "@pnp/sp/presets/all";
 import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
+import { ToastContainer } from "react-toastify";
 // interface
 interface Curobj {
   Id: number;
@@ -130,35 +132,28 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
         // disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+
           await ShowHide(
             isSelected,
-            componentsList,
-            setPopupController,
-            0,
-            currentUser
+            componentsList
+            // setPopupController,
+            // 0,
+            // currentUser
           );
+          await getData();
+
           // await handleSubmit();
         },
       },
     ],
   ];
 
-  // get the admin data
-  const _getAdmin = async (): Promise<void> => {
-    await sp.web.siteGroups
-      .getByName(CONFIG.SPGroupName.Pernix_Admin)
-      .users.get()
-      .then((res: any) => {
-        _isAdmin = res.some(
-          (val: any) => val?.Email?.toLowerCase() === currentUser?.toLowerCase()
-        );
-        setIsLoader(false);
-      })
-      .catch((err: any) => {
-        console.log(err);
-        setIsLoader(false);
-      });
-  };
   // Fetch data from the SharePoint list
   const getData = async (): Promise<void> => {
     try {
@@ -186,6 +181,23 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
     } catch (err) {
       console.error("Error fetching data:", err);
     }
+  };
+
+  // get the admin data
+  const _getAdmin = async (): Promise<void> => {
+    await sp.web.siteGroups
+      .getByName(CONFIG.SPGroupName.Pernix_Admin)
+      .users.get()
+      .then((res: any) => {
+        _isAdmin = res.some(
+          (val: any) => val?.Email?.toLowerCase() === currentUser?.toLowerCase()
+        );
+        setIsLoader(false);
+      })
+      .catch((err: any) => {
+        console.log(err);
+        setIsLoader(false);
+      });
   };
 
   useEffect(() => {
@@ -283,6 +295,18 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
           {/* Popup Dialog */}
         </div>
       )}
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   );
 };

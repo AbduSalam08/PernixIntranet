@@ -50,7 +50,7 @@ import CircularSpinner from "../../../../components/common/Loaders/CircularSpinn
 import ViewAll from "../../../../components/common/ViewAll/ViewAll";
 import Popup from "../../../../components/common/Popups/Popup";
 import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
-import { ToastContainer } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
 //import { CONFIG } from "../../../config/config";
 //import ViewAll from "../../../components/common/ViewAll/ViewAll";
 //import { RoleAuth } from "../../../services/CommonServices";
@@ -776,7 +776,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
         />
       ))}
 
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar
@@ -786,7 +786,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+      /> */}
     </div>
   );
 };
