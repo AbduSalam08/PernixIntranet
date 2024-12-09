@@ -1007,6 +1007,8 @@ const MainBannerPage = (props: any): JSX.Element => {
               >
                 <CustomDropDown
                   noErrorMsg
+                  size="SM"
+                  floatingLabel={false}
                   value={commonSearch?.Status}
                   options={statusDrop || []}
                   placeholder="Select Status"
@@ -1024,6 +1026,7 @@ const MainBannerPage = (props: any): JSX.Element => {
               <div>
                 <CustomInput
                   noErrorMsg
+                  size="SM"
                   value={commonSearch?.Search}
                   placeholder="Search"
                   onChange={(e: any) => {
@@ -1040,6 +1043,7 @@ const MainBannerPage = (props: any): JSX.Element => {
               <div>
                 <CustomDateInput
                   label="Select Date"
+                  size="SM"
                   value={commonSearch?.Date}
                   onChange={(e: any) => {
                     const value: any = e;

@@ -78,10 +78,10 @@
     width: 100%;
     min-height: 360px;
     max-height: 360px;
-    overflow: auto;
+    // overflow: auto;
     background-color: #ffffff;
     border-radius: 8px;
-    padding: 10px;
+    padding: 15px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
 
     .cardIMG {
@@ -95,9 +95,20 @@
       width: 100%;
       min-height: 150px;
       max-height: 150px;
-      overflow: auto;
-      font-size: 16px;
-      line-height: 1.4;
+      color: #706c6c;
+      font-family: "osRegular", sans-serif;
+
+      // overflow: auto;
+      font-size: 14px;
+      line-height: 23px;
+
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      line-clamp: 6;
+      -webkit-line-clamp: 6;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 8px 0px;
     }
 
     .cardFooter {
@@ -105,7 +116,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 10px;
+      padding-top: 6px;
 
       .cardStatus {
         border-radius: 4px;

@@ -164,7 +164,7 @@
       background-color: #fff;
       padding: 10px 0px 10px 10px;
       height: 350px;
-      overflow: auto;
+      // overflow: auto;
       margin-bottom: 10px;
 
       &::-webkit-scrollbar {
@@ -193,8 +193,8 @@
 
         .recogonized {
           font-size: 16px;
-          font-weight: 600;
-          color: #a7a7a7;
+          // font-weight: 600;
+          color: #adadad;
           font-family: "osSemibold", sans-serif;
         }
       }
@@ -213,12 +213,19 @@
 
       .message {
         margin: 0;
-        font-size: 13px;
+        font-size: 14px;
         // font-weight: 400;
-        color: #4b4b4b;
-        line-height: 20px;
+        color: #706c6c;
+        line-height: 23px;
         margin: 10px 0px 0px 0px;
         font-family: "osRegular", sans-serif;
+
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        line-clamp: 11;
+        -webkit-line-clamp: 11;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }

@@ -973,6 +973,7 @@ const PollPage = (props: any): JSX.Element => {
               <CustomInput
                 value={searchField.allSearch}
                 noErrorMsg
+                size="SM"
                 secWidth="180px"
                 labelText="Search"
                 placeholder="Search"
@@ -989,6 +990,7 @@ const PollPage = (props: any): JSX.Element => {
                 placeHolder="Date"
                 minWidth="180px"
                 maxWidth="180px"
+                size="SM"
                 value={
                   searchField.selectedDate ? searchField.selectedDate : null
                 }

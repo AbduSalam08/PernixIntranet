@@ -838,6 +838,7 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                 <CustomInput
                   noErrorMsg
                   value={strSearch}
+                  size="SM"
                   placeholder="Search"
                   onChange={(e: any) => {
                     const value: string = e.trimStart();

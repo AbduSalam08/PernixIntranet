@@ -88,7 +88,7 @@
   width: 100%;
   height: calc(100vh - 256px);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   padding: 10px;
   overflow: auto;
@@ -111,7 +111,7 @@
 
       .poll-header {
         font-size: 16px;
-        color: #4b4b4b;
+        color: #0b4d53;
         font-family: "osSemibold", sans-serif;
         height: auto;
         line-height: 1.4;
@@ -148,7 +148,7 @@
       overflow: auto;
 
       .container {
-        border: 1px solid #a7b5a7;
+        border: 1px solid #eee;
         border-radius: 4px;
         width: 100%;
         padding: 10px;
@@ -163,7 +163,7 @@
           left: 0;
           height: 100%;
           width: 0;
-          background-color: #a7b5a7;
+          background-color: #f0f0f0;
           border-radius: 4px;
           z-index: 0;
         }
@@ -185,16 +185,17 @@
 
             i {
               font-size: 14px;
-              color: #0b4d53;
+              color: #414141;
               font-weight: 600;
+              margin-right: 5px;
             }
 
             p {
               margin: 0;
-              color: #0b4d53;
+              color: #414141;
               line-height: 1.4;
               font-size: 14px;
-              font-family: "osSemibold", sans-serif;
+              font-family: "osMedium", sans-serif;
               overflow: hidden;
               white-space: nowrap;
               text-overflow: ellipsis;
@@ -203,9 +204,9 @@
 
           div {
             margin: 0;
-            color: #0b4d53;
+            color: #414441;
             font-size: 12px;
-            font-family: "osRegular", sans-serif;
+            font-family: "osMedium", sans-serif;
           }
         }
       }
@@ -220,7 +221,8 @@
 
       p {
         font-size: 16px;
-        font-weight: 500;
+        color: #706c6c;
+        font-family: "osRegular", sans-serif;
       }
     }
   }
@@ -234,7 +236,7 @@
   justify-content: center;
   font-size: 18px;
   font-weight: 600;
-  color: #a7a7a7;
+  color: #adadad;
 }
 
 /* Responsive design */

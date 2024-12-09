@@ -360,7 +360,7 @@ html {
 }
 /* width */
 *::-webkit-scrollbar {
-  width: 6px;
+  width: 3px;
   height: 4px;
 }
 

@@ -514,6 +514,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
             <CustomInput
               noErrorMsg
               value={commonSearch?.Search}
+              size="SM"
               placeholder="Search"
               onChange={(e: any) => {
                 const value: string = e.trimStart();

@@ -331,6 +331,7 @@ const CalendarPage = (props: any): JSX.Element => {
             value={formData.StartDate.value}
             label="Date"
             isDateController={true}
+            size="SM"
             minimumDate={new Date()}
             error={!formData.StartDate.isValid}
             errorMsg={formData.StartDate.errorMsg}
@@ -797,6 +798,7 @@ const CalendarPage = (props: any): JSX.Element => {
             secWidth="180px"
             labelText="Search"
             placeholder="Search"
+            size="SM"
             noErrorMsg
             onChange={(e) => {
               const value = e;
@@ -810,6 +812,7 @@ const CalendarPage = (props: any): JSX.Element => {
             placeHolder="Date"
             minWidth="180px"
             maxWidth="180px"
+            size="SM"
             value={searchField.selectedDate ? searchField.selectedDate : null}
             onChange={(e: any) => {
               const value: any = e;

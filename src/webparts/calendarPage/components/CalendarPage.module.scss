@@ -80,6 +80,7 @@
 
   .eventSection {
     flex: 0 1 calc(25% - 20px);
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -90,6 +91,7 @@
     border-radius: 8px;
     margin-bottom: 11px;
     position: relative;
+
     background-color: #fff;
     .date {
       width: 78px;
@@ -99,7 +101,9 @@
       p {
         margin: 6px 0px;
         font-size: 17px;
-        font-weight: 600;
+        font-family: "osSemibold", sans-serif;
+
+        // font-weight: 600;
         color: #e0803d;
       }
     }
@@ -114,11 +118,11 @@
 
       .Title {
         margin: 6px 0px;
-        font-size: 15px;
-        font-weight: 600;
-        font-family: "osSemibold";
+        font-size: 16px;
+        // font-weight: 600;
+        font-family: "osSemibold", sans-serif;
         color: #0b4d53;
-        max-width: 250px;
+        max-width: 190px;
         overflow: hidden;
         height: 18px;
         text-overflow: ellipsis;
@@ -127,16 +131,18 @@
 
       .time {
         color: #adadad;
-        font-weight: 400;
-        font-family: "osRegular";
+        font-family: "osRegular", sans-serif;
+
+        // font-weight: 400;
+        // font-family: "osRegular";
         display: block;
       }
 
       .description {
         font-size: 16px;
-        font-family: "osRegular";
+        font-family: "osRegular", sans-serif;
         color: #adadad;
-        max-width: 250px;
+        max-width: 190px;
         overflow: hidden;
         height: 18px;
         text-overflow: ellipsis;
