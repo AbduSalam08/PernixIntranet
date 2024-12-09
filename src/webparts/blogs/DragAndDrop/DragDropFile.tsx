@@ -116,7 +116,7 @@ const DragDropFile = (props: any) => {
         className={dragActive ? "drag-active" : ""}
       >
         <div>
-          <p>Drag and drop your file here or</p>
+          <p>Drag and drop your file here (1920 x 1080, 1080 x 550)</p>
           <button
             disabled={props?.ID ? true : false}
             style={{
@@ -136,7 +136,7 @@ const DragDropFile = (props: any) => {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-        ></div>
+        />
       )}
     </form>
   );
