@@ -119,7 +119,7 @@ export const addNews = async (formData: any): Promise<any> => {
     }
 
     toast.update(toastId, {
-      render: "The new news has been added successfully!",
+      render: "News added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -188,7 +188,7 @@ export const editNews = async (
     }
 
     toast.update(toastId, {
-      render: "This news has been successfully updated!",
+      render: "News updated successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -221,7 +221,7 @@ export const deleteNews = async (newsID: number): Promise<any> => {
     });
 
     toast.update(toastId, {
-      render: "This news has been successfully deleted!",
+      render: "News deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,

@@ -130,7 +130,7 @@ export const addMotivated = async (
     };
 
     toast.update(toastId, {
-      render: "Motivation quote added successfully!",
+      render: "Quote added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -223,7 +223,7 @@ export const updateMotivated = async (
     };
 
     toast.update(toastId, {
-      render: "Motivation quote updated successfully!",
+      render: "Quote updated successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -257,7 +257,7 @@ export const deleteMotivated = async (formData: any): Promise<any> => {
     });
 
     toast.update(toastId, {
-      render: "Motivation quote deleted successfully!",
+      render: "Quote deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,

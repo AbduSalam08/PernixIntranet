@@ -352,14 +352,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
           <img src={curObject?.imgUrl ?? defaultUserImg} alt="User image" />
           <div>
             <div>{curObject?.EmployeeName?.name ?? ""}</div>
-            <div>
-              {moment(curObject?.StartDate).format("YYYYMMDD") ===
-              moment(curObject?.EndDate).format("YYYYMMDD")
-                ? moment(curObject?.StartDate).format("DD MMM YYYY")
-                : moment(curObject?.StartDate).format("DD MMM YYYY") +
-                  " - " +
-                  moment(curObject?.EndDate).format("DD MMM YYYY")}
-            </div>
+            <div>{moment(curObject?.StartDate).format("DD MMM YYYY")}</div>
           </div>
         </div>
         <div title={curObject?.Description} className={styles.popUpBodySec}>

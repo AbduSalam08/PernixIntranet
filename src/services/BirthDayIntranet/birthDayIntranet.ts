@@ -153,7 +153,7 @@ export const addBirthdayWish = async (
     });
 
     toast.update(toastId, {
-      render: "The response to the birthday wish has been added successfully!",
+      render: "Birthday wishes sent successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -173,7 +173,7 @@ export const addBirthdayWish = async (
 };
 
 export const addBirthDay = async (userID: string): Promise<any> => {
-  const toastId = toast.loading("Deactivating a birthday...");
+  // const toastId = toast.loading("Deactivating a birthday...");
 
   try {
     const res: any = await SpServices.SPAddItem({
@@ -184,32 +184,32 @@ export const addBirthDay = async (userID: string): Promise<any> => {
       },
     });
 
-    toast.update(toastId, {
-      render: "The user's birthday has been successfully deactivated!",
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    // toast.update(toastId, {
+    //   render: "Successfully deactivated the user!",
+    //   type: "success",
+    //   isLoading: false,
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    // });
 
     return res?.data?.ID || null;
   } catch (err) {
     console.log("err: ", err);
 
-    toast.update(toastId, {
-      render: "Error deactivating the user's birthday. Please try again.",
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    // toast.update(toastId, {
+    //   render: "Error deactivating the user's birthday. Please try again.",
+    //   type: "error",
+    //   isLoading: false,
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    // });
 
     return null;
   }
 };
 
 export const deleteBirthDay = async (Id: number): Promise<void> => {
-  const toastId = toast.loading("Activating a birthday...");
+  // const toastId = toast.loading("Activating a birthday...");
 
   try {
     await SpServices.SPDeleteItem({
@@ -217,22 +217,22 @@ export const deleteBirthDay = async (Id: number): Promise<void> => {
       ID: Id,
     });
 
-    toast.update(toastId, {
-      render: "The user's birthday has been successfully activated!",
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    // toast.update(toastId, {
+    //   render: "Successfully activated the user!",
+    //   type: "success",
+    //   isLoading: false,
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    // });
   } catch (err) {
     console.log("err: ", err);
 
-    toast.update(toastId, {
-      render: "Error activating the user's birthday. Please try again.",
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    // toast.update(toastId, {
+    //   render: "Error activating the user's birthday. Please try again.",
+    //   type: "error",
+    //   isLoading: false,
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    // });
   }
 };

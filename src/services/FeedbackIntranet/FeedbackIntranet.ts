@@ -91,7 +91,7 @@ export const addFeedbackQus = async (formData: IFormData): Promise<any> => {
     };
 
     toast.update(toastId, {
-      render: "The new feedback question added successfully!",
+      render: "Feedback form added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -127,7 +127,7 @@ export const updateFeedbackQus = async (formData: IFormData): Promise<any> => {
     });
 
     toast.update(toastId, {
-      render: "This feedback question has been successfully updated!",
+      render: "Feedback form updated successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -152,7 +152,9 @@ export const updateFeedbackQus = async (formData: IFormData): Promise<any> => {
 };
 
 export const deleteFeedbackQus = async (formData: any): Promise<any> => {
-  const toastId = toast.loading("Deleting the feedback question in progress...");
+  const toastId = toast.loading(
+    "Deleting the feedback question in progress..."
+  );
 
   try {
     await SpServices.SPDeleteItem({
@@ -161,7 +163,7 @@ export const deleteFeedbackQus = async (formData: any): Promise<any> => {
     });
 
     toast.update(toastId, {
-      render: "This feedback question has been successfully deleted!",
+      render: "Feedback form deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -208,8 +210,7 @@ export const addFeedbackRes = async (
     };
 
     toast.update(toastId, {
-      render:
-        "The response to the feedback question has been added successfully!",
+      render: "Response submitted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,

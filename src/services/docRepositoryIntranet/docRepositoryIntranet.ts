@@ -112,7 +112,7 @@ export const addDocRepository = async (
     }
 
     toast.update(toastId, {
-      render: "The new document repository was added successfully!",
+      render: "Folder/File added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -151,7 +151,7 @@ export const deleteDocRepository = async (id: number): Promise<void> => {
     });
 
     toast.update(toastId, {
-      render: "The document repository has been successfully deleted!",
+      render: "Folder/File deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,

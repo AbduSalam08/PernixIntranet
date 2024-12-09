@@ -187,7 +187,7 @@ export const addPollData = async (
     // });
 
     toast.update(toastId, {
-      render: `Poll Added successfully`,
+      render: `Poll added successfully!`,
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -353,7 +353,7 @@ export const updatePollData = async (
     }
 
     toast.update(toastId, {
-      render: `Poll Updated successfully`,
+      render: `Poll updated successfully!`,
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -470,7 +470,7 @@ export const addVote = async (
     // });
 
     toast.update(toastId, {
-      render: `Vote has been Successfully`,
+      render: `Vote submitted successfully!`,
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -556,7 +556,7 @@ export const deletePollData = async (
     // });
 
     toast.update(toastId, {
-      render: `Poll Deleted successfully`,
+      render: `Poll deleted successfully!`,
       type: "success",
       isLoading: false,
       autoClose: 5000,

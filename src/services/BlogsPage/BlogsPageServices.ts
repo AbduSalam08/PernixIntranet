@@ -581,7 +581,7 @@ export const addBlogData = async (
     ];
 
     toast.update(toastId, {
-      render: "The new blog has been added successfully!",
+      render: "Blog sent for approval successfully.!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -624,7 +624,10 @@ export const updateBlogData = async (
 
     isToast &&
       toast.update(toastId, {
-        render: "The blog has been updated successfully!",
+        render:
+          data?.Status === "Approved"
+            ? "Blog approved successfully!"
+            : "Blog rejected successfully!",
         type: "success",
         isLoading: false,
         autoClose: 5000,
@@ -654,7 +657,7 @@ export const deleteBlogData = async (ID: number): Promise<void> => {
     });
 
     toast.update(toastId, {
-      render: "The blog has been deleted successfully!",
+      render: "Blog deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -705,7 +708,7 @@ export const addBlogCommentsData = async (
     ];
 
     toast.update(toastId, {
-      render: "The blog comment has been added successfully!",
+      render: "Comment added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
