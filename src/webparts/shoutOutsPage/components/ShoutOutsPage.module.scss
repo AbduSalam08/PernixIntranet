@@ -117,14 +117,15 @@
 
     .cardBody {
       width: 100%;
-      overflow: auto;
+      // overflow: auto;
       line-height: 1.4;
       padding: 0px 5px;
     }
 
     .Container {
       background-color: #fff;
-      padding: 10px;
+      padding: 0px 10px 10px 10px;
+      // padding: 10px;
 
       .shoutOutHeader {
         margin-bottom: 10px;
@@ -140,8 +141,8 @@
         }
         .recogonized {
           font-size: 16px;
-          font-weight: 600;
-          color: #a7a7a7;
+          // font-weight: 600;
+          color: #adadad;
           font-family: "osSemibold", sans-serif;
         }
       }
@@ -160,11 +161,18 @@
 
       .message {
         margin: 0;
-        font-size: 13px;
-        color: #4b4b4b;
-        line-height: 20px;
+        font-size: 14px;
+        color: #706c6c;
+        line-height: 23px;
         margin: 10px 0px 0px 0px;
         font-family: "osRegular", sans-serif;
+
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        line-clamp: 8;
+        -webkit-line-clamp: 8;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
@@ -173,7 +181,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 14px;
+      padding: 8px 10px 0px 10px;
+      // padding-top: 8px;
     }
   }
 }

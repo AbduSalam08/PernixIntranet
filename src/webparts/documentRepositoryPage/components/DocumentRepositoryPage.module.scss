@@ -25,8 +25,8 @@
     gap: 14px;
 
     .backHeader {
-      font-size: 24px;
-      font-weight: 600;
+      font-size: 22px;
+      // font-weight: 600;
       color: #0b4d53;
       font-family: "osSemibold", sans-serif;
     }
@@ -81,6 +81,8 @@
     font-weight: 500;
     background-color: #0b4d5310;
     color: #0b4d53;
+    // font-family: "osSemibold", sans-serif;
+
     padding: 6px 12px;
     border-radius: 4px;
     display: flex;
@@ -125,6 +127,9 @@
 
       .contentSec {
         width: 100%;
+        color: #414141;
+        font-size: 14px;
+        font-family: "osRegular", sans-serif;
       }
     }
 
