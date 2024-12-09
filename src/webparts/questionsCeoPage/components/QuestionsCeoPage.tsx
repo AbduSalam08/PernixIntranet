@@ -185,9 +185,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         success: false,
       },
       messages: {
-        success: "Answer submitted successfully!",
+        success: "Person assigned successfully!",
         error: "Something went wrong!",
-        successDescription: "The answer submitted successfully.",
+        successDescription: "The person assigned successfully.",
         errorDescription:
           "An error occured while submitting answer, please try again later.",
         inprogress: "Submitting answer, please wait...",

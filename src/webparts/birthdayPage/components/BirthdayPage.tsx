@@ -797,7 +797,7 @@ const BirthdayPage = (props: any): JSX.Element => {
 
                             <div className={styles.actionSection}>
                               {isAdmin &&
-                                moment().format("MMDD") ===
+                                moment().format("MMDD") <=
                                   moment(val?.Birthday).format("MMDD") && (
                                   <InputSwitch
                                     checked={val?.IsActive}

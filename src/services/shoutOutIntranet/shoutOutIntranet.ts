@@ -228,7 +228,7 @@ export const addShoutOut = async (
         await getAllShoutOutsData(dispath);
 
         toast.update(toastId, {
-          render: "The new shout-out added successfully!",
+          render: "Shout-out added successfully!",
           type: "success",
           isLoading: false,
           autoClose: 5000,
@@ -287,7 +287,7 @@ export const updateShoutOut = async (
       await getAllShoutOutsData(dispath);
 
       toast.update(toastId, {
-        render: "This shout-out has been successfully updated!",
+        render: "Shout-out updated successfully!",
         type: "success",
         isLoading: false,
         autoClose: 5000,
@@ -322,7 +322,7 @@ export const deleteShoutOut = async (
       await getAllShoutOutsData(dispath);
 
       toast.update(toastId, {
-        render: "This shout-out has been successfully deleted!",
+        render: "Shout-out deleted successfully!",
         type: "success",
         isLoading: false,
         autoClose: 5000,

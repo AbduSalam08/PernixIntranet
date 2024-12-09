@@ -92,7 +92,7 @@ export const createOutlookEvent = async (
 
     // Success state after the event is added
     toast.update(toastId, {
-      render: "New event added successfully!",
+      render: "Event added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -102,7 +102,7 @@ export const createOutlookEvent = async (
     // Optionally reset form data after successful submission
     return {
       status: "success",
-      message: "Event created successfully",
+      message: "Event created successfully!",
     };
   } catch (error) {
     console.error("Error creating event", error);
@@ -227,7 +227,7 @@ export const updateOutlookEvent = async (
       .update(eventUpdate);
 
     toast.update(toastId, {
-      render: "The event updated successfully!",
+      render: "Event updated successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -236,7 +236,7 @@ export const updateOutlookEvent = async (
 
     return {
       status: "success",
-      message: "Event updated successfully",
+      message: "Event updated successfully!",
     };
   } catch (error) {
     console.error("Error updating event", error);
@@ -273,7 +273,7 @@ export const deleteOutlookEvent = async (
       .delete();
 
     toast.update(toastId, {
-      render: "The event deleted successfully!",
+      render: "Event deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -282,7 +282,7 @@ export const deleteOutlookEvent = async (
 
     return {
       status: "success",
-      message: "Event deleted successfully",
+      message: "Event deleted successfully!",
     };
   } catch (error) {
     console.error("Error deleting event", error);

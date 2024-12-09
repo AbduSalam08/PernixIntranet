@@ -170,7 +170,7 @@ export const addQuestionCeo = async (
     await postToApi(payload);
 
     toast.update(toastId, {
-      render: "The new question added successfully!",
+      render: "Question submitted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -261,7 +261,7 @@ export const submitCEOQuestionAnswer = async (
 
       if (type) {
         toast.update(toastId, {
-          render: "The response has been added successfully!",
+          render: "Response submitted successfully!",
           type: "success",
           isLoading: false,
           autoClose: 5000,
@@ -281,7 +281,7 @@ export const submitCEOQuestionAnswer = async (
             messages: {
               ...updatedState[index].messages,
               successDescription:
-                "The leader for this question has been assigned successfully!",
+                "The person has been assigned for the question!",
             },
           };
           return updatedState;

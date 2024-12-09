@@ -137,7 +137,7 @@ export const addNewHire = async (formData: FormData): Promise<void> => {
     }
 
     toast.update(toastId, {
-      render: "The new hire added successfully!",
+      render: "New hire added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -186,8 +186,6 @@ export const updateHire = async (
       ID: ID,
       RequestJSON: payload,
     });
-
-    debugger;
 
     if (
       formData?.ProfileImage?.value?.name &&
@@ -248,7 +246,7 @@ export const updateHire = async (
     };
 
     toast.update(toastId, {
-      render: "This new hire has been successfully updated!",
+      render: "New hire updated successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -281,7 +279,7 @@ export const deleteHire = async (ID: number): Promise<void> => {
     });
 
     toast.update(toastId, {
-      render: "This new hire has been successfully deleted!",
+      render: "New hire deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,

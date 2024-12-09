@@ -593,17 +593,15 @@ const BirthdayIntranet = (props: any): JSX.Element => {
         )}
       </div>
 
-      {arrUserDatas.length > 0 && (
-        <ViewAll
-          onClick={() => {
-            window.open(
-              props.context.pageContext.web.absoluteUrl +
-                CONFIG.NavigatePage.BirthdayPage,
-              "_self"
-            );
-          }}
-        />
-      )}
+      <ViewAll
+        onClick={() => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.BirthdayPage,
+            "_self"
+          );
+        }}
+      />
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
