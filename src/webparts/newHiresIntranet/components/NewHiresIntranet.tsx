@@ -27,7 +27,6 @@ import CustomPeoplePicker from "../../../components/common/CustomInputFields/Cus
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import moment from "moment";
 import { IFormFields } from "../../../interface/interface";
-import { Button } from "primereact/button";
 import { ToastContainer } from "react-toastify";
 
 /* Images creation */
@@ -95,6 +94,7 @@ const NewHiresIntranet = (props: any): JSX.Element => {
       },
     },
   ];
+
   const initialFormData: INewHiresField = {
     EmployeeName: {
       value: "",
@@ -132,7 +132,6 @@ const NewHiresIntranet = (props: any): JSX.Element => {
     initialPopupController
   );
   const [curObject, setCurObject] = useState<any>();
-  console.log("setCurObject: ", setCurObject);
   const [newHires, setNewHires] = useState<any[]>([]);
   const [currentUserDetails, setCurrentUserDetails] = useState<any>({
     role: "User",
@@ -433,20 +432,20 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         <div title={val?.Description} className={styles.cardBodySec}>
           {val?.Description ?? ""}
         </div>
-        <div className={styles.cardBTNSec}>
-          <Button
-            label="Read more"
-            onClick={() => {
-              setCurObject({ ...val });
-              togglePopupVisibility(
-                setPopupController,
-                initialPopupController[1],
-                1,
-                "open"
-              );
-            }}
-          />
-        </div>
+        <button
+          className={styles.cardBTNSec}
+          onClick={() => {
+            setCurObject({ ...val });
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[1],
+              1,
+              "open"
+            );
+          }}
+        >
+          Read more
+        </button>
       </div>
     );
   };

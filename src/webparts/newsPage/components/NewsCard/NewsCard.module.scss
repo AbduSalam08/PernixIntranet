@@ -42,14 +42,21 @@
   flex-direction: column;
   gap: 8px;
   padding-bottom: 0;
-
+  max-width: 75%;
   h2 {
-    font-size: 18px;
-    font-family: "osSemiBold", sans-serif;
     margin: 0;
     color: #0b4d53;
-    line-height: 20px;
-
+    line-height: 22px;
+    height: 22px;
+    font-size: 16px;
+    white-space: nowrap;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    max-width: calc(100% - 50px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "osSemiBold", sans-serif;
     @media (max-width: 700px) {
       font-size: 14px;
     }
@@ -57,10 +64,10 @@
 
   span {
     font-family: "osRegular", sans-serif !important;
-    color: #4b4b4b;
-    line-height: 1.45;
-    font-size: 13px;
-    height: 54px;
+    color: #adadad;
+    line-height: 22px;
+    font-size: 14px;
+    height: 68px;
     overflow: hidden;
     text-overflow: ellipsis;
     word-break: break-word;
@@ -72,7 +79,7 @@
 
     @media (max-width: 700px) {
       font-size: 12px;
-      line-height: 16px;
+      line-height: 20px;
       height: auto; /* Adjust height to auto for better fit */
     }
   }

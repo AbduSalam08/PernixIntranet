@@ -190,7 +190,7 @@
     margin: 5 0;
     align-items: center;
     display: flex;
-    margin: 10% 0;
+    margin: 5% 0;
     .drawerinbox {
       .personabox {
         display: flex;
@@ -207,15 +207,16 @@
         line-height: 23px;
         h3 {
           color: #0b4d53;
-          font-weight: 500;
+          font-family: "osSemiBold", sans-serif;
         }
         h5 {
           color: #e0803d;
-          font-weight: 400;
+          font-family: "osMedium", sans-serif;
         }
-        h6 {
-          color: #8c8c8c;
-          font-weight: 400;
+        span {
+          font-family: "osRegular", sans-serif;
+          font-size: 14px;
+          color: #adadad;
         }
       }
     }
@@ -223,7 +224,7 @@
   .userdetailbox {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     line-height: 38px;
     margin-left: 30px;
 
@@ -232,28 +233,28 @@
       align-items: center;
       // justify-content: space-evenly;
       // width: 81%;
-      gap: 7px;
+      gap: 12px;
     }
     .phonebox {
       display: flex;
       align-items: center;
       // justify-content: space-evenly;
       // width: 27%;
-      gap: 7px;
+      gap: 12px;
     }
     .birthdaybox {
       display: flex;
       align-items: center;
       // width: 81%;
       // justify-content: space-evenly;
-      gap: 7px;
+      gap: 12px;
     }
     .locationbox {
       display: flex;
       align-items: center;
       // width: 81%;
       // gap: 5px;
-      gap: 7px;
+      gap: 12px;
     }
     label {
       color: #8e8e8e;
@@ -261,7 +262,7 @@
     }
   }
   .line {
-    border-top: 2px solid #c9c2c2;
+    border-top: 1px solid #55555520;
     width: 100%;
     margin: 5px 0;
   }
@@ -365,4 +366,10 @@
       background: #a7a7a8;
     }
   }
+}
+.dbWrapper {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  padding-bottom: 20px;
 }

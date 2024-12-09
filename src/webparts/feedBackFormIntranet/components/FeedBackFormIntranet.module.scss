@@ -39,7 +39,7 @@
 
   .carouselContainer {
     .CarouselTitle {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 500;
       width: 100%;
       line-height: 23px;
@@ -50,6 +50,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       font-family: "osMedium", sans-serif;
+      color: var(--primary-pernix-green);
     }
 
     .CarouselTextArea {

@@ -12,7 +12,7 @@ import { MSGraphClient } from "@microsoft/sp-http";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import DataTable from "../../../components/common/DataTable/DataTable";
 import { Icon, Persona, PersonaSize } from "@fluentui/react";
-import { MailOutline } from "@mui/icons-material";
+import { MailOutline, Visibility } from "@mui/icons-material";
 // import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { TextField } from "office-ui-fabric-react";
 import { Drawer } from "@mui/material";
@@ -20,7 +20,6 @@ import {
   getuserdetails,
   skillUpdate,
 } from "../../../services/EmployeeDirectory/EmployeeDirectory";
-import { __metadata } from "tslib";
 import moment from "moment";
 import { InputSwitch } from "primereact/inputswitch";
 import SpServices from "../../../services/SPServices/SpServices";
@@ -70,10 +69,10 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
   const textFieldStyle = {
     fieldGroup: {
       ".ms-TextField-fieldGroup": {
-        border: "1px solid rgb(228 222 217) !important",
+        border: "none !important",
         width: "220px !important",
         "::after": {
-          border: "1px solid none",
+          border: "none",
         },
       },
     },
@@ -83,13 +82,12 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       },
       ".ms-Label": {
         color: "#0b4d53 !important",
-        fontWeight: "bold",
       },
       ".ms-TextField-field": {
         background: "transparent !important",
         color: "#323130 !important",
         borderRadius: "5px",
-        border: "1px solid rgb(211 207 203) !important",
+        border: "none !important",
         "::after": {
           border: "none !important",
         },
@@ -171,7 +169,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       width: 170,
       renderCell: (params: any) => {
         //(params);
-        return (
+        return params.row.Phone ? (
           <div className={styles.detailphonebox}>
             <Icon
               iconName="Phone"
@@ -183,6 +181,8 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             />
             <label>{params.row.Phone || "-"}</label>
           </div>
+        ) : (
+          "-"
         );
       },
     },
@@ -195,7 +195,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       renderCell: (params: any) => {
         return (
           <div>
-            <label>{params.row.officeLocation || ""}</label>
+            <label>{params.row.officeLocation || "-"}</label>
           </div>
         );
       },
@@ -237,7 +237,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       headerName: "Manager",
       width: 200,
       renderCell: (params: any) => {
-        return (
+        return params?.row?.Manager.name ? (
           <div
             onClick={() => {
               //("shanmugraj");
@@ -251,6 +251,8 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             />
             {params?.row?.Manager.name}
           </div>
+        ) : (
+          "-"
         );
       },
     },
@@ -307,15 +309,12 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 setPanelItem(params.row);
               }}
             >
-              <i
-                className="pi pi-eye"
-                style={{ fontSize: "1.5rem", color: "#1ab800" }}
-              ></i>
-              {/* <VisibilityOutlined
-                style={{
-                  color: "#1ab800",
+              <Visibility
+                sx={{
+                  color: "#555",
+                  fontSize: "24px",
                 }}
-              /> */}
+              />
             </div>
             {isAdmin && (
               <div>
@@ -418,7 +417,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       });
     });
 
-    let temp = isAdmin
+    const temp = isAdmin
       ? updatedList
       : updatedList.filter((val: any) => val.isActive);
 
@@ -531,7 +530,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
 
   // this function is tenentlevelallUsergetFunction
   const getallusers = async (listdata: any[]) => {
-    let users = await fetchUser(props.context, CONFIG.UserMailPath.path);
+    const users = await fetchUser(props.context, CONFIG.UserMailPath.path);
 
     await updatefunction(users, listdata);
     // setIsLoading(false);
@@ -877,6 +876,8 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                       });
                       handleSearch({ ...filterkey, Dropdown: value });
                     }}
+                    floatingLabel={false}
+                    size="SM"
                   />
                 </div>
                 <div>
@@ -891,6 +892,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                       });
                       handleSearch({ ...filterkey, _gsearch: value });
                     }}
+                    size="SM"
                   />
                   {/* <SearchBox
                     placeholder="Search..."
@@ -916,11 +918,16 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                     <Icon
                       iconName="Filter"
                       style={{
-                        fontWeight: 700,
-                        fontSize: "16PX",
+                        fontSize: "16px",
                       }}
                     />
-                    <span>Filter</span>
+                    <span
+                      style={{
+                        fontFamily: '"osSemiBold",sans-serif',
+                      }}
+                    >
+                      Filter
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1083,21 +1090,15 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 </div>
               </div>
             ) : null}
-            <div
-              style={{
-                background: "#ffff",
-                borderRadius: "10px",
-                paddingBottom: "20px",
-              }}
-            >
+            <div className={styles.dbWrapper}>
               <DataTable
                 rows={userData}
                 // rows={dataGridProps?.sortedBy==="Asc (Old)"? currentRoleBasedData?.data:dataGridProps?.sortedBy==="Desc (Latest)"?DescData:[]}
                 columns={columns}
-                emptyMessage="No tickets found!"
+                emptyMessage="No results found!"
                 // isLoading={HelpDeskTicktesData?.isLoading}
                 pageSize={10}
-                headerBgColor={"#e5e9e5"}
+                headerBgColor={"#e5e9e570"}
                 checkboxSelection={false}
               />
             </div>
@@ -1156,7 +1157,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 <h5>
                   {panelItem.officeLocation ? panelItem.officeLocation : ""}
                 </h5>
-                <h6>{panelItem?.JobTitle ? panelItem?.JobTitle : ""}</h6>
+                <span>{panelItem?.JobTitle ? panelItem?.JobTitle : ""}</span>
               </div>
             </div>
           </div>
@@ -1165,7 +1166,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               <MailOutline
                 style={{
                   color: "#0b4d53",
-                  fontSize: "24px",
+                  fontSize: "20px",
                 }}
               />
               <label>{panelItem.Email ? panelItem.Email : "-"}</label>
@@ -1175,7 +1176,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 iconName="Phone"
                 style={{
                   color: "#0b4d53",
-                  fontSize: "24px",
+                  fontSize: "20px",
                   // marginLeft: "8px",
                 }}
               />
@@ -1186,7 +1187,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 iconName="BirthdayCake"
                 style={{
                   color: "#0b4d53",
-                  fontSize: "24px",
+                  fontSize: "20px",
                 }}
               />
               <label>{moment(panelItem.birthday).format("MMM Do")}</label>
@@ -1196,7 +1197,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 className="pi pi-map-marker"
                 style={{
                   color: "#0b4d53",
-                  fontSize: "24px",
+                  fontSize: "20px",
                   // marginLeft: "10PX",
                 }}
               />
@@ -1248,7 +1249,14 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 })
               ) : (
                 <div>
-                  <label>No Skills</label>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      color: "#adadad",
+                    }}
+                  >
+                    No Skills
+                  </label>
                 </div>
               )}
             </div>

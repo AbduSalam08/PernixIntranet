@@ -35,7 +35,7 @@ import { resetFormData, validateField } from "../../../utils/commonUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomPeoplePicker from "../../../components/common/CustomInputFields/CustomPeoplePicker";
 import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
-import { Button } from "primereact/button";
+// import { Button } from "primereact/button";
 import { ToastContainer } from "react-toastify";
 
 /* Images creation */
@@ -661,17 +661,19 @@ const NewHiresPage = (props: any): JSX.Element => {
         <div className={styles.leftSection}>
           <i
             onClick={() => {
-              isActivityPage
-                ? window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.ApprovalsPage,
-                    "_self"
-                  )
-                : window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+              if (isActivityPage) {
+                window.open(
+                  props.context.pageContext.web.absoluteUrl +
+                    CONFIG.NavigatePage.ApprovalsPage,
+                  "_self"
+                );
+              } else {
+                window.open(
+                  props.context.pageContext.web.absoluteUrl +
+                    CONFIG.NavigatePage.PernixIntranet,
+                  "_self"
+                );
+              }
             }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -693,6 +695,7 @@ const NewHiresPage = (props: any): JSX.Element => {
                 }));
                 handleSearch([...typeNewHires]);
               }}
+              size="SM"
             />
           </div>
           <div
@@ -807,85 +810,85 @@ const NewHiresPage = (props: any): JSX.Element => {
                   <div title={val?.Description} className={styles.cardBodySec}>
                     {val?.Description ?? ""}
                   </div>
-                  <div className={styles.cardBTNSec}>
-                    <Button
-                      label="Read more"
+                  <button
+                    className={styles.cardBTNSec}
+                    onClick={() => {
+                      setCurObject({ ...val });
+                      togglePopupVisibility(
+                        setPopupController,
+                        initialPopupController[2],
+                        2,
+                        "open"
+                      );
+                    }}
+                  >
+                    Read more
+                  </button>
+                  <div
+                    className={styles.actionBtns}
+                    style={{
+                      display: userDetails?.role === "Admin" ? "flex" : "none",
+                    }}
+                  >
+                    <i
+                      style={{
+                        display:
+                          selectedTab !== CONFIG.NewHiresPageTabsName[2]
+                            ? "flex"
+                            : "none",
+                      }}
+                      className="pi pi-pen-to-square"
                       onClick={() => {
-                        setCurObject({ ...val });
+                        setHandleForm({
+                          ID: val?.ID,
+                          type: "Update",
+                        });
+                        setAttachmentObject(val?.Attachment);
+                        setFormData({
+                          EmployeeName: {
+                            ...initialFormData.EmployeeName,
+                            value: val?.EmployeeName?.name,
+                          },
+                          StartDate: {
+                            ...initialFormData.StartDate,
+                            value: new Date(val?.StartDate),
+                          },
+                          EndDate: {
+                            ...initialFormData.EndDate,
+                            value: new Date(val?.EndDate),
+                          },
+                          Description: {
+                            ...initialFormData.Description,
+                            value: val?.Description,
+                          },
+                          ProfileImage: {
+                            ...initialFormData.ProfileImage,
+                            value: {
+                              name: val?.Attachment?.FileName,
+                            },
+                          },
+                        });
                         togglePopupVisibility(
                           setPopupController,
-                          initialPopupController[2],
-                          2,
+                          initialPopupController[0],
+                          0,
+                          "open",
+                          "Update hire"
+                        );
+                      }}
+                    />
+                    <i
+                      className="pi pi-trash"
+                      onClick={() => {
+                        setHandleForm({ ID: val?.ID, type: "Delete" });
+                        togglePopupVisibility(
+                          setPopupController,
+                          initialPopupController[1],
+                          1,
                           "open"
                         );
                       }}
                     />
-                    <div
-                      style={{
-                        display:
-                          userDetails?.role === "Admin" ? "flex" : "none",
-                      }}
-                    >
-                      <i
-                        style={{
-                          display:
-                            selectedTab !== CONFIG.NewHiresPageTabsName[2]
-                              ? "flex"
-                              : "none",
-                        }}
-                        className="pi pi-pen-to-square"
-                        onClick={() => {
-                          setHandleForm({
-                            ID: val?.ID,
-                            type: "Update",
-                          });
-                          setAttachmentObject(val?.Attachment);
-                          setFormData({
-                            EmployeeName: {
-                              ...initialFormData.EmployeeName,
-                              value: val?.EmployeeName?.name,
-                            },
-                            StartDate: {
-                              ...initialFormData.StartDate,
-                              value: new Date(val?.StartDate),
-                            },
-                            EndDate: {
-                              ...initialFormData.EndDate,
-                              value: new Date(val?.EndDate),
-                            },
-                            Description: {
-                              ...initialFormData.Description,
-                              value: val?.Description,
-                            },
-                            ProfileImage: {
-                              ...initialFormData.ProfileImage,
-                              value: {
-                                name: val?.Attachment?.FileName,
-                              },
-                            },
-                          });
-                          togglePopupVisibility(
-                            setPopupController,
-                            initialPopupController[0],
-                            0,
-                            "open",
-                            "Update hire"
-                          );
-                        }}
-                      />
-                      <i
-                        className="pi pi-trash"
-                        onClick={() => {
-                          setHandleForm({ ID: val?.ID, type: "Delete" });
-                          togglePopupVisibility(
-                            setPopupController,
-                            initialPopupController[1],
-                            1,
-                            "open"
-                          );
-                        }}
-                      />
-                    </div>
                   </div>
                 </div>
               );
