@@ -178,6 +178,10 @@
   overflow: auto;
   .cardSection {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
     min-height: 360px;
     max-height: 360px;
     overflow: auto;
@@ -517,4 +521,10 @@
     -webkit-line-clamp: 8;
     white-space: normal;
   }
+}
+.actionSec {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
 }

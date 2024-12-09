@@ -17,10 +17,10 @@
   justify-content: space-between;
   border-bottom: 1px solid #e4e5e7;
 }
-.fc .fc-daygrid-day-frame {
-  width: 50px !important;
-  /* height: 50px !important; */
-}
+/* .fc .fc-daygrid-day-frame { */
+/* width: 50px !important; */
+/* height: 50px !important; */
+/* } */
 /* today */
 .fc .fc-daygrid-day.fc-day-today {
   background-color: transparent !important;
@@ -114,6 +114,8 @@ th.fc-col-header-cell a {
 .fc-theme-standard th {
   border: none !important;
   padding: 6px;
+  height: 42px;
+  vertical-align: middle !important;
 }
 .fc-theme-standard .fc-scrollgrid {
   border: none !important;
