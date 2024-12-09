@@ -20,7 +20,7 @@ interface DDateInputProps {
   withLabel?: boolean;
   errorMsg?: string;
   customClass?: string;
-  size?: string;
+  size?: "SM" | "MD" | "XL";
   placeHolder?: string;
   minWidth?: string;
   maxWidth?: string;
@@ -48,7 +48,7 @@ const DDateInput: React.FC<DDateInputProps> = ({
   mandatory = false,
   errorMsg = "",
   customClass = "",
-  size = "100%",
+  size = "MD",
   maxWidth,
   minWidth,
   isDateController = false,
@@ -101,7 +101,7 @@ const DDateInput: React.FC<DDateInputProps> = ({
           withLabel ? styles.inputWrapperWithLabel : styles.inputWrapper
         } ${disabledInput ? styles.disabledInput : ""} ${
           topLabel ? styles.topLabel : ""
-        } `}
+        }  ${size === "SM" ? "inputWrapperSM" : ""}`}
       >
         {withLabel && (
           <p
@@ -132,10 +132,16 @@ const DDateInput: React.FC<DDateInputProps> = ({
               yearRange="2000:2100"
               dateFormat="dd/mm/yy"
               placeholder={!value ? placeHolder : ""}
-              className={`${styles.d_datepicker}`}
-              style={{ width: "100%" }}
+              className={`${styles.d_datepicker} ${
+                size === "SM" ? "d_datepickerSM" : ""
+              }`}
             />
-            <label className={styles.flotingLabel} htmlFor="birth_date">
+            <label
+              className={`${styles.flotingLabel}  ${
+                size === "SM" ? "labelSM" : ""
+              }`}
+              htmlFor="birth_date"
+            >
               {label}
             </label>
           </FloatLabel>

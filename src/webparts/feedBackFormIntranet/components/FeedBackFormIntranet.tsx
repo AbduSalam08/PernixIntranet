@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -270,7 +271,7 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
   };
 
   const handleResSubmit = async (): Promise<void> => {
-    let data: any = {};
+    const data: any = {};
     const column: IFeedbackResColumn = CONFIG.FeedbackResColumn;
 
     data[column.Answer] = responseData?.Answer?.value ?? "";
@@ -328,7 +329,7 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      let data: any = {};
+      const data: any = {};
       const column: IFeedbackQusColumn = CONFIG.FeedbackQusColumn;
 
       data[column.Title] = formData?.Title?.value || "";
@@ -569,7 +570,7 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
                   display: isResponse ? "flex" : "none",
                   height: "8px",
                 }}
-              ></div>
+              />
             </div>
           ) : (
             <div className={styles.noDataFound}>

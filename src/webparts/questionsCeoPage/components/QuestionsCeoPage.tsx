@@ -379,7 +379,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                   : formData?.assignTo?.previousAssignTo?.id,
               };
 
-        let str: string =
+        const str: string =
           formData?.assignTo?.value?.email && formData?.answer?.value
             ? "response"
             : formData?.answer?.value
@@ -913,7 +913,9 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
 
     getcurrentUser()
       .then((res: any) => {
-        res && setCurUser({ ...res });
+        if (res) {
+          setCurUser({ ...res });
+        }
       })
       .catch((err: any) => {
         console.log(err);
@@ -930,17 +932,19 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
         <div className={styles.leftSection}>
           <i
             onClick={() => {
-              isActivityPage
-                ? window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.ApprovalsPage,
-                    "_self"
-                  )
-                : window.open(
-                    props.context.pageContext.web.absoluteUrl +
-                      CONFIG.NavigatePage.PernixIntranet,
-                    "_self"
-                  );
+              if (isActivityPage) {
+                window.open(
+                  props.context.pageContext.web.absoluteUrl +
+                    CONFIG.NavigatePage.ApprovalsPage,
+                  "_self"
+                );
+              } else {
+                window.open(
+                  props.context.pageContext.web.absoluteUrl +
+                    CONFIG.NavigatePage.PernixIntranet,
+                  "_self"
+                );
+              }
             }}
             className="pi pi-arrow-circle-left"
             style={{ fontSize: "1.5rem", color: "#E0803D" }}
@@ -953,6 +957,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
               noErrorMsg
               value={commonSearch?.Search}
               placeholder="Search"
+              size="SM"
               onChange={(e: any) => {
                 const value: string = e.trimStart();
                 searchField.Search = value;
@@ -1114,30 +1119,101 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             ?.map((val: any, index: number) => {
               return (
                 <div key={index} className={styles.cardSection}>
-                  <div className={styles.cardHeader}>
-                    <div
-                      className={styles.createdByDetail}
-                      style={{
-                        background: val?.Anonymous ? "#e0803d2e" : "#0b4d532e",
-                      }}
-                    >
+                  <div title={val.title} className={styles.cardQuestionSec}>
+                    <Avatar
+                      className={styles.avatarCreatedBy}
+                      shape="circle"
+                      image={`/_layouts/15/userphoto.aspx?size=S&username=${
+                        val?.Anonymous ? "" : val?.avatarUrl
+                      }`}
+                    />
+                    <span title={val.title}>{val.title}</span>
+                  </div>
+
+                  {val?.replies?.length ? (
+                    <div className={styles.cardAnsSec}>
+                      {/* <div className={styles.cardAnsUserSec}>
+                        <div className={styles.replayLable}>Answer :</div>
+                      </div> */}
                       <Avatar
-                        className={styles.avatarCreatedBy}
+                        className={styles.ansAvatar}
+                        image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.assignTo?.email}`}
                         shape="circle"
-                        image={`/_layouts/15/userphoto.aspx?size=S&username=${
-                          val?.Anonymous ? "" : val?.avatarUrl
-                        }`}
                       />
                       <div
-                        title={val?.Author}
-                        className={styles.createdByName}
-                        style={{
-                          color: val?.Anonymous ? "#e0803d" : "#0b4d53",
-                        }}
+                        title={val?.replies?.[0]?.content}
+                        className={styles.cardAnsContentSec}
                       >
-                        {val?.Anonymous ? "Anonymous" : val?.Author}
+                        {val?.replies?.[0]?.content}
                       </div>
                     </div>
+                  ) : (
+                    <div className={styles.cardAnsSec} />
+                  )}
+
+                  <div className={styles.cardFooterSec}>
+                    {/* <div className={styles.cardHeader}> */}
+                    {/* <div
+                        className={styles.createdByDetail}
+                        style={{
+                          background: val?.Anonymous
+                            ? "#e0803d2e"
+                            : "#0b4d532e",
+                        }}
+                      >
+                        <Avatar
+                          className={styles.avatarCreatedBy}
+                          shape="circle"
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${
+                            val?.Anonymous ? "" : val?.avatarUrl
+                          }`}
+                        />
+                        <div
+                          title={val?.Author}
+                          className={styles.createdByName}
+                          style={{
+                            color: val?.Anonymous ? "#e0803d" : "#0b4d53",
+                          }}
+                        >
+                          {val?.Anonymous ? "Anonymous" : val?.Author}
+                        </div>
+                      </div> */}
+                    {/* <div className={styles.ansUserSec}>
+                        <Avatar
+                          className={styles.ansAvatar}
+                          image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.assignTo?.email}`}
+                          shape="circle"
+                        />
+                        <div
+                          title={val?.assignTo?.name}
+                          className={styles.ansUserLable}
+                        >
+                          {val?.assignTo?.name}
+                        </div>
+                      </div> */}
+                    {/* </div> */}
+                    <div className={styles.pillWithDate}>
+                      <div
+                        style={{
+                          display:
+                            userDetails.role === "Admin" ? "flex" : "none",
+                        }}
+                        className={
+                          val.isActive ? styles.activepill : styles.inactivepill
+                        }
+                      >
+                        {val.isActive ? "Active" : "In Active"}
+                      </div>
+                      <div
+                        className={styles.footerDateSec}
+                        style={{
+                          display: val?.replies?.length ? "flex" : "none",
+                        }}
+                      >
+                        {val?.replies?.[0]?.date}
+                      </div>
+                    </div>
+
                     <div className={styles.actionSec}>
                       {userDetails.role === "Admin" &&
                         val?.replies?.length > 0 && (
@@ -1214,60 +1290,6 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                           className="pi pi-pen-to-square"
                         />
                       )}
-                    </div>
-                  </div>
-
-                  <div title={val.title} className={styles.cardQuestionSec}>
-                    {val.title}
-                  </div>
-
-                  {val?.replies?.length ? (
-                    <div className={styles.cardAnsSec}>
-                      <div className={styles.cardAnsUserSec}>
-                        <div className={styles.replayLable}>Answer :</div>
-                        <div className={styles.ansUserSec}>
-                          <Avatar
-                            className={styles.ansAvatar}
-                            image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.assignTo?.email}`}
-                            shape="circle"
-                          />
-                          <div
-                            title={val?.assignTo?.name}
-                            className={styles.ansUserLable}
-                          >
-                            {val?.assignTo?.name}
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        title={val?.replies?.[0]?.content}
-                        className={styles.cardAnsContentSec}
-                      >
-                        {val?.replies?.[0]?.content}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={styles.cardAnsSec} />
-                  )}
-
-                  <div className={styles.cardFooterSec}>
-                    <div
-                      style={{
-                        display: userDetails.role === "Admin" ? "flex" : "none",
-                      }}
-                      className={
-                        val.isActive ? styles.activepill : styles.inactivepill
-                      }
-                    >
-                      {val.isActive ? "Active" : "In Active"}
-                    </div>
-                    <div
-                      className={styles.footerDateSec}
-                      style={{
-                        display: val?.replies?.length ? "flex" : "none",
-                      }}
-                    >
-                      {val?.replies?.[0]?.date}
                     </div>
                   </div>
                 </div>

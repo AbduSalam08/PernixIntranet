@@ -102,6 +102,7 @@ const FeedBackViewPage = (props: any): JSX.Element => {
                     }));
                     handleSearch(value);
                   }}
+                  size="SM"
                 />
               </div>
               <div
@@ -137,8 +138,8 @@ const FeedBackViewPage = (props: any): JSX.Element => {
                       <div className={styles.viewAvatarSec}>
                         <Avatar
                           style={{
-                            width: "30px",
-                            height: "30px",
+                            width: "20px",
+                            height: "20px",
                           }}
                           alt="Remy Sharp"
                           src={`${CONFIG.userImageURL}${val?.CreatedBy?.Email}`}

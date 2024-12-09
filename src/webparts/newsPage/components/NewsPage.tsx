@@ -647,6 +647,7 @@ const NewsPage = (props: any): JSX.Element => {
                 fontSize: "22px",
                 lineHeight: "30px",
                 fontFamily: "osSemibold",
+                color: "#0b4d53",
               }}
             >
               {formData?.Title?.value}
@@ -702,7 +703,7 @@ const NewsPage = (props: any): JSX.Element => {
           <p
             style={{
               lineHeight: "27px",
-              fontSize: "16px",
+              fontSize: "15px",
               fontFamily: "osRegular",
             }}
           >
@@ -1101,6 +1102,7 @@ const NewsPage = (props: any): JSX.Element => {
               value={searchField.Status}
               noErrorMsg
               width={"200px"}
+              floatingLabel={false}
               options={["Active", "In Active"]}
               placeholder="Status"
               onChange={(value) => {
@@ -1108,6 +1110,7 @@ const NewsPage = (props: any): JSX.Element => {
                 setSearchField({ ...searchField, Status: value });
                 handleSearch([...shownewsData]);
               }}
+              size="SM"
             />
           ) : null}
 
@@ -1123,6 +1126,7 @@ const NewsPage = (props: any): JSX.Element => {
               setSearchField({ ...searchField, allSearch: value });
               handleSearch([...shownewsData]);
             }}
+            size="SM"
           />
           <CustomDateInput
             label="Select date"
@@ -1139,6 +1143,7 @@ const NewsPage = (props: any): JSX.Element => {
               }));
               handleSearch([...shownewsData]);
             }}
+            size="SM"
           />
           <div className={styles.refreshBtn}>
             <i onClick={handleRefresh} className="pi pi-refresh" />

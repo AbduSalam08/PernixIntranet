@@ -140,3 +140,18 @@
   padding-right: 12px !important;
   width: 100%;
 }
+
+.d_datepickerSM .p-inputtext {
+  font-size: 13px !important;
+  padding-top: 20px !important;
+}
+.inputWrapperSM .p-float-label {
+  height: 35px !important;
+}
+.labelSM {
+  font-size: 14px !important;
+}
+.p-float-label:has(.p-inputwrapper-filled) .labelSM {
+  top: 11px !important;
+  font-size: 11px !important;
+}
