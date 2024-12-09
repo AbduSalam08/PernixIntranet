@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
@@ -86,7 +87,7 @@ const Blogs = (props: any): JSX.Element => {
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
   isAdmin = currentUserDetails.role === CONFIG.RoleDetails.user ? false : true;
-  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const searchField: IPageSearchFields = CONFIG.PageSearchFields;
 
   /* popup properties */
   const initialPopupController: any[] = [
@@ -337,8 +338,8 @@ const Blogs = (props: any): JSX.Element => {
     setFormData(updatedFormData);
     if (!hasErrors) {
       setIsLoading(true);
-      let data: any = {};
-      let fileData: any = {};
+      const data: any = {};
+      const fileData: any = {};
       const column: IBlogColumn = CONFIG.BlogColumn;
 
       data[column.ID] = null;
@@ -413,7 +414,7 @@ const Blogs = (props: any): JSX.Element => {
   const handleView = async (Id: number, Idx: number): Promise<void> => {
     setIsLoading(true);
     masterBlog[Idx].ViewedUsers.push("1");
-    let tempView: string[] = masterBlog[Idx].ViewedUsers;
+    const tempView: string[] = masterBlog[Idx].ViewedUsers;
 
     await updateBlogData(
       Id,
@@ -432,14 +433,14 @@ const Blogs = (props: any): JSX.Element => {
   };
 
   const handleComments = async (): Promise<void> => {
-    let Idx: number = masterBlog?.findIndex(
+    const Idx: number = masterBlog?.findIndex(
       (val: IBlogColumnType) => val?.ID === curBlogData?.ID
     );
 
     masterBlog[Idx].CommentedUsers.push("1");
-    let tempComment: string[] = masterBlog[Idx].CommentedUsers;
+    const tempComment: string[] = masterBlog[Idx].CommentedUsers;
 
-    let data: any = {
+    const data: any = {
       BlogIdId: curBlogData?.ID,
       Comments: comment,
       TaggedPersonId: taggedPerson,
@@ -666,13 +667,23 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                   image={`${CONFIG.userImageURL}${curBlogData?.AuthorEmail}`}
                 />
-                <div>
-                  <div>{curBlogData?.AuthorName}</div>
-                  <div>{curBlogData?.Date}</div>
+                <div className={styles.userTexts}>
+                  <span className={styles.authorName}>
+                    {curBlogData?.AuthorName}
+                  </span>
+                  <span>{curBlogData?.Date}</span>
                 </div>
               </div>
               <div className={styles.AActions}>
-                <div className={styles.AASections}>
+                <div
+                  className={styles.AASections}
+                  onClick={async () => {
+                    const curIndex: number = masterBlog?.findIndex(
+                      (res: IBlogColumnType) => res?.ID === curBlogData?.ID
+                    );
+                    await handleLike(Number(curBlogData?.ID), curIndex);
+                  }}
+                >
                   <i
                     className={
                       curBlogData?.LikedUsers?.some(
@@ -681,12 +692,6 @@ const Blogs = (props: any): JSX.Element => {
                         ? "pi pi-thumbs-up-fill"
                         : "pi pi-thumbs-up"
                     }
-                    onClick={async () => {
-                      let curIndex: number = masterBlog?.findIndex(
-                        (res: IBlogColumnType) => res?.ID === curBlogData?.ID
-                      );
-                      await handleLike(Number(curBlogData?.ID), curIndex);
-                    }}
                   />
                   <span>{curBlogData?.LikedUsers?.length}</span>
                 </div>
@@ -701,39 +706,52 @@ const Blogs = (props: any): JSX.Element => {
               </div>
             </div>
             <div className={styles.VCommentContainer}>
-              <div className={styles.CHeader}>Comments:</div>
+              <div className={styles.CHeader}>Comments</div>
               {allComment.length ? (
                 <div className={styles.CComments}>
                   {allComment?.map(
                     (val: IBlogCommentsColumnType, Idx: number) => {
                       return (
-                        <div key={Idx}>
-                          <div>
+                        <div
+                          className={`${styles.commentCard} ${styles.fadeIn}`}
+                          key={Idx}
+                        >
+                          <div className={styles.userProfile}>
                             <Avatar
+                              image={`/_layouts/15/userphoto.aspx?size=S&username=${val?.AuthorEmail}`}
+                              // size="small"
                               shape="circle"
                               style={{
-                                width: "25px !important",
-                                height: "25px !important",
+                                width: "30px !important",
+                                height: "30px !important",
                               }}
-                              image={`${CONFIG.userImageURL}${val?.AuthorEmail}`}
+                              data-pr-tooltip={val?.AuthorEmail}
                             />
-                            <div>{val?.Date}</div>
                           </div>
-                          <div
-                            className={styles.VContent}
-                            dangerouslySetInnerHTML={{
-                              __html: val?.Comments || "",
-                            }}
-                          />
+                          <div className={`${styles.commentCardMain}`}>
+                            <div className={`${styles.commentHeader}`}>
+                              <div className={styles.texts}>
+                                <div className={styles.author}>
+                                  {val?.AuthorName}{" "}
+                                </div>
+                                <div className={styles.info}>{val?.Date}</div>
+                              </div>
+                            </div>
+                            <div
+                              className={styles.commentSpace}
+                              // dangerouslySetInnerHTML={{ __html: content }}
+                              dangerouslySetInnerHTML={{
+                                __html: val?.Comments,
+                              }}
+                            />
+                          </div>
                         </div>
                       );
                     }
                   )}
                 </div>
               ) : (
-                <div className={styles.CNoComments}>
-                  No comments are available!
-                </div>
+                <div className={styles.CNoComments}>No comments found!</div>
               )}
               <div
                 style={{
@@ -792,17 +810,19 @@ const Blogs = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
-                  isActivityPage
-                    ? window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.ApprovalsPage,
-                        "_self"
-                      )
-                    : window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.PernixIntranet,
-                        "_self"
-                      );
+                  if (isActivityPage) {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.ApprovalsPage,
+                      "_self"
+                    );
+                  } else {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.PernixIntranet,
+                      "_self"
+                    );
+                  }
                 }}
               >
                 <i
@@ -820,6 +840,8 @@ const Blogs = (props: any): JSX.Element => {
               <div>
                 <CustomDropDown
                   noErrorMsg
+                  floatingLabel={false}
+                  size="SM"
                   options={[...CONFIG.blogDrop]}
                   value={comSearch.Status}
                   placeholder="All"
@@ -837,6 +859,7 @@ const Blogs = (props: any): JSX.Element => {
               <div>
                 <CustomInput
                   noErrorMsg
+                  size="SM"
                   value={comSearch.Search}
                   placeholder="Search"
                   onChange={(e: any) => {
@@ -936,7 +959,7 @@ const Blogs = (props: any): JSX.Element => {
                         alt="blog img"
                       />
                       <div className={styles.cardTag}>
-                        <div>{val?.Tag}</div>
+                        <span>{val?.Tag}</span>
                         <div
                           style={{
                             display: isAdmin ? "flex" : "none",
@@ -948,7 +971,7 @@ const Blogs = (props: any): JSX.Element => {
                             className="sectionToggler"
                             checked={val?.IsActive}
                             onChange={async (data: any) => {
-                              let curIndex: number = masterBlog?.findIndex(
+                              const curIndex: number = masterBlog?.findIndex(
                                 (res: IBlogColumnType) => res?.ID === val?.ID
                               );
                               await updateBlogData(
@@ -965,7 +988,7 @@ const Blogs = (props: any): JSX.Element => {
                           <i
                             className="pi pi-trash"
                             onClick={() => {
-                              let curIndex: number = masterBlog?.findIndex(
+                              const curIndex: number = masterBlog?.findIndex(
                                 (res: IBlogColumnType) => res?.ID === val?.ID
                               );
                               setSelData((prev: IBlogDetails) => ({
@@ -984,18 +1007,18 @@ const Blogs = (props: any): JSX.Element => {
                         </div>
                       </div>
                       <div className={styles.cardHeading}>
-                        <div>{val?.Heading}</div>
-                        <div>
-                          <i
-                            className="pi pi-arrow-up-right"
-                            onClick={() => {
-                              let curIndex: number = masterBlog?.findIndex(
-                                (res: IBlogColumnType) => res?.ID === val?.ID
-                              );
-                              handleView(Number(val?.ID), curIndex);
-                            }}
-                          />
-                        </div>
+                        <span>{val?.Heading}</span>
+                        {/* <div> */}
+                        <i
+                          className="pi pi-arrow-up-right"
+                          onClick={() => {
+                            const curIndex: number = masterBlog?.findIndex(
+                              (res: IBlogColumnType) => res?.ID === val?.ID
+                            );
+                            handleView(Number(val?.ID), curIndex);
+                          }}
+                        />
+                        {/* </div> */}
                       </div>
                       <div
                         className={styles.cardBody}
@@ -1013,10 +1036,11 @@ const Blogs = (props: any): JSX.Element => {
                         className={styles.cardApproveSec}
                       >
                         <DefaultButton
-                          btnType="primaryGreen"
+                          btnType="secondaryGreen"
                           text="Approve"
+                          size="small"
                           onClick={(_) => {
-                            let curIndex: number = masterBlog?.findIndex(
+                            const curIndex: number = masterBlog?.findIndex(
                               (res: IBlogColumnType) => res?.ID === val?.ID
                             );
                             setSelData((prev: IBlogDetails) => ({
@@ -1033,7 +1057,7 @@ const Blogs = (props: any): JSX.Element => {
                           }}
                         />
                       </div>
-                      <div className={styles.cardFooder}>
+                      <div className={styles.cardFooter}>
                         <div className={styles.cardAvaSec}>
                           <Avatar
                             shape="circle"
@@ -1043,13 +1067,23 @@ const Blogs = (props: any): JSX.Element => {
                             }}
                             image={`${CONFIG.userImageURL}${val?.AuthorEmail}`}
                           />
-                          <div>
-                            <div>{val?.AuthorName}</div>
-                            <div>{val?.Date}</div>
+                          <div className={styles.userTexts}>
+                            <span className={styles.authorName}>
+                              {val?.AuthorName}
+                            </span>
+                            <span>{val?.Date}</span>
                           </div>
                         </div>
                         <div className={styles.cardAction}>
-                          <div className={styles.actions}>
+                          <div
+                            className={styles.actions}
+                            onClick={async () => {
+                              const curIndex: number = masterBlog?.findIndex(
+                                (res: IBlogColumnType) => res?.ID === val?.ID
+                              );
+                              await handleLike(Number(val?.ID), curIndex);
+                            }}
+                          >
                             <i
                               className={
                                 val?.LikedUsers?.some(
@@ -1058,12 +1092,6 @@ const Blogs = (props: any): JSX.Element => {
                                   ? "pi pi-thumbs-up-fill"
                                   : "pi pi-thumbs-up"
                               }
-                              onClick={async () => {
-                                let curIndex: number = masterBlog?.findIndex(
-                                  (res: IBlogColumnType) => res?.ID === val?.ID
-                                );
-                                await handleLike(Number(val?.ID), curIndex);
-                              }}
                             />
                             <span>{val?.LikedUsers?.length}</span>
                           </div>
@@ -1175,7 +1203,11 @@ const Blogs = (props: any): JSX.Element => {
                   setNewVisitor={setFormData}
                   newVisitor={formData?.Attachments?.value}
                 />
-                <div>{formData?.Attachments?.value?.name || ""}</div>
+                {formData?.Attachments?.value?.name && (
+                  <div className={styles.selectedFileName}>
+                    {formData?.Attachments?.value?.name || ""}
+                  </div>
+                )}
                 {!formData?.Attachments?.isValid && (
                   <p className={styles.errorMsg}>
                     {formData?.Attachments?.errorMsg}
@@ -1185,6 +1217,7 @@ const Blogs = (props: any): JSX.Element => {
             </div>
             <div className={styles.secondRow}>
               <QuillEditor
+                height="255px"
                 placeHolder={"Description"}
                 defaultValue={formData?.Description?.value}
                 onChange={(res: any) => {

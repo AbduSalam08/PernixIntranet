@@ -18,6 +18,7 @@ const QuillEditor = ({
   defaultValue,
   suggestionList,
   getMentionedEmails,
+  height,
 }: any): JSX.Element => {
   //   const [suggestions, setSuggestions] = useState([]);
   //   const [mentionedUsers, setMentionedUsers] = useState([]);
@@ -249,6 +250,16 @@ const QuillEditor = ({
 
   return (
     <div className="quill-editor-wrapper">
+      <style>
+        {`
+          .ql-container {
+            height: ${`${height} !important` || "auto"};
+          }
+          .ql-editor {
+            height: ${`${height} !important` || "auto"};
+          }
+        `}
+      </style>
       <div
         id="quill-editor"
         className="quill-editor"
