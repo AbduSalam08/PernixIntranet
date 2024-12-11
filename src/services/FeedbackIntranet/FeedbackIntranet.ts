@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import SpServices from "../SPServices/SpServices";
 import { sp } from "@pnp/sp/presets/all";
 import { toast } from "react-toastify";
@@ -43,9 +44,9 @@ const getDataLooping = async (
 };
 
 export const getFeedBackDatas = async (listName: string): Promise<any[]> => {
-  let data: any[] = [];
+  const data: any[] = [];
 
-  let filCamlJSON: ICamlQuery = FeedBackCamlJSON?.CamlQuery?.filter(
+  const filCamlJSON: ICamlQuery = FeedBackCamlJSON?.CamlQuery?.filter(
     (val: ICamlQuery) => val.ListName === listName
   )?.[0];
 

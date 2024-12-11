@@ -42,6 +42,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getAllTickets,
   getAllTicketsData,
+  getAllTicketsDataCamlQuery,
   // getAllTicketsData2,
 } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import InfoCard from "../../components/InfoCard/InfoCard";
@@ -1298,6 +1299,14 @@ const MyTickets = (): JSX.Element => {
       currentUserDetails,
       dispatch
     );
+
+    getAllTicketsDataCamlQuery()
+      .then((res: any) => {
+        console.log("caml query data: ", res);
+      })
+      .catch((err: any) => {
+        console.log(" caml query dataerr: ", err);
+      });
   }, [location.pathname]);
 
   useEffect(() => {
