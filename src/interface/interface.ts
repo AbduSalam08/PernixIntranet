@@ -342,3 +342,47 @@ export interface IBlogCommentsColumnType {
   AuthorName: string;
   AuthorEmail: string;
 }
+
+export interface IPersonField {
+  ID: number;
+  Title: string;
+  EMail: string;
+}
+
+export interface ITicketSchema {
+  ID: number;
+  id: number;
+  Title: string | null;
+  TicketNumber: string | null;
+  EmployeeName: IPersonField | null;
+  EmployeeNameId: number | null;
+  ITOwner: IPersonField | null;
+  ITOwnerId: number | null;
+  TicketManager: IPersonField | null;
+  TicketManagerId: number | null;
+  Category: string | null;
+  Priority: string | null;
+  TicketSource: string | null;
+  Status: string | null;
+  RepeatedTicket: boolean;
+  RepeatedTicketSourceId: number | any;
+  Rating: number | null;
+  TicketClosedOn: string | null;
+  TicketRepeatedOn: string | null;
+  TicketDescription: string | null;
+  RepeatedTicketSource_TicketNumber: string | null;
+  TicketClosedBy: IPersonField | null;
+  TicketClosedById: number | null;
+  TaggedPerson: IPersonField[];
+  TaggedPersonId: number | any;
+  MailID: string | null;
+  ConId: string | null;
+  RecurrenceConfigDetailsId: number | any;
+  IsRecurredTicket: boolean;
+  HasRecurrence: boolean;
+  Created: string | null;
+  TicketEscalated: boolean;
+  Modified: string | null;
+  CreatedBy: IPersonField | null;
+  ModifiedBy: IPersonField | null;
+}

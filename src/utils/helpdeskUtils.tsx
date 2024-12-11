@@ -16,6 +16,7 @@ import {
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { togglePopupVisibility } from "./popupUtils";
+import { IPersonField, ITicketSchema } from "../interface/interface";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type FormField = {
@@ -323,71 +324,6 @@ export const validateRecurrenceForm = async (
   HelpDeskTicktesData?: any,
   hasErrors?: boolean
 ): Promise<any> => {
-  console.log("nextTicketIntimation: ", nextTicketIntimation);
-  // let hasErrors = false;
-
-  // const updatedFormData = Object.keys(recurrenceDetails).reduce((acc, key) => {
-  //   const fieldData = recurrenceDetails[key];
-  //   const { isValid, errorMsg } = validateField(
-  //     key,
-  //     fieldData?.value,
-  //     fieldData?.validationRule
-  //   );
-
-  //   if (!isValid) {
-  //     hasErrors = true;
-  //   }
-
-  //   return {
-  //     ...acc,
-  //     [key]: {
-  //       ...fieldData,
-  //       isValid,
-  //       errorMsg,
-  //     },
-  //   };
-  // }, {} as typeof recurrenceDetails);
-
-  // // Additional validation for StartDate and EndDate
-  // const startDate = recurrenceDetails?.StartDate?.value;
-  // const endDate = recurrenceDetails?.EndDate?.value;
-
-  // if (startDate && endDate) {
-  //   const start = dayjs(startDate, "DD/MM/YYYY");
-  //   const end = dayjs(endDate, "DD/MM/YYYY");
-  //   if (
-  //     dayjs(startDate)?.format("DD/MM/YYYY") ===
-  //     dayjs(endDate)?.format("DD/MM/YYYY")
-  //   ) {
-  //     hasErrors = true;
-  //     updatedFormData.StartDate = {
-  //       ...updatedFormData.StartDate,
-  //       isValid: false,
-  //       errorMsg: "Start date and End date cannot be the same.",
-  //     };
-  //     updatedFormData.EndDate = {
-  //       ...updatedFormData.EndDate,
-  //       isValid: false,
-  //       errorMsg: "Start date and End date cannot be the same.",
-  //     };
-  //   }
-  //   if (start.isAfter(end)) {
-  //     hasErrors = true;
-  //     updatedFormData.StartDate = {
-  //       ...updatedFormData.StartDate,
-  //       isValid: false,
-  //       errorMsg: "Start date should not be after end date.",
-  //     };
-  //     updatedFormData.EndDate = {
-  //       ...updatedFormData.EndDate,
-  //       isValid: false,
-  //       errorMsg: "End date should not be before start date.",
-  //     };
-  //   }
-  // }
-
-  // setRecurrenceDetails(updatedFormData);
-
   if (!hasErrors && !nextTicketIntimation.error) {
     setLoadingSubmit(true);
     setSubmitClicked(true);
@@ -522,101 +458,75 @@ export const calculateNextTicketDate = (
   };
 };
 
-// Helper function to get the next 7 days starting from today
+export const mapTicketDataToSchema = (ticketsData: any[]): ITicketSchema[] => {
+  // Maps person data to an IPersonField object.
+  const mapPersonField = (personArray: any[]): IPersonField | null => {
+    if (!personArray || personArray.length === 0) return null;
+    const person = personArray[0];
+    return {
+      ID: parseInt(person.id, 10),
+      Title: person.title || null,
+      EMail: person.email || null,
+    };
+  };
 
-// export const getDaysFromToday = (
-//   startDate: any
-// ): { date: string; day: string }[] => {
-//   console.log("startDate: ", startDate);
-//   const days = [];
+  // Extracts IDs from person array (returns an array or a single ID).
+  const getPersonFieldId = (personArray: any): number | number[] | null => {
+    if (!personArray || personArray.length === 0) return null;
+    // If multiple persons are present, return an array of IDs
+    return personArray.length > 1
+      ? personArray.map((item: any) => parseInt(item.id, 10))
+      : parseInt(personArray[0].id, 10);
+  };
 
-//   for (let i = 0; i <= 7; i++) {
-//     const currentDate = dayjs(startDate)?.add(i, "day");
-//     days.push({
-//       date: currentDate.format("DD/MM/YYYY"),
-//       day: currentDate.format("dddd"), // Full day name
-//     });
-//   }
+  // Maps lookup field data (returns a number).
+  const mapLookupField = (lookupArray: any[]): number | null => {
+    if (!lookupArray || lookupArray.length === 0) return null;
+    const lookup = lookupArray[0];
+    return parseInt(lookup.lookupId, 10);
+  };
 
-//   return days;
-// };
-
-// // Main function to calculate the next ticket date
-// export const calculateNextTicketDate = (
-//   startDate: string,
-//   todayDate: string,
-//   endDate: string,
-//   frequency: string
-// ): string | any => {
-//   if (!startDate || !endDate || !frequency) return null;
-
-//   const start = dayjs(startDate, "DD/MM/YYYY");
-//   const end = dayjs(endDate, "DD/MM/YYYY");
-//   // const today = dayjs(todayDate, "DD/MM/YYYY");
-
-//   // Validate that startDate is not after endDate
-//   if (start.isAfter(end)) {
-//     return "Start date cannot be after end date";
-//   }
-
-//   const intervals: Record<string, number> = {
-//     Weekly: 7,
-//     Quarterly: 90,
-//     "Semi Annual": 182,
-//     Annual: 365,
-//   };
-
-//   const intervalDays = intervals[frequency];
-//   if (!intervalDays) return null;
-
-//   let nextDate = start;
-
-//   // Weekly frequency calculation
-//   if (frequency?.toLowerCase() === "weekly") {
-//     const next7Days: any = getDaysFromToday(startDate);
-//     const nextDateBasedOnDay = next7Days.find(
-//       (day: any) => day.date === todayDate
-//     );
-
-//     console.log("nextDateBasedOnDay: ", nextDateBasedOnDay);
-
-//     if (nextDateBasedOnDay) {
-//       const nextDay = dayjs(nextDateBasedOnDay.date, "DD/MM/YYYY");
-//       if (!nextDay.isValid()) {
-//         return {
-//           date: "The selected day is not a valid date.",
-//           error: true,
-//         };
-//       }
-//       nextDate = nextDay.add(intervalDays, "day");
-//     } else {
-//       return {
-//         date: "The selected day does not fall within the next 7 days.",
-//         error: true,
-//       };
-//     }
-//   } else {
-//     nextDate = nextDate.add(intervalDays, "day");
-//   }
-
-//   // Check if nextDate is after end date
-//   if (nextDate.isAfter(end)) {
-//     return {
-//       date: "The selected date range is too short for the recurrence cycle.",
-//       error: true,
-//     };
-//   }
-
-//   // Ensure the final nextDate is valid
-//   if (!nextDate.isValid()) {
-//     return {
-//       date: "The calculated date is invalid.",
-//       error: true,
-//     };
-//   }
-
-//   return {
-//     date: nextDate.format("DD/MM/YYYY"),
-//     error: false,
-//   };
-// };
+  // Iterate over the ticket data and map it to the desired schema.
+  return ticketsData.map((data: any) => ({
+    ID: parseInt(data.ID, 10),
+    id: parseInt(data.ID, 10),
+    Title: data.Title || null,
+    TicketNumber: data.TicketNumber || null,
+    EmployeeName: mapPersonField(data.EmployeeName || []),
+    EmployeeNameId: getPersonFieldId(data.EmployeeName) || null,
+    ITOwner: mapPersonField(data.ITOwner || []),
+    ITOwnerId: getPersonFieldId(data.ITOwner) || null,
+    TicketManager: mapPersonField(data.TicketManager || []),
+    TicketManagerId: getPersonFieldId(data.TicketManager || []),
+    Category: data.Category || null,
+    Priority: data.Priority || null,
+    TicketSource: data.TicketSource || null,
+    Status: data.Status || null,
+    RepeatedTicket: data.RepeatedTicket === "Yes",
+    RepeatedTicketSourceId: mapLookupField(data.RepeatedTicketSource || []),
+    Rating: data.Rating ? parseFloat(data.Rating) : null,
+    TicketClosedOn: data.TicketClosedOn || null,
+    TicketRepeatedOn: data.TicketRepeatedOn || null,
+    TicketDescription: data.TicketDescription || null,
+    RepeatedTicketSource_TicketNumber:
+      data.RepeatedTicketSource_x003a__x002 || null,
+    TicketClosedBy: mapPersonField(data.TicketClosedBy || []),
+    TicketClosedById: getPersonFieldId(data.TicketClosedBy) || null,
+    TaggedPerson: (data.TaggedPerson || [])
+      .map((person: any) => mapPersonField([person]))
+      .filter(Boolean) as IPersonField[],
+    TaggedPersonId: getPersonFieldId(data.TaggedPerson) || null,
+    MailID: data.MailID || null,
+    ConId: data.ConId || null,
+    RecurrenceConfigDetailsId: mapLookupField(
+      data.RecurrenceConfigDetails || []
+    ),
+    IsRecurredTicket: data.IsRecurredTicket === "Yes",
+    HasRecurrence: data.HasRecurrence === "Yes",
+    Created: data?.["Created."] || null,
+    TicketEscalated: data.TicketEscalated === "Yes",
+    Modified: data?.["Modified."] || null,
+    CreatedBy: mapPersonField(data.Author || []),
+    ModifiedBy: mapPersonField(data.Editor || []),
+  })) as ITicketSchema[];
+};
