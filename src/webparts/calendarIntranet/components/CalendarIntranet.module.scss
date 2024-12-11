@@ -117,24 +117,128 @@
   gap: 16px; /* Space between grid items */
 }
 
-/* Make the grid responsive */
-@media (max-width: 1200px) {
-  .addNewsGrid {
-    grid-template-columns: repeat(
-      3,
-      1fr
-    ); /* Three columns for medium screens */
-  }
-}
+@media (min-width: 320px) and (max-width: 768px) {
+  .calenderContainer {
+    width: 100%;
+    height: auto;
+    .container {
+      display: block;
+      height: auto;
+      // flex-wrap: wrap;
+      .calenderSection {
+        width: 100%;
+        margin: 18px 0px;
+        // .mycalender {
+        //   width: 100%;
+        // }
+      }
+      .eventSection {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        padding: 0;
+        // padding: 10px 5px;
+        border-left: 4px solid #0b4d53;
+        border-radius: 4px;
+        margin-bottom: 11px;
+        // margin-top: 10px;
 
-@media (max-width: 900px) {
-  .addNewsGrid {
-    grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
-  }
-}
+        .date {
+          width: 78px;
+          border-right: 2px solid #ffeee2;
+          text-align: center;
+          p {
+            margin: 6px 0px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0803d;
+          }
+        }
+        .event {
+          width: calc(100% - 78px);
 
-@media (max-width: 600px) {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 5px;
+          .time {
+            color: #adadad;
+            font-size: 13px;
+            font-weight: 400;
+            font-family: "osRegular";
+            display: block;
+          }
+
+          .Title {
+            margin: 6px 0px;
+            font-size: 13px;
+            // font-weight: 600;
+            font-family: "osSemibold", sans-serif;
+            color: #0b4d53;
+            height: 18px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            width: 100%;
+            max-width: fit-content;
+          }
+
+          .description {
+            font-size: 13px;
+            font-family: "osRegular", sans-serif;
+            color: #adadad;
+            height: 18px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            width: 100%;
+            max-width: fit-content;
+          }
+        }
+      }
+
+      .footer {
+        display: flex;
+        justify-content: end;
+        margin: 20px 0px 10px 0px;
+
+        i {
+          font-size: 1.2rem;
+          color: #e0803d !important;
+        }
+        p {
+          margin: 0;
+          font-size: 15px;
+          letter-spacing: 1px;
+          font-weight: 500;
+          color: #e0803d;
+          text-decoration: underline;
+          text-decoration-color: #e0803d;
+        }
+      }
+    }
+  }
+
   .addNewsGrid {
     grid-template-columns: 1fr; /* Single column for very small screens */
   }
 }
+
+/* Make the grid responsive */
+// @media (max-width: 1200px) {
+//   .addNewsGrid {
+//     grid-template-columns: repeat(
+//       3,
+//       1fr
+//     ); /* Three columns for medium screens */
+//   }
+// }
+
+// @media (max-width: 900px) {
+//   .addNewsGrid {
+//     grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
+//   }
+// }

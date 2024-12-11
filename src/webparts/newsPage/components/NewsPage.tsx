@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from "react";
 import resetPopupController, {
   togglePopupVisibility,
@@ -88,6 +89,8 @@ let isActivityPage: boolean = false;
 
 const NewsPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  console.log("isMobile: ", isMobile);
 
   const newsIntranetData: any = useSelector((state: any) => {
     return state.NewsIntranetData.value;
@@ -183,6 +186,27 @@ const NewsPage = (props: any): JSX.Element => {
         inprogress: "Deleting news, please wait...",
       },
     },
+    {
+      open: false,
+      popupTitle: "",
+      popupWidth: "350",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "News Deleted successfully!",
+        error: "Something went wrong!",
+        successDescription: "The news 'ABC' has been Deleted successfully.",
+        errorDescription:
+          "An error occured while Deleting news, please try again later.",
+        inprogress: "Deleting news, please wait...",
+      },
+    },
   ];
 
   const [popupController, setPopupController] = useState<PopupState[]>(
@@ -203,6 +227,7 @@ const NewsPage = (props: any): JSX.Element => {
   });
   const [newsData, setNewsData] = useState<any[]>([]);
   const [shownewsData, setShowNewsData] = useState<any[]>([]);
+  console.log("shownewsData: ", shownewsData);
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -712,6 +737,56 @@ const NewsPage = (props: any): JSX.Element => {
         </div>
       </div>,
     ],
+    [
+      <div key={4}>
+        <CustomDropDown
+          value={searchField.Status}
+          noErrorMsg
+          width={"200px"}
+          floatingLabel={false}
+          options={["Active", "In Active"]}
+          placeholder="Status"
+          onChange={(value) => {
+            objFilter.Status = value;
+            setSearchField({ ...searchField, Status: value });
+            handleSearch([...shownewsData]);
+          }}
+          size="SM"
+        />
+
+        <CustomInput
+          value={searchField.allSearch}
+          noErrorMsg
+          secWidth="180px"
+          labelText="Search"
+          placeholder="Search"
+          onChange={(e) => {
+            const value = e;
+            objFilter.allSearch = value;
+            setSearchField({ ...searchField, allSearch: value });
+            handleSearch([...shownewsData]);
+          }}
+          size="SM"
+        />
+        <CustomDateInput
+          label="Select date"
+          placeHolder="Date"
+          minWidth="180px"
+          maxWidth="180px"
+          value={searchField.selectedDate ? searchField.selectedDate : null}
+          onChange={(e: any) => {
+            const value: any = e;
+            objFilter.selectedDate = value;
+            setSearchField((prev: any) => ({
+              ...prev,
+              selectedDate: value,
+            }));
+            handleSearch([...shownewsData]);
+          }}
+          size="SM"
+        />
+      </div>,
+    ],
   ];
 
   const popupActions: any[] = [
@@ -979,19 +1054,19 @@ const NewsPage = (props: any): JSX.Element => {
     setNewsData(filteredResults || []);
   };
 
-  const handleRefresh = (): void => {
-    setSearchField({
-      allSearch: "",
-      selectedDate: null,
-      Status: "",
-    });
-    objFilter = {
-      selectedDate: null,
-      allSearch: "",
-      Status: "",
-    };
-    setNewsData([...shownewsData]);
-  };
+  // const handleRefresh = (): void => {
+  //   setSearchField({
+  //     allSearch: "",
+  //     selectedDate: null,
+  //     Status: "",
+  //   });
+  //   objFilter = {
+  //     selectedDate: null,
+  //     allSearch: "",
+  //     Status: "",
+  //   };
+  //   setNewsData([...shownewsData]);
+  // };
 
   const handleDeleteClick = (id: any): any => {
     setID(id);
@@ -1050,6 +1125,9 @@ const NewsPage = (props: any): JSX.Element => {
     setShowNewsData([...filteredData]);
     handleSearch([...filteredData]);
   };
+  const handleResponsiveChange = (): void => {
+    setIsMobile(window.innerWidth <= 768);
+  };
 
   useEffect(() => {
     const urlObj = new URL(window.location.href);
@@ -1062,6 +1140,15 @@ const NewsPage = (props: any): JSX.Element => {
       dispatch
     );
     getAllNewsData(dispatch);
+    handleResponsiveChange();
+
+    // Add event listener for resize
+    window.addEventListener("resize", handleResponsiveChange);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", handleResponsiveChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -1097,7 +1184,7 @@ const NewsPage = (props: any): JSX.Element => {
           <p>News</p>
         </div>
         <div className={styles.rightSection}>
-          {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+          {/* {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
             <CustomDropDown
               value={searchField.Status}
               noErrorMsg
@@ -1147,7 +1234,20 @@ const NewsPage = (props: any): JSX.Element => {
           />
           <div className={styles.refreshBtn}>
             <i onClick={handleRefresh} className="pi pi-refresh" />
-          </div>
+          </div> */}
+
+          <i
+            className="pi pi-filter"
+            onClick={() => {
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[4],
+                4,
+                "open"
+              );
+            }}
+            style={{ fontSize: "1.2rem", color: "#0b4d53", cursor: "pointer" }}
+          ></i>
           <div
             style={{
               display:
