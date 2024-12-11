@@ -46,6 +46,7 @@ const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 const CalendarIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
+  const [isMobile, setIsMobile] = useState(false);
 
   const calenderIntranetData: any = useSelector((state: any) => {
     return state.CalenderIntranetData.value;
@@ -438,6 +439,9 @@ const CalendarIntranet = (props: any): JSX.Element => {
     setShowcalendardata(temp);
   };
 
+  const handleResponsiveChange = (): void => {
+    setIsMobile(window.innerWidth <= 768);
+  };
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
@@ -446,11 +450,32 @@ const CalendarIntranet = (props: any): JSX.Element => {
       dispatch
     );
     getEvents(dispatch, "");
+
+    handleResponsiveChange();
+
+    // Add event listener for resize
+    window.addEventListener("resize", handleResponsiveChange);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", handleResponsiveChange);
+    };
+
     // BindCalender(calenderIntranetData);
   }, []);
 
   useEffect(() => {
     BindCalender(calenderIntranetData?.data);
+
+    handleResponsiveChange();
+
+    // Add event listener for resize
+    window.addEventListener("resize", handleResponsiveChange);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", handleResponsiveChange);
+    };
   }, [calenderIntranetData]);
 
   return (
@@ -525,11 +550,11 @@ const CalendarIntranet = (props: any): JSX.Element => {
             <div
               style={{
                 width: "100%",
-                height: "310px",
+                height: isMobile ? "100px" : "310px",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                fontSize: "14px",
+                fontSize: isMobile ? "12px" : "14px",
                 color: "#adadad",
                 fontFamily: "osMedium, sans-serif",
               }}
@@ -537,25 +562,30 @@ const CalendarIntranet = (props: any): JSX.Element => {
               No events found!
             </div>
           ) : (
-            showcalendardata?.slice(0, 3).map((val: IEvent, index: number) => (
-              <div className={styles.eventSection} key={index}>
-                <div className={styles.date}>
-                  <p>{`${moment(val.start).format("D").padStart(2, "0")}`}</p>
-                  <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
+            showcalendardata
+              ?.slice(0, isMobile ? 2 : 3)
+              .map((val: IEvent, index: number) => (
+                <div className={styles.eventSection} key={index}>
+                  <div className={styles.date}>
+                    <p>{`${moment(val.start).format("D").padStart(2, "0")}`}</p>
+                    <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
+                  </div>
+                  <div className={styles.event}>
+                    <p className={styles.Title} title={val.title}>
+                      {val.title}
+                    </p>
+                    <span className={styles.time}>{`${moment(val.start).format(
+                      "hh:mm A"
+                    )} - ${moment(val.end).format("hh:mm A")}`}</span>
+                    <span
+                      className={styles.description}
+                      title={val?.description}
+                    >
+                      {val?.description}
+                    </span>
+                  </div>
                 </div>
-                <div className={styles.event}>
-                  <p className={styles.Title} title={val.title}>
-                    {val.title}
-                  </p>
-                  <span className={styles.time}>{`${moment(val.start).format(
-                    "hh:mm A"
-                  )} - ${moment(val.end).format("hh:mm A")}`}</span>
-                  <span className={styles.description} title={val?.description}>
-                    {val?.description}
-                  </span>
-                </div>
-              </div>
-            ))
+              ))
           )}
         </div>
       </div>
@@ -570,7 +600,11 @@ const CalendarIntranet = (props: any): JSX.Element => {
           );
         }}
       >
-        <p>View all</p>
+        {isMobile ? (
+          <i style={{ color: "#0b4d53" }} className="pi pi-ellipsis-h"></i>
+        ) : (
+          <p>View all</p>
+        )}
       </div>
 
       {/* Toast message section */}

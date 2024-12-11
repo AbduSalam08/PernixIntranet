@@ -86,7 +86,21 @@
       font-size: 12px;
       line-height: 16px;
       height: auto; /* Adjust height to auto for better fit */
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      line-clamp: 6;
+      -webkit-line-clamp: 6;
+      white-space: normal;
     }
+  }
+
+  @media (max-width: 630px) {
+    width: 100%;
+    max-width: unset;
   }
 }
 
