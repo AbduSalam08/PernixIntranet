@@ -4,6 +4,7 @@ import {
   IBlogColumnType,
   IBlogCommentsColumn,
   IBlogCommentsColumnType,
+  IBlogStatus,
   ICommonentsName,
   IDocRepositoryColumn,
   IFeedbackQusColumn,
@@ -35,6 +36,10 @@ export namespace CONFIG {
     .split("/", 3)
     .join("/")}/Intranet_DocumentRepository`;
 
+  export const blogFileFlowPath: string = `${window.location.pathname
+    .split("/", 3)
+    .join("/")}/Intranet_PernixWiki`;
+
   export const ListNames: IListName = {
     Intranet_DocumentRepository: "Intranet_DocumentRepository",
     Intranet_MotivationalQuotes: "Intranet_MotivationalQuotes",
@@ -60,6 +65,7 @@ export namespace CONFIG {
     HelpDesk_RecurrenceConfig: "HelpDesk_RecurrenceConfig",
     FlexibleSection: "ShowComponent",
     Intranet_BlogComments: "Intranet_BlogComments",
+    Intranet_PernixWiki: "Intranet_PernixWiki",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -257,6 +263,13 @@ export namespace CONFIG {
 
   export const blogDrop: string[] = ["Active", "Inactive"];
 
+  export const blogStatus: IBlogStatus = {
+    Draft: "Draft",
+    Pending: "Pending",
+    Approved: "Approved",
+    Rejected: "Rejected",
+  };
+
   export const BlogColumn: IBlogColumn = {
     ID: "ID",
     Title: "Title",
@@ -268,6 +281,8 @@ export namespace CONFIG {
     Status: "Status",
     IsActive: "IsActive",
     Attachments: "Attachments",
+    Content: "Content",
+    ApprovalOn: "ApprovalOn",
   };
 
   export const BlogColumnType: IBlogColumnType = {
@@ -285,6 +300,7 @@ export namespace CONFIG {
     AuthorName: "",
     AuthorEmail: "",
     Date: "",
+    ApprovalOn: null,
   };
 
   export const BlogCommentsColumn: IBlogCommentsColumn = {

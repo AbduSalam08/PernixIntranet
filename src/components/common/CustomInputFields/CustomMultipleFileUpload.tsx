@@ -879,15 +879,15 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
 
       {fileNames.length > 0 && (
         <div className={styles.fileNameAlign}>
-          {fileNames?.map((fileName, idx) => (
+          {fileNames?.map((fileName: any, idx: number) => (
             <div key={idx}>
               <span
-                title={fileName}
+                title={fileName?.name ? fileName?.name : fileName}
                 style={{
                   maxWidth: customFileNameWidth ?? "90%",
                 }}
               >
-                {fileName}
+                {fileName?.name ? fileName?.name : fileName}
               </span>
               <div>
                 <Clear

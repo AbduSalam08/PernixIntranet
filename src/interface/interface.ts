@@ -30,6 +30,7 @@ export interface IListName {
   HelpDesk_RecurrenceConfig: string;
   FlexibleSection: string;
   Intranet_BlogComments: string;
+  Intranet_PernixWiki: string;
 }
 
 export interface ISPGroupName {
@@ -291,6 +292,13 @@ export interface ICurUserData {
   Title: string;
 }
 
+export interface IBlogStatus {
+  Draft: string;
+  Pending: string;
+  Approved: string;
+  Rejected: string;
+}
+
 export interface IBlogColumn {
   ID: string;
   Title: string;
@@ -301,7 +309,9 @@ export interface IBlogColumn {
   CommentedUsers: string;
   Status: string;
   IsActive: string;
+  ApprovalOn: string;
   Attachments: string;
+  Content: string;
 }
 
 export interface IBlogCommentsColumn {
@@ -330,6 +340,7 @@ export interface IBlogColumnType {
   AuthorName: string;
   AuthorEmail: string;
   Date: string;
+  ApprovalOn: number | null;
 }
 
 export interface IBlogCommentsColumnType {
@@ -385,4 +396,6 @@ export interface ITicketSchema {
   Modified: string | null;
   CreatedBy: IPersonField | null;
   ModifiedBy: IPersonField | null;
+  TicketLocation: string | null;
+  Attachments: boolean;
 }

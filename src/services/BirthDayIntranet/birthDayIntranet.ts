@@ -10,14 +10,17 @@ import {
   IBirthdayRes,
   IBirthdayUsers,
 } from "../../interface/interface";
+import { sp } from "@pnp/sp/presets/all";
 
 export const fetchAzureUsers = async (
   context: any
 ): Promise<IBirthdayUsers[]> => {
+  const curUser: any = await sp.web.currentUser.get();
   const client: MSGraphClient = await context.msGraphClientFactory.getClient();
 
   let allUsers: any[] = [];
   let nextPageUrl: string | undefined = undefined;
+  const userMailStructure: string = `@${curUser?.Email?.split("@")[1]}`;
 
   try {
     do {
@@ -35,7 +38,7 @@ export const fetchAzureUsers = async (
       allUsers?.filter((item: any) =>
         item?.userPrincipalName
           ?.toLowerCase()
-          .endsWith(CONFIG.UserMailPath.path.toLowerCase())
+          .endsWith(userMailStructure?.toLowerCase())
       ) || []
     );
 

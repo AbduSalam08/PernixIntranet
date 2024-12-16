@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { CONFIG } from "../../config/config";
-import { sp } from "@pnp/sp/presets/all";
+import { IFolderAddResult, sp } from "@pnp/sp/presets/all";
 import SpServices from "../SPServices/SpServices";
 import { toast } from "react-toastify";
 import {
@@ -438,13 +438,6 @@ export const fetchBlogDatas = async (): Promise<IBlogColumnType[]> => {
       Listname: CONFIG.ListNames.Intranet_Blogs,
       Select: "*, AttachmentFiles, Author/ID, Author/Title, Author/EMail",
       Expand: "AttachmentFiles, Author",
-      Filter: [
-        {
-          FilterKey: "Status",
-          Operator: "ne",
-          FilterValue: "Rejected",
-        },
-      ],
       Topcount: 5000,
       Orderby: "Created",
       Orderbydecorasc: false,
@@ -474,11 +467,14 @@ export const fetchBlogDatas = async (): Promise<IBlogColumnType[]> => {
             : [],
           Status: val?.Status || "",
           IsActive: val?.IsActive || false,
-          Attachments: arrGetAttach?.[0]?.serverRelativeUrl,
+          Attachments: arrGetAttach,
           AuthorId: val?.AuthorId.toString() || "",
           AuthorEmail: val?.Author?.EMail.toLowerCase() || "",
           AuthorName: val?.Author?.Title || "",
           Date: moment(val?.Created).format("DD MMM YYYY"),
+          ApprovalOn: val?.ApprovalOn
+            ? Number(moment(val?.ApprovalOn).format("YYYYMMDDHHmm"))
+            : null,
         };
       }) || []
     );
@@ -487,6 +483,34 @@ export const fetchBlogDatas = async (): Promise<IBlogColumnType[]> => {
   } catch (err) {
     console.log("fetchBlogDatas: ", err);
 
+    return [];
+  }
+};
+
+export const fecthBlogDocumentUsingPath = async (
+  path: string
+): Promise<any[]> => {
+  try {
+    const res: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_PernixWiki,
+      Select:
+        "*, FileLeafRef, FileRef, FileDirRef, Author/Title, Author/EMail, Author/Id",
+      Expand: "File, Author",
+      Filter: [
+        {
+          FilterKey: "FileDirRef",
+          Operator: "eq",
+          FilterValue: path,
+        },
+      ],
+      Topcount: 5000,
+      Orderby: "Created",
+      Orderbydecorasc: true,
+    });
+
+    return [...res];
+  } catch (err) {
+    console.log("err: ", err);
     return [];
   }
 };
@@ -542,6 +566,7 @@ export const fecthBlogComments = async (
 export const addBlogData = async (
   data: any,
   fileData: any,
+  arrMasterFiles: any,
   curUser: ICurUserData
 ): Promise<IBlogColumnType[]> => {
   const toastId = toast.loading("Creating a new blog...");
@@ -561,6 +586,43 @@ export const addBlogData = async (
         .attachmentFiles.add(fileData.Attachments.name, fileData.Attachments);
     }
 
+    const path: IFolderAddResult = await sp.web
+      .getFolderByServerRelativePath(CONFIG.blogFileFlowPath)
+      .folders.addUsingPath(`Pernix_Wiki_${res?.data?.Id}`, true);
+
+    const list: any = await sp.web.lists.getByTitle(
+      CONFIG.ListNames.Intranet_PernixWiki
+    );
+
+    const items: any = await list.items
+      .filter(`FileRef eq '${path?.data?.ServerRelativeUrl}'`)
+      .get();
+
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.Intranet_PernixWiki,
+      ID: items[0]?.ID,
+      RequestJSON: {
+        BlogId: res?.data?.Id,
+      },
+    });
+
+    if (arrMasterFiles.length) {
+      for (let i: number = 0; arrMasterFiles.length > i; i++) {
+        await sp.web
+          .getFolderByServerRelativePath(path?.data?.ServerRelativeUrl)
+          .files.addUsingPath(arrMasterFiles?.[i]?.name, arrMasterFiles?.[i], {
+            Overwrite: true,
+          });
+      }
+    }
+    const arrGetAttach: IAttachDetails[] = [];
+
+    arrGetAttach.push({
+      fileName: fileData.Attachments.name,
+      content: null,
+      serverRelativeUrl: fileRes?.data?.ServerRelativeUrl,
+    });
+
     const resData: IBlogColumnType[] = [
       {
         ID: res?.data?.Id || null,
@@ -570,18 +632,19 @@ export const addBlogData = async (
         ViewedUsers: [],
         LikedUsers: [],
         CommentedUsers: [],
-        Status: "",
+        Status: data?.Status || "",
         IsActive: false,
-        Attachments: fileRes?.data?.ServerRelativeUrl || null,
+        Attachments: arrGetAttach || null,
         AuthorId: curUser?.ID || "",
         AuthorEmail: curUser?.Email || "",
         AuthorName: curUser?.Title || "",
         Date: moment().format("DD MMM YYYY"),
+        ApprovalOn: null,
       },
     ];
 
     toast.update(toastId, {
-      render: "Blog sent for approval successfully.!",
+      render: "Blog added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -607,7 +670,11 @@ export const addBlogData = async (
 export const updateBlogData = async (
   Id: number,
   data: any,
-  isToast: boolean
+  isToast: boolean,
+  fileData?: any,
+  docFileAddData?: any[],
+  docFileRemoveData?: any[],
+  curObject?: IBlogColumnType
 ): Promise<void> => {
   let toastId: ReactText = "";
 
@@ -622,12 +689,55 @@ export const updateBlogData = async (
       RequestJSON: { ...data },
     });
 
+    if (fileData?.Attachments?.name) {
+      if (curObject?.Attachments?.[0]?.fileName) {
+        await sp.web.lists
+          .getByTitle(CONFIG.ListNames.Intranet_Blogs)
+          .items.getById(Id)
+          .attachmentFiles.getByName(curObject?.Attachments?.[0]?.fileName)
+          .delete();
+      }
+
+      if (fileData?.Attachments) {
+        await sp.web.lists
+          .getByTitle(CONFIG.ListNames.Intranet_Blogs)
+          .items.getById(Id)
+          .attachmentFiles.add(
+            fileData?.Attachments?.name,
+            fileData?.Attachments
+          );
+      }
+    }
+
+    if (docFileRemoveData?.length) {
+      for (let i: number = 0; docFileRemoveData.length > i; i++) {
+        await SpServices.SPDeleteItem({
+          Listname: CONFIG.ListNames.Intranet_PernixWiki,
+          ID: docFileRemoveData[i].ID,
+        });
+      }
+    }
+
+    if (docFileAddData?.length) {
+      for (let i: number = 0; docFileAddData.length > i; i++) {
+        await sp.web
+          .getFolderByServerRelativePath(
+            `${CONFIG.blogFileFlowPath}/Pernix_Wiki_${Id}`
+          )
+          .files.addUsingPath(docFileAddData?.[i]?.name, docFileAddData?.[i], {
+            Overwrite: true,
+          });
+      }
+    }
+
     isToast &&
       toast.update(toastId, {
         render:
-          data?.Status === "Approved"
+          data?.Status === CONFIG.blogStatus.Approved
             ? "Blog approved successfully!"
-            : "Blog rejected successfully!",
+            : data?.Status === CONFIG.blogStatus.Rejected
+            ? "Blog rejected successfully!"
+            : "Blog updated successfully!",
         type: "success",
         isLoading: false,
         autoClose: 5000,

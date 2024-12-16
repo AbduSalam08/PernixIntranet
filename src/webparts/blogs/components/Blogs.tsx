@@ -43,12 +43,17 @@ import {
   addBlogData,
   deleteBlogData,
   fecthBlogComments,
+  fecthBlogDocumentUsingPath,
   fetchBlogDatas,
   fetchCurUserData,
   getAllUsersList,
   updateBlogData,
 } from "../../../services/BlogsPage/BlogsPageServices";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
+import moment from "moment";
+import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
+import RichText from "../../../components/common/RichText/RichText";
 
 /* Interface creation */
 interface IBlogField {
@@ -56,6 +61,7 @@ interface IBlogField {
   Tag: IFormFields;
   Description: IFormFields;
   Attachments: IFormFields;
+  Content: IFormFields;
 }
 
 interface IBlogDetails {
@@ -174,6 +180,15 @@ const Blogs = (props: any): JSX.Element => {
         type: "file",
       },
     },
+    Content: {
+      value: null,
+      isValid: true,
+      errorMsg: "",
+      validationRule: {
+        required: false,
+        type: "file",
+      },
+    },
   };
 
   /* State creation */
@@ -202,6 +217,7 @@ const Blogs = (props: any): JSX.Element => {
   const [taggedPerson, setTaggedPerson] = useState({
     results: [],
   });
+  const [curDocFiles, setCurDocFiles] = useState<any[]>([]);
 
   /* Functions creation */
   const handleInputChange = async (
@@ -234,6 +250,15 @@ const Blogs = (props: any): JSX.Element => {
   const handleSearch = async (): Promise<void> => {
     let temp: IBlogColumnType[] = [...curAllBlogs];
 
+    if (searchField.Status) {
+      temp = await Promise.all(
+        temp?.filter((val: IBlogColumnType) =>
+          searchField.Status === CONFIG.blogDrop[0]
+            ? val?.IsActive
+            : !val?.IsActive
+        )
+      );
+    }
     if (searchField.Search) {
       temp = await Promise.all(
         temp?.filter(
@@ -249,16 +274,18 @@ const Blogs = (props: any): JSX.Element => {
             ) ||
             val?.AuthorName?.toLowerCase().includes(
               searchField.Search?.toLowerCase()
+            ) ||
+            val?.Status?.toLowerCase().includes(
+              searchField.Search?.toLowerCase()
             )
         )
       );
     }
-    if (searchField.Status) {
+    if (searchField.Date) {
       temp = await Promise.all(
-        temp?.filter((val: IBlogColumnType) =>
-          searchField.Status === CONFIG.blogDrop[0]
-            ? val?.IsActive
-            : !val?.IsActive
+        temp?.filter(
+          (val: IBlogColumnType) =>
+            val?.Date === moment(searchField.Date).format("DD MMM YYYY")
         )
       );
     }
@@ -275,36 +302,36 @@ const Blogs = (props: any): JSX.Element => {
       tampTabData = await Promise.all(
         isAdmin
           ? tampTabData?.filter(
-              (val: IBlogColumnType) => val?.Status === "Approved"
+              (val: IBlogColumnType) =>
+                val?.Status === CONFIG.blogStatus.Approved
             )
           : tampTabData?.filter(
               (val: IBlogColumnType) =>
-                val?.Status === "Approved" && val?.IsActive
+                val?.Status === CONFIG.blogStatus.Approved && val?.IsActive
             )
+      );
+      tampTabData?.sort(
+        (a: IBlogColumnType, b: IBlogColumnType) =>
+          Number(b.ApprovalOn) - Number(a.ApprovalOn)
       );
     } else if (curTab === CONFIG.BlogsTab[1]) {
       tampTabData = await Promise.all(
-        isAdmin
-          ? tampTabData?.filter(
-              (val: IBlogColumnType) =>
-                val?.Status === "Approved" && val?.AuthorId === curUserDetail.ID
-            )
-          : tampTabData?.filter(
-              (val: IBlogColumnType) =>
-                val?.Status === "Approved" &&
-                val?.AuthorId === curUserDetail.ID &&
-                val?.IsActive
-            )
+        tampTabData?.filter(
+          (val: IBlogColumnType) => val?.AuthorId === curUserDetail.ID
+        )
       );
     } else {
       tampTabData = await Promise.all(
-        tampTabData?.filter((val: IBlogColumnType) => !val?.Status) || []
+        tampTabData?.filter(
+          (val: IBlogColumnType) => val?.Status === CONFIG.blogStatus.Pending
+        ) || []
       );
     }
 
     setCurAllBlogs([...tampTabData]);
     setSelTabBlogs([...tampTabData]);
     setComSearch({ ...CONFIG.PageSearchFields });
+    setCurBlogData(null);
     setSelectedTab(curTab);
     setIsLoading(false);
     setSelData({ ...blogDetail });
@@ -312,7 +339,7 @@ const Blogs = (props: any): JSX.Element => {
     setIsCreate(false);
   };
 
-  const handleSubmit = async (): Promise<void> => {
+  const handleSubmit = async (Status: string = ""): Promise<void> => {
     let hasErrors: boolean = false;
 
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
@@ -342,23 +369,95 @@ const Blogs = (props: any): JSX.Element => {
       setIsLoading(true);
       const data: any = {};
       const fileData: any = {};
+      const docFileData: any = {};
       const column: IBlogColumn = CONFIG.BlogColumn;
 
-      data[column.ID] = null;
+      data[column.ID] = curBlogData?.ID || null;
       data[column.Heading] = formData?.Heading?.value || "";
       data[column.Title] = formData?.Tag?.value || "";
       data[column.Description] = formData?.Description?.value || "";
-
-      // Attachments json prepared.
-      fileData[column.Attachments] = formData?.Attachments?.value || null;
+      data[column.Status] = Status;
 
       resetFormData(initialFormData, setFormData);
-      await addBlogData(data, fileData, curUserDetail).then(
-        async (res: IBlogColumnType[]) => {
-          masterBlog = [...res, ...masterBlog];
-          await filterTabDatas();
+      if (curBlogData?.ID) {
+        const addingFiles: any[] = formData?.Content?.value?.length
+          ? formData?.Content?.value?.filter((item1: any) => item1?.size)
+          : [];
+
+        const filterFiles: any[] = formData?.Content?.value?.length
+          ? formData?.Content?.value?.filter(
+              (item1: any) =>
+                !addingFiles.some((item2: any) => item1.name === item2.name)
+            )
+          : [];
+
+        const removedFiles: any[] = formData?.Content?.value?.length
+          ? curDocFiles?.filter(
+              (item1: any) =>
+                !filterFiles.some((item2: any) => item1.name === item2.name)
+            )
+          : [...curDocFiles];
+
+        // Attachments json prepared
+        fileData[column.Attachments] = formData?.Attachments?.value?.name
+          ? formData?.Attachments?.value
+          : null;
+
+        await updateBlogData(
+          Number(curBlogData?.ID),
+          { ...data },
+          true,
+          fileData,
+          addingFiles,
+          removedFiles,
+          curBlogData
+        );
+
+        const Idx: number = masterBlog?.findIndex(
+          (res: IBlogColumnType) => res?.ID === curBlogData?.ID
+        );
+
+        masterBlog[Idx].Heading = formData?.Heading?.value || "";
+        masterBlog[Idx].Tag = formData?.Tag?.value || "";
+        masterBlog[Idx].Description = formData?.Description?.value || "";
+        masterBlog[Idx].Status = Status;
+
+        if (fileData?.Attachments) {
+          const arrWords: string[] =
+            curBlogData?.Attachments?.[0]?.serverRelativeUrl.split("/");
+          const index: number = arrWords.findIndex(
+            (val: string) => val === arrWords[arrWords.length - 1]
+          );
+          arrWords.splice(index, 1, fileData?.Attachments?.name);
+          const url: string = arrWords.join("/");
+
+          masterBlog[Idx].Attachments = [
+            {
+              fileName: fileData?.Attachments?.name,
+              content: null,
+              serverRelativeUrl: url,
+            },
+          ];
         }
-      );
+
+        await filterTabDatas(selectedTab);
+      } else {
+        // Attachments json prepared
+        fileData[column.Attachments] = formData?.Attachments?.value || null;
+
+        // Document file json prepared
+        docFileData[column.Content] = formData?.Content?.value || [];
+
+        await addBlogData(
+          data,
+          fileData,
+          docFileData.Content,
+          curUserDetail
+        ).then(async (res: IBlogColumnType[]) => {
+          masterBlog = [...res, ...masterBlog];
+          await filterTabDatas(selectedTab);
+        });
+      }
     } else {
       console.log("Form contains errors");
     }
@@ -413,6 +512,62 @@ const Blogs = (props: any): JSX.Element => {
     }
   };
 
+  const handleEdit = async (
+    selObject: IBlogColumnType,
+    Id: number | null,
+    type: string
+  ): Promise<void> => {
+    await fecthBlogDocumentUsingPath(
+      CONFIG.blogFileFlowPath + "/Pernix_Wiki_" + selObject.ID
+    ).then(async (res: any) => {
+      const arrDocuments: any[] = [];
+
+      await res?.forEach((attach: any) => {
+        arrDocuments.push({
+          ...attach,
+          name: attach.FileLeafRef,
+        });
+      });
+
+      setCurDocFiles([...arrDocuments]);
+      setCurBlogData({ ...selObject });
+      if (type === "edit") {
+        setFormData((prev: IBlogField) => ({
+          ...prev,
+          Heading: {
+            ...prev["Heading"],
+            value: selObject.Heading,
+          },
+          Tag: {
+            ...prev["Tag"],
+            value: selObject.Tag,
+          },
+          Description: {
+            ...prev["Description"],
+            value: selObject?.Description,
+          },
+          Attachments: {
+            ...prev["Attachments"],
+            value: selObject.Attachments?.[0]?.fileName,
+          },
+          Content: {
+            ...prev["Content"],
+            value: arrDocuments,
+          },
+        }));
+        setIsCreate(true);
+      } else {
+        await fecthBlogComments(Number(Id)).then(
+          (res: IBlogCommentsColumnType[]) => {
+            setAllComment([...res]);
+            setIsLoading(false);
+            setIsView(true);
+          }
+        );
+      }
+    });
+  };
+
   const handleView = async (Id: number, Idx: number): Promise<void> => {
     setIsLoading(true);
     masterBlog[Idx].ViewedUsers.push("1");
@@ -426,12 +581,7 @@ const Blogs = (props: any): JSX.Element => {
       false
     );
 
-    setCurBlogData({ ...masterBlog[Idx] });
-    await fecthBlogComments(Id).then((res: IBlogCommentsColumnType[]) => {
-      setAllComment([...res]);
-      setIsLoading(false);
-      setIsView(true);
-    });
+    await handleEdit({ ...masterBlog[Idx] }, Id, "view");
   };
 
   const handleComments = async (): Promise<void> => {
@@ -527,7 +677,7 @@ const Blogs = (props: any): JSX.Element => {
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
-        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        disabled: false,
         size: "large",
         onClick: async () => {
           await handleDelete();
@@ -552,11 +702,11 @@ const Blogs = (props: any): JSX.Element => {
           await updateBlogData(
             Number(selData?.ID),
             {
-              Status: "Rejected",
+              Status: CONFIG.blogStatus.Rejected,
             },
             true
           );
-          masterBlog[Number(selData?.Idx)].Status = "Rejected";
+          masterBlog[Number(selData?.Idx)].Status = CONFIG.blogStatus.Rejected;
           await filterTabDatas(selectedTab);
         },
       },
@@ -576,11 +726,15 @@ const Blogs = (props: any): JSX.Element => {
           await updateBlogData(
             Number(selData?.ID),
             {
-              Status: "Approved",
+              Status: CONFIG.blogStatus.Approved,
+              ApprovalOn: new Date(),
             },
             true
           );
-          masterBlog[Number(selData?.Idx)].Status = "Approved";
+          masterBlog[Number(selData?.Idx)].Status = CONFIG.blogStatus.Approved;
+          masterBlog[Number(selData?.Idx)].ApprovalOn = Number(
+            moment(new Date()).format("YYYYMMDDHHmm")
+          );
           await filterTabDatas(selectedTab);
         },
       },
@@ -646,7 +800,7 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
-              <div className={styles.backHeader}>View blog</div>
+              <div className={styles.backHeader}>View pernix wiki</div>
             </div>
           </div>
 
@@ -655,7 +809,7 @@ const Blogs = (props: any): JSX.Element => {
             <div className={styles.VHeading}>{curBlogData?.Heading}</div>
             <div className={styles.VTag}>{curBlogData?.Tag}</div>
             <img
-              src={curBlogData?.Attachments}
+              src={curBlogData?.Attachments?.[0]?.serverRelativeUrl}
               alt="blog img"
               className={styles.VImg}
             />
@@ -665,6 +819,24 @@ const Blogs = (props: any): JSX.Element => {
                 __html: curBlogData?.Description || "",
               }}
             />
+            {curDocFiles?.length > 0 && (
+              <div className={styles.VDocuments}>
+                {curDocFiles?.map((val: any, Idx: number) => {
+                  return (
+                    <div
+                      key={Idx}
+                      onClick={() => {
+                        window.open(
+                          window.location.origin + val?.FileRef + "?web=1"
+                        );
+                      }}
+                    >
+                      {val?.name}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className={styles.VAvatar}>
               <div className={styles.AProfile}>
                 <Avatar
@@ -841,7 +1013,7 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
-              <div className={styles.backHeader}>Blogs</div>
+              <div className={styles.backHeader}>Pernix wiki</div>
             </div>
 
             <div className={styles.searchContainer}>
@@ -885,11 +1057,28 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
+              <div>
+                <CustomDateInput
+                  label="Select Date"
+                  size="SM"
+                  value={comSearch?.Date}
+                  onChange={(e: any) => {
+                    const value: any = e;
+                    searchField.Date = value;
+                    setComSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Date: value,
+                    }));
+                    handleSearch();
+                  }}
+                />
+              </div>
               <div
                 className={styles.refreshBTN}
                 onClick={(_) => {
                   searchField.Search = "";
                   searchField.Status = "";
+                  searchField.Date = null;
                   setComSearch({ ...searchField });
                   handleSearch();
                 }}
@@ -967,37 +1156,64 @@ const Blogs = (props: any): JSX.Element => {
                     >
                       <img
                         className={styles.imgSec}
-                        src={val?.Attachments}
+                        src={val?.Attachments?.[0]?.serverRelativeUrl}
                         alt="blog img"
                       />
                       <div className={styles.cardTag}>
                         <span>{val?.Tag}</span>
                         <div
                           style={{
-                            display: isAdmin ? "flex" : "none",
+                            display: "flex",
                             alignItems: "center",
                             gap: "10px",
                           }}
                         >
-                          <InputSwitch
-                            className="sectionToggler"
-                            checked={val?.IsActive}
-                            onChange={async (data: any) => {
-                              const curIndex: number = masterBlog?.findIndex(
-                                (res: IBlogColumnType) => res?.ID === val?.ID
-                              );
-                              await updateBlogData(
-                                Number(val?.ID),
-                                {
-                                  IsActive: data?.value,
-                                },
-                                false
-                              );
-                              masterBlog[curIndex].IsActive = data?.value;
-                              await filterTabDatas(selectedTab);
+                          <div
+                            style={{
+                              display: isAdmin ? "flex" : "none",
+                            }}
+                          >
+                            <InputSwitch
+                              className="sectionToggler"
+                              checked={val?.IsActive}
+                              onChange={async (data: any) => {
+                                const curIndex: number = masterBlog?.findIndex(
+                                  (res: IBlogColumnType) => res?.ID === val?.ID
+                                );
+                                await updateBlogData(
+                                  Number(val?.ID),
+                                  {
+                                    IsActive: data?.value,
+                                  },
+                                  false
+                                );
+                                masterBlog[curIndex].IsActive = data?.value;
+                                await filterTabDatas(selectedTab);
+                              }}
+                            />
+                          </div>
+                          <i
+                            style={{
+                              display:
+                                (val?.Status === CONFIG.blogStatus.Draft ||
+                                  val?.Status === CONFIG.blogStatus.Rejected) &&
+                                selectedTab === CONFIG.BlogsTab[1]
+                                  ? "flex"
+                                  : "none",
+                            }}
+                            className="pi pi-pen-to-square"
+                            onClick={() => {
+                              handleEdit(val, null, "edit");
                             }}
                           />
                           <i
+                            style={{
+                              display:
+                                val?.Status !== CONFIG.blogStatus.Approved &&
+                                (selectedTab === CONFIG.BlogsTab[1] || isAdmin)
+                                  ? "flex"
+                                  : "none",
+                            }}
                             className="pi pi-trash"
                             onClick={() => {
                               const curIndex: number = masterBlog?.findIndex(
@@ -1020,17 +1236,43 @@ const Blogs = (props: any): JSX.Element => {
                       </div>
                       <div className={styles.cardHeading}>
                         <span>{val?.Heading}</span>
-                        {/* <div> */}
-                        <i
-                          className="pi pi-arrow-up-right"
-                          onClick={() => {
-                            const curIndex: number = masterBlog?.findIndex(
-                              (res: IBlogColumnType) => res?.ID === val?.ID
-                            );
-                            handleView(Number(val?.ID), curIndex);
-                          }}
-                        />
-                        {/* </div> */}
+                        <div>
+                          <div
+                            style={{
+                              display:
+                                selectedTab === CONFIG.BlogsTab[0]
+                                  ? "none"
+                                  : "flex",
+                              background:
+                                val?.Status === CONFIG.blogStatus.Draft
+                                  ? "#51515136"
+                                  : val?.Status === CONFIG.blogStatus.Pending
+                                  ? "#cec41936"
+                                  : val?.Status === CONFIG.blogStatus.Approved
+                                  ? "#00bb0436"
+                                  : "#bb000036",
+                              color:
+                                val?.Status === CONFIG.blogStatus.Draft
+                                  ? "#515151"
+                                  : val?.Status === CONFIG.blogStatus.Pending
+                                  ? "#484502"
+                                  : val?.Status === CONFIG.blogStatus.Approved
+                                  ? "#00bb04"
+                                  : "#bb0000",
+                            }}
+                          >
+                            {val?.Status}
+                          </div>
+                          <i
+                            className="pi pi-arrow-up-right"
+                            onClick={() => {
+                              const curIndex: number = masterBlog?.findIndex(
+                                (res: IBlogColumnType) => res?.ID === val?.ID
+                              );
+                              handleView(Number(val?.ID), curIndex);
+                            }}
+                          />
+                        </div>
                       </div>
                       <div
                         className={styles.cardBody}
@@ -1167,7 +1409,9 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
-              <div className={styles.backHeader}>Add a blog</div>
+              <div className={styles.backHeader}>
+                {curBlogData?.ID ? "Edit a pernix wiki" : "Add a pernix wiki"}
+              </div>
             </div>
           </div>
 
@@ -1215,9 +1459,14 @@ const Blogs = (props: any): JSX.Element => {
                   setNewVisitor={setFormData}
                   newVisitor={formData?.Attachments?.value}
                 />
-                {formData?.Attachments?.value?.name && (
+                {(formData?.Attachments?.value?.name ||
+                  formData?.Attachments?.value) && (
                   <div className={styles.selectedFileName}>
-                    {formData?.Attachments?.value?.name || ""}
+                    {formData?.Attachments?.value?.name
+                      ? formData?.Attachments?.value?.name
+                      : formData?.Attachments?.value
+                      ? formData?.Attachments?.value
+                      : ""}
                   </div>
                 )}
                 {!formData?.Attachments?.isValid && (
@@ -1228,44 +1477,69 @@ const Blogs = (props: any): JSX.Element => {
               </div>
             </div>
             <div className={styles.secondRow}>
-              <QuillEditor
-                height="255px"
-                placeHolder={"Description"}
-                defaultValue={formData?.Description?.value}
+              <RichText
+                isValid={!formData?.Description?.isValid}
+                errorMsg={formData?.Description?.errorMsg}
+                value={formData?.Description?.value}
                 onChange={(res: any) => {
-                  const value: any = res?.trimStart();
-                  let temp: string = "";
+                  let value: string = "";
 
-                  if (value === "<p><br></p>") {
-                    temp = "";
+                  if (res === "<p><br></p>") {
+                    value = "";
                   } else if (
-                    value.replace(/<(.|\n)*?>/g, "").trim().length === 0
+                    res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
                   ) {
-                    temp = "";
+                    value = "";
                   } else {
-                    temp = value;
+                    value = res;
                   }
 
                   const { isValid, errorMsg } = validateField(
                     "Description",
-                    temp,
+                    value,
                     formData?.Description?.validationRule
                   );
-                  handleInputChange(
-                    "Description",
-                    value,
-                    !res ? true : isValid,
-                    errorMsg
-                  );
+                  handleInputChange("Description", value, isValid, errorMsg);
                 }}
-                suggestionList={[]}
-                getMentionedEmails={(_e: any) => {}}
+                placeholder="Type your content here..."
+                className="myRichTextEditor"
               />
-              {!formData?.Description?.isValid && (
-                <p className={styles.errorMsg}>
-                  {formData?.Description?.errorMsg}
-                </p>
-              )}
+            </div>
+            <div className={styles.thirdRow}>
+              <CustomMultipleFileUpload
+                placeholder="Click to upload a file"
+                accept="application/*"
+                multiple
+                value={formData?.Content?.value || []}
+                onFileSelect={(e: any) => {
+                  const value: any = e;
+                  let temp: any[] = value || [];
+
+                  if (curBlogData?.ID) {
+                    const arrNewFiles: any[] =
+                      value?.filter((val: any) => val?.type) || [];
+                    const arrRemFiles: any[] =
+                      value?.filter((val: any) => !val?.type) || [];
+                    const filArrayFile: any[] =
+                      arrRemFiles.filter(
+                        (obj1: any) =>
+                          !arrNewFiles.some(
+                            (obj2: any) => obj1.name === obj2.name
+                          )
+                      ) || [];
+                    temp = [...filArrayFile, ...arrNewFiles];
+                  }
+
+                  const { isValid, errorMsg } = validateField(
+                    "Content",
+                    temp?.[0]?.name || null,
+                    formData.Content.validationRule
+                  );
+                  handleInputChange("Content", temp || null, isValid, errorMsg);
+                }}
+                isValid={formData.Content.isValid}
+                errMsg={formData.Content.errorMsg}
+              />
             </div>
           </div>
 
@@ -1276,14 +1550,21 @@ const Blogs = (props: any): JSX.Element => {
               text="Close"
               onClick={(_) => {
                 resetFormData(initialFormData, setFormData);
-                filterTabDatas();
+                filterTabDatas(selectedTab);
+              }}
+            />
+            <DefaultButton
+              btnType="primaryGreen"
+              text="Save as draft"
+              onClick={(_) => {
+                handleSubmit(CONFIG.blogStatus.Draft);
               }}
             />
             <DefaultButton
               btnType="primaryGreen"
               text="Submit"
               onClick={(_) => {
-                handleSubmit();
+                handleSubmit(CONFIG.blogStatus.Pending);
               }}
             />
           </div>
