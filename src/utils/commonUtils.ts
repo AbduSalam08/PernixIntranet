@@ -10,6 +10,7 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { setHelpDeskTickets } from "../redux/features/HelpDeskSlice";
 import { getAllTickets } from "../services/HelpDeskMainServices/dashboardServices";
 import { CONFIG } from "../config/config";
+import { graph } from "@pnp/graph";
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
 
@@ -723,6 +724,7 @@ export const formatTicketData = (data: any, currentUserDetails: any): any => {
     priority: item?.Priority,
     status: item?.Status,
     hasOwnerShip: item?.EmployeeName?.EMail === currentUserDetails?.email,
+    hasAttachments: item?.Attachments,
   }));
 };
 
@@ -802,4 +804,11 @@ export const getLastTicketNumber = (data: any): any => {
       })
       .filter((num: number) => !isNaN(num))
   );
+};
+
+// getting the users office location from
+// Function to get a specific user's profile data by ID
+export const getUserProfileById = async (): Promise<any> => {
+  const currentLoggedGraphUser: any = await graph.me.get();
+  return currentLoggedGraphUser;
 };

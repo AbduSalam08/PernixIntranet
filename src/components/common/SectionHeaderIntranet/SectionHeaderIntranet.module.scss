@@ -21,4 +21,27 @@
       background-color: var(--primary-orange);
     }
   }
+  @media (max-width: 768px) {
+    p {
+      font-size: 16px;
+      padding-left: 8px;
+
+      &::before {
+        height: 25px;
+        width: 2px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    p {
+      font-size: 14px;
+      padding-left: 6px;
+
+      &::before {
+        height: 20px;
+        width: 2px;
+      }
+    }
+  }
 }

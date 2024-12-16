@@ -474,9 +474,9 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
   const productTemplate = (val: IFeedbackQusType): JSX.Element => {
     return (
       <div className={styles.carouselContainer}>
-        <div className={styles.CarouselTitle} title={val?.Title}>
+        <span className={styles.CarouselTitle} title={val?.Title}>
           {val?.Title}
-        </div>
+        </span>
         <div className={styles.CarouselTextArea}>
           <FloatingLabelTextarea
             value={responseData?.Answer?.value}

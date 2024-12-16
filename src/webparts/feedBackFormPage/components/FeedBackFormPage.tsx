@@ -468,9 +468,9 @@ const FeedBackFormPage = (props: any): JSX.Element => {
         </div>
         <div className={styles.secondRow}>
           <div
-            style={{
-              width: "50%",
-            }}
+          // style={{
+          //   width: "50%",
+          // }}
           >
             <CustomDateInput
               value={formData?.StartDate?.value || null}
@@ -499,9 +499,9 @@ const FeedBackFormPage = (props: any): JSX.Element => {
             />
           </div>
           <div
-            style={{
-              width: "50%",
-            }}
+          // style={{
+          //   width: "50%",
+          // }}
           >
             <CustomDateInput
               value={formData.EndDate.value}
@@ -560,9 +560,9 @@ const FeedBackFormPage = (props: any): JSX.Element => {
         </div>
         <div className={styles.secondRow}>
           <div
-            style={{
-              width: "50%",
-            }}
+          // style={{
+          //   width: "50%",
+          // }}
           >
             <CustomDateInput
               value={formData?.StartDate?.value || null}
@@ -591,9 +591,9 @@ const FeedBackFormPage = (props: any): JSX.Element => {
             />
           </div>
           <div
-            style={{
-              width: "50%",
-            }}
+          // style={{
+          //   width: "50%",
+          // }}
           >
             <CustomDateInput
               value={formData.EndDate.value}
@@ -631,6 +631,8 @@ const FeedBackFormPage = (props: any): JSX.Element => {
         <p
           style={{
             textAlign: "center",
+            fontSize: "14px",
+            lineHeight: "20px",
           }}
         >
           Are you sure you want to delete this feedback question?

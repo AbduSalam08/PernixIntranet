@@ -72,7 +72,6 @@ const TicketView = (): JSX.Element => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const pageParams = useParams();
-  console.log("pageParams: ", pageParams);
 
   const initialPopupController = [
     {
@@ -196,10 +195,8 @@ const TicketView = (): JSX.Element => {
   const currentTicketsData = verifyTicketWithCurrentUser?.filter(
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
-  console.log("currentTicketsData: ", currentTicketsData);
 
   const [recurrenceConfigData, setRecurrenceConfigData] = useState<any>();
-  console.log("recurrenceConfigData: ", recurrenceConfigData);
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
   const [toggles, setToggles] = useState({
@@ -1285,6 +1282,13 @@ const TicketView = (): JSX.Element => {
                   <label>Ticket source</label>
                   <span>{currentTicketsData?.TicketSource ?? "-"}</span>
                 </div>
+
+                {currentTicketsData?.TicketLocation && (
+                  <div className={styles.detailsLabel}>
+                    <label>Ticket location</label>
+                    <span>{currentTicketsData?.TicketLocation ?? "-"}</span>
+                  </div>
+                )}
 
                 {currentTicketsData?.RepeatedTicket && (
                   <>

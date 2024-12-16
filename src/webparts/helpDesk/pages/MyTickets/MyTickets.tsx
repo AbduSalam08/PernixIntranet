@@ -33,6 +33,7 @@ import {
   getCurrentRoleForTicketsRoute,
   getLastTicketNumber,
   getTicketsByKeyValue,
+  getUserProfileById,
   sortTickets,
   ticketsFilter,
   validateField,
@@ -60,6 +61,7 @@ import { ToastContainer } from "react-toastify";
 import {
   addNewTicket,
   getRecurrenceConfigDetails,
+  removeRecurrenceConfigOfTicket,
   updateRecurrenceConfigOfTicket,
 } from "../../../../services/HelpDeskMainServices/ticketServices";
 import { Avatar } from "primereact/avatar";
@@ -297,7 +299,7 @@ const MyTickets = (): JSX.Element => {
                   value: null,
                 },
               };
-
+          debugger;
           if (!isUser && !isITOwner) {
             if (
               !hasRecurrence &&
@@ -361,25 +363,29 @@ const MyTickets = (): JSX.Element => {
                 "does not repeat"
             ) {
               if (currentRowData?.RecurrenceConfigDetailsId) {
-                await updateRecurrenceConfigOfTicket(
-                  {
-                    ...ticketBaseDetails,
-                    DayOfWeek:
-                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
-                      "weekly"
-                        ? ""
-                        : recurrenceDetails?.DayOfWeek?.value,
-                    NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
-                    isActive:
-                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
-                        "repeat once" &&
-                      recurrenceDetails?.Frequency?.value.toLowerCase() !==
-                        "does not repeat",
-                  },
+                // await updateRecurrenceConfigOfTicket(
+                //   {
+                //     ...ticketBaseDetails,
+                //     DayOfWeek:
+                //       recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                //       "weekly"
+                //         ? ""
+                //         : recurrenceDetails?.DayOfWeek?.value,
+                //     NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+                //     isActive:
+                //       recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                //         "repeat once" &&
+                //       recurrenceDetails?.Frequency?.value.toLowerCase() !==
+                //         "does not repeat",
+                //   },
+                //   currentRowData?.ID,
+                //   recurrenceID
+                // )
+                await removeRecurrenceConfigOfTicket(
                   currentRowData?.ID,
                   recurrenceID
                 )
-                  .then((res: any) => {
+                  ?.then((res: any) => {
                     togglePopupVisibility(
                       setPopupController,
                       initialPopupController[0],
@@ -395,7 +401,7 @@ const MyTickets = (): JSX.Element => {
                       "close"
                     );
                   });
-                await getAllTickets(dispatch);
+                // await getAllTickets(dispatch);
 
                 const updatedTickets = await getAllTicketsData();
 
@@ -985,60 +991,72 @@ const MyTickets = (): JSX.Element => {
       field: "attachments",
       headerName: "Attachment",
       maxWidth: 120,
-      renderCell: (params: any) => (
-        <span
-          style={{
-            width: "80%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={async () => {
-            console.log("params: ", params);
-            const files: any = await getAttachmentofTicket(params?.row?.id);
-            console.log("files: ", files);
-            const mappedFiles: any = files?.map((item: any) => {
-              return {
-                name: item?.FileName,
-                content: `${window.location.origin}${item?.ServerRelativeUrl}?web=1`,
-              };
-            });
-            await downloadFiles(
-              `${params?.row?.ticket_number} - Attachments`,
-              mappedFiles
-            );
-
-            if (mappedFiles?.length !== 0) {
-              toast.success("Attachment downloaded!", {
-                position: "top-center",
-                autoClose: 3500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-              });
-            } else {
-              toast.warning("No Attachments found!", {
-                position: "top-center",
-                autoClose: 3500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-              });
-            }
-          }}
-        >
-          <AttachFile
-            sx={{
-              color: "#0a3622",
-              fontSize: "18px",
-              cursor: "pointer",
-              transform: "rotate(40deg)",
+      renderCell: (params: any) =>
+        params?.row?.hasAttachments ? (
+          <span
+            style={{
+              width: "80%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
-        </span>
-      ),
+            onClick={async () => {
+              console.log("params: ", params);
+              const files: any = await getAttachmentofTicket(params?.row?.id);
+              console.log("files: ", files);
+              const mappedFiles: any = files?.map((item: any) => {
+                return {
+                  name: item?.FileName,
+                  content: `${window.location.origin}${item?.ServerRelativeUrl}?web=1`,
+                };
+              });
+              await downloadFiles(
+                `${params?.row?.ticket_number} - Attachments`,
+                mappedFiles
+              );
+
+              if (mappedFiles?.length !== 0) {
+                toast.success("Attachment downloaded!", {
+                  position: "top-center",
+                  autoClose: 3500,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: false,
+                });
+              } else {
+                toast.warning("No Attachments found!", {
+                  position: "top-center",
+                  autoClose: 3500,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: false,
+                });
+              }
+            }}
+          >
+            <AttachFile
+              sx={{
+                color: "#0a3622",
+                fontSize: "18px",
+                cursor: "pointer",
+                transform: "rotate(40deg)",
+              }}
+            />
+          </span>
+        ) : (
+          <span
+            style={{
+              width: "80%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            -
+          </span>
+        ),
     },
     {
       field: "actions",
@@ -1119,7 +1137,6 @@ const MyTickets = (): JSX.Element => {
                       : "0",
                 }}
                 onClick={async () => {
-                  console.log("params: ", params);
                   const ticketNumber = params?.row?.ticket_number;
                   const currentRowData: any =
                     HelpDeskTicktesData?.AllData?.filter(
@@ -1129,6 +1146,7 @@ const MyTickets = (): JSX.Element => {
                   const currentAttachment = await getAttachmentofTicket(
                     currentRowData?.ID
                   );
+                  const currentGraphUser = await getUserProfileById();
 
                   setLoadingSubmit(false);
                   setSubmitClicked(false);
@@ -1147,7 +1165,6 @@ const MyTickets = (): JSX.Element => {
                       isITOwner
                     )
                   );
-                  console.log("currentAttachment: ", currentAttachment);
 
                   setFormData((prev: any) => ({
                     ...prev,
@@ -1161,6 +1178,12 @@ const MyTickets = (): JSX.Element => {
                             })),
                           ]
                         : null,
+                    },
+                    TicketLocation: {
+                      ...prev?.TicketLocation,
+                      value:
+                        currentGraphUser?.officeLocation ??
+                        prev?.TicketLocation?.value,
                     },
                   }));
 
@@ -1257,7 +1280,7 @@ const MyTickets = (): JSX.Element => {
 
   // Apply filters and sorting
   const filteredData = useMemo(() => {
-    let formattedData = formatTicketData(
+    let formattedData: any = formatTicketData(
       currentRoleBasedData?.data || [],
       currentUserDetails
     );
@@ -1443,7 +1466,8 @@ const MyTickets = (): JSX.Element => {
               );
 
               const newTicketNumber = generateTicketNumber(lastTicketID + 1);
-
+              const currentGraphUser = await getUserProfileById();
+              console.log("currentGraphUser: ", currentGraphUser);
               setFormData((prev: any) => ({
                 ...prev,
                 EmployeeNameId: {
@@ -1459,6 +1483,10 @@ const MyTickets = (): JSX.Element => {
                 TicketNumber: {
                   ...prev.TicketNumber,
                   value: newTicketNumber,
+                },
+                TicketLocation: {
+                  ...prev.TicketLocation,
+                  value: currentGraphUser?.officeLocation ?? "",
                 },
               }));
             }}

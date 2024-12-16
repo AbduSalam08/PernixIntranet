@@ -33,6 +33,7 @@ export namespace HelpDeskCamlQueryJSON {
                     <FieldRef Name='RepeatedTicketSource_x003a__x002' />
                     <FieldRef Name='TicketClosedBy' />
                     <FieldRef Name='TaggedPerson' />
+                    <FieldRef Name='TicketLocation' />
                     <FieldRef Name='MailID' />
                     <FieldRef Name='ConId' />
                     <FieldRef Name='RecurrenceConfigDetails' />

@@ -18,6 +18,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 20px;
 
   .leftSection {
@@ -40,6 +42,7 @@
     display: flex;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
 
     .refreshBTN {
       padding: 7px;
@@ -218,13 +221,14 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    margin-bottom: 8px;
+    // margin-bottom: 8px;
     background-color: #ffffff;
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.04);
     // height: 120px;
     max-height: 105px;
+    max-width: 300px;
     .image {
       // width: 120px;
       // height: 95px;
@@ -302,11 +306,11 @@
 }
 .birthdaySection {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
   /* 4 equal columns */
-  gap: 10px;
+  gap: 20px;
   /* Space between grid items */
-  padding: 10px;
+  // padding: 10px;
   width: 100%;
 }
 .sendBtn {
@@ -322,5 +326,107 @@
   padding: 8px 10px 12px 12px;
   i {
     color: #fff;
+  }
+}
+.bodyContainer .contentMain .content .contentwithIconsection .Title .name,
+.bodyContainer .contentMain .content .contentwithIconsection .Title .date {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1024px) {
+  .birthdaySection .contentMain {
+    max-width: 100%;
+  }
+  .birthdaySection {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .birthdaySection {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .boxWrapper {
+    padding: 16px;
+  }
+
+  .newsHeaderContainer .leftSection i {
+    font-size: 16px !important;
+  }
+  .newsHeaderContainer .leftSection p {
+    font-size: 18px;
+  }
+
+  .newsHeaderContainer .rightSection .refreshBTN i {
+    font-size: 18px;
+  }
+
+  .newsHeaderContainer .rightSection .addNewbtn {
+    font-size: 14px;
+    padding: 4px 16px;
+  }
+
+  .tabsContainer div {
+    font-size: 16px;
+  }
+
+  .sendWish span {
+    font-size: 16px;
+  }
+
+  .actionBtns button {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  .bodyContainer .contentMain {
+    padding: 12px;
+  }
+
+  .bodyContainer .contentMain .content .contentwithIconsection .Title .name {
+    font-size: 14px;
+  }
+  .bodyContainer .contentMain .content .contentwithIconsection .Title .date {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+  .bodyContainer .contentMain {
+    padding: 8px;
+  }
+
+  .birthdaySection {
+    grid-template-columns: 1fr;
+  }
+
+  .boxWrapper {
+    padding: 12px;
+  }
+
+  .newsHeaderContainer .leftSection p {
+    font-size: 16px;
+  }
+
+  .newsHeaderContainer .rightSection .addNewbtn {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+
+  .tabsContainer div {
+    font-size: 14px;
+  }
+
+  .sendWish span {
+    font-size: 16px;
+  }
+
+  .bodyContainer .contentMain .content .contentwithIconsection .Title .name {
+    font-size: 14px;
+  }
+  .bodyContainer .contentMain .content .contentwithIconsection .Title .date {
+    font-size: 12px;
   }
 }
