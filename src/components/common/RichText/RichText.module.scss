@@ -1,0 +1,26 @@
+.errorMsg {
+    margin-top: 5px !important;
+    height: 19px !important;
+    // margin-bottom: 16px;
+    color: red !important;
+    font-family: "osMedium", sans-serif !important;
+    font-size: 13px !important;
+    text-align: left !important;
+    // text-transform: lowercase;
+    animation: slideAndFade 0.17s both ease !important;
+  }
+  
+  @keyframes slideAndFade {
+    0% {
+      opacity: 0;
+      margin-top: -10px;
+      /* Start off-screen */
+    }
+  
+    100% {
+      opacity: 1;
+      margin-top: 5px;
+      /* Slide down */
+    }
+  }
+  

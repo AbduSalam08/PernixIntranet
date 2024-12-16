@@ -28,6 +28,7 @@ import { RoleAuth } from "../../../services/CommonServices";
 import { useDispatch, useSelector } from "react-redux";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import { sp } from "@pnp/sp/presets/all";
 
 // import { Item } from "@pnp/sp/items";
 // import { Button } from "primereact/button";
@@ -530,7 +531,9 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
 
   // this function is tenentlevelallUsergetFunction
   const getallusers = async (listdata: any[]) => {
-    const users = await fetchUser(props.context, CONFIG.UserMailPath.path);
+    const curUser: any = await sp.web.currentUser.get();
+    const userMailStructure: string = `@${curUser?.Email?.split("@")[1]}`;
+    const users = await fetchUser(props.context, userMailStructure);
 
     await updatefunction(users, listdata);
     // setIsLoading(false);
@@ -829,12 +832,31 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     await onLoadingFUN();
   };
 
+  const handleClick = async (): Promise<void> => {
+    const client: MSGraphClient =
+      await props.context.msGraphClientFactory.getClient();
+    const userId: string = "63e44a51-faa9-49d9-b302-e202d5e9aa7c";
+
+    try {
+      const updateJSON = {
+        birthday: "1999-06-27T00:00:00Z",
+        skills: ["SFPx", "React JS", "Java Script"],
+        mobilePhone: "9843489905"
+      };
+
+      await client.api(`/users/${userId}`).update(updateJSON);
+    } catch (err) {
+      console.log("err: ", err);
+    }
+  };
+
   useEffect(() => {
     fetchInitialList();
   }, []);
 
   return (
     <div className={styles.container}>
+      <button onClick={() => handleClick()}>AD data update</button>
       {isLoading ? (
         <div className={styles.LoaderContainer}>
           <CircularSpinner />
