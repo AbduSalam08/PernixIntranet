@@ -33,6 +33,7 @@ import dayjs from "dayjs";
 import moment from "moment";
 import { IPaginationData } from "../../../interface/interface";
 import { ToastContainer } from "react-toastify";
+import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -90,6 +91,7 @@ let isActivityPage: boolean = false;
 const NewsPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isfilter, setIsfilter] = useState<boolean>(false);
   console.log("isMobile: ", isMobile);
 
   const newsIntranetData: any = useSelector((state: any) => {
@@ -738,7 +740,15 @@ const NewsPage = (props: any): JSX.Element => {
       </div>,
     ],
     [
-      <div key={4}>
+      <div
+        key={4}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          margin: "10px",
+        }}
+      >
         <CustomDropDown
           value={searchField.Status}
           noErrorMsg
@@ -749,7 +759,7 @@ const NewsPage = (props: any): JSX.Element => {
           onChange={(value) => {
             objFilter.Status = value;
             setSearchField({ ...searchField, Status: value });
-            handleSearch([...shownewsData]);
+            // handleSearch([...shownewsData]);
           }}
           size="SM"
         />
@@ -757,22 +767,22 @@ const NewsPage = (props: any): JSX.Element => {
         <CustomInput
           value={searchField.allSearch}
           noErrorMsg
-          secWidth="180px"
+          secWidth="200px"
           labelText="Search"
           placeholder="Search"
           onChange={(e) => {
             const value = e;
             objFilter.allSearch = value;
             setSearchField({ ...searchField, allSearch: value });
-            handleSearch([...shownewsData]);
+            // handleSearch([...shownewsData]);
           }}
           size="SM"
         />
         <CustomDateInput
           label="Select date"
           placeHolder="Date"
-          minWidth="180px"
-          maxWidth="180px"
+          minWidth="200px"
+          maxWidth="200px"
           value={searchField.selectedDate ? searchField.selectedDate : null}
           onChange={(e: any) => {
             const value: any = e;
@@ -781,7 +791,7 @@ const NewsPage = (props: any): JSX.Element => {
               ...prev,
               selectedDate: value,
             }));
-            handleSearch([...shownewsData]);
+            // handleSearch([...shownewsData]);
           }}
           size="SM"
         />
@@ -921,6 +931,42 @@ const NewsPage = (props: any): JSX.Element => {
         },
       },
     ],
+
+    [
+      {
+        text: "Clear",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[4],
+            4,
+            "close"
+          );
+          handleRefresh();
+        },
+      },
+      {
+        text: "Apply",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[4],
+            4,
+            "close"
+          );
+          handleSearch([...shownewsData]);
+        },
+      },
+    ],
   ];
 
   const handleViewClick = (item: any): void => {
@@ -1054,19 +1100,19 @@ const NewsPage = (props: any): JSX.Element => {
     setNewsData(filteredResults || []);
   };
 
-  // const handleRefresh = (): void => {
-  //   setSearchField({
-  //     allSearch: "",
-  //     selectedDate: null,
-  //     Status: "",
-  //   });
-  //   objFilter = {
-  //     selectedDate: null,
-  //     allSearch: "",
-  //     Status: "",
-  //   };
-  //   setNewsData([...shownewsData]);
-  // };
+  const handleRefresh = (): void => {
+    setSearchField({
+      allSearch: "",
+      selectedDate: null,
+      Status: "",
+    });
+    objFilter = {
+      selectedDate: null,
+      allSearch: "",
+      Status: "",
+    };
+    setNewsData([...shownewsData]);
+  };
 
   const handleDeleteClick = (id: any): any => {
     setID(id);
@@ -1184,7 +1230,7 @@ const NewsPage = (props: any): JSX.Element => {
           <p>News</p>
         </div>
         <div className={styles.rightSection}>
-          {/* {currentUserDetails.role !== CONFIG.RoleDetails.user ? (
+          {currentUserDetails.role !== CONFIG.RoleDetails.user && !isMobile ? (
             <CustomDropDown
               value={searchField.Status}
               noErrorMsg
@@ -1200,54 +1246,49 @@ const NewsPage = (props: any): JSX.Element => {
               size="SM"
             />
           ) : null}
+          {!isMobile ? (
+            <>
+              <CustomInput
+                value={searchField.allSearch}
+                noErrorMsg
+                secWidth="180px"
+                labelText="Search"
+                placeholder="Search"
+                onChange={(e) => {
+                  const value = e;
+                  objFilter.allSearch = value;
+                  setSearchField({ ...searchField, allSearch: value });
+                  handleSearch([...shownewsData]);
+                }}
+                size="SM"
+              />
+              <CustomDateInput
+                label="Select date"
+                placeHolder="Date"
+                minWidth="180px"
+                maxWidth="180px"
+                value={
+                  searchField.selectedDate ? searchField.selectedDate : null
+                }
+                onChange={(e: any) => {
+                  const value: any = e;
+                  objFilter.selectedDate = value;
+                  setSearchField((prev: any) => ({
+                    ...prev,
+                    selectedDate: value,
+                  }));
+                  handleSearch([...shownewsData]);
+                }}
+                size="SM"
+              />
+              <div className={styles.refreshBtn}>
+                <i onClick={handleRefresh} className="pi pi-refresh" />
+              </div>
+            </>
+          ) : (
+            ""
+          )}
 
-          <CustomInput
-            value={searchField.allSearch}
-            noErrorMsg
-            secWidth="180px"
-            labelText="Search"
-            placeholder="Search"
-            onChange={(e) => {
-              const value = e;
-              objFilter.allSearch = value;
-              setSearchField({ ...searchField, allSearch: value });
-              handleSearch([...shownewsData]);
-            }}
-            size="SM"
-          />
-          <CustomDateInput
-            label="Select date"
-            placeHolder="Date"
-            minWidth="180px"
-            maxWidth="180px"
-            value={searchField.selectedDate ? searchField.selectedDate : null}
-            onChange={(e: any) => {
-              const value: any = e;
-              objFilter.selectedDate = value;
-              setSearchField((prev: any) => ({
-                ...prev,
-                selectedDate: value,
-              }));
-              handleSearch([...shownewsData]);
-            }}
-            size="SM"
-          />
-          <div className={styles.refreshBtn}>
-            <i onClick={handleRefresh} className="pi pi-refresh" />
-          </div> */}
-
-          <i
-            className="pi pi-filter"
-            onClick={() => {
-              togglePopupVisibility(
-                setPopupController,
-                initialPopupController[4],
-                4,
-                "open"
-              );
-            }}
-            style={{ fontSize: "1.2rem", color: "#0b4d53", cursor: "pointer" }}
-          ></i>
           <div
             style={{
               display:
@@ -1312,7 +1353,7 @@ const NewsPage = (props: any): JSX.Element => {
               className="pi pi-plus"
               style={{ fontSize: "1rem", color: "#fff" }}
             />
-            Add an news
+            {isMobile ? "" : "Add an news"}
           </div>
         </div>
       </div>
@@ -1394,6 +1435,120 @@ const NewsPage = (props: any): JSX.Element => {
                 );
               })
           )}
+        </div>
+
+        {isMobile && (
+          <div className={styles.filtericon}>
+            <i
+              className="pi pi-filter"
+              onClick={() => {
+                setIsfilter(!isfilter);
+                // togglePopupVisibility(
+                //   setPopupController,
+                //   initialPopupController[4],
+                //   4,
+                //   "open"
+                // );
+              }}
+              // style={{
+              //   fontSize: "1.2rem",
+              //   color: "#0b4d53",
+              //   cursor: "pointer",
+              // }}
+            />
+          </div>
+        )}
+        <div
+          className={`${styles.filter_container} ${
+            isfilter ? styles.active_filter_container : ""
+          }`}
+
+          // className={`filter_container ${
+          //   isfilter ? "active_filter_container" : ""
+          // }`}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              margin: "10px",
+            }}
+          >
+            <CustomDropDown
+              value={searchField.Status}
+              noErrorMsg
+              width={"200px"}
+              floatingLabel={false}
+              options={["Active", "In Active"]}
+              placeholder="Status"
+              onChange={(value) => {
+                objFilter.Status = value;
+                setSearchField({ ...searchField, Status: value });
+                // handleSearch([...shownewsData]);
+              }}
+              size="SM"
+            />
+
+            <CustomInput
+              value={searchField.allSearch}
+              noErrorMsg
+              secWidth="200px"
+              labelText="Search"
+              placeholder="Search"
+              onChange={(e) => {
+                const value = e;
+                objFilter.allSearch = value;
+                setSearchField({ ...searchField, allSearch: value });
+                // handleSearch([...shownewsData]);
+              }}
+              size="SM"
+            />
+            <CustomDateInput
+              label="Select date"
+              placeHolder="Date"
+              minWidth="200px"
+              maxWidth="200px"
+              value={searchField.selectedDate ? searchField.selectedDate : null}
+              onChange={(e: any) => {
+                const value: any = e;
+                objFilter.selectedDate = value;
+                setSearchField((prev: any) => ({
+                  ...prev,
+                  selectedDate: value,
+                }));
+                // handleSearch([...shownewsData]);
+              }}
+              size="SM"
+            />
+
+            <div>
+              <DefaultButton
+                text="Apply"
+                size="small"
+                fullWidth
+                btnType="primaryGreen"
+                onClick={(_) => {
+                  handleSearch([...shownewsData]);
+
+                  setIsfilter(!isfilter);
+                }}
+              />
+            </div>
+            <div>
+              <DefaultButton
+                text="Clear"
+                size="small"
+                fullWidth
+                btnType="darkGreyVariant"
+                onClick={(_) => {
+                  setIsfilter(!isfilter);
+
+                  handleRefresh();
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {popupController?.map((popupData: any, index: number) => (

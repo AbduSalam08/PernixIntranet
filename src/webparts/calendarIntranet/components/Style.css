@@ -201,3 +201,31 @@ th[role="columnheader"] a {
 .p-float-label:has(.p-inputwrapper-filled) label {
   top: 4px;
 }
+@media (max-width: 1024px) {
+  .fc-day :has([data-bs-target="event"]) .fc-daygrid-day-number {
+    width: 23px !important;
+    height: 23px !important;
+  }
+  .fc .fc-daygrid-day-frame a {
+    font-size: 13px;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .fc-day :has([data-bs-target="event"]) .fc-daygrid-day-number {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .fc .fc-daygrid-day-frame a {
+    font-size: 12px !important;
+  }
+  th[role="columnheader"] a {
+    font-size: 12px !important;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 13px !important;
+  }
+}

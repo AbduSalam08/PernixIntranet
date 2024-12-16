@@ -39,6 +39,12 @@ import CustomDropDown from "../../../components/common/CustomInputFields/CustomD
 import { InputSwitch } from "primereact/inputswitch";
 import { ToastContainer } from "react-toastify";
 
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import IconButton from "@mui/material/IconButton";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
 /* Interface creation */
 interface ITabObject {
   name: string;
@@ -65,6 +71,7 @@ let isActivityPage: boolean = false;
 const DocumentRepositoryPage = (props: any): JSX.Element => {
   /* Local variable creation */
   const dispatch = useDispatch();
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
   const currentUserDetails: IUserDetails = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
@@ -221,6 +228,8 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
 
   /* State creation */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isfilter, setIsfilter] = useState<boolean>(false);
+
   const [filDocDatas, setFilDocDatas] = useState<IDocRepository[]>([]);
   const [selectedPath, setSelectedPath] = useState<ITabObject[]>([...items]);
   const [isFileSearch, setIsFileSearch] = useState<boolean>(false);
@@ -236,6 +245,20 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
     undefined
   );
   const [curFilePath, setCurFilePath] = useState<string>(CONFIG.fileFlowPath);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const isMobile = useMediaQuery("(max-width:768px)"); // Detect screen size
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>, index: number) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentIndex(index);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setCurrentIndex(null);
+  };
 
   /* Functions creation */
   const handleInputChange = async (
@@ -899,6 +922,55 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                 />
               </div>
             </div>
+
+            <div className={styles.ismobile}>
+              {selectedPath.length !== 1 && (
+                <div
+                  style={{
+                    display: isAdmin ? "flex" : "none",
+                  }}
+                >
+                  <DefaultButton
+                    // text="File upload"
+                    btnType="primaryGreen"
+                    onlyIcon
+                    title="File upload"
+                    startIcon={<Upload />}
+                    onClick={(_) => {
+                      resetFormData({ ...initialFileData }, setFormData);
+                      togglePopupVisibility(
+                        setPopupController,
+                        initialPopupController[1],
+                        1,
+                        "open"
+                      );
+                    }}
+                  />
+                </div>
+              )}
+              <div
+                style={{
+                  display: isAdmin ? "flex" : "none",
+                }}
+              >
+                <DefaultButton
+                  // text="Create a folder"
+                  title="Create a folder"
+                  btnType="primaryGreen"
+                  onlyIcon
+                  startIcon={<Add />}
+                  onClick={(_) => {
+                    resetFormData({ ...initialFormData }, setFormData);
+                    togglePopupVisibility(
+                      setPopupController,
+                      initialPopupController[0],
+                      0,
+                      "open"
+                    );
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className={styles.docRepoWrapper}>
@@ -981,6 +1053,18 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                           {val?.Content?.name}
                         </div>
                       </div>
+                      {/* <div
+                        className={styles.folderActionSec}
+                        style={{
+                          justifyContent:
+                            val?.Content?.fileType === "master_folder"
+                              ? "flex-start"
+                              : "end",
+                        }}
+                      >
+                       
+                      </div> */}
+
                       <div
                         className={styles.folderActionSec}
                         style={{
@@ -990,67 +1074,215 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                               : "end",
                         }}
                       >
-                        {val?.Content?.fileType === "master_folder" &&
-                        isAdmin ? (
+                        {!isMobile ? (
+                          // Normal layout for screens wider than 768px
                           <>
-                            <div
-                              style={{
-                                width: "50%",
-                              }}
-                            >
-                              <CustomDropDown
-                                highlightDropdown
-                                noErrorMsg
-                                value={val?.Priority}
-                                size="SM"
-                                width="100px"
-                                options={["1", "2", "3", "4", "5", "6", "7"]}
-                                onChange={(data: any) => {
-                                  handleStatusAndPriorityChange(
-                                    CONFIG.DocRepositoryColumn.Priority,
-                                    data,
-                                    val?.IsActive,
-                                    idx
-                                  );
-                                }}
-                              />
-                            </div>
+                            {val?.Content?.fileType === "master_folder" &&
+                              isAdmin && (
+                                <>
+                                  <div
+                                    style={{
+                                      width: "50%",
+                                    }}
+                                  >
+                                    <CustomDropDown
+                                      highlightDropdown
+                                      noErrorMsg
+                                      value={val?.Priority}
+                                      size="SM"
+                                      width="100px"
+                                      options={[
+                                        "1",
+                                        "2",
+                                        "3",
+                                        "4",
+                                        "5",
+                                        "6",
+                                        "7",
+                                      ]}
+                                      onChange={(data: any) => {
+                                        handleStatusAndPriorityChange(
+                                          CONFIG.DocRepositoryColumn.Priority,
+                                          data,
+                                          val?.IsActive,
+                                          idx
+                                        );
+                                      }}
+                                    />
+                                  </div>
 
-                            <div
-                              style={{
-                                width: "26%",
-                              }}
-                            >
-                              <InputSwitch
-                                className="sectionToggler"
-                                checked={val?.IsActive}
-                                onChange={(data: any) => {
-                                  handleStatusAndPriorityChange(
-                                    CONFIG.DocRepositoryColumn.IsActive,
-                                    data?.value,
-                                    val?.Priority,
-                                    idx
+                                  <div
+                                    style={{
+                                      width: "26%",
+                                    }}
+                                  >
+                                    <InputSwitch
+                                      className="sectionToggler"
+                                      checked={val?.IsActive}
+                                      onChange={(data: any) => {
+                                        handleStatusAndPriorityChange(
+                                          CONFIG.DocRepositoryColumn.IsActive,
+                                          data?.value,
+                                          val?.Priority,
+                                          idx
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                            {!val?.Content?.isSubFiles && isAdmin && (
+                              <DeleteIcon
+                                className={styles.deleteIcon}
+                                onClick={() => {
+                                  setCurObject({ ...val });
+                                  togglePopupVisibility(
+                                    setPopupController,
+                                    initialPopupController[2],
+                                    2,
+                                    "open"
                                   );
                                 }}
                               />
-                            </div>
+                            )}
                           </>
-                        ) : null}
+                        ) : (
+                          // More icon with menu for screens smaller than 768px
+                          <>
+                            <IconButton
+                              aria-label="more options"
+                              aria-controls={
+                                open ? "folder-action-menu" : undefined
+                              }
+                              aria-haspopup="true"
+                              onClick={(event: any) => {
+                                handleClick(event, idx);
+                              }}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
 
-                        {!val?.Content?.isSubFiles && isAdmin ? (
-                          <DeleteIcon
-                            className={styles.deleteIcon}
-                            onClick={() => {
-                              setCurObject({ ...val });
-                              togglePopupVisibility(
-                                setPopupController,
-                                initialPopupController[2],
-                                2,
-                                "open"
-                              );
-                            }}
-                          />
-                        ) : null}
+                            <Menu
+                              id={`menu-${idx}`}
+                              anchorEl={anchorEl}
+                              open={currentIndex === idx}
+                              onClose={handleClose}
+                              // MenuListProps={{
+                              //   "aria-labelledby": "more-options",
+                              // }}
+                            >
+                              {val?.Content?.fileType === "master_folder" &&
+                                isAdmin && (
+                                  <MenuItem>
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+
+                                        // width: "50%",
+                                      }}
+                                    >
+                                      <p
+                                        style={{
+                                          fontSize: "12px",
+                                        }}
+                                      >
+                                        Sort
+                                      </p>
+                                      <CustomDropDown
+                                        highlightDropdown
+                                        noErrorMsg
+                                        value={val?.Priority}
+                                        size="SM"
+                                        width="100px"
+                                        options={[
+                                          "1",
+                                          "2",
+                                          "3",
+                                          "4",
+                                          "5",
+                                          "6",
+                                          "7",
+                                        ]}
+                                        onChange={(data: any) => {
+                                          handleStatusAndPriorityChange(
+                                            CONFIG.DocRepositoryColumn.Priority,
+                                            data,
+                                            val?.IsActive,
+                                            idx
+                                          );
+                                        }}
+                                      />
+                                    </div>
+                                  </MenuItem>
+                                )}
+
+                              {val?.Content?.fileType === "master_folder" &&
+                                isAdmin && (
+                                  <MenuItem>
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+
+                                        // width: "26%",
+                                      }}
+                                    >
+                                      <p
+                                        style={{
+                                          fontSize: "12px",
+                                        }}
+                                      >
+                                        Activity
+                                      </p>
+                                      <InputSwitch
+                                        className="sectionToggler"
+                                        checked={val?.IsActive}
+                                        onChange={(data: any) => {
+                                          handleStatusAndPriorityChange(
+                                            CONFIG.DocRepositoryColumn.IsActive,
+                                            data?.value,
+                                            val?.Priority,
+                                            idx
+                                          );
+                                        }}
+                                      />
+                                    </div>
+                                  </MenuItem>
+                                )}
+
+                              {!val?.Content?.isSubFiles && isAdmin && (
+                                <MenuItem
+                                  onClick={() => {
+                                    setCurObject({ ...val });
+                                    togglePopupVisibility(
+                                      setPopupController,
+                                      initialPopupController[2],
+                                      2,
+                                      "open"
+                                    );
+                                    handleClose();
+                                  }}
+                                  sx={{
+                                    fontSize: "12px",
+                                  }}
+                                >
+                                  Delete
+                                  <DeleteIcon
+                                    className={styles.deleteIcon}
+                                    sx={{
+                                      fontSize: "24px", // Change font size
+                                      color: "red", // Change color
+                                    }}
+                                  />
+                                </MenuItem>
+                              )}
+                            </Menu>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -1059,6 +1291,76 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
             ) : (
               <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
             )}
+
+            <div className={styles.filtericon}>
+              <i
+                className="pi pi-filter"
+                onClick={() => {
+                  setIsfilter(!isfilter);
+                }}
+              />
+            </div>
+
+            <div
+              className={`${styles.filter_container} ${
+                isfilter ? styles.active_filter_container : ""
+              }`}
+
+              // className={`filter_container ${
+              //   isfilter ? "active_filter_container" : ""
+              // }`}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  margin: "10px",
+                }}
+              >
+                <CustomInput
+                  noErrorMsg
+                  value={strSearch}
+                  size="SM"
+                  placeholder="Search"
+                  onChange={(e: any) => {
+                    const value: string = e.trimStart();
+                    setStrSearch(value);
+                    // handleSearch(value, [...filDocDatas]);
+                  }}
+                />
+
+                <div>
+                  <DefaultButton
+                    text="Apply"
+                    size="small"
+                    fullWidth
+                    btnType="primaryGreen"
+                    onClick={(_) => {
+                      // handleSearch([...shownewsData]);
+
+                      handleSearch(strSearch, [...filDocDatas]);
+
+                      setIsfilter(!isfilter);
+                    }}
+                  />
+                </div>
+                <div>
+                  <DefaultButton
+                    text="Clear"
+                    size="small"
+                    fullWidth
+                    btnType="darkGreyVariant"
+                    onClick={(_) => {
+                      setIsfilter(!isfilter);
+
+                      setStrSearch("");
+                      handleSearch("", [...filDocDatas]);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Toast message section */}

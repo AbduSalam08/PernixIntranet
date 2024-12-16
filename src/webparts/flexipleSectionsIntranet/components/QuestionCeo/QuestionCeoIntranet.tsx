@@ -344,7 +344,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
             showIndicators={true}
             showNavigators={false}
             circular
-            autoplayInterval={CEOQuestions?.length > 1 ? 6000 : 8.64e7}
+            autoplayInterval={CEOQuestions?.length > 1 ? 8.64e7 : 8.64e7}
             // responsiveOptions={responsiveOptions}
             itemTemplate={productTemplate}
           />

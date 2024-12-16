@@ -103,6 +103,13 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 20px;
+  @media (max-width: 630px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    // gap: 30px;
+  }
 }
 
 .activepill {
@@ -169,6 +176,13 @@
     @media (max-width: 630px) {
       padding: 4px 8px;
       font-size: 12px;
+    }
+  }
+
+  @media (max-width: 630px) {
+    gap: 10px;
+    i {
+      font-size: 15px !important;
     }
   }
 }
