@@ -119,6 +119,17 @@ export const initialData = (
         type: "string",
       },
     },
+    TicketLocation: {
+      // value: isTicketManager || isITOwner ? "" : "Open",
+      // value: "Open",
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required",
+      validationRule: {
+        required: false,
+        type: "string",
+      },
+    },
     RepeatedTicket: {
       value: false,
       isValid: true,

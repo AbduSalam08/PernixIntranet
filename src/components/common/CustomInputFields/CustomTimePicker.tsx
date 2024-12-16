@@ -91,7 +91,7 @@ const CustomTimePicker: React.FC<ITimeInputProps> = ({
 }) => {
   const handleChange = useCallback(
     (e: any) => {
-      onChange && onChange(e?.target.value);
+      onChange?.(e?.target.value);
     },
     [onChange]
   );
@@ -210,7 +210,7 @@ const CustomTimePicker: React.FC<ITimeInputProps> = ({
                     ? "5px 13px !important"
                     : highlightDropdown
                     ? "18px 10px 6px 10px !important"
-                    : "18px !important",
+                    : "18px 15px !important",
                 paddingBottom: highlightDropdown
                   ? "3px !important"
                   : "6px !important",

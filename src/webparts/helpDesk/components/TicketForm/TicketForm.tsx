@@ -9,6 +9,7 @@ import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
 import CustomPeoplePicker from "../../../../components/common/CustomInputFields/CustomPeoplePicker";
 import CustomMultipleFileUpload from "../../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
+import CustomAutocomplete from "../../../../components/common/CustomInputFields/CustomAutoComplete";
 
 interface TicketFormProps {
   openNewTicketSlide: any;
@@ -61,9 +62,6 @@ const TicketForm: React.FC<TicketFormProps> = ({
   isTicketManager,
   isITOwner,
 }) => {
-  console.log("formData: ", formData);
-  console.log("formData?.Attachment?.value: ", formData?.Attachment?.value);
-  console.log("openNewTicketSlide: ", openNewTicketSlide);
   return (
     <Drawer
       anchor={"right"}
@@ -230,6 +228,25 @@ const TicketForm: React.FC<TicketFormProps> = ({
                     }}
                   />
                 )}
+
+              <CustomAutocomplete
+                options={["Chennai", "Bangalore", "Hyderabad"]}
+                value={formData.TicketLocation?.value}
+                onChange={(e: string) => {
+                  const value = e?.trimStart();
+                  const { isValid, errorMsg } = validateField(
+                    "TicketLocation",
+                    value,
+                    formData.TicketLocation.validationRule
+                  );
+                  handleInputChange("TicketLocation", value, isValid, errorMsg);
+                }}
+                placeholder="Select location"
+                label="Select location"
+                size="MD"
+                isValid={formData.TicketLocation?.isValid}
+                errorMsg={formData.TicketLocation?.errorMsg}
+              />
 
               <FloatingLabelTextarea
                 value={formData.TicketDescription.value}

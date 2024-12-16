@@ -96,6 +96,10 @@ export const mapRowDataToFormData = (
           : currentRowData?.Status
         : "Open",
     },
+    TicketLocation: {
+      ...initialData.TicketLocation,
+      value: currentRowData?.TicketLocation,
+    },
     // Add any other fields that need to be mapped.
   };
 };
@@ -335,7 +339,14 @@ export const validateRecurrenceForm = async (
             EndDate: recurrenceDetails?.EndDate?.value,
             Frequency: recurrenceDetails?.Frequency?.value,
             isActive: true,
-            DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+            DayOfWeek:
+              recurrenceDetails?.Frequency?.value === "Weekly"
+                ? recurrenceDetails?.DayOfWeek?.value
+                : null,
+            NextTicketDate:
+              recurrenceDetails?.Frequency?.value !== "Weekly"
+                ? ticketDetails
+                : null,
             ...ticketDetails,
           },
           recurrenceDetails?.TicketDetails?.value?.ID
@@ -369,7 +380,14 @@ export const validateRecurrenceForm = async (
           EndDate: recurrenceDetails?.EndDate?.value,
           Frequency: recurrenceDetails?.Frequency?.value,
           isActive: recurrenceDetails?.IsActive?.value,
-          DayOfWeek: recurrenceDetails?.DayOfWeek?.value,
+          DayOfWeek:
+            recurrenceDetails?.Frequency?.value === "Weekly"
+              ? recurrenceDetails?.DayOfWeek?.value
+              : null,
+          NextTicketDate:
+            recurrenceDetails?.Frequency?.value !== "Weekly"
+              ? ticketDetails
+              : null,
           ...ticketDetails,
         },
         recurrenceDetails?.TicketDetails?.value?.ID,
@@ -528,5 +546,7 @@ export const mapTicketDataToSchema = (ticketsData: any[]): ITicketSchema[] => {
     Modified: data?.["Modified."] || null,
     CreatedBy: mapPersonField(data.Author || []),
     ModifiedBy: mapPersonField(data.Editor || []),
+    Attachments: data?.Attachments === "1",
+    TicketLocation: data?.TicketLocation || "",
   })) as ITicketSchema[];
 };

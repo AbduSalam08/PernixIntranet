@@ -186,122 +186,6 @@ export const addNewTicket = async (
   }
 };
 
-// export const updateTicket = async (
-//   ticketID: any,
-//   formData: any,
-//   excludeKeys: any
-// ): Promise<any> => {
-//   console.log("formData: ", formData);
-//   const payload = await extractPayload(formData, excludeKeys, true);
-//   console.log("payload: ", payload);
-//   const extraPayload = {
-//     TicketClosedOn: payload?.Status === "Closed" ? dayjs(new Date()) : null,
-//   };
-
-//   const toastId = toast.loading("Updating ticket...");
-//   try {
-//     await SpServices.SPUpdateItem({
-//       Listname: CONFIG.ListNames.HelpDesk_AllTickets,
-//       ID: ticketID,
-//       RequestJSON: { ...payload, ...extraPayload },
-//     })
-//       .then(async (res: any) => {
-//         console.log("res: ", res);
-
-//         // updation of attachment
-//         const attachments = await sp.web.lists
-//           .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-//           .items.getById(ticketID)
-//           .attachmentFiles();
-
-//         if (formData?.Attachment?.value !== null) {
-//           try {
-//             // Check if an attachment was provided and if it's different from the existing one
-//             if (formData?.Attachment?.value?.name) {
-//               if (
-//                 attachments.length === 0 ||
-//                 (attachments.length > 0 &&
-//                   attachments[0]?.FileName !==
-//                     formData?.Attachment?.value?.name)
-//               ) {
-//                 // Delete existing attachments if there are any
-//                 if (attachments.length !== 0) {
-//                   await SpServices.SPDeleteAttachments({
-//                     ListName: CONFIG.ListNames.HelpDesk_AllTickets,
-//                     ListID: ticketID,
-//                     AttachmentName: attachments[0]?.FileName,
-//                   });
-//                 }
-
-//                 // Add the new attachment if a valid one is provided
-//                 if (formData?.Attachment.value?.type) {
-//                   await sp.web.lists
-//                     .getByTitle(CONFIG.ListNames.HelpDesk_AllTickets)
-//                     .items.getById(ticketID)
-//                     .attachmentFiles.add(
-//                       formData?.Attachment.value.name,
-//                       formData?.Attachment.value
-//                     );
-
-//                   console.log("Attachment updated successfully.");
-//                 }
-//               } else {
-//                 console.log("No changes detected in the attachment.");
-//               }
-//             }
-//           } catch (err) {
-//             console.error("Error handling attachments: ", err);
-//           }
-//         } else {
-//           // Handle case when `Attachment` is null (indicating a removal)
-//           if (attachments.length !== 0) {
-//             try {
-//               await SpServices.SPDeleteAttachments({
-//                 ListName: CONFIG.ListNames.HelpDesk_AllTickets,
-//                 ListID: ticketID,
-//                 AttachmentName: attachments[0]?.FileName,
-//               });
-
-//               console.log("Attachment removed!");
-//             } catch (err) {
-//               console.error("Error removing attachments: ", err);
-//             }
-//           } else {
-//             console.log("No attachments to remove.");
-//           }
-//         }
-//       })
-//       .catch((err: any) => {
-//         console.log("err: ", err);
-//         toast.update(toastId, {
-//           render: "Error while updating ticket. Please try again.",
-//           type: "error",
-//           isLoading: false,
-//           autoClose: 5000,
-//           hideProgressBar: false,
-//         });
-//       });
-
-//     toast.update(toastId, {
-//       render: "Ticket updated!",
-//       type: "success",
-//       isLoading: false,
-//       autoClose: 5000,
-//       hideProgressBar: false,
-//     });
-//   } catch (error) {
-//     console.error("Error while updating ticket:", error);
-//     toast.update(toastId, {
-//       render: "Error while updating ticket. Please try again.",
-//       type: "error",
-//       isLoading: false,
-//       autoClose: 5000,
-//       hideProgressBar: false,
-//     });
-//     throw error;
-//   }
-// };
-
 export const updateTicket = async (
   ticketID: any,
   formData: any,
@@ -552,6 +436,46 @@ export const updateRecurrenceConfigOfTicket = async (
 
     toast.update(toastId, {
       render: "Recurrence updated successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.error("Error update recurrence config for ticket:", err);
+    toast.update(toastId, {
+      render: "Failed to update recurrence!",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+    throw err;
+  }
+};
+
+export const removeRecurrenceConfigOfTicket = async (
+  ticketID: number,
+  configID: number
+): Promise<void> => {
+  const toastId = toast.loading("Updating recurrence configuration");
+  try {
+    // have to reset here if any changes needed in update
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.HelpDesk_RecurrenceConfig,
+      ID: configID,
+    });
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.HelpDesk_AllTickets,
+      ID: ticketID,
+      RequestJSON: {
+        HasRecurrence: false,
+        RecurrenceConfigDetailsId: null,
+      },
+    });
+
+    toast.update(toastId, {
+      render: "Recurrence removed successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,

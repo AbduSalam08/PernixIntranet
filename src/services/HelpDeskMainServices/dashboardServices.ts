@@ -128,7 +128,6 @@ export const getAllTicketsDataCamlQuery = async (): Promise<any> => {
         }
       });
     const mappedData = mapTicketDataToSchema([...data]);
-    console.log("[...data]", [...data]);
     return mappedData;
   } catch (err) {
     console.log("Datas fetching error for feedback: ", err);

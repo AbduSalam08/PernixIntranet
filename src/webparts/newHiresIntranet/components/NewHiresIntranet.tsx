@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import styles from "./NewHiresIntranet.module.scss";
 import "../../../assets/styles/style.css";
@@ -10,7 +11,6 @@ import resetPopupController, {
 } from "../../../utils/popupUtils";
 import Popup from "../../../components/common/Popups/Popup";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
-import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addNewHire,

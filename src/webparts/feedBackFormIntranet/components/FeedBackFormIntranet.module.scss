@@ -93,3 +93,68 @@
   font-size: 18px;
   color: #afafaf;
 }
+
+.container {
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .PRCarouselContainer {
+      height: auto;
+      padding: 16px;
+    }
+
+    .inputFieldContainer {
+      .secondRow {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+
+    .PRCarouselContainer {
+      .carouselContainer {
+        .CarouselTitle {
+          font-size: 14px;
+          line-height: 20px;
+        }
+      }
+    }
+
+    .noDataFound {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footerBTNSec {
+      margin-top: 16px;
+      flex-direction: column;
+      gap: 10px;
+
+      .sendBTN {
+        padding: 5px;
+        width: 100%;
+        font-size: 14px;
+      }
+
+      .viewAllBTN {
+        font-size: 14px;
+      }
+    }
+
+    .PRCarouselContainer {
+      height: auto;
+      padding: 12px;
+
+      .carouselContainer {
+        .CarouselTitle {
+          font-size: 14px;
+          line-height: 20px;
+        }
+      }
+    }
+
+    .noDataFound {
+      font-size: 14px;
+    }
+  }
+}

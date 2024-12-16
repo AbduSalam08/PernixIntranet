@@ -18,7 +18,7 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
-
+  flex-wrap: wrap;
   .backContainer {
     display: flex;
     align-items: center;
@@ -35,7 +35,9 @@
   .searchContainer {
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
 
     .refreshBTN {
       padding: 7px;
@@ -243,5 +245,228 @@
     color: #adadad;
     text-align: center;
     font-family: "osRegular";
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px 16px;
+  }
+
+  .headerContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+
+    .backContainer {
+      div {
+        i {
+          font-size: 18px;
+        }
+      }
+      .backHeader {
+        font-size: 18px;
+      }
+    }
+
+    .searchContainer {
+      gap: 10px;
+
+      .refreshBTN {
+        padding: 6px;
+      }
+    }
+  }
+
+  .tabsContainer {
+    gap: 15px;
+
+    div {
+      font-size: 16px;
+    }
+  }
+
+  .bodyContainer {
+    padding: 8px 12px;
+    height: calc(100vh - 220px);
+
+    .bodySection {
+      height: auto;
+
+      .titleSec {
+        width: 100%;
+        height: 40px;
+        padding: 0 10px;
+        font-size: 14px;
+      }
+
+      .iconSec {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+    }
+  }
+
+  .bodyNoDataFound {
+    font-size: 16px;
+    padding: 8px;
+  }
+
+  .inputFieldContainer {
+    .secondRow {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
+  .viewTitleSec {
+    font-size: 18px;
+  }
+
+  .viewBodyContainer {
+    height: calc(100vh - 200px);
+
+    .viewBodySec {
+      padding: 16px;
+
+      .viewAnsSec {
+        font-size: 14px;
+      }
+
+      .viewCardFooter {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+
+        .viewAvatarSec {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+
+          div {
+            font-size: 12px;
+          }
+        }
+
+        .viewDateSec {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .content {
+    gap: 12px;
+
+    img {
+      height: 50px;
+      width: 50px;
+    }
+
+    div {
+      font-size: 16px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+
+  .headerContainer {
+    gap: 10px;
+
+    .backContainer {
+      .backHeader {
+        font-size: 16px;
+      }
+    }
+
+    .searchContainer {
+      gap: 10px;
+
+      .refreshBTN {
+        padding: 5px;
+
+        i {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .tabsContainer {
+    gap: 12px;
+
+    div {
+      font-size: 14px;
+    }
+  }
+
+  .bodyContainer {
+    padding: 6px 8px;
+
+    .bodySection {
+      .titleSec {
+        font-size: 12px;
+      }
+
+      .iconSec {
+        gap: 8px;
+
+        svg {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .bodyNoDataFound {
+    font-size: 14px;
+  }
+
+  .viewTitleSec {
+    font-size: 16px;
+  }
+
+  .viewBodyContainer {
+    .viewBodySec {
+      padding: 12px;
+
+      .viewAnsSec {
+        font-size: 12px;
+      }
+
+      .viewCardFooter {
+        gap: 8px;
+
+        .viewAvatarSec {
+          gap: 5px;
+
+          div {
+            font-size: 10px;
+          }
+        }
+
+        .viewDateSec {
+          font-size: 10px;
+        }
+      }
+    }
+  }
+
+  .content {
+    gap: 8px;
+
+    img {
+      height: 40px;
+      width: 40px;
+    }
+
+    div {
+      font-size: 14px;
+    }
   }
 }

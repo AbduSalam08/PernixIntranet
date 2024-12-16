@@ -394,7 +394,7 @@ const CustomDropDown: React.FC<Props> = ({
                     ? "5px 13px !important"
                     : highlightDropdown
                     ? "18px 10px 6px 10px !important"
-                    : "18px !important",
+                    : "18px 15px !important",
                 paddingBottom: highlightDropdown
                   ? "3px !important"
                   : "6px !important",

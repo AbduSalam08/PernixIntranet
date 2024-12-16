@@ -13,14 +13,14 @@
   top: -4px !important;
 }
 .MuiInputLabel-root {
-  margin-left: 6px !important;
+  margin-left: 2px !important;
   top: -3px !important;
   color: #a4a4a4 !important;
   font-family: "osRegular", sans-serif !important;
 }
 .MuiInputBase-input {
   border-radius: 6px !important;
-  padding: 0px 18px !important;
+  padding: 0px 15px !important;
   padding-top: 14px !important;
   font-size: 15px;
   font-family: "osMedium", sans-serif !important;
@@ -154,4 +154,25 @@
 .p-float-label:has(.p-inputwrapper-filled) .labelSM {
   top: 11px !important;
   font-size: 11px !important;
+}
+.MuiAutocomplete-inputRoot {
+  padding: 8px 0 !important;
+}
+.MuiAutocomplete-inputRoot::before,
+.MuiAutocomplete-inputRoot::after {
+  display: none !important;
+}
+.MuiAutocomplete-input {
+  font-family: "osMedium", sans-serif !important;
+  padding: 0 10px !important;
+  padding-top: 14px !important;
+}
+.MuiAutocomplete-root .MuiInputLabel-root {
+  margin-left: 0 !important;
+}
+.MuiAutocomplete-option {
+  font-size: 14px !important;
+}
+.MuiAutocomplete-option[aria-selected="true"] {
+  background-color: #2d4b5120 !important;
 }
