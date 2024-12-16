@@ -26,6 +26,11 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+
+    @media (max-width: 768px) {
+      padding: 0;
+      gap: 8px;
+    }
   }
 }
 /* Define the grid container */

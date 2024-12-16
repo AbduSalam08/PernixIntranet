@@ -176,8 +176,92 @@
 }
 
 @media (max-width: 600px) {
+  .newsHeaderContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px;
+    .leftSection {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      i {
+        cursor: pointer;
+      }
+      p {
+        font-family: "osSemibold", sans-serif;
+        color: #0b4d53;
+        font-size: 16px;
+      }
+    }
+
+    .rightSection {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      .refreshBtn {
+        padding: 7px;
+        border-radius: 4px;
+        background-color: #0b4d53;
+        cursor: pointer;
+
+        i {
+          font-size: 20px;
+          font-weight: 500;
+          color: #ffff;
+        }
+      }
+      .addNewbtn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        background: #0b4d53;
+        // width: 114px;
+        height: 24px;
+        color: #fff;
+        padding: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+
+        i {
+          font-size: 12px !important;
+        }
+      }
+    }
+  }
+
+  .tabsContainer {
+    display: flex;
+    gap: 10px;
+    margin: 0px 20px;
+
+    div {
+      padding-bottom: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0b4d53;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  }
   .addNewsGrid {
     grid-template-columns: 1fr; /* Single column for very small screens */
+
+    .r3 {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      // gap: 20px;
+    }
+  }
+
+  .filter_container {
+    display: block;
   }
 }
 
@@ -187,4 +271,42 @@
   padding: 16px; /* Padding inside grid items */
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.filtericon {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  z-index: 5;
+  padding: 10px 8px 5px 8px;
+  border-radius: 50%;
+  box-shadow: 0 1.6px 3.6px 0 #00000022, 0 0.3px 0.9px 0 #0000001c;
+  background-color: #fff;
+
+  i {
+    font-size: 14px;
+    color: #0b4d53;
+    cursor: pointer;
+  }
+}
+
+.filter_container {
+  display: none;
+  position: fixed;
+  bottom: 70px;
+  right: -100%;
+  padding: 8px;
+  transition: 0.3s ease all;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 1.6px 3.6px 0 #00000022, 0 0.3px 0.9px 0 #0000001c;
+  z-index: 5;
+}
+
+.active_filter_container {
+  display: block;
+  right: 16px;
+  transition: 0.5s ease all;
 }

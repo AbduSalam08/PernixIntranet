@@ -202,6 +202,13 @@
           line-clamp: 2;
           -webkit-line-clamp: 2;
           white-space: normal;
+          @media (max-width: 1024px) {
+            font-size: 14px;
+          }
+
+          @media (max-width: 767px) {
+            font-size: 13px;
+          }
         }
       }
     }
@@ -215,6 +222,13 @@
       font-size: 13px;
       font-family: "osRegular", sans-serif;
       margin-bottom: 20px;
+      @media (max-width: 1024px) {
+        font-size: 12px;
+      }
+
+      @media (max-width: 767px) {
+        font-size: 11px;
+      }
 
       // font-weight: 500;
       // margin: 5px 0px 20px 0px;
@@ -222,6 +236,14 @@
         color: #e0803d;
       }
     }
+
+    @media (max-width: 768px) {
+      padding: 14px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 14px;
   }
 }
 
@@ -262,5 +284,12 @@
     line-clamp: 11;
     -webkit-line-clamp: 11;
     white-space: normal;
+
+    @media (max-width: 1024px) {
+      font-size: 12px;
+    }
+    @media (max-width: 768px) {
+      font-size: 11px;
+    }
   }
 }

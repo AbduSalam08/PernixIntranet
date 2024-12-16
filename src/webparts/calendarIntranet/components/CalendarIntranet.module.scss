@@ -115,8 +115,13 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Four equal-width columns */
   gap: 16px; /* Space between grid items */
+  margin: 20px 0px;
 }
-
+@media (max-width: 900px) {
+  .addNewsGrid {
+    grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
+  }
+}
 @media (min-width: 320px) and (max-width: 768px) {
   .calenderContainer {
     width: 100%;
@@ -223,7 +228,7 @@
   }
 
   .addNewsGrid {
-    grid-template-columns: 1fr; /* Single column for very small screens */
+    grid-template-columns: 1fr !important; /* Single column for very small screens */
   }
 }
 
@@ -234,11 +239,5 @@
 //       3,
 //       1fr
 //     ); /* Three columns for medium screens */
-//   }
-// }
-
-// @media (max-width: 900px) {
-//   .addNewsGrid {
-//     grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
 //   }
 // }

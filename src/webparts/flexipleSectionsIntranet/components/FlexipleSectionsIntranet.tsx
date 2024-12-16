@@ -175,6 +175,7 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
       setComponentsList(formattedData);
       const poll = formattedData.find((item: Curobj) => item.title === "Poll");
       setIsSelected(poll?.isActive ?? false);
+
       setInitialSelected(poll?.isActive ?? false);
 
       await _getAdmin();
@@ -238,7 +239,12 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
             {componentsList?.map(
               (component: Curobj) =>
                 component?.isActive && (
-                  <div key={component.title} style={{ flex: "1 1 100%" }}>
+                  <div
+                    key={component.title}
+                    // style={{
+                    //   flex: "1 1 100%",
+                    // }}
+                  >
                     {component?.title === "QuestionCeo" && (
                       <QuestionCeo props={props} />
                     )}

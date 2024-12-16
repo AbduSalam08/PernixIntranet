@@ -52,6 +52,8 @@ let isActivityPage: boolean = false;
 
 const PollPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
+  const [isfilter, setIsfilter] = useState<boolean>(false);
+
   const curUser = props.context._pageContext._user.email;
 
   const currentUserDetails: any = useSelector(
@@ -1070,6 +1072,69 @@ const PollPage = (props: any): JSX.Element => {
                 Add a Poll
               </div>
             </div>
+
+            <div className={styles.ismobile}>
+              <div
+                style={{
+                  display:
+                    currentUserDetails.role === CONFIG.RoleDetails.user
+                      ? "none"
+                      : "flex",
+                }}
+                className={styles.addNewbtn}
+                onClick={() => {
+                  resetFormData(formData, setFormData);
+                  resetOptionsData(options, setOptions);
+                  setFormData({
+                    Title: {
+                      value: "",
+                      Id: null,
+                      isValid: true,
+                      errorMsg: "Invalid title",
+                      validationRule: { required: true, type: "string" },
+                    },
+                    StartDate: {
+                      value: new Date(),
+                      Id: null,
+                      isValid: true,
+                      errorMsg: "Invalid input",
+                      validationRule: { required: true, type: "date" },
+                    },
+                    EndDate: {
+                      value: "",
+                      Id: null,
+                      isValid: true,
+                      errorMsg: "Invalid input",
+                      validationRule: { required: true, type: "date" },
+                    },
+                  });
+                  setOptions([
+                    {
+                      Id: 1,
+                      itemId: null,
+                      Title: "",
+                      value: "",
+                      Percentage: 0,
+                      isValid: true,
+                      errorMsg: "Invalid title",
+                      validationRule: { required: true, type: "string" },
+                    },
+                  ]);
+
+                  togglePopupVisibility(
+                    setPopupController,
+                    initialPopupController[0],
+                    0,
+                    "open"
+                  );
+                }}
+              >
+                <i
+                  className="pi pi-plus"
+                  style={{ fontSize: "1rem", color: "#fff" }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className={styles.tabsContainer}>
@@ -1247,6 +1312,104 @@ const PollPage = (props: any): JSX.Element => {
               ))}
             </div>
           )}
+
+          <div className={styles.filtericon}>
+            <i
+              className="pi pi-filter"
+              onClick={() => {
+                setIsfilter(!isfilter);
+                // togglePopupVisibility(
+                //   setPopupController,
+                //   initialPopupController[4],
+                //   4,
+                //   "open"
+                // );
+              }}
+              // style={{
+              //   fontSize: "1.2rem",
+              //   color: "#0b4d53",
+              //   cursor: "pointer",
+              // }}
+            />
+          </div>
+
+          <div
+            className={`${styles.filter_container} ${
+              isfilter ? styles.active_filter_container : ""
+            }`}
+
+            // className={`filter_container ${
+            //   isfilter ? "active_filter_container" : ""
+            // }`}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                margin: "10px",
+              }}
+            >
+              <CustomInput
+                value={searchField.allSearch}
+                noErrorMsg
+                size="SM"
+                secWidth="180px"
+                labelText="Search"
+                placeholder="Search"
+                onChange={(e) => {
+                  const value = e.trimStart();
+                  objFilter.allSearch = value;
+                  setSearchField({ ...searchField, allSearch: value });
+                }}
+              />
+
+              <CustomDateInput
+                label="Select date"
+                placeHolder="Date"
+                minWidth="180px"
+                maxWidth="180px"
+                size="SM"
+                value={
+                  searchField.selectedDate ? searchField.selectedDate : null
+                }
+                onChange={(e: any) => {
+                  const value: any = e;
+                  objFilter.selectedDate = value;
+                  setSearchField((prev: any) => ({
+                    ...prev,
+                    selectedDate: value,
+                  }));
+                }}
+              />
+              <div>
+                <DefaultButton
+                  text="Apply"
+                  size="small"
+                  fullWidth
+                  btnType="primaryGreen"
+                  onClick={(_) => {
+                    // handleSearch([...shownewsData]);
+                    handleSearch([...showcurrentPoll]);
+                    setIsfilter(!isfilter);
+                  }}
+                />
+              </div>
+              <div>
+                <DefaultButton
+                  text="Clear"
+                  size="small"
+                  fullWidth
+                  btnType="darkGreyVariant"
+                  onClick={(_) => {
+                    setIsfilter(!isfilter);
+
+                    handleRefresh();
+                  }}
+                />
+              </div>
+            </div>
+          </div>
 
           {popupController?.map((popupData: any, index: number) => (
             <Popup

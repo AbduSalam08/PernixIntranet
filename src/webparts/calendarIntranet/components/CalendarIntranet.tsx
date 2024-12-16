@@ -245,12 +245,13 @@ const CalendarIntranet = (props: any): JSX.Element => {
           }}
         />
         <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            alignItems: "center",
-            margin: "20px 0px",
-          }}
+          // style={{
+          //   display: "flex",
+          //   gap: "20px",
+          //   alignItems: "center",
+          //   margin: "20px 0px",
+          // }}
+          className={styles.addNewsGrid}
         >
           <CustomDateInput
             value={formData.StartDate.value}

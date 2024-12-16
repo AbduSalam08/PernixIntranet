@@ -36,6 +36,7 @@ import { setMainSPContext } from "../../../redux/features/MainSPContextSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { ToastContainer } from "react-toastify";
+import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 
 const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
 
@@ -69,6 +70,8 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   const ShoutOutsStoreData: any = useSelector((state: any) => {
     return state.ShoutOutsData.value;
   });
+  const [isfilter, setIsfilter] = useState<boolean>(false);
+
   const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
   const [showShoutOutsData, setShowShoutOutsData] = useState<any[]>([]);
   const [currentUserData, setCurrentUserData] = useState<any>({});
@@ -563,6 +566,31 @@ const ShoutOutsPage = (props: any): JSX.Element => {
             Add shout-out
           </div>
         </div>
+
+        <div className={styles.ismobile}>
+          <div
+            style={{
+              display: "flex",
+            }}
+            className={styles.addNewbtn}
+            onClick={() => {
+              setHandleForm({ ID: null, type: "Add" });
+              resetFormData(formData, setFormData);
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open",
+                "New Shout-out"
+              );
+            }}
+          >
+            <i
+              className="pi pi-plus"
+              style={{ fontSize: "1rem", color: "#fff" }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* tabs */}
@@ -764,6 +792,90 @@ const ShoutOutsPage = (props: any): JSX.Element => {
             })}
         </div>
       )}
+
+      <div className={styles.filtericon}>
+        <i
+          className="pi pi-filter"
+          onClick={() => {
+            setIsfilter(!isfilter);
+            // togglePopupVisibility(
+            //   setPopupController,
+            //   initialPopupController[4],
+            //   4,
+            //   "open"
+            // );
+          }}
+          // style={{
+          //   fontSize: "1.2rem",
+          //   color: "#0b4d53",
+          //   cursor: "pointer",
+          // }}
+        />
+      </div>
+
+      <div
+        className={`${styles.filter_container} ${
+          isfilter ? styles.active_filter_container : ""
+        }`}
+
+        // className={`filter_container ${
+        //   isfilter ? "active_filter_container" : ""
+        // }`}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            margin: "10px",
+          }}
+        >
+          <CustomInput
+            noErrorMsg
+            value={commonSearch?.Search}
+            size="SM"
+            placeholder="Search"
+            onChange={(e: any) => {
+              const value: string = e.trimStart();
+              searchField.Search = value;
+              setCommonSearch((prev: IPageSearchFields) => ({
+                ...prev,
+                Search: value,
+              }));
+            }}
+          />
+          <div>
+            <DefaultButton
+              text="Apply"
+              size="small"
+              fullWidth
+              btnType="primaryGreen"
+              onClick={(_) => {
+                handleSearch([...shoutOutsData]);
+
+                setIsfilter(!isfilter);
+              }}
+            />
+          </div>
+          <div>
+            <DefaultButton
+              text="Clear"
+              size="small"
+              fullWidth
+              btnType="darkGreyVariant"
+              onClick={(_) => {
+                setIsfilter(!isfilter);
+
+                searchField.Search = "";
+                searchField.Status = "";
+                searchField.Date = null;
+                setCommonSearch({ ...searchField });
+                handleSearch([...shoutOutsData]);
+              }}
+            />
+          </div>
+        </div>
+      </div>
 
       {showShoutOutsData.length > 0 && (
         <div

@@ -88,6 +88,14 @@
 
     .folderCard {
       flex: 0 0 140px; // Show around 2 items on medium screens (40% width each)
+
+      img {
+        width: 55px;
+        height: 55px;
+      }
+      span {
+        font-size: 13px;
+      }
     }
   }
 
@@ -97,6 +105,14 @@
 
     .folderCard {
       flex: 0 0 140px; // Show around 1 item on small screens (70% width each)
+
+      img {
+        width: 45px;
+        height: 45px;
+      }
+      span {
+        font-size: 12px;
+      }
     }
   }
 }

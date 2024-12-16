@@ -20,6 +20,7 @@
   @media (max-width: 630px) {
     flex-direction: column;
     align-items: flex-start;
+    padding: 10px;
   }
 }
 
@@ -62,8 +63,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: "osSemiBold", sans-serif;
-    @media (max-width: 700px) {
+
+    @media (max-width: 1024px) {
       font-size: 14px;
+    }
+    @media (max-width: 700px) {
+      font-size: 13px;
     }
   }
 
@@ -82,6 +87,10 @@
     -webkit-line-clamp: 3;
     white-space: normal;
 
+    @media (max-width: 1024px) {
+      font-size: 13px;
+    }
+
     @media (max-width: 700px) {
       font-size: 12px;
       line-height: 16px;
@@ -96,6 +105,10 @@
       -webkit-line-clamp: 6;
       white-space: normal;
     }
+  }
+  @media (max-width: 800px) {
+    width: 100%;
+    max-width: calc(53% - 5px);
   }
 
   @media (max-width: 630px) {
@@ -125,6 +138,9 @@
   font-size: 12px;
   color: #333;
   text-transform: uppercase;
+  @media (max-width: 1024px) {
+    font-size: 12px;
+  }
 
   @media (max-width: 630px) {
     font-size: 10px;
@@ -162,6 +178,10 @@
       &:hover {
         background-color: #c82333;
       }
+    }
+    @media (max-width: 1024px) {
+      padding: 4px 8px;
+      font-size: 13px;
     }
 
     @media (max-width: 630px) {

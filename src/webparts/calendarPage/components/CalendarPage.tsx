@@ -30,6 +30,7 @@ import dayjs from "dayjs";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomTimePicker from "../../../components/common/CustomInputFields/CustomTimePicker";
 import { ToastContainer } from "react-toastify";
+import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 
 interface IEvent {
   title: string;
@@ -55,6 +56,8 @@ let isActivityPage: boolean = false;
 
 const CalendarPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
+  const [isfilter, setIsfilter] = useState<boolean>(false);
+
   const calenderIntranetData: any = useSelector((state: any) => {
     return state.CalenderIntranetData.value;
   });
@@ -319,19 +322,11 @@ const CalendarPage = (props: any): JSX.Element => {
             handleInputChange("Title", value, isValid, errorMsg);
           }}
         />
-        <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            alignItems: "center",
-            margin: "20px 0px",
-          }}
-        >
+        <div className={styles.popupinputlayout}>
           <CustomDateInput
             value={formData.StartDate.value}
             label="Date"
             isDateController={true}
-            size="SM"
             minimumDate={new Date()}
             error={!formData.StartDate.isValid}
             errorMsg={formData.StartDate.errorMsg}
@@ -414,14 +409,7 @@ const CalendarPage = (props: any): JSX.Element => {
             handleInputChange("Title", value, isValid, errorMsg);
           }}
         />
-        <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            alignItems: "center",
-            margin: "20px 0px",
-          }}
-        >
+        <div className={styles.popupinputlayout}>
           <CustomDateInput
             value={formData.StartDate.value}
             label="Date"
@@ -827,6 +815,7 @@ const CalendarPage = (props: any): JSX.Element => {
           <div className={styles.refreshBtn} onClick={handleRefresh}>
             <i className="pi pi-refresh" />
           </div>
+
           <div
             style={{
               display:
@@ -883,6 +872,64 @@ const CalendarPage = (props: any): JSX.Element => {
               style={{ fontSize: "1rem", color: "#fff" }}
             />
             Add an event
+          </div>
+        </div>
+        <div className={styles.isaddNewbtn}>
+          <div
+            style={{
+              display:
+                currentUserDetails.role === CONFIG.RoleDetails.user
+                  ? "none"
+                  : "flex",
+            }}
+            className={styles.addNewbtn}
+            onClick={() => {
+              setSelectvalue({ ...selectvalue, id: null, isEdit: false });
+              resetFormData(formData, setFormData);
+              setFormData({
+                Title: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Invalid name",
+                  validationRule: { required: true, type: "string" },
+                },
+                StartDate: {
+                  value: new Date(),
+                  isValid: true,
+                  errorMsg: "Invalid input",
+                  validationRule: { required: true, type: "date" },
+                },
+                StartTime: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "StartTime is required",
+                  validationRule: { required: true, type: "string" },
+                },
+                EndTime: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "EndTime is required",
+                  validationRule: { required: true, type: "string" },
+                },
+                Description: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: true, type: "string" },
+                },
+              });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open"
+              );
+            }}
+          >
+            <i
+              className="pi pi-plus"
+              style={{ fontSize: "1rem", color: "#fff" }}
+            />
           </div>
         </div>
       </div>
@@ -995,6 +1042,105 @@ const CalendarPage = (props: any): JSX.Element => {
             ))}
           </div>
         )}
+
+        <div className={styles.filtericon}>
+          <i
+            className="pi pi-filter"
+            onClick={() => {
+              setIsfilter(!isfilter);
+              // togglePopupVisibility(
+              //   setPopupController,
+              //   initialPopupController[4],
+              //   4,
+              //   "open"
+              // );
+            }}
+            // style={{
+            //   fontSize: "1.2rem",
+            //   color: "#0b4d53",
+            //   cursor: "pointer",
+            // }}
+          />
+        </div>
+
+        <div
+          className={`${styles.filter_container} ${
+            isfilter ? styles.active_filter_container : ""
+          }`}
+
+          // className={`filter_container ${
+          //   isfilter ? "active_filter_container" : ""
+          // }`}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              margin: "10px",
+            }}
+          >
+            <CustomInput
+              value={searchField.allSearch}
+              noErrorMsg
+              secWidth="200px"
+              labelText="Search"
+              placeholder="Search"
+              onChange={(e) => {
+                const value = e;
+                objFilter.allSearch = value;
+                setSearchField({ ...searchField, allSearch: value });
+                // handleSearch([...shownewsData]);
+              }}
+              size="SM"
+            />
+            <CustomDateInput
+              label="Select date"
+              placeHolder="Date"
+              minWidth="200px"
+              maxWidth="200px"
+              value={searchField.selectedDate ? searchField.selectedDate : null}
+              onChange={(e: any) => {
+                const value: any = e;
+                objFilter.selectedDate = value;
+                setSearchField((prev: any) => ({
+                  ...prev,
+                  selectedDate: value,
+                }));
+                // handleSearch([...shownewsData]);
+              }}
+              size="SM"
+            />
+
+            <div>
+              <DefaultButton
+                text="Apply"
+                size="small"
+                fullWidth
+                btnType="primaryGreen"
+                onClick={(_) => {
+                  // handleSearch([...shownewsData]);
+
+                  handleSearch([...calendardata]);
+                  setIsfilter(!isfilter);
+                }}
+              />
+            </div>
+            <div>
+              <DefaultButton
+                text="Clear"
+                size="small"
+                fullWidth
+                btnType="darkGreyVariant"
+                onClick={(_) => {
+                  setIsfilter(!isfilter);
+
+                  handleRefresh();
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Toast message section */}

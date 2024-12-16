@@ -39,6 +39,7 @@ import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import { Checkbox } from "primereact/checkbox";
 import { ToastContainer } from "react-toastify";
+import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 
 interface IReplies {
   avatarUrl: string;
@@ -82,6 +83,7 @@ let isActivityPage: boolean = false;
 const QuestionsCeoPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const [isfilter, setIsfilter] = useState<boolean>(false);
 
   const QuestionCEOIntranetData: any = useSelector((state: any) => {
     return state.QuestionCEOIntranetData.value;
@@ -1006,6 +1008,32 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             </div>
           )}
         </div>
+
+        <div className={styles.ismobile}>
+          {userDetails?.role !== "CEO" && (
+            <div
+              style={{
+                display: "flex",
+              }}
+              className={styles.addNewbtn}
+              onClick={() => {
+                resetFormData(newFormData, setNewFormData);
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[1],
+                  1,
+                  "open",
+                  "Create a question to leadership"
+                );
+              }}
+            >
+              <i
+                className="pi pi-plus"
+                style={{ fontSize: "1rem", color: "#fff" }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* tabs */}
@@ -1151,10 +1179,13 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                     </div>
                   ) : (
                     <div
-                      className={styles.cardAnsSec}
+                      // className={styles.cardAnsSec}
                       style={{
                         color: "#adadad",
                         justifyContent: "center",
+                        height: "30vh !important",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
                       Not answered yet!
@@ -1307,6 +1338,92 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
             })}
         </div>
       )}
+
+      <div className={styles.filtericon}>
+        <i
+          className="pi pi-filter"
+          onClick={() => {
+            setIsfilter(!isfilter);
+            // togglePopupVisibility(
+            //   setPopupController,
+            //   initialPopupController[4],
+            //   4,
+            //   "open"
+            // );
+          }}
+          // style={{
+          //   fontSize: "1.2rem",
+          //   color: "#0b4d53",
+          //   cursor: "pointer",
+          // }}
+        />
+      </div>
+
+      <div
+        className={`${styles.filter_container} ${
+          isfilter ? styles.active_filter_container : ""
+        }`}
+
+        // className={`filter_container ${
+        //   isfilter ? "active_filter_container" : ""
+        // }`}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            margin: "10px",
+          }}
+        >
+          <CustomInput
+            noErrorMsg
+            value={commonSearch?.Search}
+            placeholder="Search"
+            size="SM"
+            onChange={(e: any) => {
+              const value: string = e.trimStart();
+              searchField.Search = value;
+              setCommonSearch((prev: IPageSearchFields) => ({
+                ...prev,
+                Search: value,
+              }));
+              // handleSearch([...ceoQuestionsdata]);
+            }}
+          />
+          <div>
+            <DefaultButton
+              text="Apply"
+              size="small"
+              fullWidth
+              btnType="primaryGreen"
+              onClick={(_) => {
+                // handleSearch([...shownewsData]);
+                handleSearch([...ceoQuestionsdata]);
+
+                setIsfilter(!isfilter);
+              }}
+            />
+          </div>
+          <div>
+            <DefaultButton
+              text="Clear"
+              size="small"
+              fullWidth
+              btnType="darkGreyVariant"
+              onClick={(_) => {
+                setIsfilter(!isfilter);
+
+                searchField.Search = "";
+                searchField.Status = "";
+                searchField.Date = null;
+                setCommonSearch({ ...searchField });
+                handleSearch([...ceoQuestionsdata]);
+              }}
+            />
+          </div>
+        </div>
+      </div>
 
       {showCEOQuestions.length > 0 && (
         <div
