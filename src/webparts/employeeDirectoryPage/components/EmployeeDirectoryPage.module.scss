@@ -373,3 +373,97 @@
   padding: 10px;
   padding-bottom: 20px;
 }
+
+// Popup design
+.popupFirstRow {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+
+  .detailsSec {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .nameSec {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .jobTitleSec {
+      font-size: 12px;
+      font-weight: 600;
+      color: #adadad;
+    }
+  }
+}
+
+.popSecondRow {
+  display: flex;
+  margin-bottom: 20px;
+  width: 100%;
+  gap: 20px;
+
+  .leftSec {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      label {
+        width: 40%;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      p {
+        width: 60%;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .rightSec {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .rowData {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .rowHeading {
+        width: 40%;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .rowValue {
+        width: 60%;
+        font-size: 14px;
+
+        .rowTag {
+          padding: 4px 12px;
+          border-radius: 4px;
+          background: #00800021;
+          color: #008000;
+          font-weight: 600;
+          font-size: 12px;
+        }
+      }
+
+      .inputFieldsSec {
+        width: 60%;
+      }
+    }
+  }
+}

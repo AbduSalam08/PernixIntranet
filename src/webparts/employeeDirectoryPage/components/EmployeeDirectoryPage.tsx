@@ -4,6 +4,9 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable no-dupe-else-if */
+/* eslint-disable no-unused-expressions */
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
 import "./Style.css";
@@ -12,14 +15,9 @@ import { MSGraphClient } from "@microsoft/sp-http";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import DataTable from "../../../components/common/DataTable/DataTable";
 import { Icon, Persona, PersonaSize } from "@fluentui/react";
-import { MailOutline, Visibility } from "@mui/icons-material";
-// import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
+import { Edit, MailOutline, Visibility } from "@mui/icons-material";
 import { TextField } from "office-ui-fabric-react";
 import { Drawer } from "@mui/material";
-import {
-  getuserdetails,
-  skillUpdate,
-} from "../../../services/EmployeeDirectory/EmployeeDirectory";
 import moment from "moment";
 import { InputSwitch } from "primereact/inputswitch";
 import SpServices from "../../../services/SPServices/SpServices";
@@ -29,22 +27,76 @@ import { useDispatch, useSelector } from "react-redux";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { sp } from "@pnp/sp/presets/all";
+import {
+  getuserdetails,
+  skillUpdate,
+} from "../../../services/EmployeeDirectory/EmployeeDirectory";
+import resetPopupController, {
+  togglePopupVisibility,
+} from "../../../utils/popupUtils";
+import DefaultButton from "../../../components/common/Buttons/DefaultButton";
+import Popup from "../../../components/common/Popups/Popup";
+import { ToastContainer } from "react-toastify";
+import { IEDMonthDrop } from "../../../interface/interface";
 
-// import { Item } from "@pnp/sp/items";
-// import { Button } from "primereact/button";
-// import DataTable from "../../../components/common/DataTable/DataTable";
+/* Interfaces creation */
+interface IEDFormFields {
+  Month: string;
+  Date: string;
+  Skills: string;
+  Qualifications: string;
+  Experience: string;
+}
 
+/* Global variable creation */
 let isAdmin: boolean = false;
+const formFields: IEDFormFields = {
+  Date: "",
+  Experience: "",
+  Month: "",
+  Qualifications: "",
+  Skills: "",
+};
 
 const EmployeeDirectoryPage = (props: any): JSX.Element => {
+  /* Local variable creation */
   const dispatch = useDispatch();
 
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
-  console.log("currentUserDetails: ", currentUserDetails);
   isAdmin = currentUserDetails?.role === CONFIG.RoleDetails.user ? false : true;
 
+  /* popup properties */
+  const initialPopupController: any[] = [
+    {
+      open: false,
+      popupTitle: "",
+      popupWidth: "1200px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "Folder created successfully!",
+        error: "Something went wrong!",
+        successDescription:
+          "The new folder 'ABC' has been created successfully.",
+        errorDescription:
+          "An error occured while adding folder, please try again later.",
+        inprogress: "Adding new folder, please wait...",
+      },
+    },
+  ];
+
+  /* State creation */
+  const [popupController, setPopupController] = useState<any[]>(
+    initialPopupController
+  );
   const [filterkey, setfilterkey] = useState({
     _status: "",
     _gsearch: "",
@@ -59,14 +111,15 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     isopen: false,
     popupedit: false,
   });
-  const [globalfilterdata, setglobalfilterdata] = useState<any>([]);
-  console.log(panelPopupFlag, globalfilterdata);
-  const [listData, setListData] = useState<any>([]);
-  console.log(listData);
   const [filterFlag, setFilterFlag] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>([]);
   const [userDuplicateData, setUserDuplicateData] = useState<any>([]);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [formData, setFormData] = useState<IEDFormFields>({ ...formFields });
+  const [isSubmit, setIsSubmit] = useState<boolean>(false);
+
+  /* Styles creation */
   const textFieldStyle = {
     fieldGroup: {
       ".ms-TextField-fieldGroup": {
@@ -107,30 +160,8 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       },
     },
   };
-  // const searchBoxStyle: Partial<ISearchBoxStyles> = {
-  //   root: {
-  //     padding: "0 10px",
-  //     fontSize: 16,
-  //     width: "100%",
-  //     borderRadius: "6px",
-  //     border: "none !important",
 
-  //     ".ms-SearchBox-icon": {
-  //       fontWeight: 900,
-  //       color: "rgb(151 144 155) !important",
-  //     },
-  //     ".ms-SearchBox": {
-  //       border: "none !important",
-  //     },
-  //     "::after": {
-  //       border: "none !important",
-  //       backgrounColor: "white",
-  //     },
-  //     ".ms-Button-flexContainer": {
-  //       background: "transparent",
-  //     },
-  //   },
-  // };
+  /* Data table columns creation */
   const columns = [
     {
       sortable: true,
@@ -140,15 +171,14 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       renderCell: (params: any) => {
         return (
           <div
-            onClick={() => {
-              setPanelPopupFlag({
-                ...panelPopupFlag,
-                isopen: true,
-                popupedit: false,
-              });
-              setPanelItem(params.row);
-
-              //("shanmugraj");
+            onClick={async () => {
+              setPanelItem({ ...params?.row });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open"
+              );
             }}
             style={{ cursor: "pointer" }}
             className={styles.personabox}
@@ -169,7 +199,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       headerName: "Phone number",
       width: 170,
       renderCell: (params: any) => {
-        //(params);
         return params.row.Phone ? (
           <div className={styles.detailphonebox}>
             <Icon
@@ -187,7 +216,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         );
       },
     },
-
     {
       sortable: false,
       field: "officeLocation",
@@ -201,23 +229,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         );
       },
     },
-    // {
-    //   sortable: false,
-    //   field: "Skills",
-    //   headerName: "Skills",
-    //   width: 200,
-    //   renderCell: (params: any) => {
-    //     return (
-    //       <div>
-    //         <label>
-    //           {params.row.Skills.length > 0
-    //             ? params.row.Skills.join(",")
-    //             : "Software Developer"}
-    //         </label>
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       sortable: false,
       field: "JobTitle",
@@ -231,7 +242,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         );
       },
     },
-
     {
       sortable: false,
       field: "Manager.name",
@@ -239,12 +249,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       width: 200,
       renderCell: (params: any) => {
         return params?.row?.Manager.name ? (
-          <div
-            onClick={() => {
-              //("shanmugraj");
-            }}
-            className={styles.personabox}
-          >
+          <div className={styles.personabox}>
             <Persona
               title={params.row.Manager?.name}
               imageUrl={`/_layouts/15/userphoto.aspx?username=${params.row.Manager.email}`}
@@ -257,39 +262,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         );
       },
     },
-    // {
-    //   sortable: false,
-    //   field: "Email",
-    //   headerName: "Email",
-    //   width: 200,
-    //   renderCell: (params: any) => {
-    //     return (
-    //       <div
-    //         style={
-    //           {
-    //             // maxWidth: "200px",
-    //           }
-    //         }
-    //       >
-    //         <p
-    //           style={{
-    //             margin: 0,
-    //             width: "190px",
-    //             overflow: "hidden",
-    //             textOverflow: "ellipsis",
-    //             whiteSpace: "nowrap",
-    //           }}
-    //           title={params?.row?.Email || "-"}
-    //         >
-    //           {params.row.Email || "-"}
-    //         </p>
-    //       </div>
-    //       // <div>
-    //       //   <label>{params.row.Email || "-"}</label>
-    //       // </div>
-    //     );
-    //   },
-    // },
     {
       sortable: false,
       field: "Action",
@@ -300,14 +272,14 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           <div className={styles.twoiconbox}>
             <div
               className={styles.visibilityicon}
-              onClick={() => {
-                //;
-                setPanelPopupFlag({
-                  ...panelPopupFlag,
-                  isopen: true,
-                  popupedit: false,
-                });
-                setPanelItem(params.row);
+              onClick={async () => {
+                setPanelItem({ ...params?.row });
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[0],
+                  0,
+                  "open"
+                );
               }}
             >
               <Visibility
@@ -339,272 +311,16 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 />
               </div>
             )}
-            {/* <div className={styles.windowediticon}>
-              <Icon
-                style={{
-                  fontWeight: "bold",
-                  color: " #007ef2",
-                }}
-                iconName="WindowEdit"
-                onClick={() => {
-                  //;
-                  setPanelPopupFlag({
-                    ...panelPopupFlag,
-                    popupedit: true,
-                    isopen: true,
-                  });
-                  setPanelItem(params.row);
-                }}
-              />
-            </div> */}
           </div>
         );
       },
     },
   ];
-  const onLoadingFUN = async (): Promise<void> => {
-    setFilterFlag(false);
-    setfilterkey({
-      _status: "",
-      _gsearch: "",
-      Name: "",
-      Phone: "",
-      Skills: "",
-      Dropdown: "All",
-      Email: "",
-    });
-    setPanelPopupFlag({
-      isopen: false,
-      popupedit: false,
-    });
 
-    getuserskills();
-  };
-  // This function is userskillupdatefunction
-  const updatefunction = async (tempdata: any, listdata: any) => {
-    const updatedList = tempdata.map((item: any) => {
-      const matchingItem = listdata?.find(
-        (newitem: any) => newitem.Userid === item.Id
-      );
-
-      if (matchingItem) {
-        return {
-          ...item,
-          // Skills: [...matchingItem[0].Skills],
-          ListId: matchingItem?.ListId,
-          isActive: matchingItem?.isActive || false,
-        };
-      }
-      return item;
-    });
-
-    const additionaldata: { _listId: any; Searchstring: string }[] = [];
-    updatedList.map((_reitem: any) => {
-      let newstring = "";
-      for (const newitem in _reitem) {
-        if (
-          typeof _reitem[newitem] === "string" ||
-          typeof _reitem[newitem] === "number"
-        ) {
-          newstring += `  ${_reitem[newitem]}`;
-        } else if (Array.isArray(_reitem[newitem]) && _reitem[newitem]) {
-          //;
-          newstring += ` ${_reitem[newitem].join(" ")}`;
-        }
-      }
-      additionaldata.push({
-        _listId: _reitem.Id,
-        Searchstring: newstring.toLowerCase(),
-      });
-    });
-
-    const temp = isAdmin
-      ? updatedList
-      : updatedList.filter((val: any) => val.isActive);
-
-    setglobalfilterdata(additionaldata);
-    console.log("temp: ", temp);
-
-    setUserData(temp);
-    // setUserData(updatedList);
-    console.log("updatedList: ", updatedList);
-    setUserDuplicateData(temp);
-    // setUserDuplicateData(updatedList);
-    setIsLoading(false);
-  };
-  // get all user from Azure
-  async function fetchUser(context: any, filterSuffix: string) {
-    const client: MSGraphClient =
-      await context.msGraphClientFactory.getClient();
-
-    let allUsers: any[] = [];
-    let nextPageUrl: string | undefined = undefined;
-
-    try {
-      // Step 1: Fetch all users with basic details (ID, mail, displayName)
-      do {
-        const response: any = nextPageUrl
-          ? await client
-              .api(nextPageUrl)
-              .version("v1.0")
-              .top(999)
-              .select(
-                "department,skill,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
-              )
-              .expand("manager")
-              .get()
-          : await client
-              .api("/users")
-              .version("v1.0")
-              .top(999)
-              .select(
-                "department,skill,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
-              )
-              .expand("manager")
-              .get();
-
-        allUsers = allUsers.concat(response.value);
-
-        nextPageUrl = response["@odata.nextLink"];
-      } while (nextPageUrl);
-
-      console.log(allUsers, "Fetched all users");
-
-      //  Fetch birthday extension for each user
-      const usersWithBirthdays = await Promise.all(
-        allUsers.map(async (user: any, index: number) => {
-          try {
-            // Fetch extensions for the user
-            const userDetails = await client
-              .api(`/users/${user.id}?$select=birthday,skills`)
-              .version("v1.0")
-              .get();
-            console.log(userDetails, "userdetail");
-
-            if (userDetails?.birthday && userDetails.skills) {
-              return {
-                id: index,
-                Skills:
-                  userDetails?.skills?.length > 0
-                    ? userDetails.skills.toString()?.split(",")
-                    : [],
-                ListId: null,
-                isActive: false,
-                officeLocation: user.officeLocation ? user.officeLocation : "",
-                Phone: user.mobilePhone ? user.mobilePhone : "",
-                Name: user.displayName ? user.displayName : "",
-                Id: user.id ? user.id : null,
-                JobTitle: user.jobTitle ? user.jobTitle : "",
-                SureName: user.surname ? user.surname : "",
-                Language: user.preferredLanguage ? user.preferredLanguage : "",
-                Email: user.userPrincipalName ? user.userPrincipalName : "",
-                Manager: {
-                  email: user.manager ? user.manager.mail : "",
-                  name: user.manager ? user.manager.displayName : "",
-                },
-                birthday: userDetails.birthday, // Directly map birthday
-              };
-            }
-
-            return null;
-          } catch (error) {
-            console.error(
-              `Error fetching birthday for user ${user.id}:`,
-              error
-            );
-            return null;
-          }
-        })
-      );
-
-      // Filter results based on email suffix and remove null entries
-      const filteredUsers = usersWithBirthdays.filter(
-        (user) => user && user.Email?.endsWith(filterSuffix)
-      );
-
-      return filteredUsers;
-    } catch (error) {
-      console.error("Error fetching user birthdays:", error);
-      return [];
-    }
-  }
-
-  // this function is tenentlevelallUsergetFunction
-  const getallusers = async (listdata: any[]) => {
-    const curUser: any = await sp.web.currentUser.get();
-    const userMailStructure: string = `@${curUser?.Email?.split("@")[1]}`;
-    const users = await fetchUser(props.context, userMailStructure);
-
-    await updatefunction(users, listdata);
-    // setIsLoading(false);
-
-    // props.context.msGraphClientFactory
-    //   .getClient()
-    //   .then((client: MSGraphClient) => {
-    //     client
-    //       .api("/users?$filter=userType eq 'Member'")
-    //       .version("v1.0")
-    //       .top(999)
-    //       .select(
-    //         "department,accountEnabled,Country,mail,id,displayName,Country,jobTitle,mobilePhone,manager,ext,givenName,surname,userPrincipalName,userType,businessPhones,officeLocation,identities"
-    //       )
-    //       .expand("manager")
-    //       .get()
-    //       .then((response) => {
-    //         console.log("response: ", response);
-
-    //         const tempdata: any = [];
-    //         response.value.forEach((item: any, index: number) => {
-    //           tempdata.push({
-    //             id: index,
-    //             Skills: [],
-    //             ListId: null,
-    //             officeLocation: item.officeLocation ? item.officeLocation : "",
-    //             Phone: item.mobilePhone ? item.mobilePhone : "",
-    //             Name: item.displayName ? item.displayName : "",
-    //             Id: item.id ? item.id : null,
-    //             JobTitle: item.JobTitle ? item.JobTitle : "",
-    //             SureName: item.surname ? item.surname : "",
-    //             Language: item.preferredLanguage ? item.preferredLanguage : "",
-    //             Email: item.userPrincipalName ? item.userPrincipalName : "",
-    //             Manager: {
-    //               email: item.manager ? item.manager.mail : "",
-    //               name: item.manager ? item.manager.displayName : "",
-    //             },
-    //           });
-    //         });
-
-    //         updatefunction(tempdata, listdata);
-    //         setIsLoading(false);
-    //       })
-    //       .catch((error) => {
-    //         console.error("Error fetching users: ", error);
-    //       });
-    //   });
-  };
-
-  // This function is UsersSkill function
-
-  async function getuserskills() {
-    await getuserdetails().then((item) => {
-      const tempdata: any = [];
-      item.forEach((useritem: any) => {
-        tempdata.push({
-          Userid: useritem.Userid ? useritem.Userid : "",
-          Skills: useritem.Skills ? useritem.Skills : [],
-          ListId: useritem.Id ? useritem.Id : null,
-          isActive: useritem.isActive ? useritem.isActive : false,
-        });
-      });
-
-      setListData([...tempdata]);
-      getallusers(tempdata);
-    });
-  }
   // This function is Filterfunction
   const filterfunction = async (_filterkey: any, text: string) => {
     let _data: any = [...userDuplicateData];
-    // const searchtext = text.toLowerCase().trim();
+
     if (_filterkey.Name !== "") {
       _data = _data.filter(
         (item: any) =>
@@ -624,7 +340,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             .includes(_filterkey.Phone.trim())
       );
     }
-
     if (_filterkey.Skills !== "") {
       _data = _data.filter(
         (item: any) =>
@@ -632,12 +347,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           item.Skills?.toString()
             .toLowerCase()
             .includes(_filterkey.Skills.trim().toLowerCase())
-
-        // item.Skills.some(
-        //   (newitem: any) =>
-        //     newitem?.Skills?.toLowerCase() ===
-        //     _filterkey.Skills.trim().toLowerCase()
-        // )
       );
     }
     if (_filterkey.Email !== "") {
@@ -653,6 +362,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     setfilterkey({ ..._filterkey });
     setUserData([..._data]);
   };
+
   // This function is FilterOnchangehandlerfunction
   const filterOnchangehandler = async (key: any, text: any) => {
     const _filterkey: any = { ...filterkey };
@@ -674,31 +384,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       Skills: [...filterdata],
     });
   };
-  // const globalfiltersetdata = (_data: any) => {
-  //   const newdata: any = [];
-  //   const _duplicatedata = [...userDuplicateData];
-  //   _duplicatedata.filter((arr) => {
-  //     if (_data.some((newItem: any) => newItem._listId === arr.Id)) {
-  //       newdata.push(arr);
-  //     }
-  //   });
-  //   setUserData([...newdata]);
-  // };
-  // const globalfilterfunction = (value: any) => {
-  //   let _data = [...globalfilterdata];
-  //   if (value !== "") {
-  //     const findtext = value.toLowerCase().toString();
-  //     _data = _data.filter((item) => item.Searchstring.includes(findtext));
-  //     if (_data.length > 0) {
-  //       globalfiltersetdata(_data);
-  //     } else if (_data.length === 0) {
-  //       setUserData([..._data]);
-  //     }
-  //   } else if (value === "") {
-  //     const _data = [...userDuplicateData];
-  //     setUserData([..._data]);
-  //   }
-  // };
 
   const handleSearch = (val: any): void => {
     const searchDropdown = val?.Dropdown || "All";
@@ -730,78 +415,31 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     setUserData([...filteredResults]);
   };
 
-  //active in active users
-
-  // const showandHideuser = async (
-  //   isActive: boolean,
-  //   id: any,
-  //   listid: any
-  // ): Promise<void> => {
-  //   try {
-  //     if (listid) {
-  //       await SpServices.SPUpdateItem({
-  //         Listname: CONFIG.ListNames.EmployeeDirectory_Config,
-  //         ID: listid,
-  //         RequestJSON: { isActive: isActive, Userid: id },
-  //       });
-  //     } else {
-  //       let res=await SpServices.SPAddItem({
-  //         Listname: CONFIG.ListNames.EmployeeDirectory_Config,
-  //         RequestJSON: {
-  //           isActive: isActive,
-  //           Userid: id,
-  //         },
-  //       });
-  //     }
-  //   } catch {
-  //     console.log("fetching error in active and in active");
-  //   }
-  // };
-
   const showandHideuser = async (
     isActive: boolean,
     id: any,
     listid: any
   ): Promise<void> => {
     try {
-      let response: any;
       if (listid) {
-        // Update the existing item
-        response = await SpServices.SPUpdateItem({
+        await SpServices.SPUpdateItem({
           Listname: CONFIG.ListNames.EmployeeDirectory_Config,
           ID: listid,
           RequestJSON: { isActive: isActive, Userid: id },
         });
 
-        // Update the state by finding the existing item and updating it
-        // setUserData((prevState: any) =>
-        //   prevState.map((item: any) =>
-        //     item.Id === listid
-        //       ? { ...item, isActive: isActive, Userid: id }
-        //       : item
-        //   )
-        // );
-        console.log("response: ", response);
-
         await fetchInitialList();
       } else {
         // Add a new item
-        response = await SpServices.SPAddItem({
+        await SpServices.SPAddItem({
           Listname: CONFIG.ListNames.EmployeeDirectory_Config,
           RequestJSON: {
             isActive: isActive,
             Userid: id,
           },
         });
-        console.log("response: ", response);
 
         await fetchInitialList();
-
-        // Add the new item to the state
-        // setUserData((prevState: any) => [
-        //   ...prevState,
-        //   { isActive: isActive, Userid: id, ListId: response?.data?.Id }, // Use the returned data to add the new item
-        // ]);
       }
     } catch (error) {
       console.error("Fetching error in active and inactive:", error);
@@ -819,6 +457,305 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       });
   };
 
+  const updateExtension = async (): Promise<void> => {
+    const client: MSGraphClient =
+      await props.context.msGraphClientFactory.getClient();
+
+    const extension = {
+      Experience: formData?.Experience,
+      Qualifications: formData?.Qualifications,
+    };
+
+    try {
+      await client
+        .api(`/users/${panelItem?.Id}/extensions/${panelItem?.Id}`)
+        .version("v1.0")
+        .header("Content-Type", "application/json")
+        .update(extension);
+
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      setIsLoading(true);
+      await fetchInitialList();
+    } catch (err) {
+      setIsSubmit(false);
+      console.log("err: ", err);
+    }
+  };
+
+  const addExtension = async (): Promise<void> => {
+    const client: MSGraphClient =
+      await props.context.msGraphClientFactory.getClient();
+
+    const extension = {
+      "@odata.type": "microsoft.graph.openTypeExtension",
+      extensionName: panelItem?.Id,
+      Experience: formData?.Experience,
+      Qualifications: formData?.Qualifications,
+    };
+
+    try {
+      await client
+        .api(`/users/${panelItem?.Id}/extensions`)
+        .version("v1.0")
+        .header("Content-Type", "application/json")
+        .post(extension);
+
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[0],
+        0,
+        "close"
+      );
+      setIsLoading(true);
+      await fetchInitialList();
+    } catch (err) {
+      setIsSubmit(false);
+      console.log("err: ", err);
+    }
+  };
+
+  const updateUser = async (): Promise<void> => {
+    const monthNumber: string = moment().month(formData?.Month).format("MM");
+
+    const updateJSON: any = {
+      birthday: `1999-${monthNumber}-${formData?.Date}T00:00:00Z`,
+      skills: formData?.Skills?.split(","),
+    };
+
+    const client: MSGraphClient =
+      await props.context.msGraphClientFactory.getClient();
+
+    try {
+      await client
+        .api(`/users/${panelItem?.Id}`)
+        .version("v1.0")
+        .header("Content-Type", "application/json")
+        .update(updateJSON);
+
+      !panelItem.isExtension ? addExtension() : updateExtension();
+    } catch (err) {
+      setIsSubmit(false);
+      console.log("err: ", err);
+    }
+  };
+
+  const handleSubmit = async (): Promise<void> => {
+    setIsSubmit(true);
+    updateUser();
+  };
+
+  const handleEdit = async (val: any): Promise<void> => {
+    setFormData((prev: IEDFormFields) => ({
+      ...prev,
+      Date: val?.birthday ? moment(val?.birthday).format("DD") : "",
+      Month: val?.birthday ? moment(val?.birthday).format("MMMM") : "",
+      Skills: val?.Skills.join(",") || "",
+      Qualifications: val?.Qualifications || "",
+      Experience: val?.Experience || "",
+    }));
+    setIsEdit(true);
+  };
+
+  // This function is userskillupdatefunction
+  const updatefunction = async (tempdata: any, listdata: any) => {
+    const updatedList = tempdata.map((item: any) => {
+      const matchingItem = listdata?.find(
+        (newitem: any) => newitem.Userid === item.Id
+      );
+
+      if (matchingItem) {
+        return {
+          ...item,
+          ListId: matchingItem?.ListId,
+          isActive: matchingItem?.isActive || false,
+        };
+      }
+      return item;
+    });
+
+    const additionaldata: { _listId: any; Searchstring: string }[] = [];
+    updatedList.map((_reitem: any) => {
+      let newstring = "";
+      for (const newitem in _reitem) {
+        if (
+          typeof _reitem[newitem] === "string" ||
+          typeof _reitem[newitem] === "number"
+        ) {
+          newstring += `  ${_reitem[newitem]}`;
+        } else if (Array.isArray(_reitem[newitem]) && _reitem[newitem]) {
+          newstring += ` ${_reitem[newitem].join(" ")}`;
+        }
+      }
+      additionaldata.push({
+        _listId: _reitem.Id,
+        Searchstring: newstring.toLowerCase(),
+      });
+    });
+
+    const temp = isAdmin
+      ? updatedList
+      : updatedList.filter((val: any) => val.isActive);
+
+    setUserData(temp);
+    setUserDuplicateData(temp);
+    setIsEdit(false);
+    setIsSubmit(false);
+    setIsLoading(false);
+  };
+
+  // get all user from Azure
+  const fetchUser = async (context: any, filterSuffix: string) => {
+    const client: MSGraphClient =
+      await context.msGraphClientFactory.getClient();
+
+    let allUsers: any[] = [];
+    let nextPageUrl: string | undefined = undefined;
+
+    try {
+      do {
+        const response: any = nextPageUrl
+          ? await client
+              .api(nextPageUrl)
+              .version("v1.0")
+              .top(999)
+              .select(
+                "department, skill, accountEnabled, Country, mail, id, displayName, Country, jobTitle, mobilePhone, manager, ext, givenName, surname, userPrincipalName, userType, businessPhones, officeLocation, identities"
+              )
+              .expand("manager, extensions")
+              .get()
+          : await client
+              .api("/users")
+              .version("v1.0")
+              .top(999)
+              .select(
+                "department, skill, accountEnabled, Country, mail, id, displayName, Country, jobTitle, mobilePhone, manager, ext, givenName, surname, userPrincipalName, userType, businessPhones, officeLocation, identities"
+              )
+              .expand("manager, extensions")
+              .get();
+
+        allUsers = allUsers.concat(response.value);
+
+        nextPageUrl = response["@odata.nextLink"];
+      } while (nextPageUrl);
+
+      //  Fetch birthday extension for each user
+      const usersWithBirthdays: any[] = await Promise.all(
+        allUsers?.map(async (user: any, index: number) => {
+          try {
+            // Fetch extensions for the user
+            const userDetails = await client
+              .api(`/users/${user.id}?$select=birthday,skills`)
+              .version("v1.0")
+              .get();
+
+            if (userDetails?.birthday && userDetails.skills) {
+              return {
+                id: index,
+                Skills:
+                  userDetails?.skills?.length > 0
+                    ? userDetails.skills.toString()?.split(",")
+                    : [],
+                ListId: null,
+                isActive: false,
+                officeLocation: user.officeLocation ? user.officeLocation : "",
+                Phone: user.mobilePhone ? user.mobilePhone : "",
+                Name: user.displayName ? user.displayName : "",
+                Id: user.id ? user.id : null,
+                JobTitle: user.jobTitle ? user.jobTitle : "",
+                SureName: user.surname ? user.surname : "",
+                Language: user.preferredLanguage ? user.preferredLanguage : "",
+                Email: user.userPrincipalName ? user.userPrincipalName : "",
+                Manager: {
+                  email: user.manager ? user.manager.mail : "",
+                  name: user.manager ? user.manager.displayName : "",
+                },
+                birthday:
+                  moment(userDetails?.birthday).format("YYYYMMDD") !==
+                  "00010101"
+                    ? moment(userDetails?.birthday).format()
+                    : "",
+                Department: user?.department || "",
+                BusinessPhones: user?.businessPhones?.length
+                  ? user?.businessPhones?.[0]
+                  : "",
+                Experience: user?.extensions?.[0]?.Experience || "",
+                Qualifications: user?.extensions?.[0]?.Qualifications || "",
+                isExtension: user?.extensions?.length ? true : false,
+              };
+            }
+
+            return null;
+          } catch (error) {
+            console.log("Error fetching user data: ", error);
+
+            return null;
+          }
+        }) || []
+      );
+
+      // Filter results based on email suffix and remove null entries
+      const filteredUsers = usersWithBirthdays.filter(
+        (user) => user && user.Email?.endsWith(filterSuffix)
+      );
+
+      return filteredUsers;
+    } catch (error) {
+      console.error("Error fetching user birthdays: ", error);
+
+      return [];
+    }
+  };
+
+  // this function is tenentlevelallUsergetFunction
+  const getallusers = async (listdata: any[]) => {
+    const curUser: any = await sp.web.currentUser.get();
+    const userMailStructure: string = `@${curUser?.Email?.split("@")[1]}`;
+    const users = await fetchUser(props.context, userMailStructure);
+
+    await updatefunction(users, listdata);
+  };
+
+  // This function is UsersSkill function
+  const getuserskills = async () => {
+    await getuserdetails().then(async (item) => {
+      const tempdata: any[] = [];
+      item?.forEach((useritem: any) => {
+        tempdata.push({
+          Userid: useritem.Userid ? useritem.Userid : "",
+          Skills: useritem.Skills ? useritem.Skills : [],
+          ListId: useritem.Id ? useritem.Id : null,
+          isActive: useritem.isActive ? useritem.isActive : false,
+        });
+      });
+
+      await getallusers(tempdata);
+    });
+  };
+
+  const onLoadingFUN = async (): Promise<void> => {
+    setFilterFlag(false);
+    setfilterkey({
+      _status: "",
+      _gsearch: "",
+      Name: "",
+      Phone: "",
+      Skills: "",
+      Dropdown: "All",
+      Email: "",
+    });
+    setPanelPopupFlag({
+      isopen: false,
+      popupedit: false,
+    });
+
+    await getuserskills();
+  };
+
   const fetchInitialList = async () => {
     setIsLoading(true);
 
@@ -832,34 +769,316 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     await onLoadingFUN();
   };
 
-  const handleClick = async (): Promise<void> => {
-    const client: MSGraphClient =
-      await props.context.msGraphClientFactory.getClient();
-    const userId: string = "63e44a51-faa9-49d9-b302-e202d5e9aa7c";
+  const popupInputs: any[] = [
+    [
+      <div key={0}>
+        <div className={styles.popupFirstRow}>
+          <Persona
+            title={panelItem?.Name || ""}
+            imageUrl={`/_layouts/15/userphoto.aspx?username=${
+              panelItem?.Email || ""
+            }`}
+            size={PersonaSize.size100}
+          />
+          <div className={styles.detailsSec}>
+            <div className={styles.nameSec}>{panelItem?.Name || "-"}</div>
+            <div className={styles.jobTitleSec}>
+              {panelItem?.JobTitle || "-"}
+            </div>
+            <DefaultButton
+              btnType="primaryGreen"
+              title="Edit profile"
+              text="Edit profile"
+              startIcon={<Edit />}
+              style={{
+                display:
+                  // (isAdmin && !isEdit) ||
+                  (false && !isEdit) ||
+                  (panelItem?.Email?.toLowerCase() ===
+                    currentUserDetails?.email?.toLowerCase() &&
+                    !isEdit)
+                    ? "flex"
+                    : "none",
+              }}
+              onClick={async () => {
+                await handleEdit({ ...panelItem });
+              }}
+            />
+          </div>
+        </div>
+        <div className={styles.popSecondRow}>
+          <div className={styles.leftSec}>
+            <div>
+              <label>Department</label>
+              <p>{panelItem?.Department || "-"}</p>
+            </div>
+            <div>
+              <label>Office location</label>
+              <p>{panelItem?.officeLocation || "-"}</p>
+            </div>
+            <div>
+              <label>Managers name</label>
+              <p
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <Persona
+                  title={panelItem?.Manager?.name}
+                  imageUrl={`/_layouts/15/userphoto.aspx?username=${panelItem?.Manager?.email}`}
+                  size={PersonaSize.size24}
+                />
+                {panelItem?.Manager?.name}
+              </p>
+            </div>
+            <div>
+              <label>Office phone number</label>
+              <p>{panelItem?.BusinessPhones || "-"}</p>
+            </div>
+            <div>
+              <label>Mobile phone number</label>
+              <p>{panelItem?.Phone || "-"}</p>
+            </div>
+          </div>
+          <div className={styles.rightSec}>
+            <div className={styles.rowData}>
+              <label className={styles.rowHeading}>Birthday</label>
+              {!isEdit ? (
+                <p className={styles.rowValue}>
+                  {panelItem?.birthday
+                    ? moment(panelItem.birthday).format("MMM Do")
+                    : "-"}
+                </p>
+              ) : (
+                <div
+                  className={styles.inputFieldsSec}
+                  style={{
+                    display: "flex",
+                    justifyContent: "end",
+                    gap: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "48%",
+                    }}
+                  >
+                    <CustomDropDown
+                      disabled={isSubmit}
+                      options={CONFIG.Months}
+                      value={formData?.Month}
+                      size="SM"
+                      onChange={(value: string) => {
+                        setFormData((prev: IEDFormFields) => ({
+                          ...prev,
+                          Month: value,
+                          Date: "",
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: "48%",
+                    }}
+                  >
+                    <CustomDropDown
+                      options={
+                        !formData?.Month
+                          ? []
+                          : CONFIG.EDMonthDrop?.filter(
+                              (val: IEDMonthDrop) =>
+                                val?.Month === formData?.Month
+                            )?.[0]?.Date
+                      }
+                      value={formData?.Date}
+                      size="SM"
+                      disabled={
+                        isSubmit ? true : formData?.Month ? false : true
+                      }
+                      onChange={(value: string) => {
+                        setFormData((prev: IEDFormFields) => ({
+                          ...prev,
+                          Date: value,
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className={styles.rowData}>
+              <label className={styles.rowHeading}>
+                Skills{" "}
+                {isEdit && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      paddingTop: "10px",
+                      color: "#aeaeae",
+                    }}
+                  >
+                    {`( Enter your values using commas )`}
+                  </div>
+                )}
+              </label>
+              {!isEdit ? (
+                <p
+                  className={styles.rowValue}
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {panelItem?.Skills?.length
+                    ? panelItem?.Skills?.map((val: string, idx: number) => {
+                        return (
+                          <span key={idx} className={styles.rowTag}>
+                            {val}
+                          </span>
+                        );
+                      })
+                    : "-"}
+                </p>
+              ) : (
+                <div className={styles.inputFieldsSec}>
+                  <CustomInput
+                    disabled={isSubmit}
+                    noErrorMsg
+                    size="SM"
+                    value={formData?.Skills}
+                    onChange={(value: string) => {
+                      setFormData((prev: IEDFormFields) => ({
+                        ...prev,
+                        Skills: value.trimStart(),
+                      }));
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            <div className={styles.rowData}>
+              <label className={styles.rowHeading}>Qualifications</label>
+              {!isEdit ? (
+                <p className={styles.rowValue}>
+                  {panelItem?.Qualifications || "-"}
+                </p>
+              ) : (
+                <div className={styles.inputFieldsSec}>
+                  <CustomInput
+                    disabled={isSubmit}
+                    noErrorMsg
+                    size="SM"
+                    value={formData?.Qualifications}
+                    onChange={(value: string) => {
+                      setFormData((prev: IEDFormFields) => ({
+                        ...prev,
+                        Qualifications: value.trimStart(),
+                      }));
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            <div className={styles.rowData}>
+              <label className={styles.rowHeading}>Experience</label>
+              {!isEdit ? (
+                <p className={styles.rowValue}>
+                  {panelItem?.Experience || "-"}
+                </p>
+              ) : (
+                <div className={styles.inputFieldsSec}>
+                  <CustomInput
+                    disabled={isSubmit}
+                    noErrorMsg
+                    size="SM"
+                    value={formData?.Experience}
+                    onChange={(value: string) => {
+                      setFormData((prev: IEDFormFields) => ({
+                        ...prev,
+                        Experience: value.trimStart(),
+                      }));
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>,
+    ],
+  ];
 
-    try {
-      const updateJSON = {
-        birthday: "1999-06-27T00:00:00Z",
-        skills: ["SFPx", "React JS", "Java Script"],
-        mobilePhone: "9843489905"
-      };
-
-      await client.api(`/users/${userId}`).update(updateJSON);
-    } catch (err) {
-      console.log("err: ", err);
-    }
-  };
+  const popupActions: any[] = [
+    isEdit
+      ? [
+          {
+            text: "Cancel",
+            btnType: "darkGreyVariant",
+            disabled: isSubmit,
+            endIcon: false,
+            startIcon: false,
+            size: "large",
+            onClick: () => {
+              setIsEdit(false);
+            },
+          },
+          {
+            text: "Submit",
+            btnType: "primaryGreen",
+            disabled: isSubmit,
+            endIcon: false,
+            startIcon: false,
+            size: "large",
+            onClick: async () => {
+              await handleSubmit();
+            },
+          },
+        ]
+      : [
+          {
+            text: "Close",
+            btnType: "darkGreyVariant",
+            disabled: false,
+            endIcon: false,
+            startIcon: false,
+            size: "large",
+            onClick: () => {
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "close"
+              );
+              setIsEdit(false);
+            },
+          },
+        ],
+  ];
 
   useEffect(() => {
+    setIsLoading(true);
     fetchInitialList();
   }, []);
 
   return (
     <div className={styles.container}>
-      <button onClick={() => handleClick()}>AD data update</button>
       {isLoading ? (
         <div className={styles.LoaderContainer}>
           <CircularSpinner />
+          {/* <button
+            onClick={() => {
+              let isClick: boolean = false;
+
+              if (!isClick) {
+                updateUser();
+              }
+            }}
+          >
+            Click
+          </button> */}
         </div>
       ) : (
         <div>
@@ -882,7 +1101,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 />
 
                 <p>Employee Directory</p>
-                {/* <Icon iconName="SkypeArrow" className={styles.icon} /> */}
               </div>
 
               <div className={styles.filterbox}>
@@ -906,6 +1124,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                     size="SM"
                   />
                 </div>
+
                 <div>
                   <CustomInput
                     noErrorMsg
@@ -920,19 +1139,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                     }}
                     size="SM"
                   />
-                  {/* <SearchBox
-                    placeholder="Search..."
-                    styles={searchBoxStyle}
-                    value={filterkey._gsearch}
-                    onChange={(e, value: any) => {
-                      setfilterkey({
-                        ...filterkey,
-                        _gsearch: value,
-                      });
-                      // globalfilterfunction(value);
-                      handleSearch({ ...filterkey, _gsearch: value });
-                    }}
-                  /> */}
                 </div>
                 <div>
                   <div
@@ -958,44 +1164,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 </div>
               </div>
             </div>
-            {/* <div className={styles.headingbox}> */}
-            {/* <div>
-                <h3>Employee Directory</h3>
-              </div> */}
-            {/* <div className={styles.filterbox}>
-                <div>
-                  <SearchBox
-                    placeholder="Search..."
-                    styles={searchBoxStyle}
-                    value={filterkey._gsearch}
-                    onChange={(e, value: any) => {
-                      setfilterkey({
-                        ...filterkey,
-                        _gsearch: value,
-                      });
-                      globalfilterfunction(value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <div
-                    className={styles["new-blog-button"]}
-                    onClick={() => {
-                      setFilterFlag(!filterFlag);
-                    }}
-                  >
-                    <Icon
-                      iconName="Filter"
-                      style={{
-                        fontWeight: 700,
-                        fontSize: "16PX",
-                      }}
-                    />
-                    <span>Filter</span>
-                  </div>
-                </div>
-              </div> */}
-            {/* </div> */}
+
             {filterFlag === true ? (
               <div className={styles.textfieldbox}>
                 <div>
@@ -1123,10 +1292,8 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             <div className={styles.dbWrapper}>
               <DataTable
                 rows={userData}
-                // rows={dataGridProps?.sortedBy==="Asc (Old)"? currentRoleBasedData?.data:dataGridProps?.sortedBy==="Desc (Latest)"?DescData:[]}
                 columns={columns}
                 emptyMessage="No results found!"
-                // isLoading={HelpDeskTicktesData?.isLoading}
                 pageSize={10}
                 headerBgColor={"#e5e9e570"}
                 checkboxSelection={false}
@@ -1135,6 +1302,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           </div>
         </div>
       )}
+
       <Drawer
         anchor={"right"}
         open={panelPopupFlag.isopen}
@@ -1207,7 +1375,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 style={{
                   color: "#0b4d53",
                   fontSize: "20px",
-                  // marginLeft: "8px",
                 }}
               />
               <label> {panelItem.Phone ? panelItem.Phone : "-"}</label>
@@ -1228,7 +1395,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 style={{
                   color: "#0b4d53",
                   fontSize: "20px",
-                  // marginLeft: "10PX",
                 }}
               />
 
@@ -1297,7 +1463,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 <div
                   className={styles["new-blog-button"]}
                   onClick={() => {
-                    // setPanelItem([]);
                     setPanelPopupFlag({
                       ...panelPopupFlag,
                       isopen: false,
@@ -1307,12 +1472,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 >
                   <button className={styles.cancelbutton}>Cancel</button>
                 </div>
-                <div
-                  className={styles["new-blog-button"]}
-                  onClick={() => {
-                    //("shanmugaraj");
-                  }}
-                >
+                <div className={styles["new-blog-button"]}>
                   <button
                     className={styles.submitbutton}
                     onClick={() => {
@@ -1327,6 +1487,55 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           ) : null}
         </div>
       </Drawer>
+
+      {/* Toast message section */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
+      {/* add and edit popup section */}
+      {popupController?.map((popupData: any, index: number) => (
+        <Popup
+          key={index}
+          isLoading={popupData?.isLoading}
+          messages={popupData?.messages}
+          resetPopup={() => {
+            setPopupController((prev: any): any => {
+              resetPopupController(prev, index, true);
+            });
+          }}
+          PopupType={popupData.popupType}
+          onHide={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              index,
+              "close"
+            );
+          }}
+          popupTitle={
+            popupData.popupType !== "confimation" && popupData.popupTitle
+          }
+          popupActions={popupActions[index]}
+          visibility={popupData.open}
+          content={popupInputs[index]}
+          popupWidth={popupData.popupWidth}
+          defaultCloseBtn={popupData.defaultCloseBtn || false}
+          confirmationTitle={
+            popupData.popupType !== "custom" ? popupData.popupTitle : ""
+          }
+          popupHeight={index === 0 ? true : false}
+          noActionBtn={true}
+        />
+      ))}
     </div>
   );
 };
