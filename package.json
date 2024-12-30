@@ -13,6 +13,8 @@
     "serve": "fast-serve"
   },
   "dependencies": {
+    "@azure/msal-browser": "^2.39.0",
+    "@azure/msal-react": "^2.2.0",
     "@coreui/coreui": "^4.2.6",
     "@coreui/react": "^4.8.0",
     "@emotion/react": "^11.11.4",

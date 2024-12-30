@@ -31,6 +31,7 @@ export interface IListName {
   FlexibleSection: string;
   Intranet_BlogComments: string;
   Intranet_PernixWiki: string;
+  HelpDesk_TicketLocationConfig: string;
 }
 
 export interface ISPGroupName {
@@ -398,4 +399,9 @@ export interface ITicketSchema {
   ModifiedBy: IPersonField | null;
   TicketLocation: string | null;
   Attachments: boolean;
+}
+
+export interface IEDMonthDrop {
+  Month: string;
+  Date: string[];
 }
