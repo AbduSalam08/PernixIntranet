@@ -24,6 +24,8 @@ import { CONFIG } from "../../../config/config";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import { ToastContainer } from "react-toastify";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
 // interface
 interface Curobj {
   Id: number;
@@ -36,6 +38,8 @@ let _isAdmin: boolean = false;
 const FlexipleSectionIntranet = (props: any): JSX.Element => {
   // state variable
   const [componentsList, setComponentsList] = useState<Curobj[]>([]);
+  const isMobile = useMediaQuery("(max-width:768px)"); // Detect screen size
+
   const [isSelected, setIsSelected] = useState<boolean>(false);
   const [initialSelected, setInitialSelected] = useState<boolean>(false);
   const [isLoader, setIsLoader] = useState<boolean>(true);
@@ -219,7 +223,13 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
               <DefaultButton
                 btnType="primaryGreen"
                 title="Edit Layout"
-                text={<EditIcon />}
+                text={
+                  <EditIcon
+                    sx={{
+                      width: isMobile ? "16px" : "auto",
+                    }}
+                  />
+                }
                 // text={"Edit Layout"}
                 onClick={() => {
                   togglePopupVisibility(

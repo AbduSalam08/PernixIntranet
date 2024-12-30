@@ -117,14 +117,32 @@
   gap: 16px; /* Space between grid items */
   margin: 20px 0px;
 }
-@media (max-width: 900px) {
-  .addNewsGrid {
-    grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
-  }
-}
-@media (min-width: 320px) and (max-width: 768px) {
+// @media (max-width: 900px) {
+//   .addNewsGrid {
+//     grid-template-columns: repeat(2, 1fr); /* Two columns for small screens */
+//   }
+// }
+
+// @media (max-width: 1200px) {
+//   .calenderContainer {
+//     height: auto;
+//     .container {
+//       width: 50%;
+//       // display: block;
+//       height: auto;
+//       // flex-wrap: wrap;
+//       .calenderSection {
+//         width: 50%;
+//         margin: 18px 0px;
+//         // .mycalender {
+//         //   width: 100%;
+//         // }
+//       }
+//     }
+//   }
+// }
+@media (max-width: 768px) {
   .calenderContainer {
-    width: 100%;
     height: auto;
     .container {
       display: block;

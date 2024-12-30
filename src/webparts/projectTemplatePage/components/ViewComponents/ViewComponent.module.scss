@@ -1,0 +1,45 @@
+.container {
+  //   background-color: #cccc !important;
+
+  width: 100%;
+
+  .firstRow {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+
+    .imgSection {
+      width: 60%;
+      height: 450px;
+      border-radius: 10px;
+    }
+    .detailsSection {
+      width: 40%;
+      height: 450px;
+      border-radius: 10px;
+
+      background-color: #fff;
+      padding: 20px;
+    }
+  }
+  .secondRow {
+    display: flex;
+    gap: 20px;
+
+    .summarySection {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .countdownSection {
+      width: 50%;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+  }
+}

@@ -179,6 +179,7 @@ const RichText = ({
         { indent: "-1" },
         { indent: "+1" },
       ],
+      ["link"],
       // ["image"],
       ["clean"],
     ],
@@ -192,6 +193,8 @@ const RichText = ({
     "list",
     "bullet",
     "indent",
+    "link",
+
     // "image",
     // "background",
   ];

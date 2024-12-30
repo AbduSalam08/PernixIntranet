@@ -192,6 +192,8 @@ const Blogs = (props: any): JSX.Element => {
   };
 
   /* State creation */
+  const [isfilter, setIsfilter] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<string>(CONFIG.BlogsTab[0]);
   const [curAllBlogs, setCurAllBlogs] = useState<IBlogColumnType[]>([]);
@@ -800,7 +802,7 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
-              <div className={styles.backHeader}>View pernix wiki</div>
+              <div className={styles.backHeader}>View Pernix wiki</div>
             </div>
           </div>
 
@@ -821,6 +823,7 @@ const Blogs = (props: any): JSX.Element => {
             />
             {curDocFiles?.length > 0 && (
               <div className={styles.VDocuments}>
+                <p>Attachments</p>
                 {curDocFiles?.map((val: any, Idx: number) => {
                   return (
                     <div
@@ -831,7 +834,7 @@ const Blogs = (props: any): JSX.Element => {
                         );
                       }}
                     >
-                      {val?.name}
+                      <i className="pi pi-paperclip"></i> {val?.name}
                     </div>
                   );
                 })}
@@ -1024,6 +1027,7 @@ const Blogs = (props: any): JSX.Element => {
               >
                 <CustomDropDown
                   noErrorMsg
+                  width="180px"
                   floatingLabel={false}
                   size="SM"
                   options={[...CONFIG.blogDrop]}
@@ -1043,6 +1047,7 @@ const Blogs = (props: any): JSX.Element => {
               <div>
                 <CustomInput
                   noErrorMsg
+                  secWidth="180px"
                   size="SM"
                   value={comSearch.Search}
                   placeholder="Search"
@@ -1060,6 +1065,8 @@ const Blogs = (props: any): JSX.Element => {
               <div>
                 <CustomDateInput
                   label="Select Date"
+                  minWidth="180px"
+                  maxWidth="180px"
                   size="SM"
                   value={comSearch?.Date}
                   onChange={(e: any) => {
@@ -1095,6 +1102,16 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
+            </div>
+            <div className={styles.ismobile}>
+              <DefaultButton
+                onlyIcon
+                btnType="primaryGreen"
+                startIcon={<Add />}
+                onClick={(_) => {
+                  setIsCreate(true);
+                }}
+              />
             </div>
           </div>
 
@@ -1146,13 +1163,18 @@ const Blogs = (props: any): JSX.Element => {
                   return (
                     <div
                       key={idx}
-                      className={styles.cardSec}
-                      style={{
-                        height:
-                          selectedTab === CONFIG.BlogsTab[2]
-                            ? "494px"
-                            : "440px",
-                      }}
+                      className={`${styles.cardSec} ${
+                        selectedTab === CONFIG.BlogsTab[2]
+                          ? styles.pendingApproval
+                          : styles.allblog
+                      }`}
+                      // className={styles.cardSec}
+                      // style={{
+                      //   height:
+                      //     selectedTab === CONFIG.BlogsTab[2]
+                      //       ? "494px"
+                      //       : "440px",
+                      // }}
                     >
                       <img
                         className={styles.imgSec}
@@ -1162,11 +1184,12 @@ const Blogs = (props: any): JSX.Element => {
                       <div className={styles.cardTag}>
                         <span>{val?.Tag}</span>
                         <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                          }}
+                          className={styles.icons}
+                          // style={{
+                          //   display: "flex",
+                          //   alignItems: "center",
+                          //   gap: "10px",
+                          // }}
                         >
                           <div
                             style={{
@@ -1369,6 +1392,132 @@ const Blogs = (props: any): JSX.Element => {
             </div>
           )}
 
+          {/* mobilefilter */}
+
+          <div className={styles.filtericon}>
+            <i
+              className="pi pi-filter"
+              onClick={() => {
+                setIsfilter(!isfilter);
+              }}
+            />
+          </div>
+
+          <div
+            className={`${styles.filter_container} ${
+              isfilter ? styles.active_filter_container : ""
+            }`}
+
+            // className={`filter_container ${
+            //   isfilter ? "active_filter_container" : ""
+            // }`}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                margin: "10px",
+              }}
+            >
+              <div
+                style={{
+                  display: isAdmin ? "flex" : "none",
+                }}
+              >
+                <CustomDropDown
+                  noErrorMsg
+                  floatingLabel={false}
+                  width="180px"
+                  size="SM"
+                  options={[...CONFIG.blogDrop]}
+                  value={comSearch.Status}
+                  placeholder="All"
+                  onChange={(e: any) => {
+                    const value: any = e;
+                    searchField.Status = value;
+                    setComSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Status: value,
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <CustomInput
+                  noErrorMsg
+                  secWidth="180px"
+                  size="SM"
+                  value={comSearch.Search}
+                  placeholder="Search"
+                  onChange={(e: any) => {
+                    const value: string = e.trimStart();
+                    searchField.Search = value;
+                    setComSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Search: value,
+                    }));
+                    // handleSearch();
+                  }}
+                />
+              </div>
+              <div>
+                <CustomDateInput
+                  label="Select Date"
+                  size="SM"
+                  minWidth="180px"
+                  maxWidth="180px"
+                  value={comSearch?.Date}
+                  onChange={(e: any) => {
+                    const value: any = e;
+                    searchField.Date = value;
+                    setComSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Date: value,
+                    }));
+                    // handleSearch();
+                  }}
+                />
+              </div>
+
+              <div>
+                <DefaultButton
+                  text="Apply"
+                  size="small"
+                  fullWidth
+                  btnType="primaryGreen"
+                  onClick={(_) => {
+                    // handleSearch([...shownewsData]);
+
+                    // handleSearch(strSearch, [...filDocDatas]);
+                    handleSearch();
+
+                    setIsfilter(!isfilter);
+                  }}
+                />
+              </div>
+              <div>
+                <DefaultButton
+                  text="Clear"
+                  size="small"
+                  fullWidth
+                  btnType="darkGreyVariant"
+                  onClick={(_) => {
+                    setIsfilter(!isfilter);
+                    searchField.Search = "";
+                    searchField.Status = "";
+                    searchField.Date = null;
+                    setComSearch({ ...searchField });
+                    handleSearch();
+
+                    // setStrSearch("");
+                    // handleSearch("", [...filDocDatas]);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Pagination section */}
           {selTabBlogs.length ? (
             <div
@@ -1410,7 +1559,7 @@ const Blogs = (props: any): JSX.Element => {
                 />
               </div>
               <div className={styles.backHeader}>
-                {curBlogData?.ID ? "Edit a pernix wiki" : "Add a pernix wiki"}
+                {curBlogData?.ID ? "Edit a Pernix wiki" : "Add a Pernix wiki"}
               </div>
             </div>
           </div>
@@ -1478,6 +1627,7 @@ const Blogs = (props: any): JSX.Element => {
             </div>
             <div className={styles.secondRow}>
               <RichText
+                className={styles.richtextwrapper}
                 isValid={!formData?.Description?.isValid}
                 errorMsg={formData?.Description?.errorMsg}
                 value={formData?.Description?.value}
@@ -1502,7 +1652,7 @@ const Blogs = (props: any): JSX.Element => {
                   handleInputChange("Description", value, isValid, errorMsg);
                 }}
                 placeholder="Type your content here..."
-                className="myRichTextEditor"
+                // className="myRichTextEditor"
               />
             </div>
             <div className={styles.thirdRow}>

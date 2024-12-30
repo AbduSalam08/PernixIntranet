@@ -205,6 +205,8 @@ const MainBannerPage = (props: any): JSX.Element => {
   };
 
   /* State creation */
+  const [isfilter, setIsfilter] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [allQuotes, setAllQuotes] = useState<IQuoteDatas[]>([]);
@@ -1091,6 +1093,31 @@ const MainBannerPage = (props: any): JSX.Element => {
                 />
               </div>
             </div>
+
+            <div className={styles.ismobile}>
+              <div
+                style={{
+                  display: isAdmin ? "flex" : "none",
+                }}
+              >
+                <DefaultButton
+                  btnType="primaryGreen"
+                  onlyIcon
+                  text={<Add />}
+                  onClick={(_) => {
+                    setCurObject({ ...CONFIG.QuoteDatas });
+                    resetFormData(formData, setFormData);
+                    setFormData({ ...initialFormData });
+                    togglePopupVisibility(
+                      setPopupController,
+                      initialPopupController[0],
+                      0,
+                      "open"
+                    );
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Tab section */}
@@ -1219,6 +1246,125 @@ const MainBannerPage = (props: any): JSX.Element => {
               No motivational quote found!
             </div>
           )}
+
+          <div className={styles.filtericon}>
+            <i
+              className="pi pi-filter"
+              onClick={() => {
+                setIsfilter(!isfilter);
+              }}
+            />
+          </div>
+
+          <div
+            className={`${styles.filter_container} ${
+              isfilter ? styles.active_filter_container : ""
+            }`}
+
+            // className={`filter_container ${
+            //   isfilter ? "active_filter_container" : ""
+            // }`}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                margin: "10px",
+              }}
+            >
+              <div
+                style={{
+                  display: isAdmin ? "flex" : "none",
+                }}
+              >
+                <CustomDropDown
+                  noErrorMsg
+                  width="180px"
+                  size="SM"
+                  floatingLabel={false}
+                  value={commonSearch?.Status}
+                  options={statusDrop || []}
+                  placeholder="Select Status"
+                  onChange={(e: any) => {
+                    const value: any = e;
+                    searchField.Status = value;
+                    setCommonSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Status: value,
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <CustomInput
+                  noErrorMsg
+                  secWidth="180px"
+                  size="SM"
+                  value={commonSearch?.Search}
+                  placeholder="Search"
+                  onChange={(e: any) => {
+                    const value: string = e.trimStart();
+                    searchField.Search = value;
+                    setCommonSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Search: value,
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <CustomDateInput
+                  label="Select Date"
+                  size="SM"
+                  maxWidth="180px"
+                  minWidth="180px"
+                  value={commonSearch?.Date}
+                  onChange={(e: any) => {
+                    const value: any = e;
+                    searchField.Date = value;
+                    setCommonSearch((prev: IPageSearchFields) => ({
+                      ...prev,
+                      Date: value,
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <DefaultButton
+                  text="Apply"
+                  size="small"
+                  fullWidth
+                  btnType="primaryGreen"
+                  onClick={(_) => {
+                    handleSearch([...allQuotes]);
+
+                    // handleSearch();
+                    setIsfilter(!isfilter);
+                  }}
+                />
+              </div>
+              <div>
+                <DefaultButton
+                  text="Clear"
+                  size="small"
+                  fullWidth
+                  btnType="darkGreyVariant"
+                  onClick={(_) => {
+                    setIsfilter(!isfilter);
+
+                    searchField.Search = "";
+                    searchField.Status = "";
+                    searchField.Date = null;
+                    setCommonSearch({ ...searchField });
+                    handleSearch([...allQuotes]);
+
+                    // handleSearch();
+                  }}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Toast message section */}
           <ToastContainer

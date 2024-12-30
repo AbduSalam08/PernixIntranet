@@ -26,7 +26,6 @@
 
     .backHeader {
       font-size: 22px;
-      font-weight: 600;
       color: #0b4d53;
       font-family: "osSemibold", sans-serif;
     }
@@ -49,6 +48,10 @@
         color: #ffff;
       }
     }
+  }
+
+  .ismobile {
+    display: none;
   }
 }
 
@@ -144,23 +147,42 @@
   padding: 10px;
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
-  .grid-container {
-    grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
+.filtericon {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  z-index: 5;
+  padding: 10px 8px 5px 8px;
+  border-radius: 50%;
+  box-shadow: 0 1.6px 3.6px 0 #00000022, 0 0.3px 0.9px 0 #0000001c;
+  background-color: #fff;
+
+  i {
+    font-size: 14px;
+    color: #0b4d53;
+    cursor: pointer;
   }
 }
 
-@media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
-  }
+.filter_container {
+  display: none;
+  position: fixed;
+  bottom: 70px;
+  right: -100%;
+  padding: 8px;
+  transition: 0.3s ease all;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 1.6px 3.6px 0 #00000022, 0 0.3px 0.9px 0 #0000001c;
+  z-index: 5;
 }
 
-@media (max-width: 480px) {
-  .grid-container {
-    grid-template-columns: 1fr; /* 1 column on very small screens */
-  }
+.active_filter_container {
+  right: 16px;
+  transition: 0.5s ease all;
 }
 
 .bodyNoDataFound {
@@ -199,6 +221,9 @@
     div {
       width: 100%;
     }
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
   }
 
   .thirdRow {
@@ -207,6 +232,9 @@
 
     div {
       width: 100%;
+    }
+    @media (max-width: 600px) {
+      flex-direction: column;
     }
   }
 }
@@ -244,5 +272,103 @@
       font-size: 14px;
       color: #adadad;
     }
+  }
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .bodyContainer {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
+  }
+}
+
+@media (max-width: 900px) {
+  .bodyContainer {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
+  }
+}
+
+@media (max-width: 600px) {
+  .headerContainer {
+    .backContainer {
+      .backHeader {
+        font-size: 16px;
+      }
+    }
+    .searchContainer {
+      display: none;
+    }
+    .ismobile {
+      display: block;
+    }
+  }
+  .tabsContainer {
+    div {
+      font-size: 14px;
+    }
+  }
+
+  .bodyContainer {
+    height: auto !important;
+    grid-template-columns: 1fr !important;
+    padding: 0;
+    .cardSection {
+      min-height: 300px;
+      max-height: 300px;
+      .cardIMG {
+        height: 100px;
+      }
+      .cardBody {
+        min-height: 130px;
+        max-height: 130px;
+        font-size: 12px;
+        line-height: 20px;
+      }
+      .cardFooter {
+        .cardStatus {
+          font-size: 12px;
+        }
+        .cardIcon {
+          i {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .viewPopupContainer {
+    .viewScreenIMG {
+      height: auto;
+    }
+
+    .viewScreenQuote {
+      font-size: 12px;
+      line-height: 1.4;
+      // height: 60px;
+      margin: 10px 0px;
+      overflow: auto;
+    }
+
+    .viewScreenFooter {
+      .activeLable {
+        font-size: 12px;
+      }
+
+      .dateLable {
+        font-size: 12px;
+      }
+    }
+  }
+  .bodyNoDataFound {
+    font-size: 14px;
+    font-weight: unset;
+  }
+
+  .filtericon {
+    display: block;
+  }
+  .filter_container {
+    display: block;
   }
 }

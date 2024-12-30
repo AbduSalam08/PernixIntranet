@@ -358,7 +358,8 @@
 
   .bodyContainer {
     width: 100%;
-    height: calc(100vh - 326px) !important;
+    height: auto !important;
+    // height: calc(100vh - 326px) !important;
     overflow: auto;
 
     .folderSection {

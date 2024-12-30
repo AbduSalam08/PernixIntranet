@@ -18,6 +18,7 @@ import {
   addNews,
   getAllNewsData,
 } from "../../../services/newsIntranet/newsInranet";
+import "./Style.css";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
 import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";

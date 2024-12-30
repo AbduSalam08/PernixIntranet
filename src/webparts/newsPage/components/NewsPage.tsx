@@ -643,7 +643,13 @@ const NewsPage = (props: any): JSX.Element => {
     ],
     [
       <div key={3}>
-        <div style={{ width: "100%", height: "350px", borderRadius: "10px" }}>
+        <div
+          style={{
+            width: "100%",
+            height: isMobile ? "auto" : "350px",
+            borderRadius: "10px",
+          }}
+        >
           <img
             style={{
               width: "100%",
@@ -656,81 +662,175 @@ const NewsPage = (props: any): JSX.Element => {
           />
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            margin: "20px 0px 10px 0px",
-          }}
-        >
+        {isMobile ? (
           <div
-            style={{
-              width: "80%",
-            }}
+            style={
+              {
+                // display: "flex",
+                // justifyContent: "space-between",
+                // alignItems: "flex-start",
+                // margin: "20px 0px 10px 0px",
+              }
+            }
           >
-            <p
+            <div
               style={{
-                fontSize: "22px",
-                lineHeight: "30px",
-                fontFamily: "osSemibold",
-                color: "#0b4d53",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                margin: "20px 0px 10px 0px",
               }}
             >
-              {formData?.Title?.value}
-            </p>
+              <p
+                style={{
+                  fontSize: "14px",
+                  // lineHeight: "px",
+                  fontFamily: "osSemibold",
+                  color: "#0b4d53",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: 2,
+
+                  // overflow: "hidden"
+                  // textOverflow: "ellipsis",
+                  // word-break: break-word,
+                  // display: -webkit-box,
+                  // -webkit-box-orient: vertical,
+                  // line-clamp: 5,
+                  // -webkit-line-clamp: 5,
+                  // white-space: normal
+                }}
+              >
+                {formData?.Title?.value}
+              </p>
+
+              <p
+                style={{
+                  background: "#daf0da",
+                  padding: "6px 15px",
+                  color: "green",
+                  borderRadius: "4px",
+                  fontSize: "12px",
+                  fontFamily: "osMedium",
+                }}
+              >
+                {formData?.Status?.value}
+              </p>
+            </div>
 
             <div
               style={{
                 display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                marginTop: "10px",
+                flexDirection: "column",
+                gap: "10px",
+                alignItems: "flex-end",
+                marginBottom: "10px",
               }}
             >
-              <img
-                style={{ width: "26px", height: "26px", borderRadius: "50%" }}
-                src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
-              />
-              <span>{formData?.Authorname?.value}</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginTop: "10px",
+                }}
+              >
+                <img
+                  style={{ width: "22px", height: "22px", borderRadius: "50%" }}
+                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                />
+                <span style={{ fontSize: "12px" }}>
+                  {formData?.Authorname?.value}
+                </span>
+              </div>
+
+              <span style={{ fontSize: "12px", color: "#adadad" }}>
+                {" "}
+                {`${moment(formData?.StartDate?.value).format(
+                  "MM/DD/YYYY"
+                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
+              </span>
             </div>
           </div>
-
+        ) : (
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              alignItems: "flex-end",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              margin: "20px 0px 10px 0px",
             }}
           >
-            <p
+            <div
               style={{
-                background: "#daf0da",
-                padding: "6px 15px",
-                color: "green",
-                borderRadius: "4px",
-                fontSize: "14px",
-                fontFamily: "osMedium",
+                width: "80%",
               }}
             >
-              {formData?.Status?.value}
-            </p>
+              <p
+                style={{
+                  fontSize: "22px",
+                  lineHeight: "30px",
+                  fontFamily: "osSemibold",
+                  color: "#0b4d53",
+                }}
+              >
+                {formData?.Title?.value}
+              </p>
 
-            <span style={{ fontSize: "14px", color: "#adadad" }}>
-              {" "}
-              {`${moment(formData?.StartDate?.value).format(
-                "MM/DD/YYYY"
-              )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
-            </span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginTop: "10px",
+                }}
+              >
+                <img
+                  style={{ width: "26px", height: "26px", borderRadius: "50%" }}
+                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                />
+                <span>{formData?.Authorname?.value}</span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                alignItems: "flex-end",
+              }}
+            >
+              <p
+                style={{
+                  background: "#daf0da",
+                  padding: "6px 15px",
+                  color: "green",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  fontFamily: "osMedium",
+                }}
+              >
+                {formData?.Status?.value}
+              </p>
+
+              <span style={{ fontSize: "14px", color: "#adadad" }}>
+                {" "}
+                {`${moment(formData?.StartDate?.value).format(
+                  "MM/DD/YYYY"
+                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
         <div>
           <p
             style={{
-              lineHeight: "27px",
-              fontSize: "15px",
+              lineHeight: "23px",
+              fontSize: "12px",
               fontFamily: "osRegular",
             }}
           >

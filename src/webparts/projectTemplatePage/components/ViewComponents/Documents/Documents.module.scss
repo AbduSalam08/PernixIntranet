@@ -1,34 +1,75 @@
-.docRepoContainer {
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  flex-direction: column;
-  box-shadow: 0px -1px 4px #b6b6b650;
-  padding: 25px;
-  background-color: #fff;
+.accordion {
+  //   border: 1px solid #ffff;
+  margin: 10px 0;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #ffff;
 }
 
-.popupLayoutDesign {
-  .firstRow {
-    margin-bottom: 20px;
+.accordionheader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  background-color: #fff;
+  font-weight: bold;
+}
 
-    div {
-      width: 100%;
-    }
-  }
+.accordionheading {
+  //   flex: 1;
+  //   text-align: left;
 
-  .secondRow {
-    div {
-      width: 100%;
-    }
+  padding-left: 10px;
+  font-size: 18px;
+  // border-left: 2px solid var(--primary-orange);
+  font-family: "osSemiBold", sans-serif;
+  color: var(--primary-pernix-green);
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    height: 30px;
+    width: 3px;
+    background-color: var(--primary-orange);
   }
+}
+
+.accordionicon {
+  text-align: right;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.accordioncontent {
+  padding: 15px;
+  background-color: #fff;
+  //   border-top: 1px solid #ddd;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.addicon {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 20px 0px 0px;
 }
 
 .folderCard {
   // border: 1px solid #eee;
   cursor: pointer;
-  box-shadow: 0px 0px 4px #b6b6b650;
+  //   box-shadow: 0px 0px 4px #b6b6b650;
   width: 160px;
   height: 125px;
   display: flex;
@@ -56,7 +97,9 @@
     color: #414141;
   }
 }
+
 .docCarousel {
+  background-color: #fff;
   width: 100%;
   padding: 15px;
   max-width: 1600px;
@@ -86,7 +129,6 @@
     gap: 20px;
     padding: 10px;
     margin-top: 10px;
-
 
     .folderCard {
       flex: 0 0 140px; // Show around 2 items on medium screens (40% width each)

@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable  @typescript-eslint/no-use-before-define */
+
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
 import styles from "./ApprovalsPage.module.scss";
@@ -9,6 +11,8 @@ import CircularSpinner from "../../../components/common/Loaders/CircularSpinner"
 import { IPageURL } from "../../../interface/interface";
 import { CONFIG } from "../../../config/config";
 import { sp } from "@pnp/sp/presets/all";
+// import { Badge } from "primereact/badge";
+// import SpServices from "../../../services/SPServices/SpServices";
 
 /* Global variable creation */
 const errorImg: string = require("../../../assets/images/svg/errorImg.svg");
@@ -92,11 +96,18 @@ const arrLinksData: IPageURL[] = [
     IsAdmin: false,
   },
 ];
-
+interface Count {
+  Blog: number | any;
+  QCeo: number | any;
+}
 const ApprovalsPage = (props: any): JSX.Element => {
   /* State creation */
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [arrMasterData, setArrMasterData] = useState<IPageURL[]>([]);
+  const [count, setCount] = useState<Count>({
+    Blog: 0,
+    QCeo: 0,
+  });
 
   /* Functions creation */
   const adminAccessCheck = async (
@@ -157,11 +168,114 @@ const ApprovalsPage = (props: any): JSX.Element => {
   const getCurrentUser = async (): Promise<void> => {
     const currentUser: any = await sp.web.currentUser.get();
     await getSuperAdminFun(currentUser?.Id ?? null);
+
+    const blog = await fetchListData({
+      listName: CONFIG.ListNames.Intranet_Blogs,
+      filters: "Status eq 'Pending'",
+    });
+
+    console.log("blog: ", blog);
+
+    const Questionceo = await fetchListData({
+      listName: CONFIG.ListNames.Intranet_QuestionsToCEO,
+      select: "*,AssignTo/ID,AssignTo/EMail",
+      expand: "AssignTo",
+      filters: "AssignToId eq null ",
+    });
+
+    setCount({
+      Blog: blog,
+      QCeo: Questionceo,
+    });
+    console.log("Questionceo: ", Questionceo);
   };
 
   const onLoadingFUN = async (): Promise<void> => {
     setIsLoading(true);
     getCurrentUser();
+  };
+  // const fetchListdata = async (): Promise<void> => {
+  //   const res: any[] = await SpServices.SPReadItems({
+  //     Listname: CONFIG.ListNames.Intranet_Blogs,
+  //     Select: "*, AttachmentFiles, Author/ID, Author/Title, Author/EMail",
+  //     Expand: "AttachmentFiles, Author",
+  //     Filter: [
+  //       {
+  //         FilterKey: "Status",
+  //         Operator: "eq",
+  //         FilterValue: "Pending",
+  //       },
+  //     ],
+  //     Topcount: 5000,
+  //     Orderby: "Created",
+  //     Orderbydecorasc: false,
+  //   });
+  //   console.log(res,"res");
+
+  // };
+
+  // const fetchListData = async ({
+  //   listName,
+  //   filters ,
+  //   topCount = 5000,
+  //   orderBy = "Created",
+  //   orderByAsc = false,
+  //   select,
+  //   expand
+  // }: {
+  //   listName: string;
+  //   filters?: { FilterKey: string; Operator: string; FilterValue: string }[];
+  //   topCount?: number;
+  //   orderBy?: string;
+  //   orderByAsc?: boolean;
+  //   select?:any,
+  //   expand?:any,
+  // }): Promise<any> => {
+  //   const res: any[] = await SpServices.SPReadItems({
+  //     Listname: listName,
+  //     Select: select,
+  //     Expand: expand,
+  //     Filter: filters,
+  //     Topcount: topCount,
+  //     Orderby: orderBy,
+  //     Orderbydecorasc: orderByAsc,
+  //   });
+  //   debugger
+  //   return res.length;
+  // };
+
+  const fetchListData = async ({
+    listName,
+    filters = "",
+    topCount = 5000,
+    orderBy = "Created",
+    orderByAsc = false,
+    select = "*",
+    expand = "",
+  }: {
+    listName: string;
+    filters?: string;
+    topCount?: number;
+    orderBy?: string;
+    orderByAsc?: boolean;
+    select?: string;
+    expand?: string;
+  }) => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle(listName)
+        .items.filter(filters)
+        .select(select)
+        .expand(expand)
+        .top(topCount)
+        .orderBy(orderBy, orderByAsc)
+        .get();
+
+      return items && items.length;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
   };
 
   useEffect(() => {
@@ -224,6 +338,23 @@ const ApprovalsPage = (props: any): JSX.Element => {
                         <img src={val?.Image} alt={val?.Name} />
                       </div>
                       <div className={styles.nameSec}>{val?.Name}</div>
+
+                      <div>
+                        {/* Conditional rendering of the badge */}
+                        {val.Name === CONFIG.CommonentsName.Blogs &&
+                        count.Blog > 0 ? (
+                          <div className={styles.customBadge}>
+                            {count?.Blog > 99 ? count.Blog + "+" : count.Blog}
+                          </div>
+                        ) : null}
+
+                        {val.Name === CONFIG.CommonentsName.QuestionCEO &&
+                        count.QCeo > 0 ? (
+                          <div className={styles.customBadge}>
+                            {count?.QCeo > 99 ? count.QCeo + "+" : count.QCeo}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   );
                 })}
