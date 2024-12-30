@@ -17,6 +17,8 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { togglePopupVisibility } from "./popupUtils";
 import { IPersonField, ITicketSchema } from "../interface/interface";
+import SpServices from "../services/SPServices/SpServices";
+import { CONFIG } from "../config/config";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type FormField = {
@@ -185,6 +187,55 @@ export const renderAttachments = (
   );
 };
 
+export const getAllTicketLocations = (): Promise<any> => {
+  return SpServices.SPReadItems({
+    Listname: CONFIG.ListNames.HelpDesk_TicketLocationConfig,
+  })
+    .then((res: any) => {
+      console.log("res: ", res);
+      return res; // Return the response directly
+    })
+    .catch((err: any) => {
+      console.log("Error: ", err);
+      throw err; // Ensure to propagate the error if needed
+    });
+};
+
+export const handleTicketLocation = async (
+  ticketLocation: string | any
+): Promise<any> => {
+  if (ticketLocation && ticketLocation?.trim() !== "") {
+    try {
+      // Read items from the SharePoint list
+      const res: any = await SpServices.SPReadItems({
+        Listname: CONFIG.ListNames.HelpDesk_TicketLocationConfig,
+      });
+
+      console.log("Response: ", res);
+
+      const locationExists = res.some(
+        (item: any) => item.LocationName === ticketLocation
+      );
+
+      if (!locationExists) {
+        // If the location does not exist, add it
+        await SpServices.SPAddItem({
+          Listname: CONFIG.ListNames.HelpDesk_TicketLocationConfig,
+          RequestJSON: {
+            LocationName: ticketLocation,
+          },
+        });
+      } else {
+        console.log("Location already exists.");
+      }
+    } catch (err) {
+      console.log("Error: ", err);
+    }
+  } else {
+    console.log("Invalid location.");
+  }
+};
+
 export const handleSubmit = async (
   formData: any,
   setLoadingSubmit: any,
@@ -262,6 +313,7 @@ export const handleSubmit = async (
         ?.catch((err: any) => {
           console.log("err: ", err);
         });
+      await handleTicketLocation(formData?.TicketLocation?.value);
     } else {
       await Promise.all([
         updateTicket(openNewTicketSlide?.data?.ID, formData, ["Attachment"]),
@@ -294,6 +346,7 @@ export const handleSubmit = async (
         ?.catch((err: any) => {
           console.log("err: ", err);
         });
+      await handleTicketLocation(formData?.TicketLocation?.value);
     }
   } else {
     toast.warning("Please fill out all fields!", {
@@ -328,6 +381,7 @@ export const validateRecurrenceForm = async (
   HelpDeskTicktesData?: any,
   hasErrors?: boolean
 ): Promise<any> => {
+  console.log("ticketDetails: ", ticketDetails);
   if (!hasErrors && !nextTicketIntimation.error) {
     setLoadingSubmit(true);
     setSubmitClicked(true);
@@ -343,37 +397,38 @@ export const validateRecurrenceForm = async (
               recurrenceDetails?.Frequency?.value === "Weekly"
                 ? recurrenceDetails?.DayOfWeek?.value
                 : null,
+            ...ticketDetails,
             NextTicketDate:
               recurrenceDetails?.Frequency?.value !== "Weekly"
-                ? ticketDetails
+                ? dayjs(ticketDetails?.NextTicketDate).toDate()
                 : null,
-            ...ticketDetails,
           },
           recurrenceDetails?.TicketDetails?.value?.ID
         ),
       ]).then(async () => {
-        await getAllTickets(dispatch);
-        const updatedTickets = await getAllTicketsData();
-        ticketsFilter(
-          `${currentRole}${location.pathname}`,
-          {
-            ...HelpDeskTicktesData,
-            AllData: updatedTickets,
-          },
-          currentUserDetails,
-          dispatch
+        // await getAllTickets(dispatch);
+        // const updatedTickets = await getAllTicketsData();
+        // ticketsFilter(
+        //   `${currentRole}${location.pathname}`,
+        //   {
+        //     ...HelpDeskTicktesData,
+        //     AllData: updatedTickets,
+        //   },
+        //   currentUserDetails,
+        //   dispatch
+        // );
+        // ticketFilter?.();
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[popupIndex || 0],
+          popupIndex || 0,
+          "close"
         );
-        ticketFilter?.();
       });
-      togglePopupVisibility(
-        setPopupController,
-        initialPopupController[popupIndex || 0],
-        popupIndex || 0,
-        "close"
-      );
       // await getAllTickets(dispatch);
     } else if (query === "update") {
       // Promise.all([
+      console.log("nextTicketIntimation?.date: ", nextTicketIntimation?.date);
       await updateRecurrenceConfigOfTicket(
         {
           StartDate: recurrenceDetails?.StartDate?.value,
@@ -384,11 +439,11 @@ export const validateRecurrenceForm = async (
             recurrenceDetails?.Frequency?.value === "Weekly"
               ? recurrenceDetails?.DayOfWeek?.value
               : null,
+          ...ticketDetails,
           NextTicketDate:
             recurrenceDetails?.Frequency?.value !== "Weekly"
-              ? ticketDetails
+              ? dayjs(ticketDetails?.NextTicketDate).toDate()
               : null,
-          ...ticketDetails,
         },
         recurrenceDetails?.TicketDetails?.value?.ID,
         recurrenceConfigID
@@ -471,7 +526,8 @@ export const calculateNextTicketDate = (
   }
 
   return {
-    date: nextDate?.format("DD/MM/YYYY"),
+    // date: nextDate?.format("DD/MM/YYYY"),
+    date: nextDate,
     error: false,
   };
 };

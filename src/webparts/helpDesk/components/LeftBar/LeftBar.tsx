@@ -39,13 +39,11 @@ const LeftBar: React.FC = (): JSX.Element => {
   );
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
-  console.log("currentRole: ", currentRole);
 
   const currentRoleBasedData: any = currentRoleBasedDataUtil(
     currentUserDetails,
     HelpDeskTicktesData
   );
-  console.log("currentRoleBasedData: ", currentRoleBasedData);
 
   // Define nav items
   useEffect(() => {

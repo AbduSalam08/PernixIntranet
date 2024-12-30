@@ -129,7 +129,6 @@ const TicketBySource = memo(
     const allTicketsFlattened = Object.keys(createdTicketsData)?.flatMap(
       (key: string) => createdTicketsData[key]?.data || []
     );
-    console.log("allTicketsFlattened: ", allTicketsFlattened);
 
     const emailTickets =
       allTicketsFlattened?.filter(
@@ -151,8 +150,8 @@ const TicketBySource = memo(
       datasets: [
         {
           data: [
-            (emailTickets / totalTicketsBySource) * 100 || 0,
-            (portalTickets / totalTicketsBySource) * 100 || 0,
+            Math.round((emailTickets / totalTicketsBySource) * 100) || 0,
+            Math.round((portalTickets / totalTicketsBySource) * 100) || 0,
           ],
           backgroundColor: ["#E0803D", "#0B4D53"], // Colors for the sources
         },

@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import styles from "./TicketForm.module.scss"; // SCSS for styling
 import PageHeader from "../../../../components/common/PageHeader/PageHeader";
@@ -10,6 +11,7 @@ import CustomPeoplePicker from "../../../../components/common/CustomInputFields/
 import CustomMultipleFileUpload from "../../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import FloatingLabelTextarea from "../../../../components/common/CustomInputFields/CustomTextArea";
 import CustomAutocomplete from "../../../../components/common/CustomInputFields/CustomAutoComplete";
+import { getAllTicketLocations } from "../../../../utils/helpdeskUtils";
 
 interface TicketFormProps {
   openNewTicketSlide: any;
@@ -62,6 +64,25 @@ const TicketForm: React.FC<TicketFormProps> = ({
   isTicketManager,
   isITOwner,
 }) => {
+  const [allTicketLocation, setAllTicketLocation] = useState<any[]>([]);
+
+  console.log("allTicketLocation: ", allTicketLocation);
+  console.log("formData: ", formData);
+
+  useEffect(() => {
+    const fetchTicketLocations = async (): Promise<any> => {
+      try {
+        const ticketLocations = await getAllTicketLocations();
+        setAllTicketLocation(
+          ticketLocations?.map((item: any) => item?.LocationName)
+        );
+      } catch (error) {
+        console.error("Error fetching ticket locations:", error);
+      }
+    };
+    console.log("rendering...");
+    fetchTicketLocations();
+  }, [formData?.TicketNumber?.value !== ""]);
   return (
     <Drawer
       anchor={"right"}
@@ -122,7 +143,6 @@ const TicketForm: React.FC<TicketFormProps> = ({
                 selectedItem={[formData?.EmployeeNameId?.value?.email]}
                 onChange={(item: any) => {
                   const value = item[0];
-                  console.log("value: ", value);
                   const { isValid, errorMsg } = validateField(
                     "EmployeeNameId",
                     value,
@@ -141,7 +161,6 @@ const TicketForm: React.FC<TicketFormProps> = ({
                   selectedItem={[formData?.ITOwnerId?.value?.email]}
                   onChange={(item: any) => {
                     const value = item[0];
-                    console.log("value: ", value);
                     const { isValid, errorMsg } = validateField(
                       "ITOwnerId",
                       value,
@@ -230,10 +249,11 @@ const TicketForm: React.FC<TicketFormProps> = ({
                 )}
 
               <CustomAutocomplete
-                options={["Chennai", "Bangalore", "Hyderabad"]}
+                options={allTicketLocation}
                 value={formData.TicketLocation?.value}
                 onChange={(e: string) => {
                   const value = e?.trimStart();
+                  console.log("value: ", value);
                   const { isValid, errorMsg } = validateField(
                     "TicketLocation",
                     value,
@@ -283,7 +303,6 @@ const TicketForm: React.FC<TicketFormProps> = ({
                   // value={formData?.Attachment?.value?.name || null}
                   value={formData?.Attachment?.value || []}
                   onFileSelect={(file) => {
-                    console.log("file: ", file);
                     const { isValid, errorMsg } = validateField(
                       "Attachment",
                       file ? file?.[0]?.name : "",

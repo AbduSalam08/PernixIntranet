@@ -111,7 +111,6 @@ const MyTickets = (): JSX.Element => {
   const [recurrenceDetails, setRecurrenceDetails] = useState<any>(
     initialRecurrenceFormData
   );
-  console.log("recurrenceDetails: ", recurrenceDetails);
   const [hasRecurrence, setHasRecurrence] = useState(false);
 
   const initialPopupController: IinitialPopupLoaders[] = [
@@ -149,7 +148,6 @@ const MyTickets = (): JSX.Element => {
 
   const isTicketManager: boolean =
     currentUserDetails?.role === "HelpDesk_Ticket_Managers";
-  console.log("isTicketManager: ", isTicketManager);
 
   const isITOwner: boolean = currentUserDetails?.role === "HelpDesk_IT_Owners";
 
@@ -158,7 +156,6 @@ const MyTickets = (): JSX.Element => {
   );
 
   const currentRole: string = getCurrentRoleForTicketsRoute(currentUserDetails);
-  console.log("currentRole: ", currentRole);
   const isUser: boolean = currentRole?.includes("user");
 
   const currentRoleBasedData = currentRoleBasedDataUtil(
@@ -175,7 +172,6 @@ const MyTickets = (): JSX.Element => {
   );
 
   const [formData, setFormData] = useState<any>(initialTicketsFormData);
-  console.log("formData: ", formData);
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
@@ -189,7 +185,6 @@ const MyTickets = (): JSX.Element => {
   const [nextTicketIntimation, setNextTicketIntimation] = useState(
     nextTicketIntimationLocal
   );
-  console.log("nextTicketIntimation: ", nextTicketIntimation);
 
   const popupActions: any = [
     [
@@ -299,7 +294,7 @@ const MyTickets = (): JSX.Element => {
                   value: null,
                 },
               };
-          debugger;
+
           if (!isUser && !isITOwner) {
             if (
               !hasRecurrence &&
@@ -308,6 +303,8 @@ const MyTickets = (): JSX.Element => {
               recurrenceDetails?.Frequency?.value?.toLowerCase() !==
                 "does not repeat"
             ) {
+              setLoadingSubmit(true);
+              setSubmitClicked(true);
               await addNewTicket(formDataAppended, ["Attachments"], true)
                 .then(async (res: any) => {
                   navigate(`${currentRole}/all_tickets`);
@@ -362,6 +359,8 @@ const MyTickets = (): JSX.Element => {
               recurrenceDetails?.Frequency?.value?.toLowerCase() ===
                 "does not repeat"
             ) {
+              setLoadingSubmit(true);
+              setSubmitClicked(true);
               if (currentRowData?.RecurrenceConfigDetailsId) {
                 // await updateRecurrenceConfigOfTicket(
                 //   {
@@ -513,7 +512,7 @@ const MyTickets = (): JSX.Element => {
                   query,
                   {
                     ...ticketBaseDetails,
-                    NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
+                    NextTicketDate: nextTicketIntimation?.date,
                   },
                   {
                     ...recurrenceDetails,
@@ -750,7 +749,6 @@ const MyTickets = (): JSX.Element => {
                 hightLightInput
                 onChange={(e: any) => {
                   const value = e;
-                  console.log("value: ", value);
                   const { isValid, errorMsg } = validateField(
                     "StartDate",
                     value,
@@ -775,7 +773,6 @@ const MyTickets = (): JSX.Element => {
                 hightLightInput
                 onChange={(e: any) => {
                   const value = e;
-                  console.log("value: ", value);
                   const { isValid, errorMsg } = validateField(
                     "EndDate",
                     value,
@@ -815,7 +812,6 @@ const MyTickets = (): JSX.Element => {
                   selectedValue={recurrenceDetails?.DayOfWeek?.value}
                   errorMsg={recurrenceDetails?.DayOfWeek?.errorMsg}
                   onChange={(value: any) => {
-                    console.log("value: ", value);
                     const { isValid, errorMsg } = validateField(
                       "DayOfWeek",
                       value,
@@ -866,7 +862,11 @@ const MyTickets = (): JSX.Element => {
                         : ""
                     }`}
                   >
-                    {nextTicketIntimation?.date || "N/A"}
+                    {nextTicketIntimation?.error
+                      ? nextTicketIntimation?.date
+                      : dayjs(nextTicketIntimation?.date).format(
+                          "DD/MM/YYYY"
+                        ) || "N/A"}
                   </span>
                 </div>
               )}
@@ -886,9 +886,6 @@ const MyTickets = (): JSX.Element => {
     sortedBy: "New to old",
     sortedByOptions: ["Old to new", "New to old"],
   });
-  console.log("dataGridProps: ", dataGridProps);
-
-  console.log("dataGridProps: ", dataGridProps);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -1001,9 +998,7 @@ const MyTickets = (): JSX.Element => {
               justifyContent: "center",
             }}
             onClick={async () => {
-              console.log("params: ", params);
               const files: any = await getAttachmentofTicket(params?.row?.id);
-              console.log("files: ", files);
               const mappedFiles: any = files?.map((item: any) => {
                 return {
                   name: item?.FileName,
@@ -1325,10 +1320,10 @@ const MyTickets = (): JSX.Element => {
 
     getAllTicketsDataCamlQuery()
       .then((res: any) => {
-        console.log("caml query data: ", res);
+        console.log("data fetched...");
       })
       .catch((err: any) => {
-        console.log(" caml query dataerr: ", err);
+        console.log("error while fetching: ", err);
       });
   }, [location.pathname]);
 
@@ -1467,7 +1462,6 @@ const MyTickets = (): JSX.Element => {
 
               const newTicketNumber = generateTicketNumber(lastTicketID + 1);
               const currentGraphUser = await getUserProfileById();
-              console.log("currentGraphUser: ", currentGraphUser);
               setFormData((prev: any) => ({
                 ...prev,
                 EmployeeNameId: {

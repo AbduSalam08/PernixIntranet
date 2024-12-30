@@ -184,7 +184,6 @@ const Dashboard = (): JSX.Element => {
         const itOwners = await getUsersByGroup(
           CONFIG.SPGroupName.HelpDesk_IT_Owners
         );
-        console.log("itOwners: ", itOwners);
 
         setUsersByType((prev: any) => ({
           ...prev,
@@ -195,7 +194,6 @@ const Dashboard = (): JSX.Element => {
         const helpdeskManagers = await getUsersByGroup(
           CONFIG.SPGroupName.HelpDesk_Ticket_Managers
         );
-        console.log("helpdesk_managers: ", helpdeskManagers);
 
         setUsersByType((prev: any) => ({
           ...prev,
