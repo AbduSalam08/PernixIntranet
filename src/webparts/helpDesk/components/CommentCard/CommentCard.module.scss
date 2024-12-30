@@ -72,8 +72,12 @@
         .extraInfo {
           font-size: 12px;
           color: #696258;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
           // margin-left: 5px;
-          padding-left: 10px;
+          // padding-left: 10px;
           // border-left: 1px solid #55555580;
           font-family: "osMedium", sans-serif;
         }
@@ -112,7 +116,11 @@
         font-size: 12px;
         color: #586069;
         font-family: "osMedium", sans-serif;
-        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        // padding-left: 10px;
         // border-left: 1px solid #55555580;
       }
       .hamb {
@@ -144,6 +152,9 @@
       list-style: disc !important;
       margin-left: 15px !important;
     }
+    div > p {
+      word-break: break-all !important;
+    }
   }
 }
 @keyframes fadeIn {
@@ -160,4 +171,22 @@
 .fadeIn {
   opacity: 0;
   animation: fadeIn 0.15s ease-in-out forwards;
+}
+.rhsInfo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.dividerDotAuthor {
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background-color: #696258;
+}
+.dividerDot {
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background-color: #586069;
 }

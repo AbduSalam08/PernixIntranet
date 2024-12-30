@@ -238,7 +238,11 @@ interface Props {
   withLabel?: boolean;
   floatingLabel?: boolean;
   width?: any;
+  height?: any;
   highlightDropdown?: boolean;
+  dropDownBackgroundColor?: string | any;
+  customFontsize?: string;
+  noPadding?: boolean;
 }
 
 const CustomDropDown: React.FC<Props> = ({
@@ -255,6 +259,10 @@ const CustomDropDown: React.FC<Props> = ({
   floatingLabel = true,
   width,
   highlightDropdown,
+  height,
+  dropDownBackgroundColor,
+  noPadding,
+  customFontsize,
 }) => {
   const handleChange = useCallback(
     (e) => {
@@ -389,23 +397,32 @@ const CustomDropDown: React.FC<Props> = ({
                 border: "0",
               },
               ".MuiSelect-select": {
-                padding:
-                  size === "SM"
-                    ? "5px 13px !important"
-                    : highlightDropdown
-                    ? "18px 10px 6px 10px !important"
-                    : "18px 15px !important",
-                paddingBottom: highlightDropdown
+                padding: noPadding
+                  ? "0 !important"
+                  : size === "SM"
+                  ? "5px 13px !important"
+                  : highlightDropdown
+                  ? "18px 10px 6px 10px !important"
+                  : "18px 15px !important",
+                paddingBottom: noPadding
+                  ? "0 !important"
+                  : highlightDropdown
                   ? "3px !important"
                   : "6px !important",
-                fontSize: size === "SM" ? "14px" : "15px",
+                fontSize: customFontsize
+                  ? customFontsize
+                  : size === "SM"
+                  ? "14px"
+                  : "15px",
                 // width: size === "SM" ? "auto" : "100%",
                 width: "100%",
+                backgroundColor: dropDownBackgroundColor
+                  ? `${dropDownBackgroundColor} !important`
+                  : "#fff",
                 textAlign: "left",
               },
               fontWeight: "400",
-              padding: "0",
-              height: "34px",
+              height: height ? `${height} !important` : "34px",
               outline: "none",
             }}
           >

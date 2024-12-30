@@ -820,9 +820,22 @@ em {
 }
 
 /* mui switch styles */
+.MuiSwitch-thumb {
+  box-shadow: 0px 0px 5px #00000050 !important;
+}
 .Mui-checked .MuiSwitch-thumb {
   background-color: var(--primary-pernix-green) !important;
 }
 .Mui-checked + .MuiSwitch-track {
   background-color: var(--primary-pernix-green-accent) !important;
+}
+
+.MuiTooltip-tooltip {
+  font-size: 14px !important;
+  font-family: "osMedium", sans-serif !important;
+  padding: 6px 10px !important;
+  line-height: 20px !important;
+}
+.commentSpace div p {
+  word-break: break-all !important;
 }

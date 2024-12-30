@@ -7,6 +7,8 @@ import MenuItem from "@mui/material/MenuItem";
 import styles from "./CommentCard.module.scss"; // Import the SCSS module
 import Popup from "../../../../components/common/Popups/Popup";
 import { togglePopupVisibility } from "../../../../utils/popupUtils";
+import { Lock } from "@mui/icons-material";
+import CustomDropDown from "../../../../components/common/CustomInputFields/CustomDropDown";
 
 const CommentCard = ({
   data,
@@ -21,6 +23,10 @@ const CommentCard = ({
   avatarSrc,
   edited,
   handleDelete,
+  isPrivateComment,
+  commentTypeValue,
+  commentTypeOnChange,
+  enableUtilDropDown,
 }: any): JSX.Element => {
   const initialPopupController = [
     {
@@ -50,6 +56,7 @@ const CommentCard = ({
   const [popupController, setPopupController] = useState(
     initialPopupController
   );
+
   // Handlers for the menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -99,6 +106,7 @@ const CommentCard = ({
       },
     ],
   ];
+
   return (
     <div
       className={`${styles.commentCard} ${styles.fadeIn}`}
@@ -118,10 +126,66 @@ const CommentCard = ({
           }`}
         >
           <div className={styles.texts}>
-            <div className={styles.author}>{author} </div>
-            <div className={styles.info}>{date}</div>
-            {/* <div className={styles.info}>Commented on {date}</div> */}
-            {edited && <div className={styles.extraInfo}>Edited</div>}
+            <div className={styles.author}>{author}</div>
+            <div className={styles.rhsInfo}>
+              {edited && <div className={styles.extraInfo}>Edited</div>}
+              {enableUtilDropDown && (
+                <div className={styles.extraInfo}>
+                  {isPrivateComment && (
+                    <Lock
+                      sx={{
+                        fontSize: "14px",
+                        transform: "translateX(5px)",
+                      }}
+                    />
+                  )}
+                  {/* Private */}
+                  <CustomDropDown
+                    noErrorMsg
+                    floatingLabel={false}
+                    size="SM"
+                    options={["Public", "Private"]}
+                    value={commentTypeValue}
+                    placeholder="Select"
+                    onChange={(e: any) => {
+                      const value: any = e;
+                      commentTypeOnChange(value);
+                    }}
+                    width={"80px"}
+                    height={"20px"}
+                    dropDownBackgroundColor={
+                      ownComment ? "#c4692420" : "#1f363b15"
+                    }
+                    noPadding={true}
+                    highlightDropdown={false}
+                    customFontsize="13px"
+                  />
+                  <div
+                    className={
+                      ownComment ? styles.dividerDotAuthor : styles.dividerDot
+                    }
+                  />
+                </div>
+              )}
+              {!enableUtilDropDown && isPrivateComment && (
+                <div className={styles.extraInfo}>
+                  <Lock
+                    sx={{
+                      fontSize: "14px",
+                      transform: "translateX(5px)",
+                    }}
+                  />
+                  Private
+                  <div
+                    className={
+                      ownComment ? styles.dividerDotAuthor : styles.dividerDot
+                    }
+                  />
+                </div>
+              )}
+              <div className={styles.info}>{date}</div>
+              {/* <div className={styles.info}>Commented on {date}</div> */}
+            </div>
           </div>
           <div className={styles.hamb}>
             {/* {role && <span className={styles.roleBadge}>{role}</span>} */}
@@ -135,7 +199,6 @@ const CommentCard = ({
                 />
               </div>
             )} */}
-
             <Menu
               anchorEl={anchorEl}
               open={open}
@@ -176,7 +239,7 @@ const CommentCard = ({
           </div>
         </div>
         <div
-          className={styles.commentSpace}
+          className={`${styles.commentSpace} commentSpace`}
           dangerouslySetInnerHTML={{ __html: content }}
         />
         <input

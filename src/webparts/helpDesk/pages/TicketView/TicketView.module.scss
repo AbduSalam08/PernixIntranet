@@ -447,3 +447,36 @@
   text-decoration: underline;
   cursor: pointer;
 }
+.commentAction {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+}
+.commentTypeDef {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 20px;
+    background-color: #eee;
+    border-radius: 50px;
+  }
+  cursor: pointer;
+  .text {
+    color: #2d4b51;
+    font-family: "osMedium", sans-serif;
+    font-size: 14px;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}

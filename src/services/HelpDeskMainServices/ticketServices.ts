@@ -322,6 +322,7 @@ export const addRecurrenceConfigForTicket = async (
   formData: any,
   ticketID: number
 ): Promise<void> => {
+  console.log("formData: ", formData);
   const toastId = toast.loading("Adding recurrence configuration");
   try {
     const res: any = await SpServices.SPAddItem({

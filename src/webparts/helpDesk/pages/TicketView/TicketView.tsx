@@ -3,11 +3,19 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Avatar, AvatarGroup, Backdrop, CircularProgress } from "@mui/material";
+import {
+  Avatar,
+  AvatarGroup,
+  Backdrop,
+  CircularProgress,
+  Fade,
+  Switch,
+  Tooltip,
+} from "@mui/material";
 import styles from "./TicketView.module.scss";
 import styles2 from "../MyTickets/MyTickets.module.scss";
 import { useNavigate, useParams } from "react-router-dom";
-import CommentCard from "../../components/CommentCard/CommentCard";
+// import CommentCard from "../../components/CommentCard/CommentCard";
 import QuillEditor from "../../../../components/common/QuillEditor/QuillEditor";
 import { useEffect, useState } from "react";
 import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
@@ -51,7 +59,7 @@ import {
 } from "../../../../services/HelpDeskMainServices/ticketServices";
 import { getAllTickets } from "../../../../services/HelpDeskMainServices/dashboardServices";
 import ErrorElement from "../../../../components/common/ErrorElement/ErrorElement";
-import { ArrowRight, Edit } from "@mui/icons-material";
+import { ArrowRight, Edit, InfoRounded } from "@mui/icons-material";
 import CircularSpinner from "../../../../components/common/Loaders/CircularSpinner";
 import TicketForm from "../../components/TicketForm/TicketForm";
 import {
@@ -63,6 +71,7 @@ import {
 } from "../../../../utils/helpdeskUtils";
 import CustomDateInput from "../../../../components/common/CustomInputFields/CustomDateInput";
 import WeekDaysSelector from "../../../../components/common/WeekDaysSelector/WeekDaysSelector";
+import CommentsList from "./CommentsList/CommentsList";
 // import { getTicketByTicketNumber } from "../../../../services/HelpDeskMainServices/dashboardServices";
 const leftArrow = require("../../../../assets/images/svg/headerBack.svg");
 const fileIcon: any = require("../../assets/images/svg/fileIcon.svg");
@@ -135,10 +144,12 @@ const TicketView = (): JSX.Element => {
 
   const [currentAttachment, setCurrentAttachment] = useState<any>(null);
 
+  // const [mentionedEmailInPage, setMentionedEmailInPage] = useState<any>([]);
+  // const [baseCollection, setBaseCollection] = useState<any>([]);
+  // console.log("baseCollection: ", baseCollection?.length);
+  // console.log("mentionedEmailInPage: ", mentionedEmailInPage);
+
   const ticketNumber: string | any = pageParams?.ticketid;
-  // const [localProperties, setLocalProperties] = useState({
-  //   expandCommentBar:true
-  // });
   const [conversationData, setConversationData] = useState<{
     isLoading: boolean;
     data: any[];
@@ -196,6 +207,19 @@ const TicketView = (): JSX.Element => {
     (item: any) => item?.TicketNumber === ticketNumber
   )[0];
 
+  const currentTicketMentionedPersons = currentTicketsData?.TaggedPerson?.map(
+    (user: any) => user
+  );
+
+  const PeopleInConversation = [
+    ...conversationData?.data?.filter((item: any) => {
+      return item?.TaggedPerson;
+    }),
+  ]?.flatMap((item: any) => item?.TaggedPerson);
+
+  console.log("PeopleInConversation: ", PeopleInConversation);
+  console.log("currentTicketMentionedPersons: ", currentTicketMentionedPersons);
+
   const [recurrenceConfigData, setRecurrenceConfigData] = useState<any>();
 
   const [TVBackDrop, setTVBackDrop] = useState(false);
@@ -252,6 +276,7 @@ const TicketView = (): JSX.Element => {
     recurrenceDetails?.EndDate?.value,
     recurrenceDetails?.Frequency?.value
   );
+
   const [nextTicketIntimation, setNextTicketIntimation] = useState(
     nextTicketIntimationLocal
   );
@@ -463,44 +488,52 @@ const TicketView = (): JSX.Element => {
 
             setRecurrenceDetails(updatedFormData);
 
-            validateRecurrenceForm(
-              query,
-              {
-                ...ticketBaseDetails,
-                NextTicketDate: dayjs(nextTicketIntimation?.date).toDate(),
-              },
-              {
-                ...recurrenceDetails,
-                TicketDetails: {
-                  value: {
-                    ID: currentRowData?.ID,
+            await Promise.all([
+              validateRecurrenceForm(
+                query,
+                {
+                  ...ticketBaseDetails,
+                  NextTicketDate: nextTicketIntimation?.date,
+                },
+                {
+                  ...recurrenceDetails,
+                  TicketDetails: {
+                    value: {
+                      ID: currentRowData?.ID,
+                    },
+                    isValid: true,
+                    errorMsg: "This field is required",
+                    validationRule: { required: false, type: "string" },
                   },
-                  isValid: true,
-                  errorMsg: "This field is required",
-                  validationRule: { required: false, type: "string" },
+                  IsActive: {
+                    value: hasRecurrence,
+                    isValid: true,
+                    errorMsg: "This field is required",
+                    validationRule: { required: false, type: "string" },
+                  },
                 },
-                IsActive: {
-                  value: hasRecurrence,
-                  isValid: true,
-                  errorMsg: "This field is required",
-                  validationRule: { required: false, type: "string" },
-                },
-              },
-              setRecurrenceDetails,
-              popupController[1]?.popupData?.RecurrenceConfigDetailsId,
-              setLoadingSubmit,
-              setSubmitClicked,
-              popupController,
-              setPopupController,
-              dispatch,
-              nextTicketIntimation,
-              1,
-              null,
-              currentRole,
-              currentUserDetails,
-              HelpDeskTicktesData,
-              hasErrors
-            );
+                setRecurrenceDetails,
+                popupController[1]?.popupData?.RecurrenceConfigDetailsId,
+                setLoadingSubmit,
+                setSubmitClicked,
+                popupController,
+                setPopupController,
+                dispatch,
+                nextTicketIntimation,
+                1,
+                null,
+                currentRole,
+                currentUserDetails,
+                HelpDeskTicktesData,
+                hasErrors
+              ),
+            ])
+              .then(async () => {
+                await getAllTickets(dispatch);
+              })
+              .catch((err: any) => {
+                console.log("err: ", err);
+              });
           }
         },
       },
@@ -602,7 +635,6 @@ const TicketView = (): JSX.Element => {
                 hightLightInput
                 onChange={(e: any) => {
                   const value = e;
-                  console.log("value: ", value);
                   const { isValid, errorMsg } = validateField(
                     "StartDate",
                     value,
@@ -627,7 +659,6 @@ const TicketView = (): JSX.Element => {
                 hightLightInput
                 onChange={(e: any) => {
                   const value = e;
-                  console.log("value: ", value);
                   const { isValid, errorMsg } = validateField(
                     "EndDate",
                     value,
@@ -667,7 +698,6 @@ const TicketView = (): JSX.Element => {
                   selectedValue={recurrenceDetails?.DayOfWeek?.value}
                   errorMsg={recurrenceDetails?.DayOfWeek?.errorMsg}
                   onChange={(value: any) => {
-                    console.log("value: ", value);
                     const { isValid, errorMsg } = validateField(
                       "DayOfWeek",
                       value,
@@ -718,7 +748,11 @@ const TicketView = (): JSX.Element => {
                         : ""
                     }`}
                   >
-                    {nextTicketIntimation?.date || "N/A"}
+                    {nextTicketIntimation?.error
+                      ? nextTicketIntimation?.date
+                      : dayjs(nextTicketIntimation?.date).format(
+                          "DD/MM/YYYY"
+                        ) || "N/A"}
                   </span>
                 </div>
               )}
@@ -730,10 +764,13 @@ const TicketView = (): JSX.Element => {
   ];
 
   const [commentText, setCommentText] = useState({
-    isValid: true,
+    isValid: false,
+    submitted: false,
     isEdited: false,
     value: "",
   });
+
+  const [commentAsPrivate, setCommentAsPrivate] = useState<boolean>(false);
 
   const [taggedPerson, setTaggedPerson] = useState({
     results: [],
@@ -848,6 +885,36 @@ const TicketView = (): JSX.Element => {
       );
     }
   }, [popupController[1]?.popupWidth]);
+
+  // uncommment and update the allticket - if the mention from email to contributors funcitonality needs to be implemented
+  // const getMismatchingItems = (
+  //   sourceArray: any[] = [],
+  //   comparisonArray: any[] = []
+  // ): any[] => {
+  //   const safeSourceArray = sourceArray||[];
+  //   const safeComparisonArray = comparisonArray || [];
+
+  //   console.log("Source Array:", safeSourceArray);
+  //   console.log("Comparison Array:", safeComparisonArray);
+
+  //   // Return mismatching items
+  //   return safeSourceArray.filter(
+  //     (item) => !safeComparisonArray.includes(item) // Check for exact match
+  //   );
+  // };
+
+  // // Example usage
+  // const misMatchingTags = getMismatchingItems(
+  //   currentTicketMentionedPersons?.map((item: any) => item?.ID) || [],
+  //   PeopleInConversation?.map((item: any) => item?.ID) || []
+  // );
+
+  // console.log("Mismatching Tags:", misMatchingTags);
+
+  // const [commentTypeValue, setCommentTypeValue] = useState("Public");
+  // const commentTypeOnChange = (value: any): void => {
+  //   setCommentTypeValue(value);
+  // };
 
   return (
     <>
@@ -966,7 +1033,6 @@ const TicketView = (): JSX.Element => {
                     width={"180px"}
                     highlightDropdown
                     onChange={(value) => {
-                      console.log("value: ", value);
                       togglePopupVisibility(
                         setPopupController,
                         initialPopupController[0],
@@ -1022,53 +1088,17 @@ const TicketView = (): JSX.Element => {
                     </span>
                   </div>
                 ) : (
-                  conversationData?.data?.map((item: any, index: number) => {
-                    return (
-                      <CommentCard
-                        data={item}
-                        handleDelete={async (data: any) => {
-                          await Promise.all([deleteComment(data?.ID)])
-                            .then(async (res: any) => {
-                              await getAllComments(
-                                currentTicketsData?.ID,
-                                setConversationData,
-                                true
-                              );
-                            })
-                            .catch((err: any) => {
-                              console.log("err: ", err);
-                            });
-                        }}
-                        lastItem={conversationData?.data?.length === index + 1}
-                        index={index}
-                        key={index}
-                        ownComment={
-                          currentUserDetails?.email === item?.Author?.EMail
-                        }
-                        isAuthor={
-                          currentTicketsData?.EmployeeName?.EMail ===
-                          item?.Author?.EMail
-                        }
-                        role={
-                          currentUserDetails?.email ===
-                          currentTicketsData?.ITOwner?.EMail
-                            ? "IT/Business owner"
-                            : currentUserDetails?.email ===
-                              currentTicketsData?.TicketManager?.EMail
-                            ? "Helpdesk manager"
-                            : currentTicketsData?.EmployeeName?.EMail ===
-                              item?.Author?.EMail
-                            ? "Ticket owner"
-                            : ""
-                        }
-                        author={item?.Author?.Title}
-                        date={dayjs(item?.Created).format("DD MMM YYYY HH:mm")}
-                        edited={item?.IsEdited}
-                        content={item?.Comment}
-                        avatarSrc={`/_layouts/15/userphoto.aspx?size=S&username=${item?.Author?.EMail}`}
-                      />
-                    );
-                  })
+                  // Ntpd 97
+                  <CommentsList
+                    conversationData={conversationData}
+                    setConversationData={setConversationData}
+                    currentTicketsData={currentTicketsData}
+                    currentUserDetails={currentUserDetails}
+                    isTicketManager={isTicketManager}
+                    isITOwner={isITOwner}
+                    deleteComment={deleteComment}
+                    getAllComments={getAllComments}
+                  />
                 )}
               </div>
 
@@ -1093,14 +1123,14 @@ const TicketView = (): JSX.Element => {
                     <div className="inputWrap">
                       <QuillEditor
                         onChange={(commentText: any) => {
-                          console.log("commentText: ", commentText);
                           setCommentText((prev: any) => ({
                             ...prev,
                             isValid: true,
+                            submitted: true,
                             value: commentText,
                           }));
                         }}
-                        placeHolder={"Enter Comments and @ to mention..."}
+                        placeHolder={"Write a comment here, mention @users"}
                         defaultValue={commentText.value}
                         suggestionList={AllUsersData ?? []}
                         getMentionedEmails={(e: any) => {
@@ -1115,55 +1145,103 @@ const TicketView = (): JSX.Element => {
                         <p className={styles.errorMsg}>Comment is required.</p>
                       )}
                     </div>
-                    <DefaultButton
-                      btnType="primaryGreen"
-                      text={"Comment"}
-                      style={{
-                        marginLeft: "auto",
-                      }}
-                      onClick={async () => {
-                        if (
-                          commentText?.value?.replace(/<(.|\n)*?>/g, "").trim()
-                            .length === 0
-                        ) {
-                          setCommentText((prev) => ({
-                            ...prev,
-                            isValid: false,
-                          }));
-                        } else {
-                          const formData = {
-                            Comment: commentText.value,
-                            TaggedPersonId: taggedPerson,
-                            TicketDetailsId: currentTicketsData?.ID,
-                            IsEdited: commentText.isEdited,
-                          };
-                          const alltaggedPersons =
-                            conversationData?.data?.flatMap((item: any) =>
-                              item?.TaggedPersonId?.map((ID: any) => ID)
-                            );
-                          await Promise.all([
-                            addComment(formData, alltaggedPersons),
-                          ])
-                            .then(async (res: any) => {
-                              setCommentText((prev: any) => ({
-                                ...prev,
-                                isValid: true,
-                                value: "",
-                                isEdited: false,
-                              }));
-                              await getAllComments(
-                                currentTicketsData?.ID,
-                                setConversationData,
-                                true
+                    <div className={styles.commentAction}>
+                      {(isTicketManager || isITOwner) && (
+                        <div className={styles.commentTypeDef}>
+                          <Tooltip
+                            title={
+                              "By enabling this, the comment can be only viewed by the helpdesk manager, IT/Business owner & the person whom tagged in this comment."
+                            }
+                            placement="left"
+                            arrow
+                            TransitionComponent={Fade}
+                          >
+                            <InfoRounded
+                              sx={{
+                                color: "#adadad",
+                                fontSize: "20px",
+                              }}
+                            />
+                          </Tooltip>
+                          <span
+                            className={styles.text}
+                            onClick={() => {
+                              setCommentAsPrivate(!commentAsPrivate);
+                            }}
+                          >
+                            Comment as private
+                          </span>
+                          <Switch
+                            checked={commentAsPrivate}
+                            value={commentAsPrivate}
+                            onChange={(value: any, checked: boolean) => {
+                              setCommentAsPrivate(checked);
+                            }}
+                          />
+                        </div>
+                      )}
+                      <DefaultButton
+                        btnType="primaryGreen"
+                        text={"Send"}
+                        onClick={async () => {
+                          if (
+                            commentText?.value
+                              ?.replace(/<(.|\n)*?>/g, "")
+                              .trim().length === 0
+                          ) {
+                            setCommentText((prev) => ({
+                              ...prev,
+                              isValid: false,
+                              submitted: false,
+                            }));
+                          } else {
+                            const formData = {
+                              Comment: commentText.value,
+                              TaggedPersonId: taggedPerson,
+                              TicketDetailsId: currentTicketsData?.ID,
+                              IsEdited: commentText.isEdited,
+                            };
+                            const alltaggedPersons =
+                              conversationData?.data?.flatMap((item: any) =>
+                                item?.TaggedPersonId?.map((ID: any) => ID)
                               );
-                            })
-                            .catch((err: any) => {
-                              console.log("err: ", err);
-                            });
+                            setCommentText((prev: any) => ({
+                              ...prev,
+                              // isValid: false,
+                              submitted: false,
+                            }));
+                            await Promise.all([
+                              addComment(
+                                formData,
+                                alltaggedPersons,
+                                commentAsPrivate
+                              ),
+                            ])
+                              .then(async (res: any) => {
+                                setCommentText((prev: any) => ({
+                                  ...prev,
+                                  isValid: false,
+                                  submitted: false,
+                                  value: "",
+                                  isEdited: false,
+                                }));
+                                setCommentAsPrivate(false);
+                                await getAllComments(
+                                  currentTicketsData?.ID,
+                                  setConversationData,
+                                  true
+                                );
+                              })
+                              .catch((err: any) => {
+                                console.log("err: ", err);
+                              });
+                          }
+                        }}
+                        disabled={
+                          !commentText?.isValid || !commentText?.submitted
                         }
-                      }}
-                      disabled={commentText.value?.trim() === ""}
-                    />
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1354,7 +1432,6 @@ const TicketView = (): JSX.Element => {
                               content: `${window.location.origin}${item?.ServerRelativeUrl}?web=1`,
                             };
                           });
-                          console.log("files: ", files);
                           await downloadFiles(
                             `${currentTicketsData?.TicketNumber}-Attachments.zip`,
                             files

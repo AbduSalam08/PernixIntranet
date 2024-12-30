@@ -7,7 +7,8 @@ import { sp } from "@pnp/sp";
 
 export const addComment = async (
   formData: any,
-  alltaggedPersons: any
+  alltaggedPersons: any,
+  isPrivateComment: boolean
 ): Promise<any> => {
   const toastId = toast.loading("Adding comment...");
   try {
@@ -18,6 +19,7 @@ export const addComment = async (
         TaggedPersonId: formData?.TaggedPersonId,
         IsEdited: false,
         TicketDetailsId: formData?.TicketDetailsId,
+        IsPrivateComment: isPrivateComment,
       },
     })
       .then(async (res: any) => {
