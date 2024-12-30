@@ -33,6 +33,8 @@ import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomTimePicker from "../../../components/common/CustomInputFields/CustomTimePicker";
 import { ToastContainer } from "react-toastify";
+import ViewAll from "../../../components/common/ViewAll/ViewAll";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface IEvent {
   title: string;
@@ -46,7 +48,10 @@ const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 const CalendarIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
-  const [isMobile, setIsMobile] = useState(false);
+
+  const isMobile = useMediaQuery("(max-width:768px)"); // Detect screen size
+
+  // const [isMobile, setIsMobile] = useState(false);
 
   const calenderIntranetData: any = useSelector((state: any) => {
     return state.CalenderIntranetData.value;
@@ -440,9 +445,9 @@ const CalendarIntranet = (props: any): JSX.Element => {
     setShowcalendardata(temp);
   };
 
-  const handleResponsiveChange = (): void => {
-    setIsMobile(window.innerWidth <= 768);
-  };
+  // const handleResponsiveChange = (): void => {
+  //   setIsMobile(window.innerWidth <= 768);
+  // };
   useEffect(() => {
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
@@ -452,31 +457,32 @@ const CalendarIntranet = (props: any): JSX.Element => {
     );
     getEvents(dispatch, "");
 
-    handleResponsiveChange();
+    // handleResponsiveChange();
 
-    // Add event listener for resize
-    window.addEventListener("resize", handleResponsiveChange);
+    // // Add event listener for resize
+    // window.addEventListener("resize", handleResponsiveChange);
 
-    // Cleanup function to remove the event listener
-    return () => {
-      window.removeEventListener("resize", handleResponsiveChange);
-    };
+    // // Cleanup function to remove the event listener
+    // return () => {
+    //   window.removeEventListener("resize", handleResponsiveChange);
+    // };
 
     // BindCalender(calenderIntranetData);
+    BindCalender(calenderIntranetData?.data);
   }, []);
 
   useEffect(() => {
     BindCalender(calenderIntranetData?.data);
 
-    handleResponsiveChange();
+    // handleResponsiveChange();
 
-    // Add event listener for resize
-    window.addEventListener("resize", handleResponsiveChange);
+    // // Add event listener for resize
+    // window.addEventListener("resize", handleResponsiveChange);
 
-    // Cleanup function to remove the event listener
-    return () => {
-      window.removeEventListener("resize", handleResponsiveChange);
-    };
+    // // Cleanup function to remove the event listener
+    // return () => {
+    //   window.removeEventListener("resize", handleResponsiveChange);
+    // };
   }, [calenderIntranetData]);
 
   return (
@@ -591,6 +597,17 @@ const CalendarIntranet = (props: any): JSX.Element => {
         </div>
       </div>
 
+      <ViewAll
+        onClick={() => {
+          window.open(
+            props.context.pageContext.web.absoluteUrl +
+              CONFIG.NavigatePage.CalendarPage,
+            "_self"
+          );
+        }}
+      />
+
+      {/* 
       <div
         className={styles.footer}
         onClick={(_: any) => {
@@ -606,7 +623,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
         ) : (
           <p>View all</p>
         )}
-      </div>
+      </div> */}
 
       {/* Toast message section */}
       <ToastContainer

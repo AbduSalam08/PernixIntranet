@@ -295,7 +295,7 @@
 
 .noDataFound {
   width: 100%;
-  height: "448px";
+  height: 324px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -393,6 +393,9 @@
       font-family: "osSemibold", sans-serif;
     }
   }
+  .noDataFound{
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -467,7 +470,9 @@
       }
     }
   }
-
+  .noDataFound{
+    font-size: 14px;
+  }
   .voteButton {
     width: 120px;
     height: 30px;

@@ -144,7 +144,7 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
     [
       <div className={styles.addShoutOutGrid} key={1}>
         <div style={{ width: "100%" }}>
-          <div style={{ width: "50%" }}>
+          <div style={{ width: "100%" }}>
             <CustomPeoplePicker
               labelText="Shout-out to"
               isValid={formData.SendTowards.isValid}

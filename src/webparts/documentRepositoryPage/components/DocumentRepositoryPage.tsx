@@ -1150,137 +1150,143 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                         ) : (
                           // More icon with menu for screens smaller than 768px
                           <>
-                            <IconButton
-                              aria-label="more options"
-                              aria-controls={
-                                open ? "folder-action-menu" : undefined
-                              }
-                              aria-haspopup="true"
-                              onClick={(event: any) => {
-                                handleClick(event, idx);
-                              }}
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
-
-                            <Menu
-                              id={`menu-${idx}`}
-                              anchorEl={anchorEl}
-                              open={currentIndex === idx}
-                              onClose={handleClose}
-                              // MenuListProps={{
-                              //   "aria-labelledby": "more-options",
-                              // }}
-                            >
-                              {val?.Content?.fileType === "master_folder" &&
-                                isAdmin && (
-                                  <MenuItem>
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "10px",
-
-                                        // width: "50%",
-                                      }}
-                                    >
-                                      <p
-                                        style={{
-                                          fontSize: "12px",
-                                        }}
-                                      >
-                                        Sort
-                                      </p>
-                                      <CustomDropDown
-                                        highlightDropdown
-                                        noErrorMsg
-                                        value={val?.Priority}
-                                        size="SM"
-                                        width="100px"
-                                        options={[
-                                          "1",
-                                          "2",
-                                          "3",
-                                          "4",
-                                          "5",
-                                          "6",
-                                          "7",
-                                        ]}
-                                        onChange={(data: any) => {
-                                          handleStatusAndPriorityChange(
-                                            CONFIG.DocRepositoryColumn.Priority,
-                                            data,
-                                            val?.IsActive,
-                                            idx
-                                          );
-                                        }}
-                                      />
-                                    </div>
-                                  </MenuItem>
-                                )}
-
-                              {val?.Content?.fileType === "master_folder" &&
-                                isAdmin && (
-                                  <MenuItem>
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "10px",
-
-                                        // width: "26%",
-                                      }}
-                                    >
-                                      <p
-                                        style={{
-                                          fontSize: "12px",
-                                        }}
-                                      >
-                                        Activity
-                                      </p>
-                                      <InputSwitch
-                                        className="sectionToggler"
-                                        checked={val?.IsActive}
-                                        onChange={(data: any) => {
-                                          handleStatusAndPriorityChange(
-                                            CONFIG.DocRepositoryColumn.IsActive,
-                                            data?.value,
-                                            val?.Priority,
-                                            idx
-                                          );
-                                        }}
-                                      />
-                                    </div>
-                                  </MenuItem>
-                                )}
-
-                              {!val?.Content?.isSubFiles && isAdmin && (
-                                <MenuItem
-                                  onClick={() => {
-                                    setCurObject({ ...val });
-                                    togglePopupVisibility(
-                                      setPopupController,
-                                      initialPopupController[2],
-                                      2,
-                                      "open"
-                                    );
-                                    handleClose();
-                                  }}
-                                  sx={{
-                                    fontSize: "12px",
+                            {isAdmin && (
+                              <>
+                                <IconButton
+                                  aria-label="more options"
+                                  aria-controls={
+                                    open ? "folder-action-menu" : undefined
+                                  }
+                                  aria-haspopup="true"
+                                  onClick={(event: any) => {
+                                    handleClick(event, idx);
                                   }}
                                 >
-                                  Delete
-                                  <DeleteIcon
-                                    className={styles.deleteIcon}
-                                    sx={{
-                                      fontSize: "24px", // Change font size
-                                      color: "red", // Change color
-                                    }}
-                                  />
-                                </MenuItem>
-                              )}
-                            </Menu>
+                                  <MoreVertIcon />
+                                </IconButton>
+
+                                <Menu
+                                  id={`menu-${idx}`}
+                                  anchorEl={anchorEl}
+                                  open={currentIndex === idx}
+                                  onClose={handleClose}
+                                  // MenuListProps={{
+                                  //   "aria-labelledby": "more-options",
+                                  // }}
+                                >
+                                  {val?.Content?.fileType === "master_folder" &&
+                                    isAdmin && (
+                                      <MenuItem>
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px",
+
+                                            // width: "50%",
+                                          }}
+                                        >
+                                          <p
+                                            style={{
+                                              fontSize: "12px",
+                                            }}
+                                          >
+                                            Sort
+                                          </p>
+                                          <CustomDropDown
+                                            highlightDropdown
+                                            noErrorMsg
+                                            value={val?.Priority}
+                                            size="SM"
+                                            width="100px"
+                                            options={[
+                                              "1",
+                                              "2",
+                                              "3",
+                                              "4",
+                                              "5",
+                                              "6",
+                                              "7",
+                                            ]}
+                                            onChange={(data: any) => {
+                                              handleStatusAndPriorityChange(
+                                                CONFIG.DocRepositoryColumn
+                                                  .Priority,
+                                                data,
+                                                val?.IsActive,
+                                                idx
+                                              );
+                                            }}
+                                          />
+                                        </div>
+                                      </MenuItem>
+                                    )}
+
+                                  {val?.Content?.fileType === "master_folder" &&
+                                    isAdmin && (
+                                      <MenuItem>
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px",
+
+                                            // width: "26%",
+                                          }}
+                                        >
+                                          <p
+                                            style={{
+                                              fontSize: "12px",
+                                            }}
+                                          >
+                                            Activity
+                                          </p>
+                                          <InputSwitch
+                                            className="sectionToggler"
+                                            checked={val?.IsActive}
+                                            onChange={(data: any) => {
+                                              handleStatusAndPriorityChange(
+                                                CONFIG.DocRepositoryColumn
+                                                  .IsActive,
+                                                data?.value,
+                                                val?.Priority,
+                                                idx
+                                              );
+                                            }}
+                                          />
+                                        </div>
+                                      </MenuItem>
+                                    )}
+
+                                  {!val?.Content?.isSubFiles && isAdmin && (
+                                    <MenuItem
+                                      onClick={() => {
+                                        setCurObject({ ...val });
+                                        togglePopupVisibility(
+                                          setPopupController,
+                                          initialPopupController[2],
+                                          2,
+                                          "open"
+                                        );
+                                        handleClose();
+                                      }}
+                                      sx={{
+                                        fontSize: "12px",
+                                      }}
+                                    >
+                                      Delete
+                                      <DeleteIcon
+                                        className={styles.deleteIcon}
+                                        sx={{
+                                          fontSize: "24px", // Change font size
+                                          color: "red", // Change color
+                                        }}
+                                      />
+                                    </MenuItem>
+                                  )}
+                                </Menu>
+                              </>
+                            )}
                           </>
                         )}
                       </div>

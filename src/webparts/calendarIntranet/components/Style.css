@@ -212,6 +212,10 @@ th[role="columnheader"] a {
   .fc .fc-toolbar-title {
     font-size: 14px !important;
   }
+
+  /* .CanvasSection-xl6 {
+    width: 100% !important ;
+  } */
 }
 
 @media (max-width: 768px) {
@@ -228,4 +232,7 @@ th[role="columnheader"] a {
   .fc .fc-toolbar-title {
     font-size: 13px !important;
   }
+  /* .CanvasSection-xl6 {
+    width: 50% !important ;
+  } */
 }

@@ -400,6 +400,7 @@
   .bodyContainer {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
+    height: auto !important;
 
     .cardSection {
       width: 100%;
@@ -655,6 +656,7 @@
   .bodyContainer {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
+    height: auto !important;
 
     .cardSection {
       width: 100%;
