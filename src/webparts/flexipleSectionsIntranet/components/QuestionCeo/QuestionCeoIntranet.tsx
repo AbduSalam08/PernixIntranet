@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable  @typescript-eslint/no-var-requires */
+
 import { Avatar } from "primereact/avatar";
 import styles from "../QuestionCeo/QuestionCeoIntranet.module.scss";
 import { Carousel } from "primereact/carousel";
@@ -26,6 +28,9 @@ import { Checkbox } from "primereact/checkbox";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
+
+// const errorGrey = require("../../../../images/svg/errorGrey.svg");
+const errorGrey = require("../../../../assets/images/svg/errorGrey.svg");
 
 const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -337,17 +342,24 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
 
       <div className={styles.carouselWrapper}>
         <div className={styles.contentSection}>
-          <Carousel
-            value={CEOQuestions}
-            numScroll={1}
-            numVisible={1}
-            showIndicators={true}
-            showNavigators={false}
-            circular
-            autoplayInterval={CEOQuestions?.length > 1 ? 8.64e7 : 8.64e7}
-            // responsiveOptions={responsiveOptions}
-            itemTemplate={productTemplate}
-          />
+          {CEOQuestions?.length == 0 ? (
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"No questions found!"}</span>
+            </div>
+          ) : (
+            <Carousel
+              value={CEOQuestions}
+              numScroll={1}
+              numVisible={1}
+              showIndicators={true}
+              showNavigators={false}
+              circular
+              autoplayInterval={CEOQuestions?.length > 1 ? 8.64e7 : 8.64e7}
+              // responsiveOptions={responsiveOptions}
+              itemTemplate={productTemplate}
+            />
+          )}
         </div>
       </div>
       <ViewAll

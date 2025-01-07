@@ -255,8 +255,10 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         </div>
 
         <div className={styles.thirdRow}>
-          <div>
+          <div className={styles.dateinput}>
             <CustomDateInput
+              maxWidth="100%"
+              minWidth="100%"
               value={formData.StartDate.value}
               label="Start Date"
               isDateController={true}
@@ -291,8 +293,10 @@ const NewHiresIntranet = (props: any): JSX.Element => {
               }}
             />
           </div>
-          <div>
+          <div className={styles.dateinput}>
             <CustomDateInput
+              maxWidth="100%"
+              minWidth="100%"
               value={formData.EndDate.value}
               label="End Date"
               isDateController={true}
@@ -489,6 +493,11 @@ const NewHiresIntranet = (props: any): JSX.Element => {
             <img src={errorGrey} alt="Error" />
             <span className="disabledText">{newHiresData?.error}</span>
           </div>
+        ) : !newHires?.length ? (
+          <div className="errorWrapper">
+            <img src={errorGrey} alt="Error" />
+            <span className="disabledText">{"no New hires data  found"}</span>
+          </div>
         ) : (
           <Carousel
             value={newHires}
@@ -504,8 +513,9 @@ const NewHiresIntranet = (props: any): JSX.Element => {
         )}
       </div>
 
-      {!newHiresData?.isLoading && newHires.length > 0 && (
-        <div style={{ marginTop: "30px" }}>
+      {/* {!newHiresData?.isLoading && newHires.length > 0 && ( */}
+      {!newHiresData?.isLoading && (
+        <div>
           <ViewAll
             onClick={() => {
               window.open(

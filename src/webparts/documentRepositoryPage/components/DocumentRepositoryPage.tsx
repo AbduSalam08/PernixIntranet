@@ -61,6 +61,7 @@ interface IDocField {
 /* Global variable creation */
 const folderIcon = require("../../../assets/images/svg/folderIcon.svg");
 const fileIcon = require("../../../webparts/helpDesk/assets/images/svg/fileIcon.svg");
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 let items: ITabObject[] = [{ name: "Home", path: CONFIG.fileFlowPath }];
 let isAdmin: boolean = false;
@@ -1295,7 +1296,11 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                 })}
               </div>
             ) : (
-              <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
+              // <div className={styles.bodyNoDataFound}>No Data Found !!!</div>
+              <div className="errorWrapper" style={{ height: "50vh" }}>
+                <img src={errorGrey} alt="Error" />
+                <span className="disabledText">{"No Data Found !!!"}</span>
+              </div>
             )}
 
             <div className={styles.filtericon}>

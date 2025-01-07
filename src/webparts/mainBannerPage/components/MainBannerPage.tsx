@@ -51,6 +51,7 @@ interface IMotivateField {
 
 /* Global variable creation */
 const PernixBannerImage = require("../assets/PernixBannerImage.svg");
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 let masterQuotes: IQuoteDatas[] = [];
 let isAdmin: boolean = false;
@@ -1242,8 +1243,13 @@ const MainBannerPage = (props: any): JSX.Element => {
                 })}
             </div>
           ) : (
-            <div className={styles.bodyNoDataFound}>
-              No motivational quote found!
+            // <div className={styles.bodyNoDataFound}>
+            //   No motivational quote found!
+            // </div>
+
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"data not found"}</span>
             </div>
           )}
 

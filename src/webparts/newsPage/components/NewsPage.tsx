@@ -830,7 +830,7 @@ const NewsPage = (props: any): JSX.Element => {
           <p
             style={{
               lineHeight: "23px",
-              fontSize: "12px",
+              fontSize: "14px",
               fontFamily: "osRegular",
             }}
           >
@@ -1504,9 +1504,10 @@ const NewsPage = (props: any): JSX.Element => {
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{newsIntranetData?.error}</span>
             </div>
-          ) : filteredNewsData.length === 0 ? (
-            <div>
-              <p>No News Found!!!</p>
+          ) : filteredNewsData?.length === 0 ? (
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"No News found"}</span>
             </div>
           ) : (
             filteredNewsData

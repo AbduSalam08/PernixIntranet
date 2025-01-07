@@ -245,7 +245,14 @@ const FlexipleSectionIntranet = (props: any): JSX.Element => {
             </div>
           )}
 
-          <div className={styles.container}>
+          <div
+            className={
+              componentsList?.filter((component) => component?.isActive)
+                .length > 2
+                ? styles.container
+                : styles.twoComponents
+            }
+          >
             {componentsList?.map(
               (component: Curobj) =>
                 component?.isActive && (

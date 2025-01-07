@@ -486,128 +486,140 @@ const CalendarIntranet = (props: any): JSX.Element => {
   }, [calenderIntranetData]);
 
   return (
-    <div className={styles.calenderContainer}>
-      <div className={styles.header}>
-        <SectionHeaderIntranet
-          label="Calendar"
-          title="Create a event"
-          removeAdd={
-            currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
-          }
-          headerAction={() => {
-            resetFormData(formData, setFormData);
-            setFormData({
-              Title: {
-                value: "",
-                isValid: true,
-                errorMsg: "Invalid name",
-                validationRule: { required: true, type: "string" },
-              },
-              StartDate: {
-                value: new Date(),
-                isValid: true,
-                errorMsg: "Invalid input",
-                validationRule: { required: true, type: "date" },
-              },
-              StartTime: {
-                value: "",
-                isValid: true,
-                errorMsg: "StartTime is required",
-                validationRule: { required: true, type: "string" },
-              },
-              EndTime: {
-                value: "",
-                isValid: true,
-                errorMsg: "EndTime is required",
-                validationRule: { required: true, type: "string" },
-              },
-              Description: {
-                value: "",
-                isValid: true,
-                errorMsg: "This field is required",
-                validationRule: { required: true, type: "string" },
-              },
-            });
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              0,
-              "open"
+    <>
+      <div className={styles.calenderContainer}>
+        <div className={styles.header}>
+          <SectionHeaderIntranet
+            label="Calendar"
+            title="Create a event"
+            removeAdd={
+              currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
+            }
+            headerAction={() => {
+              resetFormData(formData, setFormData);
+              setFormData({
+                Title: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "Invalid name",
+                  validationRule: { required: true, type: "string" },
+                },
+                StartDate: {
+                  value: new Date(),
+                  isValid: true,
+                  errorMsg: "Invalid input",
+                  validationRule: { required: true, type: "date" },
+                },
+                StartTime: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "StartTime is required",
+                  validationRule: { required: true, type: "string" },
+                },
+                EndTime: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "EndTime is required",
+                  validationRule: { required: true, type: "string" },
+                },
+                Description: {
+                  value: "",
+                  isValid: true,
+                  errorMsg: "This field is required",
+                  validationRule: { required: true, type: "string" },
+                },
+              });
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                0,
+                "open"
+              );
+            }}
+          />
+          {/* <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} /> */}
+        </div>
+
+        <div className={styles.container}>
+          <div className={styles.calenderSection}>
+            <div id="myCalendar" className={styles.mycalender} />
+          </div>
+          <div className={styles.calenderSection}>
+            {calenderIntranetData?.isLoading ? (
+              <CircularSpinner />
+            ) : calenderIntranetData?.error ? (
+              <div className="errorWrapper">
+                <img src={errorGrey} alt="Error" />
+                <span className="disabledText">
+                  {calenderIntranetData?.error}
+                </span>
+              </div>
+            ) : showcalendardata?.length === 0 ? (
+              // <div
+              //   style={{
+              //     width: "100%",
+              //     height: isMobile ? "100px" : "310px",
+              //     display: "flex",
+              //     justifyContent: "center",
+              //     alignItems: "center",
+              //     fontSize: isMobile ? "12px" : "14px",
+              //     color: "#adadad",
+              //     fontFamily: "osMedium, sans-serif",
+              //   }}
+              // >
+              //   No events found!
+              // </div>
+
+              <div className="errorWrapper" style={{ height: "50vh" }}>
+                <img src={errorGrey} alt="Error" />
+                <span className="disabledText">{" No events found!"}</span>
+              </div>
+            ) : (
+              showcalendardata
+                ?.slice(0, isMobile ? 2 : 3)
+                .map((val: IEvent, index: number) => (
+                  <div className={styles.eventSection} key={index}>
+                    <div className={styles.date}>
+                      <p>{`${moment(val.start)
+                        .format("D")
+                        .padStart(2, "0")}`}</p>
+                      <p>{`${moment(val.start)
+                        .format("MMM")
+                        .toUpperCase()}`}</p>
+                    </div>
+                    <div className={styles.event}>
+                      <p className={styles.Title} title={val.title}>
+                        {val.title}
+                      </p>
+                      <span className={styles.time}>{`${moment(
+                        val.start
+                      ).format("hh:mm A")} - ${moment(val.end).format(
+                        "hh:mm A"
+                      )}`}</span>
+                      <span
+                        className={styles.description}
+                        title={val?.description}
+                      >
+                        {val?.description}
+                      </span>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
+
+        <ViewAll
+          onClick={() => {
+            window.open(
+              props.context.pageContext.web.absoluteUrl +
+                CONFIG.NavigatePage.CalendarPage,
+              "_self"
             );
           }}
         />
-        {/* <img src={`${plusIcon}`} alt="" onClick={() => createOutlookEvent()} /> */}
-      </div>
 
-      <div className={styles.container}>
-        <div className={styles.calenderSection}>
-          <div id="myCalendar" className={styles.mycalender} />
-        </div>
-        <div className={styles.calenderSection}>
-          {calenderIntranetData?.isLoading ? (
-            <CircularSpinner />
-          ) : calenderIntranetData?.error ? (
-            <div className="errorWrapper">
-              <img src={errorGrey} alt="Error" />
-              <span className="disabledText">
-                {calenderIntranetData?.error}
-              </span>
-            </div>
-          ) : showcalendardata?.length === 0 ? (
-            <div
-              style={{
-                width: "100%",
-                height: isMobile ? "100px" : "310px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                fontSize: isMobile ? "12px" : "14px",
-                color: "#adadad",
-                fontFamily: "osMedium, sans-serif",
-              }}
-            >
-              No events found!
-            </div>
-          ) : (
-            showcalendardata
-              ?.slice(0, isMobile ? 2 : 3)
-              .map((val: IEvent, index: number) => (
-                <div className={styles.eventSection} key={index}>
-                  <div className={styles.date}>
-                    <p>{`${moment(val.start).format("D").padStart(2, "0")}`}</p>
-                    <p>{`${moment(val.start).format("MMM").toUpperCase()}`}</p>
-                  </div>
-                  <div className={styles.event}>
-                    <p className={styles.Title} title={val.title}>
-                      {val.title}
-                    </p>
-                    <span className={styles.time}>{`${moment(val.start).format(
-                      "hh:mm A"
-                    )} - ${moment(val.end).format("hh:mm A")}`}</span>
-                    <span
-                      className={styles.description}
-                      title={val?.description}
-                    >
-                      {val?.description}
-                    </span>
-                  </div>
-                </div>
-              ))
-          )}
-        </div>
-      </div>
-
-      <ViewAll
-        onClick={() => {
-          window.open(
-            props.context.pageContext.web.absoluteUrl +
-              CONFIG.NavigatePage.CalendarPage,
-            "_self"
-          );
-        }}
-      />
-
-      {/* 
+        {/* 
       <div
         className={styles.footer}
         onClick={(_: any) => {
@@ -625,6 +637,48 @@ const CalendarIntranet = (props: any): JSX.Element => {
         )}
       </div> */}
 
+        {popupController?.map((popupData: any, index: number) => (
+          <Popup
+            key={index}
+            isLoading={popupData?.isLoading}
+            messages={popupData?.messages}
+            resetPopup={() => {
+              setPopupController((prev: any): any => {
+                resetPopupController(prev, index, true);
+              });
+            }}
+            PopupType={popupData.popupType}
+            onHide={() => {
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                index,
+                "close"
+              );
+              resetFormData(formData, setFormData);
+
+              if (popupData?.isLoading?.success) {
+                getEvents(dispatch);
+              }
+            }}
+            popupTitle={
+              popupData.popupType !== "confimation" && popupData.popupTitle
+            }
+            popupActions={popupActions[index]}
+            visibility={popupData.open}
+            content={popupInputs[index]}
+            popupWidth={popupData.popupWidth}
+            defaultCloseBtn={popupData.defaultCloseBtn || false}
+            confirmationTitle={
+              popupData.popupType !== "custom" ? popupData.popupTitle : ""
+            }
+            popupHeight={index === 0 ? true : false}
+            noActionBtn={true}
+            // popupActions={[]}
+          />
+        ))}
+      </div>
+
       {/* Toast message section */}
       <ToastContainer
         position="top-center"
@@ -637,48 +691,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
         draggable
         pauseOnHover
       />
-
-      {popupController?.map((popupData: any, index: number) => (
-        <Popup
-          key={index}
-          isLoading={popupData?.isLoading}
-          messages={popupData?.messages}
-          resetPopup={() => {
-            setPopupController((prev: any): any => {
-              resetPopupController(prev, index, true);
-            });
-          }}
-          PopupType={popupData.popupType}
-          onHide={() => {
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              index,
-              "close"
-            );
-            resetFormData(formData, setFormData);
-
-            if (popupData?.isLoading?.success) {
-              getEvents(dispatch);
-            }
-          }}
-          popupTitle={
-            popupData.popupType !== "confimation" && popupData.popupTitle
-          }
-          popupActions={popupActions[index]}
-          visibility={popupData.open}
-          content={popupInputs[index]}
-          popupWidth={popupData.popupWidth}
-          defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={
-            popupData.popupType !== "custom" ? popupData.popupTitle : ""
-          }
-          popupHeight={index === 0 ? true : false}
-          noActionBtn={true}
-          // popupActions={[]}
-        />
-      ))}
-    </div>
+    </>
   );
 };
 

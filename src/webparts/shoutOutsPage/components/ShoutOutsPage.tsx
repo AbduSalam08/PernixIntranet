@@ -39,6 +39,7 @@ import { ToastContainer } from "react-toastify";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 
 const img: any = require("../../../assets/images/svg/Shoutouts/bronze.png");
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 interface PopupState {
   open: boolean;
@@ -470,10 +471,8 @@ const ShoutOutsPage = (props: any): JSX.Element => {
   };
 
   useEffect(() => {
-    if (ShoutOutsStoreData?.data?.length > 0) {
-      onLoadingFUN(selectedTab || CONFIG.ShoutOutsPageTabsName[0]);
-    }
-  }, [ShoutOutsStoreData]);
+    onLoadingFUN(selectedTab || CONFIG.ShoutOutsPageTabsName[0]);
+  }, [ShoutOutsStoreData?.data?.length]);
 
   useEffect(() => {
     const urlObj = new URL(window.location.href);
@@ -625,19 +624,24 @@ const ShoutOutsPage = (props: any): JSX.Element => {
       </div>
 
       {showShoutOutsData?.length === 0 ? (
-        <div
-          style={{
-            width: "100%",
-            height: "50vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "14px",
-            color: "#adadad",
-            fontFamily: "osMedium, sans-serif",
-          }}
-        >
-          No shout outs found.
+        // <div
+        //   style={{
+        //     width: "100%",
+        //     height: "50vh",
+        //     display: "flex",
+        //     justifyContent: "center",
+        //     alignItems: "center",
+        //     fontSize: "14px",
+        //     color: "#adadad",
+        //     fontFamily: "osMedium, sans-serif",
+        //   }}
+        // >
+        //   No shout outs found.
+        // </div>
+
+        <div className="errorWrapper" style={{ height: "50vh" }}>
+          <img src={errorGrey} alt="Error" />
+          <span className="disabledText">{"No shout outs found."}</span>
         </div>
       ) : (
         <div className={styles.bodyContainer}>
@@ -712,23 +716,6 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                       <div />
                     )}
                     <div className={styles.actionBtns}>
-                      {currentUserData.userRole === "Admin" && (
-                        <InputSwitch
-                          checked={val.isActive}
-                          className="sectionToggler"
-                          onChange={(e: any) => {
-                            setShowShoutOutsData((prevItems) =>
-                              prevItems.map((item: any, idx: number) =>
-                                val?.ID === item?.ID
-                                  ? { ...item, isActive: e.value }
-                                  : item
-                              )
-                            );
-                            changeShoutOutActiveStatus(val.ID, e.value);
-                          }}
-                        />
-                      )}
-
                       {val?.senderImage?.toLowerCase() ===
                         currentUserData?.email?.toLowerCase() &&
                         !val.isActive && (
@@ -785,6 +772,23 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                             }}
                           />
                         )}
+
+                      {currentUserData.userRole === "Admin" && (
+                        <InputSwitch
+                          checked={val.isActive}
+                          className="sectionToggler"
+                          onChange={(e: any) => {
+                            setShowShoutOutsData((prevItems) =>
+                              prevItems.map((item: any, idx: number) =>
+                                val?.ID === item?.ID
+                                  ? { ...item, isActive: e.value }
+                                  : item
+                              )
+                            );
+                            changeShoutOutActiveStatus(val.ID, e.value);
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

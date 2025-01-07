@@ -50,6 +50,8 @@ let curMasterOptions: any[] = [];
 
 let isActivityPage: boolean = false;
 
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+
 const PollPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const [isfilter, setIsfilter] = useState<boolean>(false);
@@ -939,7 +941,7 @@ const PollPage = (props: any): JSX.Element => {
 
   useEffect(() => {
     onLoadingFUN(selectedTab || CONFIG.TabsName[0]);
-  }, [PollIntranetData]);
+  }, [PollIntranetData?.data?.length]);
 
   return (
     <div className={styles.masContainer}>
@@ -1178,7 +1180,12 @@ const PollPage = (props: any): JSX.Element => {
           </div>
 
           {!currentPoll.length ? (
-            <div className={styles.noDataFound}>No poll found!</div>
+            // <div className={styles.noDataFound}>No poll found!</div>
+
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"No poll found!"}</span>
+            </div>
           ) : (
             <div className={styles.bodyContainer}>
               {currentPoll?.map((val: any, index: number) => (

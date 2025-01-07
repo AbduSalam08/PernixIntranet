@@ -44,6 +44,7 @@ import { InputSwitch } from "primereact/inputswitch";
 const wishImg: any = require("../../../assets/images/svg/wishImg.svg");
 const teamsImg: any = require("../../../assets/images/svg/Birthday/teamsIcon.png");
 const outlookImg: any = require("../../../assets/images/svg/Birthday/outlookIcon.png");
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 let masterUser: IBirthdayUsers[] = [];
 let masterData: IBirthdayData[] = [];
@@ -243,17 +244,37 @@ const BirthdayPage = (props: any): JSX.Element => {
 
     if (isActive && ID) {
       await deleteBirthDay(ID).then((res: any) => {
-        arrUserDatas[Idx].BirthdayUserListDataId = null;
-        arrUserDatas[Idx].IsActive = true;
-        setCurrentUser({ ...CONFIG.SelectWish });
-        setArrUserDatas([...arrUserDatas]);
+        const slicedData: IBirthdayUsers[] = arrUserDatas?.slice(
+          pagination.first,
+          pagination.first + pagination.rows
+        );
+
+        if (slicedData?.[Idx]) {
+          slicedData[Idx].BirthdayUserListDataId = null;
+          slicedData[Idx].IsActive = true;
+
+          arrUserDatas[pagination.first + Idx] = slicedData[Idx];
+
+          setCurrentUser({ ...CONFIG.SelectWish });
+          setArrUserDatas([...arrUserDatas]);
+        }
       });
     } else {
       await addBirthDay(userID).then((Id: any) => {
-        arrUserDatas[Idx].BirthdayUserListDataId = Id;
-        arrUserDatas[Idx].IsActive = false;
-        setCurrentUser({ ...CONFIG.SelectWish });
-        setArrUserDatas([...arrUserDatas]);
+        const slicedData: IBirthdayUsers[] = arrUserDatas?.slice(
+          pagination.first,
+          pagination.first + pagination.rows
+        );
+
+        if (slicedData?.[Idx]) {
+          slicedData[Idx].BirthdayUserListDataId = Id;
+          slicedData[Idx].IsActive = false;
+
+          arrUserDatas[pagination.first + Idx] = slicedData[Idx];
+
+          setCurrentUser({ ...CONFIG.SelectWish });
+          setArrUserDatas([...arrUserDatas]);
+        }
       });
     }
   };
@@ -737,21 +758,25 @@ const BirthdayPage = (props: any): JSX.Element => {
           </div>
 
           {!arrUserDatas?.length ? (
-            <div
-              style={{
-                width: "100%",
-                height: "50vh",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                fontSize: "14px",
-                color: "#adadad",
-                fontFamily: "osMedium, sans-serif",
-              }}
-            >
-              Birthday data not found!
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"Birthday data not found!"}</span>
             </div>
           ) : (
+            // <div
+            //   style={{
+            //     width: "100%",
+            //     height: "50vh",
+            //     display: "flex",
+            //     justifyContent: "center",
+            //     alignItems: "center",
+            //     fontSize: "14px",
+            //     color: "#adadad",
+            //     fontFamily: "osMedium, sans-serif",
+            //   }}
+            // >
+            //   Birthday data not found!
+            // </div>
             <div className={styles.bodyContainer}>
               <div className={styles.birthdaySection}>
                 {arrUserDatas
@@ -766,13 +791,13 @@ const BirthdayPage = (props: any): JSX.Element => {
                               isAdmin &&
                               moment().format("MMDD") ===
                                 moment(val?.Birthday).format("MMDD")
-                                ? "75px"
+                                ? "50px"
                                 : "50px",
                             height:
                               isAdmin &&
                               moment().format("MMDD") ===
                                 moment(val?.Birthday).format("MMDD")
-                                ? "75px"
+                                ? "50px"
                                 : "50px",
                           }}
                         >

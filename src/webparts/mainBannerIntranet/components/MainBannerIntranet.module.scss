@@ -102,6 +102,7 @@
   @media (max-width: 480px) {
     width: 95%;
     margin-left: 0;
+    padding: 15px 20px;
 
     h1 {
       font-size: 20px;
@@ -109,6 +110,12 @@
 
     p {
       font-size: 16px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      // white-space: nowrap;
     }
   }
 }
@@ -136,6 +143,11 @@
     justify-content: flex-start;
     scroll-behavior: smooth;
     padding: 10px 0; // Add padding to the scroll area
+
+    &::-webkit-scrollbar {
+      width: 2px !important; // Adjust the width of the scrollbar
+      height: 2px !important; // Adjust the width of the scrollbar
+    }
   }
 }
 .quickLinksLoading {
@@ -184,5 +196,15 @@
     background-color: #e0803d;
     color: #ffffff;
     cursor: pointer;
+
+    @media (max-width: 480px) {
+      padding: 7px 9px;
+      font-size: 12px;
+      z-index: 99;
+    }
+  }
+  @media (max-width: 480px) {
+    top: 2px;
+    right: 2px;
   }
 }

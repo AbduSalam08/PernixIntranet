@@ -319,6 +319,7 @@ export const deleteShoutOut = async (
       Listname: CONFIG.ListNames.Intranet_ShoutOuts,
       ID: ID,
     }).then(async (res: any) => {
+      debugger;
       await getAllShoutOutsData(dispath);
 
       toast.update(toastId, {

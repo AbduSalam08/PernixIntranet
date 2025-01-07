@@ -374,50 +374,96 @@ const NewsIntranet = (props: any): JSX.Element => {
   }, [newsIntranetData]);
 
   return (
-    <div className={styles.newsContainer}>
-      <SectionHeaderIntranet
-        label={"News"}
-        title="Add a new news"
-        removeAdd={
-          currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
-        }
-        headerAction={() => {
-          togglePopupVisibility(
-            setPopupController,
-            initialPopupController[0],
-            0,
-            "open"
-          );
-          resetFormData(formData, setFormData);
-        }}
-      />
+    <>
+      <div className={styles.newsContainer}>
+        <SectionHeaderIntranet
+          label={"News"}
+          title="Add a new news"
+          removeAdd={
+            currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
+          }
+          headerAction={() => {
+            togglePopupVisibility(
+              setPopupController,
+              initialPopupController[0],
+              0,
+              "open"
+            );
+            resetFormData(formData, setFormData);
+          }}
+        />
 
-      <div className={styles.newsContainerWrapper}>
-        {newsIntranetData?.isLoading ? (
-          <CircularSpinner />
-        ) : newsIntranetData?.error ? (
-          <div className="errorWrapper">
-            <img src={errorGrey} alt="Error" />
-            <span className="disabledText">{newsIntranetData?.error}</span>
-          </div>
-        ) : (
-          shownewsdata
-            ?.slice(0, 3)
-            ?.map((item: any, idx: number) => (
-              <NewsCard
-                title={item?.title}
-                imageUrl={item?.imageUrl}
-                key={idx}
-                description={item?.description}
-                noActions={true}
-                noStatus={true}
-              />
-            ))
-        )}
+        <div className={styles.newsContainerWrapper}>
+          {newsIntranetData?.isLoading ? (
+            <CircularSpinner />
+          ) : newsIntranetData?.error ? (
+            <div className="errorWrapper">
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{newsIntranetData?.error}</span>
+            </div>
+          ) : shownewsdata?.length === 0 ? (
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"No News found."}</span>
+            </div>
+          ) : (
+            shownewsdata
+              ?.slice(0, 3)
+              ?.map((item: any, idx: number) => (
+                <NewsCard
+                  title={item?.title}
+                  imageUrl={item?.imageUrl}
+                  key={idx}
+                  description={item?.description}
+                  noActions={true}
+                  noStatus={true}
+                />
+              ))
+          )}
+        </div>
+
+        <ViewAll onClick={handlenavigate} />
+
+        {popupController?.map((popupData: any, index: number) => (
+          <Popup
+            key={index}
+            isLoading={popupData?.isLoading}
+            messages={popupData?.messages}
+            resetPopup={() => {
+              setPopupController((prev: any): any => {
+                resetPopupController(prev, index, true);
+              });
+            }}
+            PopupType={popupData.popupType}
+            onHide={() => {
+              resetFormData(formData, setFormData);
+              togglePopupVisibility(
+                setPopupController,
+                initialPopupController[0],
+                index,
+                "close"
+              );
+
+              if (popupData?.isLoading?.success) {
+                getAllNewsData(dispatch);
+              }
+            }}
+            popupTitle={
+              popupData.popupType !== "confimation" && popupData.popupTitle
+            }
+            popupActions={popupActions[index]}
+            visibility={popupData.open}
+            content={popupInputs[index]}
+            popupWidth={popupData.popupWidth}
+            defaultCloseBtn={popupData.defaultCloseBtn || false}
+            confirmationTitle={
+              popupData.popupType !== "custom" ? popupData.popupTitle : ""
+            }
+            popupHeight={index === 0 ? true : false}
+            noActionBtn={true}
+          />
+        ))}
       </div>
-
-      <ViewAll onClick={handlenavigate} />
-
       {/* Toast message section */}
       <ToastContainer
         position="top-center"
@@ -430,47 +476,7 @@ const NewsIntranet = (props: any): JSX.Element => {
         draggable
         pauseOnHover
       />
-
-      {popupController?.map((popupData: any, index: number) => (
-        <Popup
-          key={index}
-          isLoading={popupData?.isLoading}
-          messages={popupData?.messages}
-          resetPopup={() => {
-            setPopupController((prev: any): any => {
-              resetPopupController(prev, index, true);
-            });
-          }}
-          PopupType={popupData.popupType}
-          onHide={() => {
-            resetFormData(formData, setFormData);
-            togglePopupVisibility(
-              setPopupController,
-              initialPopupController[0],
-              index,
-              "close"
-            );
-
-            if (popupData?.isLoading?.success) {
-              getAllNewsData(dispatch);
-            }
-          }}
-          popupTitle={
-            popupData.popupType !== "confimation" && popupData.popupTitle
-          }
-          popupActions={popupActions[index]}
-          visibility={popupData.open}
-          content={popupInputs[index]}
-          popupWidth={popupData.popupWidth}
-          defaultCloseBtn={popupData.defaultCloseBtn || false}
-          confirmationTitle={
-            popupData.popupType !== "custom" ? popupData.popupTitle : ""
-          }
-          popupHeight={index === 0 ? true : false}
-          noActionBtn={true}
-        />
-      ))}
-    </div>
+    </>
   );
 };
 

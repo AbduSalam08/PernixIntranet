@@ -6,6 +6,7 @@
     display: flex;
     justify-content: flex-end;
     margin: 15px 0px;
+    width: calc(100% - 40px);
 
     .buttondiv {
       display: flex;
@@ -28,26 +29,39 @@
   }
   .container {
     display: flex;
+    flex-wrap: wrap;
     // margin: 20px;
     gap: 40px;
 
     > div {
-      width: 31.55%;
+      width: calc(33.33% - 40px);
     }
-
-    // @media (max-width: 1020px) {
-    //   > div {
-    //     width: calc(50% - 40px) !important;
-    //   }
-    // }
   }
+
+  .twoComponents {
+    display: flex;
+    flex-wrap: wrap;
+    // margin: 20px;
+    gap: 40px;
+    > div {
+      width: calc(50% - 40px);
+    }
+  }
+
+  // @media (max-width: 1020px) {
+  //   > div {
+  //     width: calc(50% - 40px) !important;
+  //   }
+  // }
 }
+
 // For mobile responsiveness
 
 @media (max-width: 1020px) {
   .flexibleSection {
-    // width: 100%;
     .icon {
+      width: calc(100% - 20px);
+
       i {
         font-size: 1rem;
       }
@@ -60,31 +74,52 @@
       gap: 10px;
 
       > div {
-        flex: 1 1 calc(50% - 10px) !important;
+        width: calc(50% - 10px) !important;
       }
     }
   }
 }
+
 @media (max-width: 768px) {
   .flexibleSection {
-    width: unset !important;
-    // margin: 0 !important;
-
     .icon {
+      width: 100% !important;
+
       i {
         font-size: 1rem;
       }
     }
 
     .container {
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px;
 
       > div {
-        flex: 1 1 100% !important;
+        width: 100% !important; // Set to full width for proper alignment
       }
     }
   }
 }
+
+// @media (max-width: 768px) {
+//   .flexibleSection {
+
+//     .icon {
+//       i {
+//         font-size: 1rem;
+//       }
+//     }
+
+//     .container {
+//       gap: 10px;
+
+//       > div {
+//         width: calc(100% - 10px) !important;
+//       }
+//     }
+//   }
+// }
 
 .LoaderContainer {
   display: flex;

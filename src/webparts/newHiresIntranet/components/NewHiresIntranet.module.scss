@@ -5,6 +5,9 @@
   border-radius: 6px;
   background-color: #fff;
   height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
   .contentSection {
     padding: 15px 20px;
@@ -171,8 +174,12 @@
     flex-wrap: wrap;
     gap: 20px;
 
-    div {
-      width: 100%;
+    .dateinput {
+      width: calc(50% - 10px);
+
+      @media (max-width: 520px) {
+        width: 100%;
+      }
     }
   }
 }

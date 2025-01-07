@@ -48,6 +48,8 @@ const CustomPeoplePicker: React.FC<any> = ({
   useEffect(() => {
     if (selectedUserItem?.length) {
       setIsFocused(true);
+    } else {
+      setIsFocused(false);
     }
   }, [selectedItem, isFocused]);
 

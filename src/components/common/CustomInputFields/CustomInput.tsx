@@ -37,6 +37,7 @@ interface Props {
   onKeyDown?: any;
   noBorderInput?: boolean;
   topLabel?: boolean;
+  maxLength?: number;
 }
 
 const CustomInput: React.FC<Props> = ({
@@ -64,6 +65,7 @@ const CustomInput: React.FC<Props> = ({
   onKeyDown,
   noBorderInput,
   topLabel,
+  maxLength,
   secWidth = "100%",
 }) => {
   const handleChange = useCallback(

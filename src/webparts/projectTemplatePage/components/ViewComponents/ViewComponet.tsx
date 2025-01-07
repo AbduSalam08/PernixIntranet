@@ -33,7 +33,7 @@ const ViewComponent = ({ selectedProject }: any) => {
       </div>
 
       <div>
-        <Documents />
+        <Documents value={selectedProject} />
       </div>
 
       <div>

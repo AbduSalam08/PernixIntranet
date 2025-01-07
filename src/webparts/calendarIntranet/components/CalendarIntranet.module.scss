@@ -6,6 +6,9 @@
   // height: 448px;
   height: 486px;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   .header {
     display: flex;
     justify-content: flex-end;
