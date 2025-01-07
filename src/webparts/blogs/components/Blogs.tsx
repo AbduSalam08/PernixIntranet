@@ -348,7 +348,11 @@ const Blogs = (props: any): JSX.Element => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
         key,
-        fieldData.value,
+        key === "Tag" && fieldData.value?.length <= 255
+          ? fieldData.value
+          : key !== "Tag"
+          ? fieldData.value
+          : "",
         fieldData?.validationRule
       );
 
@@ -356,15 +360,23 @@ const Blogs = (props: any): JSX.Element => {
         hasErrors = true;
       }
 
+      const errMessage: string =
+        key === "Tag" && fieldData.value?.length <= 255
+          ? errorMsg
+          : key !== "Tag"
+          ? errorMsg
+          : "Maximum 255 characters allowed.";
+
       return {
         ...acc,
         [key]: {
           ...fieldData,
           isValid,
-          errorMsg,
+          errMessage,
         },
       };
     }, {} as typeof formData);
+    2;
 
     setFormData(updatedFormData);
     if (!hasErrors) {
@@ -888,7 +900,16 @@ const Blogs = (props: any): JSX.Element => {
                 </div>
               </div>
             </div>
-            <div className={styles.VCommentContainer}>
+            <div
+              className={styles.VCommentContainer}
+              style={{
+                display:
+                  CONFIG.blogStatus.Approved === curBlogData?.Status &&
+                  curBlogData?.IsActive
+                    ? "block"
+                    : "none",
+              }}
+            >
               <div className={styles.CHeader}>Comments</div>
               {allComment.length ? (
                 <div className={styles.CComments}>
@@ -1032,7 +1053,7 @@ const Blogs = (props: any): JSX.Element => {
                   size="SM"
                   options={[...CONFIG.blogDrop]}
                   value={comSearch.Status}
-                  placeholder="All"
+                  placeholder="Select Status"
                   onChange={(e: any) => {
                     const value: any = e;
                     searchField.Status = value;
@@ -1589,16 +1610,24 @@ const Blogs = (props: any): JSX.Element => {
                   <CustomInput
                     value={formData?.Tag?.value}
                     placeholder="Tag"
+                    maxLength={255}
                     isValid={formData?.Tag?.isValid}
                     errorMsg={formData?.Tag?.errorMsg}
                     onChange={(e: any) => {
                       const value = e.trimStart();
                       const { isValid, errorMsg } = validateField(
                         "Tag",
-                        value,
+                        value.length <= 255 ? value : "",
                         formData?.Tag?.validationRule
                       );
-                      handleInputChange("Tag", value, isValid, errorMsg);
+                      handleInputChange(
+                        "Tag",
+                        value,
+                        isValid,
+                        value.length <= 255
+                          ? errorMsg
+                          : "Maximum 255 characters allowed."
+                      );
                     }}
                   />
                 </div>
@@ -1625,36 +1654,7 @@ const Blogs = (props: any): JSX.Element => {
                 )}
               </div>
             </div>
-            <div className={styles.secondRow}>
-              <RichText
-                className={styles.richtextwrapper}
-                isValid={!formData?.Description?.isValid}
-                errorMsg={formData?.Description?.errorMsg}
-                value={formData?.Description?.value}
-                onChange={(res: any) => {
-                  let value: string = "";
 
-                  if (res === "<p><br></p>") {
-                    value = "";
-                  } else if (
-                    res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
-                  ) {
-                    value = "";
-                  } else {
-                    value = res;
-                  }
-
-                  const { isValid, errorMsg } = validateField(
-                    "Description",
-                    value,
-                    formData?.Description?.validationRule
-                  );
-                  handleInputChange("Description", value, isValid, errorMsg);
-                }}
-                placeholder="Type your content here..."
-                // className="myRichTextEditor"
-              />
-            </div>
             <div className={styles.thirdRow}>
               <CustomMultipleFileUpload
                 placeholder="Click to upload a file"
@@ -1689,6 +1689,36 @@ const Blogs = (props: any): JSX.Element => {
                 }}
                 isValid={formData.Content.isValid}
                 errMsg={formData.Content.errorMsg}
+              />
+            </div>
+            <div className={styles.secondRow}>
+              <RichText
+                className={`blog ${styles.richtextwrapper}`}
+                isValid={!formData?.Description?.isValid}
+                errorMsg={formData?.Description?.errorMsg}
+                value={formData?.Description?.value}
+                onChange={(res: any) => {
+                  let value: string = "";
+
+                  if (res === "<p><br></p>") {
+                    value = "";
+                  } else if (
+                    res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
+                  ) {
+                    value = "";
+                  } else {
+                    value = res;
+                  }
+
+                  const { isValid, errorMsg } = validateField(
+                    "Description",
+                    value,
+                    formData?.Description?.validationRule
+                  );
+                  handleInputChange("Description", value, isValid, errorMsg);
+                }}
+                placeholder="Type your content here..."
+                // className="myRichTextEditor"
               />
             </div>
           </div>

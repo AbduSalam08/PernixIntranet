@@ -15,6 +15,7 @@ import { Avatar } from "@mui/material";
 
 /* Global variable creation */
 let masterData: IFeedbackResType[] = [];
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 const FeedBackViewPage = (props: any): JSX.Element => {
   /* State creation */
@@ -153,7 +154,12 @@ const FeedBackViewPage = (props: any): JSX.Element => {
               })}
             </div>
           ) : (
-            <div className={styles.bodyNoDataFound}>No responses found!</div>
+            // <div className={styles.bodyNoDataFound}>No responses found!</div>
+
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"No responses found!"}</span>
+            </div>
           )}
         </>
       )}

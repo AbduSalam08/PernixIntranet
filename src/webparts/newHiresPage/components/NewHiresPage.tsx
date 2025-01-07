@@ -41,6 +41,7 @@ import { ToastContainer } from "react-toastify";
 /* Images creation */
 // const personImagePlaceholder: any = require("../../../assets/images/svg/personImagePlaceholder.svg");
 const defaultUserImg: string = require("../../../assets/images/svg/user2.png");
+const errorGrey: string = require("../../../assets/images/svg/errorGrey.svg");
 
 /* Local interfaces */
 interface INewHiresField {
@@ -779,19 +780,24 @@ const NewHiresPage = (props: any): JSX.Element => {
       </div>
 
       {showNewHires?.length === 0 ? (
-        <div
-          style={{
-            width: "100%",
-            height: "50vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "14px",
-            color: "#adadad",
-            fontFamily: "osMedium, sans-serif",
-          }}
-        >
-          No new hires found!
+        //  <div
+        //     style={{
+        //       width: "100%",
+        //       height: "50vh",
+        //       display: "flex",
+        //       justifyContent: "center",
+        //       alignItems: "center",
+        //       fontSize: "14px",
+        //       color: "#adadad",
+        //       fontFamily: "osMedium, sans-serif",
+        //     }}
+        //   >
+        //     No new hires found!
+        //   </div>
+
+        <div className="errorWrapper" style={{ height: "50vh" }}>
+          <img src={errorGrey} alt="Error" />
+          <span className="disabledText">{"No new hires found!"}</span>
         </div>
       ) : (
         <div className={styles.bodyContainer}>

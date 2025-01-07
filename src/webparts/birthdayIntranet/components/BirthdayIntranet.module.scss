@@ -64,7 +64,9 @@
               font-size: 16px;
               color: #0b4d53;
               font-family: "osSemibold", sans-serif;
-              margin-bottom: 5px;
+              line-height: 1.4;
+              // padding-bottom: 6px;
+              // margin-bottom: 5px;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
@@ -78,6 +80,7 @@
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
+              line-height: 1.4;
             }
           }
 

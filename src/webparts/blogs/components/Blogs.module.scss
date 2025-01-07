@@ -206,6 +206,8 @@
       color: #e0803d;
       line-height: 17px;
       display: -webkit-box;
+      padding-right: 5px;
+      // margin-left: 5px;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       font-family: "osMedium", sans-serif;
@@ -682,12 +684,16 @@
 
   div {
     cursor: pointer;
-    text-decoration: underline;
     color: #0000ee;
 
     i {
       font-size: 14px;
       margin-right: 6px;
+      color: #000;
+    }
+    &:hover {
+      text-decoration: underline;
+      // color: #0b4d53;
     }
   }
 }

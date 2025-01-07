@@ -56,6 +56,9 @@ let masterFeedBackQus: IFeedbackQusType[] = [];
 let masterFeedBackRes: IFeedbackResType[] = [];
 let currentUserData: IUserData;
 
+//image
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+
 const FeedBackFormIntranet = (props: any): JSX.Element => {
   /* Local variable creation */
   const dispatch = useDispatch();
@@ -528,7 +531,7 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
           <CircularSpinner />
         </div>
       ) : (
-        <div>
+        <div className={styles.feedbackwrapper}>
           {/* Header section */}
           <SectionHeaderIntranet
             title="Create a feedback question"
@@ -547,36 +550,39 @@ const FeedBackFormIntranet = (props: any): JSX.Element => {
           />
 
           {/* Carousel section */}
-          {allFeedbackQuestion.length ? (
-            <div className={styles.PRCarouselContainer}>
-              <Carousel
-                value={allFeedbackQuestion}
-                numScroll={1}
-                numVisible={1}
-                showIndicators={!isResponse}
-                showNavigators={false}
-                circular
-                autoplayInterval={
-                  isResponse
-                    ? 0
-                    : allFeedbackQuestion.length > 1
-                    ? 6000
-                    : 8.64e7
-                }
-                itemTemplate={productTemplate}
-              />
-              <div
-                style={{
-                  display: isResponse ? "flex" : "none",
-                  height: "8px",
-                }}
-              />
-            </div>
-          ) : (
-            <div className={styles.noDataFound}>
-              No feedback questions found!
-            </div>
-          )}
+          <div className={styles.PRCarouselContainer}>
+            {allFeedbackQuestion.length ? (
+              <>
+                <Carousel
+                  value={allFeedbackQuestion}
+                  numScroll={1}
+                  numVisible={1}
+                  showIndicators={!isResponse}
+                  showNavigators={false}
+                  circular
+                  autoplayInterval={
+                    isResponse
+                      ? 0
+                      : allFeedbackQuestion.length > 1
+                      ? 6000
+                      : 8.64e7
+                  }
+                  itemTemplate={productTemplate}
+                />
+                <div
+                  style={{
+                    display: isResponse ? "flex" : "none",
+                    height: "8px",
+                  }}
+                />
+              </>
+            ) : (
+              <div className="errorWrapper">
+                <img src={errorGrey} alt="Error" />
+                <span className="disabledText">{"data not found"}</span>
+              </div>
+            )}
+          </div>
 
           {/* footer section */}
           <div

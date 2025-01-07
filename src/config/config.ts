@@ -135,7 +135,7 @@ export namespace CONFIG {
 
   export const birthdayPaginationData: IPaginationData = {
     first: 0,
-    rows: 9,
+    rows: 16,
   };
 
   export const MotivateColumn: IMotivateColumn = {

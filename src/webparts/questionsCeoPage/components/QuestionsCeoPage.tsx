@@ -80,6 +80,8 @@ interface PopupState {
 let assignedUser: string = "";
 let isActivityPage: boolean = false;
 
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+
 const QuestionsCeoPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const searchField: IPageSearchFields = CONFIG.PageSearchFields;
@@ -894,13 +896,13 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
     setCeoQuestionsdata([...filteredData].reverse());
     setShowCEOQuestions([...filteredData].reverse());
     setIsLoading(false);
+
+    debugger;
   };
 
   useEffect(() => {
-    if (QuestionCEOIntranetData?.data?.length > 0) {
-      onLoadingFUN(selectedTab || CONFIG.QuestionsPageTabsName[0]);
-    }
-  }, [QuestionCEOIntranetData]);
+    onLoadingFUN(selectedTab || CONFIG.QuestionsPageTabsName[0]);
+  }, [QuestionCEOIntranetData?.data?.length]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -1126,19 +1128,24 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
       </div>
 
       {showCEOQuestions?.length === 0 ? (
-        <div
-          style={{
-            width: "100%",
-            height: "50vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "14px",
-            color: "#adadad",
-            fontFamily: "osMedium, sans-serif",
-          }}
-        >
-          No questions found!
+        // <div
+        //   style={{
+        //     width: "100%",
+        //     height: "50vh",
+        //     display: "flex",
+        //     justifyContent: "center",
+        //     alignItems: "center",
+        //     fontSize: "14px",
+        //     color: "#adadad",
+        //     fontFamily: "osMedium, sans-serif",
+        //   }}
+        // >
+        //   No questions found!
+        // </div>
+
+        <div className="errorWrapper" style={{ height: "50vh" }}>
+          <img src={errorGrey} alt="Error" />
+          <span className="disabledText">{"No questions found!"}</span>
         </div>
       ) : (
         <div className={styles.bodyContainer}>

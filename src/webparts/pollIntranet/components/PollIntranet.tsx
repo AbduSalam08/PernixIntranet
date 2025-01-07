@@ -585,7 +585,13 @@ const PollIntranet = (props: any): JSX.Element => {
           <CircularSpinner />
         </div>
       ) : (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
           <SectionHeaderIntranet
             title="Create a new poll"
             label="Poll"

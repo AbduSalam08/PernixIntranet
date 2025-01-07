@@ -47,6 +47,7 @@ interface IFeedbackField {
 
 /* Global variable creation */
 const errorImg: string = require("../../../assets/images/svg/errorImg.svg");
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 let isAdmin: boolean = false;
 let masterFeedBackQus: IFeedbackQusType[] = [];
@@ -955,8 +956,15 @@ const FeedBackFormPage = (props: any): JSX.Element => {
                   )}
                 </div>
               ) : (
-                <div className={styles.bodyNoDataFound}>
-                  No feedback questions found!
+                // <div className={styles.bodyNoDataFound}>
+                //   No feedback questions found!
+                // </div>
+
+                <div className="errorWrapper" style={{ height: "50vh" }}>
+                  <img src={errorGrey} alt="Error" />
+                  <span className="disabledText">
+                    {"No feedback questions found!"}
+                  </span>
                 </div>
               )}
             </>

@@ -405,3 +405,27 @@ export interface IEDMonthDrop {
   Month: string;
   Date: string[];
 }
+
+export interface ProjectDetails {
+  id: number;
+  projectName: string | null;
+  status: string | null;
+  contractNo: string | null;
+  projectAdmin: {
+    id: number | null;
+    name: string | null;
+    email: string | null;
+  };
+  clientName: string | null;
+  location: string | null;
+  address: string | null;
+  team: {
+    id: number | null;
+    name: string | null;
+    email: string | null;
+  }[];
+  startDate: string | null; // ISO date string
+  endDate: string | null;
+  description: string | null;
+  summary: string | null;
+}

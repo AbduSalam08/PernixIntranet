@@ -307,6 +307,8 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
         .slice(0, 5);
       setShoutOutsData([...filteredData]);
       setIsLoading(false);
+    } else {
+      setIsLoading(false);
     }
   }, [shoutOutData]);
 
@@ -346,7 +348,13 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{shoutOutData?.error}</span>
             </div>
+          ) : shoutOutsData?.length == 0 ? (
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">{"No shout outs found"}</span>
+            </div>
           ) : (
+            // <div></div>
             <Carousel
               value={shoutOutsData}
               numScroll={1}

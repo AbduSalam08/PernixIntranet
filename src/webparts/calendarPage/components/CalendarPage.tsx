@@ -982,19 +982,24 @@ const CalendarPage = (props: any): JSX.Element => {
             <span className="disabledText">{calenderIntranetData?.error}</span>
           </div>
         ) : showcalendardata?.length === 0 ? (
-          <div
-            style={{
-              width: "100%",
-              height: "50vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: "14px",
-              color: "#adadad",
-              fontFamily: "osMedium, sans-serif",
-            }}
-          >
-            No events found!
+          // <div
+          //   style={{
+          //     width: "100%",
+          //     height: "50vh",
+          //     display: "flex",
+          //     justifyContent: "center",
+          //     alignItems: "center",
+          //     fontSize: "14px",
+          //     color: "#adadad",
+          //     fontFamily: "osMedium, sans-serif",
+          //   }}
+          // >
+          //   No events found!
+          // </div>
+
+          <div className="errorWrapper" style={{ height: "50vh" }}>
+            <img src={errorGrey} alt="Error" />
+            <span className="disabledText">{"No events found!"}</span>
           </div>
         ) : (
           <div className={styles.eventWrapper}>

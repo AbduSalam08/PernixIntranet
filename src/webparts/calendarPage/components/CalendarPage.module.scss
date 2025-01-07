@@ -78,12 +78,12 @@
 .eventWrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 15px;
   width: 100%;
   margin: 20px;
 
   .eventSection {
-    flex: 0 1 calc(25% - 20px);
+    width: calc((100% - 45px) / 4);
 
     display: flex;
     justify-content: space-between;
@@ -229,7 +229,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    margin: 20px;
+    margin: 20px 0px;
     .leftSection {
       display: flex;
       align-items: center;
@@ -310,7 +310,8 @@
 
     .eventSection {
       // flex: 0 1 calc(25% - 20px);
-      flex: 0 1 100%;
+      // flex: 0 1 100%;
+      width: 100%;
 
       display: flex;
       justify-content: space-between;
@@ -358,15 +359,15 @@
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          width: 100%;
-          max-width: 150px;
+          // width: 100%;
+          max-width: 110px;
           // max-width: fit-content;
         }
 
         .time {
           color: #adadad;
           font-family: "osRegular", sans-serif;
-          font-size: 14px;
+          font-size: 13px;
 
           // font-weight: 400;
           // font-family: "osRegular";
@@ -374,7 +375,7 @@
         }
 
         .description {
-          font-size: 14px;
+          font-size: 13px;
           font-family: "osRegular", sans-serif;
           color: #adadad;
 
@@ -382,8 +383,8 @@
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          width: 100%;
-          max-width: 150px;
+          // width: 100%;
+          max-width: 110px;
 
           // max-width: fit-content;
         }
@@ -421,7 +422,7 @@
   .tabsContainer {
     display: flex;
     gap: 10px;
-    margin: 0px 20px;
+    margin: 0px 0px 10px 0px;
 
     div {
       padding-bottom: 6px;
@@ -457,7 +458,7 @@
     width: 100%;
     margin: 10px;
     .eventSection {
-      flex: 0 1 calc(50% - 20px);
+      width: calc(50% - 10px);
 
       display: flex;
       justify-content: space-between;
@@ -556,6 +557,7 @@
 
 .calenderSection {
   width: 100%;
+  display: flex;
 }
 
 // .calendarContainer {

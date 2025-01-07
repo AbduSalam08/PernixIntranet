@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable  @typescript-eslint/no-var-requires */
 //import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import styles from "../PollIntranet/PollIntranet.module.scss";
 import "../../../../assets/styles/style.css";
@@ -55,6 +56,9 @@ import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIn
 //import ViewAll from "../../../components/common/ViewAll/ViewAll";
 //import { RoleAuth } from "../../../services/CommonServices";
 //import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
+
+//const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+const errorGrey = require("../../../../assets/images/svg/errorGrey.svg");
 
 const PollIntranet = ({ props }: any): JSX.Element => {
   const dispatch = useDispatch();
@@ -607,7 +611,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
           <CircularSpinner />
         </div>
       ) : (
-        <div>
+        <>
           <SectionHeaderIntranet
             title="Create a new poll"
             label="Poll"
@@ -646,82 +650,93 @@ const PollIntranet = ({ props }: any): JSX.Element => {
             }}
           />
 
-          <div className={styles.pollCardSec}>
-            {currentPoll?.length ? (
-              <>
-                <div
-                  className={styles["poll-header"]}
-                  title={currentPoll[0]?.Question}
-                >
-                  {currentPoll[0]?.Question}
-                </div>
+          <div className={styles.pollCardWrapper}>
+            <div className={styles.pollCardSec}>
+              {currentPoll?.length ? (
+                <>
+                  <div
+                    className={styles["poll-header"]}
+                    title={currentPoll[0]?.Question}
+                  >
+                    {currentPoll[0]?.Question}
+                  </div>
 
-                <div className={styles.bodyOptions}>
-                  {currentPoll[0]?.options?.map((val: any, index: number) => (
-                    <div key={index} title={val?.Title}>
-                      <div
-                        className={styles.container}
-                        onClick={() => {
-                          setCurPollID(curPollID !== index + 1 ? index + 1 : 0);
-                          handleOptionClick(
-                            currentPoll[0]?.Id,
-                            val.Id,
-                            val.Title,
-                            currentPoll[0]?.resId
-                          );
-                        }}
-                      >
+                  <div className={styles.bodyOptions}>
+                    {currentPoll[0]?.options?.map((val: any, index: number) => (
+                      <div key={index} title={val?.Title}>
                         <div
-                          style={{ width: `${val?.Percentage}%` }}
-                          className={styles.backgroundfill}
-                        />
+                          className={styles.container}
+                          onClick={() => {
+                            setCurPollID(
+                              curPollID !== index + 1 ? index + 1 : 0
+                            );
+                            handleOptionClick(
+                              currentPoll[0]?.Id,
+                              val.Id,
+                              val.Title,
+                              currentPoll[0]?.resId
+                            );
+                          }}
+                        >
+                          <div
+                            style={{ width: `${val?.Percentage}%` }}
+                            className={styles.backgroundfill}
+                          />
 
-                        <div className={styles.contentSection}>
-                          <div className={styles.content}>
-                            <p
-                              style={{
-                                width: "5%",
-                              }}
-                            >
-                              {index + 1}.
-                            </p>
-                            {selectedOption?.OptionId === val?.Id &&
-                            curPollID ? (
-                              <i className="pi pi-check" />
-                            ) : (
-                              ""
-                            )}
-                            <p
-                              style={{
-                                width: "95%",
-                              }}
-                            >
-                              {val?.Title}
-                            </p>
+                          <div className={styles.contentSection}>
+                            <div className={styles.content}>
+                              <p
+                                style={{
+                                  width: "5%",
+                                }}
+                              >
+                                {index + 1}.
+                              </p>
+                              {selectedOption?.OptionId === val?.Id &&
+                              curPollID ? (
+                                <i className="pi pi-check" />
+                              ) : (
+                                ""
+                              )}
+                              <p
+                                style={{
+                                  width: "95%",
+                                }}
+                              >
+                                {val?.Title}
+                              </p>
+                            </div>
+
+                            <div>{`${val?.Percentage}%`}</div>
                           </div>
-
-                          <div>{`${val?.Percentage}%`}</div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </>
+              ) : (
+                // <div className={styles.noDataFound}>No poll found!</div>
+                <div className="errorWrapper" style={{ height: "50vh" }}>
+                  <img src={errorGrey} alt="Error" />
+                  <span className="disabledText">{"No poll found!"}</span>
                 </div>
-              </>
-            ) : (
-              <div className={styles.noDataFound}>No poll found!</div>
-            )}
+              )}
+            </div>
           </div>
 
           <div
             style={{
               display: "flex",
               alignItems: "flex-start",
+              height: "min-content",
             }}
           >
             <div className={styles.voteButton}>
               <Button
                 style={{
                   display: currentPoll?.length !== 0 ? "flex" : "none",
+                  // height: "35px",
+                  fontSize: "14px",
                 }}
                 label="Vote"
                 disabled={
@@ -733,7 +748,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
             </div>
             <ViewAll onClick={handlenavigate} />
           </div>
-        </div>
+        </>
       )}
 
       {popupController?.map((popupData: any, index: number) => (
