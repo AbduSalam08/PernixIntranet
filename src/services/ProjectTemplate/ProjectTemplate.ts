@@ -2,6 +2,8 @@ import moment from "moment";
 import SpServices from "../SPServices/SpServices";
 import { ProjectDetails } from "../../interface/interface";
 import { IFolderAddResult, sp } from "@pnp/sp/presets/all";
+import "@pnp/sp/webs";
+import "@pnp/sp/folders";
 
 interface IFormData {
   [key: string]: { value: any };
@@ -211,6 +213,21 @@ export const addDocRepository = async (
   }
 };
 
+export const addBannerImages = async (
+  FormData: any,
+  curpath: string
+): Promise<void> => {
+  let data = FormData.Content?.value || [];
+
+  for (let i: number = 0; data.length > i; i++) {
+    await sp.web
+      .getFolderByServerRelativePath(curpath)
+      .files.addUsingPath(data?.[i]?.name, data?.[i], {
+        Overwrite: true,
+      });
+  }
+};
+
 // export const getProjectDetails = async (): Promise<any> => {
 //   await SpServices.SPReadItems({
 //     Listname: "ProjectDetails",
@@ -281,28 +298,122 @@ export const handleUpdateproject = async (formData: any): Promise<void> => {
   }
 };
 
-// export const getFoldersAndFiles = async (serverRelativeUrl: string) => {
-//     try {
-//       // Get the folder by server relative URL
-//       const folder:IFolder  = await sp.web.getFolderByServerRelativePath(serverRelativeUrl).expand("Folders", "Files").get();
+export const getFolderFiles = async (url: string): Promise<any> => {
+  try {
+    // Get the folder reference
+    const folder = sp.web.getFolderByServerRelativePath(url);
 
-//       // Extract folders and files
-//       const folders = folder.Folders.map((item: any) => ({
-//         Name: item.Name,
-//         ServerRelativeUrl: item.ServerRelativeUrl,
-//       }));
+    // Retrieve the files in the folder
+    const files = await folder.files();
+    console.log("Files in the folder:", files);
 
-//       const files = folder.files.map((item: any) => ({
-//         Name: item.Name,
-//         ServerRelativeUrl: item.ServerRelativeUrl,
-//       }));
+    return files;
+  } catch (error) {
+    console.error("Error retrieving folder files:", error);
+  }
+};
 
-//       console.log("Folders:", folders);
-//       console.log("Files:", files);
+export const addCheckpoints = async (
+  formdata: any,
+  listId: any,
+  Projectname: string,
+  isEdit: boolean,
+  checkpointId: number | null
+): Promise<void> => {
+  // Prepare the checkpoint data from formdata
+  const newCheckpoint = {
+    id: isEdit ? checkpointId : Math.round(Math.random() * 200000) + 1,
+    Checkpoint: formdata.Checkpoint.value,
+    StartDate: formdata.StartDate.value,
+    EndDate: formdata.EndDate.value,
+    Status: formdata.Status.value,
+  };
 
-//       return { folders, files };
-//     } catch (error) {
-//       console.error("Error fetching folders and files:", error);
-//       throw error;
-//     }
-//   };
+  try {
+    // Get the item and its attachments
+    const item = await sp.web.lists
+      .getByTitle("ProjectDetails")
+      .items.getById(listId)
+      .select("AttachmentFiles")
+      .expand("AttachmentFiles")();
+
+    console.log(item.AttachmentFiles, "Attachments");
+
+    let checkpointsArray: any[] = []; // Initialize an empty array for checkpoints
+
+    if (item.AttachmentFiles.length > 0) {
+      // If an attachment exists, download and parse its content
+      const attachmentUrl = item.AttachmentFiles[0].ServerRelativeUrl;
+      const attachmentContent = await sp.web
+        .getFileByServerRelativeUrl(attachmentUrl)
+        .getText();
+
+      checkpointsArray = JSON.parse(attachmentContent); // Parse the existing content as JSON
+      console.log("Existing checkpoints:", checkpointsArray);
+    }
+
+    // Update the existing checkpoint at the specified index
+    if (isEdit && checkpointId !== null) {
+      // Find the index of the checkpoint with the provided id
+      const index = checkpointsArray.findIndex(
+        (checkpoint) => checkpoint.id === checkpointId
+      );
+
+      if (index !== -1) {
+        // Update the existing checkpoint at the found index
+        checkpointsArray[index] = {
+          ...checkpointsArray[index],
+          ...newCheckpoint,
+        };
+        console.log("Checkpoint updated:", checkpointsArray[index]);
+      } else {
+        throw new Error("Invalid index provided for update.");
+      }
+    } else {
+      // Add the new checkpoint to the array
+      checkpointsArray.push(newCheckpoint);
+      console.log("New checkpoint added:", newCheckpoint);
+    }
+
+    // Convert the updated array back to JSON
+    const fileContent = JSON.stringify(checkpointsArray, null, 2); // Pretty JSON format
+    const blob = new Blob([fileContent], { type: "text/plain" }); // Create Blob for file content
+    const fileName = `${Projectname}.txt`; // Use the project name as the file name
+
+    if (item.AttachmentFiles.length > 0) {
+      // If an attachment exists, delete it before uploading the updated one
+      const attachmentUrl = item.AttachmentFiles[0].ServerRelativeUrl;
+      await sp.web.getFileByServerRelativeUrl(attachmentUrl).recycle();
+      console.log("Existing attachment deleted.");
+    }
+
+    // Add the updated attachment
+    await sp.web.lists
+      .getByTitle("ProjectDetails")
+      .items.getById(listId)
+      .attachmentFiles.add(fileName, blob);
+    console.log("Attachment updated successfully!");
+  } catch (error) {
+    console.error("Error handling attachments:", error);
+  }
+};
+export const getAttachmentContent = async (
+  listName: string,
+  itemId: number,
+  attachmentName: string
+): Promise<string> => {
+  try {
+    // Fetch the attachment content
+    const content = await sp.web.lists
+      .getByTitle(listName)
+      .items.getById(itemId)
+      .attachmentFiles.getByName(attachmentName)
+      .getText();
+
+    console.log("Attachment Content:", content);
+    return content; // Return the content for further processing
+  } catch (error) {
+    console.error("Error fetching attachment content:", error);
+    throw error; // Re-throw the error for handling
+  }
+};

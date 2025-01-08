@@ -1,11 +1,10 @@
-import RichText from "../../../../components/common/RichText/RichText";
-import SectionHeaderIntranet from "../../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import Checkpoints from "./Checkpoints/Checkpoints";
 import Countdown from "./Countdown/Countdown";
 import Documents from "./Documents/Documents";
 import ImageSection from "./ImageSection/ImageSection";
 import ImportantLinks from "./ImportantLink/ImportantLinks";
 import Details from "./ProjectDetails/Details";
+import Summary from "./Summary/Summary";
 import styles from "./ViewComponent.module.scss";
 
 const ViewComponent = ({ selectedProject }: any) => {
@@ -24,8 +23,7 @@ const ViewComponent = ({ selectedProject }: any) => {
 
       <div className={styles.secondRow}>
         <div className={styles.summarySection}>
-          <SectionHeaderIntranet label={"Summary"} />
-          <RichText />
+          <Summary value={selectedProject} />
         </div>
         <div className={styles.countdownSection}>
           <Countdown />
@@ -41,7 +39,7 @@ const ViewComponent = ({ selectedProject }: any) => {
       </div>
 
       <div>
-        <Checkpoints />
+        <Checkpoints value={selectedProject} />
       </div>
     </div>
   );
