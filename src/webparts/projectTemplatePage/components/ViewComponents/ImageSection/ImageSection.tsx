@@ -11,8 +11,16 @@ import { resetFormData, validateField } from "../../../../../utils/commonUtils";
 import { CONFIG } from "../../../../../config/config";
 import DefaultButton from "../../../../../components/common/Buttons/DefaultButton";
 import { Add } from "@mui/icons-material";
+import {
+  addBannerImages,
+  getFolderFiles,
+} from "../../../../../services/ProjectTemplate/ProjectTemplate";
+import { Carousel } from "primereact/carousel";
+import CircularSpinner from "../../../../../components/common/Loaders/CircularSpinner";
 
 const ImageSection = ({ value }: any) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [images, setImages] = useState<any>([]);
   /* popup properties */
   const initialPopupController = [
     {
@@ -79,13 +87,33 @@ const ImageSection = ({ value }: any) => {
     folderPath: string = CONFIG.fileFlowPath,
     idx: number
   ): Promise<void> => {
-    resetFormData(formData, setFormData);
     togglePopupVisibility(
       setPopupController,
-      initialPopupController[idx],
-      idx,
+      initialPopupController[0],
+      0,
       "close"
     );
+
+    let x = `${window.location.pathname
+      .split("/", 3)
+      .join("/")}/ProjectTemplate/${value?.projectName}/BannerImages`;
+
+    await addBannerImages(formData, x);
+
+    const transformedFiles = formData?.Content?.value?.map((val: any) => ({
+      name: val.name,
+      serverRelativeUrl: `${window.location.pathname
+        .split("/", 3)
+        .join("/")}/ProjectTemplate/${value?.projectName}/BannerImages/${
+        val.name
+      }`,
+    }));
+
+    setImages((prevImages: any) => [...prevImages, ...transformedFiles]);
+
+    resetFormData(formData, setFormData);
+
+    debugger;
 
     // await getDocRepository().then(async (val: any[]) => {
     //   masterRes = [...val];
@@ -199,10 +227,31 @@ const ImageSection = ({ value }: any) => {
     ],
   ];
 
-  useEffect(() => {}, []);
-  return (
-    <>
-      <div style={{ position: "absolute", top: 10, right: 0 }}>
+  useEffect(() => {
+    setIsLoading(true);
+
+    let x = `${window.location.pathname
+      .split("/", 3)
+      .join("/")}/ProjectTemplate/${value?.projectName}/BannerImages`;
+    getFolderFiles(x).then((res) => {
+      const transformedFiles = res?.map((val: any) => ({
+        name: val.Name,
+        serverRelativeUrl: val.ServerRelativeUrl,
+      }));
+      console.log("Transformed Files:", transformedFiles);
+
+      setImages([...transformedFiles]);
+      setIsLoading(false);
+      return transformedFiles;
+    });
+  }, []);
+
+  const itemTemplate = (item: any) => (
+    <div style={{ position: "relative", height: "430px", overflow: "hidden" }}>
+      {/* Default Button */}
+      <div
+        style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}
+      >
         <DefaultButton
           onlyIcon
           text={<Add />}
@@ -217,16 +266,37 @@ const ImageSection = ({ value }: any) => {
           }}
         />
       </div>
+
+      {/* Image */}
       <img
-        src={value?.images}
+        src={item?.serverRelativeUrl}
         alt="img"
         style={{
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          position: "relative",
         }}
       />
+    </div>
+  );
+  return (
+    <>
+      {isLoading ? (
+        <CircularSpinner />
+      ) : (
+        <div style={{ position: "relative" }}>
+          {/* Carousel */}
+          <Carousel
+            value={images || []}
+            itemTemplate={itemTemplate}
+            numVisible={1}
+            numScroll={1}
+            circular
+            autoplayInterval={230000000000000}
+            style={{ width: "100%" }}
+          />
+        </div>
+      )}
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
