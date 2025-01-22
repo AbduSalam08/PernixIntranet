@@ -663,7 +663,7 @@ const TicketsCreatedByStatsForITOwner = memo(
     };
 
     // Render the chart using the MainChart component or display empty message
-    return ticketsCreatedByUserBasis.length === 0 ? (
+    return ticketsCreatedByUserBasis?.length === 0 ? (
       emptyMessageText()
     ) : (
       <MainChart
