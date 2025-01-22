@@ -4,6 +4,8 @@ import { ProjectDetails } from "../../interface/interface";
 import { IFolderAddResult, sp } from "@pnp/sp/presets/all";
 import "@pnp/sp/webs";
 import "@pnp/sp/folders";
+import { CONFIG } from "../../config/config";
+import { toast } from "react-toastify";
 
 interface IFormData {
   [key: string]: { value: any };
@@ -132,84 +134,6 @@ export const getProjectDetails = async (): Promise<ProjectDetails[]> => {
   } catch (error) {
     console.error("Error fetching project details:", error);
     return [];
-  }
-};
-
-export const addDocRepository = async (
-  formData: IFormData,
-  curPath: string,
-  folderType: string
-): Promise<void> => {
-  // const toastId = toast.loading("Creating a new document repository...");
-
-  try {
-    let arrMasterFiles: any = formData?.Content || [];
-    let newFolderName: any = formData?.FolderName || "";
-
-    if (newFolderName) {
-      const path: IFolderAddResult = await sp.web
-        .getFolderByServerRelativePath(curPath)
-        .folders.addUsingPath(newFolderName, true);
-
-      //   if (folderType === "master_folder") {
-      //     const list: any = await sp.web.lists.getByTitle(
-      //       CONFIG.ListNames.Intranet_DocumentRepository
-      //     );
-
-      //     const items: any = await list.items
-      //       .filter(`FileRef eq '${path?.data?.ServerRelativeUrl}'`)
-      //       .get();
-
-      //     await SpServices.SPUpdateItem({
-      //       Listname: CONFIG.ListNames.Intranet_DocumentRepository,
-      //       ID: items[0]?.ID,
-      //       RequestJSON: {
-      //         Priority: "1",
-      //         IsActive: false,
-      //       },
-      //     });
-      //   }
-
-      if (arrMasterFiles.length) {
-        for (let i: number = 0; arrMasterFiles.length > i; i++) {
-          await sp.web
-            .getFolderByServerRelativePath(path?.data?.ServerRelativeUrl)
-            .files.addUsingPath(
-              arrMasterFiles?.[i]?.name,
-              arrMasterFiles?.[i],
-              {
-                Overwrite: true,
-              }
-            );
-        }
-      }
-    } else {
-      for (let i: number = 0; arrMasterFiles.length > i; i++) {
-        await sp.web
-          .getFolderByServerRelativePath(curPath)
-          .files.addUsingPath(arrMasterFiles?.[i]?.name, arrMasterFiles?.[i], {
-            Overwrite: true,
-          });
-      }
-    }
-
-    // toast.update(toastId, {
-    //   render: "Folder/File added successfully!",
-    //   type: "success",
-    //   isLoading: false,
-    //   autoClose: 5000,
-    //   hideProgressBar: false,
-    // });
-  } catch (err) {
-    console.error("Error add document:", err);
-
-    // toast.update(toastId, {
-    //   render: "Error adding new document repository. Please try again.",
-    //   type: "error",
-    //   isLoading: false,
-    //   autoClose: 5000,
-    //   hideProgressBar: false,
-    // });
   }
 };
 
@@ -415,5 +339,161 @@ export const getAttachmentContent = async (
   } catch (error) {
     console.error("Error fetching attachment content:", error);
     throw error; // Re-throw the error for handling
+  }
+};
+
+/* Document services creations */
+export const getDocRepository = async (): Promise<any[]> => {
+  try {
+    const res: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.ProjectTemplate,
+      Select:
+        "*, FileLeafRef, FileRef, FileDirRef, Author/Title, Author/EMail, Author/Id",
+      Expand: "File, Author",
+      Topcount: 5000,
+      Orderby: "Created",
+      Orderbydecorasc: false,
+    });
+
+    return [...res];
+  } catch (err) {
+    console.error("Error fetching Document:", err);
+    return [];
+  }
+};
+
+export const pathFileORFolderCheck = async (path: string): Promise<any[]> => {
+  try {
+    const items: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.ProjectTemplate,
+      Select:
+        "*, FileLeafRef, FileRef, FileDirRef, Author/Title, Author/EMail, Author/Id",
+      Expand: "File, Author",
+      Filter: [
+        {
+          FilterKey: "FileDirRef",
+          Operator: "eq",
+          FilterValue: path,
+        },
+      ],
+      Topcount: 5000,
+      Orderby: "Created",
+      Orderbydecorasc: false,
+    });
+
+    return [...items];
+  } catch (err) {
+    console.error("Error fetching Document:", err);
+    return [];
+  }
+};
+
+export const addDocRepository = async (
+  formData: IFormData,
+  curPath: string,
+  folderType: string
+): Promise<void> => {
+  const toastId = toast.loading("Creating a new document repository...");
+
+  try {
+    let arrMasterFiles: any = formData?.Content || [];
+    let newFolderName: any = formData?.FolderName || "";
+
+    if (newFolderName) {
+      const path: IFolderAddResult = await sp.web
+        .getFolderByServerRelativePath(curPath)
+        .folders.addUsingPath(newFolderName, true);
+
+      if (folderType === "master_folder") {
+        const list: any = await sp.web.lists.getByTitle(
+          CONFIG.ListNames.Intranet_DocumentRepository
+        );
+
+        const items: any = await list.items
+          .filter(`FileRef eq '${path?.data?.ServerRelativeUrl}'`)
+          .get();
+
+        await SpServices.SPUpdateItem({
+          Listname: CONFIG.ListNames.Intranet_DocumentRepository,
+          ID: items[0]?.ID,
+          RequestJSON: {
+            Priority: "1",
+            IsActive: false,
+          },
+        });
+      }
+
+      if (arrMasterFiles.length) {
+        for (let i: number = 0; arrMasterFiles.length > i; i++) {
+          await sp.web
+            .getFolderByServerRelativePath(path?.data?.ServerRelativeUrl)
+            .files.addUsingPath(
+              arrMasterFiles?.[i]?.name,
+              arrMasterFiles?.[i],
+              {
+                Overwrite: true,
+              }
+            );
+        }
+      }
+
+      toast.update(toastId, {
+        render: "Folder/File added successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    } else {
+      for (let i: number = 0; arrMasterFiles.length > i; i++) {
+        await sp.web
+          .getFolderByServerRelativePath(curPath)
+          .files.addUsingPath(arrMasterFiles?.[i]?.name, arrMasterFiles?.[i], {
+            Overwrite: true,
+          });
+      }
+    }
+  } catch (err) {
+    console.error("Error add document:", err);
+
+    toast.update(toastId, {
+      render: "Error adding new document repository. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+export const deleteDocRepository = async (id: number): Promise<void> => {
+  const toastId = toast.loading(
+    "Deleting the document repository in progress..."
+  );
+
+  try {
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.Intranet_DocumentRepository,
+      ID: id,
+    });
+
+    toast.update(toastId, {
+      render: "Folder/File deleted successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.error("Error updete document:", err);
+
+    toast.update(toastId, {
+      render:
+        "An error occurred while deleting this document repository. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
   }
 };

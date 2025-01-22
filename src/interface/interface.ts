@@ -32,6 +32,7 @@ export interface IListName {
   Intranet_BlogComments: string;
   Intranet_PernixWiki: string;
   HelpDesk_TicketLocationConfig: string;
+  ProjectTemplate: string;
 }
 
 export interface ISPGroupName {
@@ -428,4 +429,56 @@ export interface ProjectDetails {
   endDate: string | null;
   description: string | null;
   summary: string | null;
+}
+
+/* Project template interfaces */
+export interface IProjectDocNames {
+  banner: string;
+  documnet: string;
+}
+
+export interface IProRepository {
+  ID: number | null;
+  Content: IAttachObj;
+}
+
+/* Employee directory interfaces creation */
+export interface IManagerDetails {
+  Name: string;
+  Email: string;
+}
+
+export interface IEmployeeDirectoryUsersData {
+  id: number | null;
+  ListId: string | number | null;
+  IsActive: boolean;
+  UserId: string | number | null;
+  Name: string;
+  SureName: string;
+  Email: string;
+  JobTitle: string;
+  Manager: IManagerDetails;
+  Department: string;
+  OfficeLocation: string;
+  BusinessPhones: string;
+  MobilePhone: string;
+  Birthday: string;
+  Skills: string[];
+  Experience: string;
+  Qualifications: string;
+  IsExtension: boolean;
+}
+
+export interface IActiveUserDatas {
+  ID: number | null;
+  UserId: string;
+  IsActive: boolean;
+}
+
+export interface IEDSearch {
+  Status: string;
+  CommonSearch: string;
+  Name: string;
+  Phone: string;
+  Email: string;
 }
