@@ -812,3 +812,14 @@ export const getUserProfileById = async (): Promise<any> => {
   const currentLoggedGraphUser: any = await graph.me.get();
   return currentLoggedGraphUser;
 };
+
+export const debouncer = (fn: any, delay: number): (() => any) => {
+  console.log("fn: ", fn);
+  let time: any;
+  return function (...args: any) {
+    clearTimeout(time);
+    time = setTimeout(() => {
+      return fn(...args);
+    }, delay);
+  };
+};

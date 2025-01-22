@@ -11,6 +11,7 @@ import { Persona, PersonaSize } from "office-ui-fabric-react";
 import ReactDOM from "react-dom";
 import { Avatar } from "primereact/avatar";
 import { useSelector } from "react-redux";
+import { debouncer } from "../../../utils/commonUtils";
 
 const QuillEditor = ({
   onChange,
@@ -61,6 +62,8 @@ const QuillEditor = ({
     //     email: "abc@erf.com",
     //   },
     // ];
+    if (!searchTerm) return [];
+
     return AllUsersData?.filter((person: any) =>
       person.value?.toLowerCase().includes(searchTerm?.toLowerCase())
     );
@@ -96,6 +99,7 @@ const QuillEditor = ({
 
   // Example usage:
   const [searchTerm, setSearchTerm] = useState("");
+  console.log("searchTerm: ", searchTerm);
   const mentionValues = getMentionValues("mention");
 
   const uniqueEmails = filterPeopleByMentions(
@@ -104,6 +108,47 @@ const QuillEditor = ({
   );
 
   let quill: any;
+
+  const changeListsAndIcons = (): void => {
+    console.log("oke");
+    const mentionListItems = document.getElementsByClassName(
+      "ql-mention-list-item"
+    );
+
+    const matchedPeople = suggestPeople(searchTerm);
+
+    if (mentionListItems.length > 0) {
+      for (let i = 0; i < mentionListItems.length; i++) {
+        if (matchedPeople.length > i) {
+          // Ensure matchedPeople[i] exists
+          const element = mentionListItems.item(i);
+          if (element instanceof HTMLElement) {
+            ReactDOM.render(
+              <div key={matchedPeople[i]?.id} className={styles.suggestionItem}>
+                <Avatar
+                  image={`/_layouts/15/userphoto.aspx?size=S&username=${matchedPeople[i]?.email}`}
+                  shape="circle"
+                  size="normal"
+                  title={matchedPeople[i]?.email || "Unknown Email"}
+                  style={{
+                    margin: "0 !important",
+                    width: "30px",
+                    height: "30px",
+                    marginRight: "10px",
+                  }}
+                />
+                <div className={styles.userDetails}>
+                  <p>{matchedPeople[i]?.value || "Unknown Name"}</p>
+                  <span>{matchedPeople[i]?.email || "Unknown Email"}</span>
+                </div>
+              </div>,
+              element
+            );
+          }
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     // Initialize Quill with the mention module
@@ -119,15 +164,25 @@ const QuillEditor = ({
         mention: {
           allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
           mentionDenotationChars: ["@"],
-          source: async function (
-            searchTerm: any,
-            renderList: any,
-            mentionsChar: any
+
+          source: debouncer(async function (
+            searchTerm: string,
+            renderList: any
           ) {
-            const matchedPeople = suggestPeople(searchTerm);
             setSearchTerm(searchTerm);
-            renderList(matchedPeople, searchTerm);
+            const matchedPeople = suggestPeople(searchTerm); // Fetch matching people
+            console.log("Matched People: ", matchedPeople);
+            renderList(matchedPeople, searchTerm); // Pass the results to renderList
           },
+          500),
+
+          // async function(searchTerm: any, renderList: any, mentionsChar: any) {
+          //   const matchedPeople = debouncer(suggestPeople(searchTerm), 2000);
+
+          //   console.log("matchedPeople: ", matchedPeople);
+          //   setSearchTerm(searchTerm);
+          //   // renderList(matchedPeople, searchTerm);
+          // },
         },
       },
     });
@@ -187,66 +242,31 @@ const QuillEditor = ({
     };
   }, []);
 
-  const changeListsAndIcons = (): void => {
-    const mentionListItems = document.getElementsByClassName(
-      "ql-mention-list-item"
-    );
-
-    const matchedPeople = suggestPeople(searchTerm);
-
-    if (mentionListItems.length > 0) {
-      for (let i = 0; i < mentionListItems.length; i++) {
-        if (matchedPeople.length > i) {
-          // Ensure matchedPeople[i] exists
-          const element = mentionListItems.item(i);
-          if (element instanceof HTMLElement) {
-            ReactDOM.render(
-              <div key={matchedPeople[i]?.id} className={styles.suggestionItem}>
-                <Avatar
-                  image={`/_layouts/15/userphoto.aspx?size=S&username=${matchedPeople[i]?.email}`}
-                  shape="circle"
-                  size="normal"
-                  title={matchedPeople[i]?.email || "Unknown Email"}
-                  style={{
-                    margin: "0 !important",
-                    width: "30px",
-                    height: "30px",
-                    marginRight: "10px",
-                  }}
-                />
-                <div className={styles.userDetails}>
-                  <p>{matchedPeople[i]?.value || "Unknown Name"}</p>
-                  <span>{matchedPeople[i]?.email || "Unknown Email"}</span>
-                </div>
-              </div>,
-              element
-            );
-          }
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    onChange(content);
-    getMentionedEmails(uniqueEmails);
-
-    window.addEventListener("keypress", (e) => {
-      changeListsAndIcons();
-    });
-    window.addEventListener("keydown", (e) => {
-      changeListsAndIcons();
-    });
-    window.addEventListener("keyup", (e) => {
-      changeListsAndIcons();
-    });
-  }, [content]);
-
   useEffect(() => {
     if (defaultValue === "") {
       quillRef.current.root.innerHTML = "";
     }
   }, [defaultValue]);
+
+  useEffect(() => {
+    onChange(content);
+    getMentionedEmails(uniqueEmails);
+  }, [content]);
+
+  useEffect(() => {
+    if (searchTerm) {
+      changeListsAndIcons();
+    }
+    // window.addEventListener("keypress", (e) => {
+    //   changeListsAndIcons();
+    // });
+    // window.addEventListener("keydown", (e) => {
+    //   changeListsAndIcons();
+    // });
+    // window.addEventListener("keyup", (e) => {
+    //   changeListsAndIcons();
+    // });
+  }, [searchTerm]);
 
   return (
     <div className="quill-editor-wrapper">
