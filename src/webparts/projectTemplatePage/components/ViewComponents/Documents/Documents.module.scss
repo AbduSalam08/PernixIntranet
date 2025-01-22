@@ -1,3 +1,50 @@
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}
+
+.tabContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 0;
+  width: 100%;
+
+  .tabsAlign {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-left: 5px;
+
+    .clickTab {
+      font-size: 18px;
+      font-weight: 500;
+      color: #7c7c7c;
+      cursor: pointer;
+    }
+  }
+
+  .selectedTab {
+    height: 32px;
+    margin: 0 5px;
+    font-size: 18px;
+    font-weight: 500;
+    background-color: #0b4d5310;
+    color: #0b4d53;
+    // font-family: "osSemibold", sans-serif;
+
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .accordion {
   //   border: 1px solid #ffff;
   margin: 10px 0;
@@ -63,7 +110,9 @@
 .addicon {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   padding: 20px 20px 0px 0px;
+  border-bottom: 1px solid #eee;
 }
 
 .folderCard {
@@ -80,6 +129,35 @@
   border-radius: 6px;
   padding: 10px;
   transition: all 0.2s;
+
+  .folderContentSec {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 80%;
+    height: 46px !important;
+    cursor: pointer;
+    gap: 20px;
+    padding-left: 18px;
+
+    .folderIcon {
+      height: 20px;
+      width: 20px;
+    }
+
+    .fileIcon {
+      height: 18px;
+      width: 18px;
+    }
+
+    .contentSec {
+      width: 100%;
+      color: #414141;
+      font-size: 14px;
+      font-family: "osRegular", sans-serif;
+    }
+  }
+
   &:hover {
     background-color: #eeeeee80;
     transition: all 0.2s;

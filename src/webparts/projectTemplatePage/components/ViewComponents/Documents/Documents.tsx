@@ -1,12 +1,12 @@
-/* eslint-disable   @typescript-eslint/no-var-requires */
-/* eslint-disable    @typescript-eslint/no-floating-promises */
-
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import DefaultButton from "../../../../../components/common/Buttons/DefaultButton";
 import styles from "./Documents.module.scss";
-const folderIcon = require("../../../../../assets/images/svg/folderIcon.svg");
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Add } from "@mui/icons-material";
 import Popup from "../../../../../components/common/Popups/Popup";
 import resetPopupController, {
@@ -15,19 +15,66 @@ import resetPopupController, {
 import { resetFormData, validateField } from "../../../../../utils/commonUtils";
 import CustomMultipleFileUpload from "../../../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import CustomInput from "../../../../../components/common/CustomInputFields/CustomInput";
+import { CONFIG } from "../../../../../config/config";
 import {
+  addDocRepository,
+  pathFileORFolderCheck,
+} from "../../../../../services/ProjectTemplate/ProjectTemplate";
+import {
+  IAttachObj,
   IDocRepositoryColumn,
   IFormFields,
+  IProRepository,
 } from "../../../../../interface/interface";
-import { CONFIG } from "../../../../../config/config";
-import { addDocRepository } from "../../../../../services/ProjectTemplate/ProjectTemplate";
+import CircularSpinner from "../../../../../components/common/Loaders/CircularSpinner";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+
+/* Interface creation */
+interface ITabObject {
+  name: string;
+  path: string;
+}
+
 interface IDocField {
   FolderName: IFormFields;
   Content: IFormFields;
 }
-const Documents = ({ value }: any) => {
-  const [isOpen, setIsOpen] = useState(false);
 
+/* Global variable creation */
+const folderIcon: string = require("../../../../../assets/images/svg/folderIcon.svg");
+const fileIcon = require("../../../../helpDesk/assets/images/svg/fileIcon.svg");
+const errorGrey = require("../../../../../assets/images/svg/errorGrey.svg");
+
+const Documents = ({ value }: any): JSX.Element => {
+  /* Local variable creation */
+  const sitePath: string =
+    CONFIG.sitePath +
+    "/" +
+    CONFIG.ListNames.ProjectTemplate +
+    "/" +
+    value?.projectName +
+    "_" +
+    value?.id +
+    "/" +
+    CONFIG.ProjectDocNames.documnet;
+
+  const items: ITabObject[] = [
+    {
+      name: "Home",
+      path:
+        CONFIG.sitePath +
+        "/" +
+        CONFIG.ListNames.ProjectTemplate +
+        "/" +
+        value?.projectName +
+        "_" +
+        value?.id +
+        "/" +
+        CONFIG.ProjectDocNames.documnet,
+    },
+  ];
+
+  /* popup properties */
   const initialPopupController = [
     {
       open: false,
@@ -73,6 +120,12 @@ const Documents = ({ value }: any) => {
     },
   };
 
+  /* State creation */
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [selectedPath, setSelectedPath] = useState<ITabObject[]>([...items]);
+  console.log("setSelectedPath: ", setSelectedPath);
+  const [curDocDatas, setCurDocDatas] = useState<IProRepository[]>([]);
   const [popupController, setPopupController] = useState<any[]>(
     initialPopupController
   );
@@ -247,62 +300,207 @@ const Documents = ({ value }: any) => {
   const toggleAccordion = (): void => {
     setIsOpen(!isOpen);
   };
+
+  // const handleSelectFolder = async (
+  //   type: string,
+  //   path: string,
+  //   idx: number,
+  //   filePath: string
+  // ): Promise<void> => {
+  //   let curTabs: ITabObject[] = [];
+
+  //   if (path === "Home") {
+  //     let temp: IProRepository[] = [];
+
+  //     temp = await Promise.all(
+  //       masterDocDatas?.map(async (val: IProRepository) => {
+  //         let objAttach: IAttachObj = {
+  //           isSubFiles: await curItemDatasFilter(
+  //             val?.Content?.ServerRelativeUrl
+  //           ),
+  //           name: val?.Content?.name,
+  //           content: [],
+  //           fileType: val?.Content?.fileType,
+  //           ServerRelativeUrl: val?.Content?.ServerRelativeUrl,
+  //         };
+
+  //         return {
+  //           ID: val?.ID,
+  //           Content: objAttach,
+  //         };
+  //       }) || []
+  //     );
+
+  //     curTabs = selectedPath.slice(0, idx);
+  //     setSelectedPath([...curTabs]);
+  //   } else if (type === "remove") {
+  //     curTabs = selectedPath.slice(0, idx);
+  //     setSelectedPath([...curTabs]);
+  //   } else {
+  //     selectedPath.push({
+  //       name: path,
+  //       path: filePath,
+  //     });
+  //     setSelectedPath([...selectedPath]);
+  //   }
+
+  //   if (path !== "Home") {
+  //     setIsLoading(true);
+  //     await filCurrentItems(filePath);
+  //   }
+  // };
+
+  const onLoadingFUN = async (path: string): Promise<void> => {
+    await pathFileORFolderCheck(path).then((res: any[]) => {
+      console.log("res: ", res);
+      const temp: IProRepository[] =
+        res?.map((val: any) => {
+          const objAttach: IAttachObj = {
+            isSubFiles: path === val?.FileRef ? true : false,
+            name: val?.FileLeafRef,
+            content: [],
+            fileType: val?.FileSystemObjectType === 1 ? "folder" : "file",
+            ServerRelativeUrl:
+              val?.FileSystemObjectType === 1
+                ? val?.FileRef
+                : window.location.origin + val?.FileRef,
+          };
+
+          return {
+            ID: val?.ID || null,
+            Content: objAttach,
+          };
+        }) || [];
+
+      setCurDocDatas([...temp]);
+      setIsLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    onLoadingFUN(sitePath);
+  }, []);
+
   return (
-    <div>
-      <div className={styles.accordion}>
-        <div className={styles.accordionheader} onClick={toggleAccordion}>
-          <p className={styles.accordionheading}>Documents</p>
-          <DefaultButton
-            text={isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            btnType="primaryGreen"
-            onlyIcon
-          />
-          {/* <span className="accordion-icon">{isOpen ? "-" : "+"}</span> */}
-        </div>
-        {isOpen && (
-          <>
-            <div className={styles.addicon}>
-              <DefaultButton
-                text={<Add />}
-                btnType="primaryGreen"
-                onlyIcon
-                onClick={() => {
-                  togglePopupVisibility(
-                    setPopupController,
-                    initialPopupController[0],
-                    0,
-                    "open"
-                  );
-                }}
-              />
-            </div>
-            <div className={styles.docCarousel}>
-              <div
-                className={styles.folderCard}
-                key={1}
-                // onClick={() => {
-                //   localStorage.removeItem(CONFIG.selMasterFolder);
-                //   localStorage.setItem(
-                //     CONFIG.selMasterFolder,
-                //     JSON.stringify({
-                //       Name: item?.Content?.name,
-                //       Path: item?.Content?.ServerRelativeUrl,
-                //     })
-                //   );
-                //   window.open(
-                //     props.context.pageContext.web.absoluteUrl +
-                //       CONFIG.NavigatePage.DocRepositoryPage,
-                //     "_self"
-                //   );
-                // }}
-              >
-                <img src={folderIcon} alt="folder image" />
-                <span>{"test"}</span>
-              </div>
-            </div>
-          </>
-        )}
+    <div className={styles.accordion}>
+      <div className={styles.accordionheader} onClick={toggleAccordion}>
+        <p className={styles.accordionheading}>Documents</p>
+        <DefaultButton
+          text={isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          btnType="primaryGreen"
+          onlyIcon
+        />
       </div>
+
+      {isOpen && (
+        <>
+          <div className={styles.addicon}>
+            {/* Tab section */}
+            <div className={styles.tabContainer}>
+              {selectedPath?.map((val: ITabObject, idx: number) => {
+                return (
+                  <div key={idx}>
+                    {selectedPath.length !== idx + 1 ? (
+                      <div className={styles.tabsAlign}>
+                        <div
+                          className={styles.clickTab}
+                          onClick={() => {
+                            // handleSelectFolder(
+                            //   "remove",
+                            //   val.name,
+                            //   idx + 1,
+                            //   val.path
+                            // );
+                          }}
+                        >
+                          {val.name}
+                        </div>
+                        <NavigateNextIcon
+                          style={{
+                            color: "#7c7c7c",
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles.selectedTab}>{val.name}</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <DefaultButton
+              text={<Add />}
+              btnType="primaryGreen"
+              onlyIcon
+              onClick={() => {
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[0],
+                  0,
+                  "open"
+                );
+              }}
+            />
+          </div>
+
+          {isLoading ? (
+            <div className={styles.LoaderContainer}>
+              <CircularSpinner />
+            </div>
+          ) : curDocDatas?.length ? (
+            <div className={styles.docCarousel}>
+              {curDocDatas?.map((val: IProRepository, idx: number) => {
+                return (
+                  <div className={styles.folderCard} key={idx}>
+                    <div
+                      className={styles.folderContentSec}
+                      title={val?.Content?.name}
+                      onClick={() => {
+                        if (val?.Content?.fileType !== "file") {
+                          // handleSelectFolder(
+                          //   "add",
+                          //   val?.Content?.name,
+                          //   idx + 1,
+                          //   val?.Content?.ServerRelativeUrl
+                          // );
+                        } else {
+                          window.open(
+                            val?.Content?.ServerRelativeUrl + "?web=1"
+                          );
+                        }
+                      }}
+                    >
+                      <img
+                        src={
+                          val?.Content?.fileType !== "file"
+                            ? folderIcon
+                            : fileIcon
+                        }
+                        className={
+                          val?.Content?.fileType !== "file"
+                            ? styles.folderIcon
+                            : styles.fileIcon
+                        }
+                        alt="Doc"
+                      />
+                      <div className={styles.contentSec}>
+                        {val?.Content?.name}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="errorWrapper" style={{ height: "50vh" }}>
+              <img src={errorGrey} alt="Error" />
+              <span className="disabledText">No Data Found !!!</span>
+            </div>
+          )}
+        </>
+      )}
 
       {popupController?.map((popupData: any, index: number) => (
         <Popup
@@ -342,4 +540,5 @@ const Documents = ({ value }: any) => {
     </div>
   );
 };
+
 export default Documents;

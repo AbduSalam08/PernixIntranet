@@ -23,6 +23,9 @@ import {
   ISPGroupName,
   ITenantDetail,
   IUserMailPath,
+  IProjectDocNames,
+  IEDSearch,
+  IEmployeeDirectoryUsersData,
 } from "../interface/interface";
 
 export namespace CONFIG {
@@ -68,6 +71,7 @@ export namespace CONFIG {
     Intranet_BlogComments: "Intranet_BlogComments",
     Intranet_PernixWiki: "Intranet_PernixWiki",
     HelpDesk_TicketLocationConfig: "HelpDesk_TicketLocationConfig",
+    ProjectTemplate: "ProjectTemplate",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -491,4 +495,49 @@ export namespace CONFIG {
     "November",
     "December",
   ];
+
+  /* Projectlibrary path config */
+  export const sitePath: string = `${window.location.pathname
+    .split("/", 3)
+    .join("/")}`;
+
+  export const ProjectDocNames: IProjectDocNames = {
+    banner: "BannerImages",
+    documnet: "Documents",
+  };
+
+  /* Employee directory configs */
+  export const EmployeeDirectoryUsersData: IEmployeeDirectoryUsersData = {
+    id: null,
+    ListId: null,
+    IsActive: false,
+    UserId: null,
+    Name: "",
+    SureName: "",
+    Email: "",
+    JobTitle: "",
+    Manager: {
+      Name: "",
+      Email: "",
+    },
+    Department: "",
+    OfficeLocation: "",
+    BusinessPhones: "",
+    MobilePhone: "",
+    Birthday: "",
+    Skills: [],
+    Experience: "",
+    Qualifications: "",
+    IsExtension: false,
+  };
+
+  export const EDDrop: string[] = ["All", "Active", "Inactive"];
+
+  export const EDSearch: IEDSearch = {
+    CommonSearch: "",
+    Email: "",
+    Name: "",
+    Phone: "",
+    Status: EDDrop[0],
+  };
 }

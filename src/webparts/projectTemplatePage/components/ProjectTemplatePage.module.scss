@@ -1,47 +1,32 @@
-.container {
-  width: 100%;
-
-  padding: 16px 30px;
-  border-radius: 10px;
-
-  .headerContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    .leftSection {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      p {
-        margin: 0;
-        font-size: 18px;
-        font-family: "osSemiBold", sans-serif;
-
-        color: #0b4d53;
-      }
-    }
-    .rightSection {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-  }
-}
-
-.LoaderContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: calc(100vh - 144px);
-}
-
 // .container {
 //   width: 100%;
-//   height: calc(100vh - 128px);
-//   background-color: #f0f0f0;
+
 //   padding: 16px 30px;
+//   border-radius: 10px;
+
+//   .headerContainer {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: center;
+//     margin-bottom: 20px;
+//     .leftSection {
+//       display: flex;
+//       gap: 10px;
+//       align-items: center;
+//       p {
+//         margin: 0;
+//         font-size: 18px;
+//         font-family: "osSemiBold", sans-serif;
+
+//         color: #0b4d53;
+//       }
+//     }
+//     .rightSection {
+//       display: flex;
+//       align-items: center;
+//       gap: 10px;
+//     }
+//   }
 // }
 
 // .LoaderContainer {
@@ -51,3 +36,34 @@
 //   width: 100%;
 //   height: calc(100vh - 144px);
 // }
+
+// // .container {
+// //   width: 100%;
+// //   height: calc(100vh - 128px);
+// //   background-color: #f0f0f0;
+// //   padding: 16px 30px;
+// // }
+
+// // .LoaderContainer {
+// //   display: flex;
+// //   justify-content: center;
+// //   align-items: center;
+// //   width: 100%;
+// //   height: calc(100vh - 144px);
+// // }
+
+/* Comming soon design */
+.container {
+  width: 100%;
+  height: calc(100vh - 128px);
+  background-color: #f0f0f0;
+  padding: 16px 30px;
+}
+
+.LoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 144px);
+}

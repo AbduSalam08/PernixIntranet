@@ -35,6 +35,10 @@
       {
         "resource": "Microsoft Graph",
         "scope": "Sites.ReadWrite.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User-Phone.ReadWrite.All"
       }
     ],
     "developer": {

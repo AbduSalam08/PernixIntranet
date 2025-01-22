@@ -14,6 +14,8 @@ interface DataTableProps {
   disableSelectionOnClick?: boolean; // Disable selection on click
   emptyMessage?: string;
   headerBgColor?: string;
+  CurrentPageNumber?: number;
+  setCurrentPageNumber?: (pageNumber: number) => any;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -26,9 +28,11 @@ const DataTable: React.FC<DataTableProps> = ({
   onRowClick,
   emptyMessage,
   headerBgColor,
+  CurrentPageNumber = 1,
+  setCurrentPageNumber,
 }) => {
   // Add state for page and page size
-  const [currentPage, setCurrentPage] = useState(1); // Start from page 1
+  const [currentPage, setCurrentPage] = useState<number>(CurrentPageNumber); // Start from page 1
   const [pageSizeState, setPageSizeState] = useState(pageSize);
 
   // Calculate total pages based on rows and page size
@@ -40,6 +44,7 @@ const DataTable: React.FC<DataTableProps> = ({
     value: number
   ): void => {
     setCurrentPage(value);
+    setCurrentPageNumber?.(value);
   };
 
   // Handle page size change
@@ -55,7 +60,11 @@ const DataTable: React.FC<DataTableProps> = ({
   );
 
   useEffect(() => {
-    setCurrentPage(1);
+    if (CurrentPageNumber > totalPages) {
+      setCurrentPage(totalPages);
+    } else {
+      setCurrentPage(CurrentPageNumber);
+    }
   }, [rows?.length]);
 
   return (
