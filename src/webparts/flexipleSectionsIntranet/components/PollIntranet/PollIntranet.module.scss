@@ -213,7 +213,8 @@
 
 .bodyOptions {
   min-height: 270px;
-  max-height: 270px;
+  // max-height: 270px;
+  max-height: 310px;
   overflow: auto;
   margin-bottom: 10px;
 }
@@ -497,4 +498,10 @@
 }
 .pollCardWrapper {
   height: 390px;
+}
+.bottomSection {
+  margin-top: 30px;
+  display: flex;
+  align-items: flex-start;
+  height: min-content;
 }

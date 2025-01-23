@@ -725,11 +725,7 @@ const PollIntranet = ({ props }: any): JSX.Element => {
           </div>
 
           <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              height: "min-content",
-            }}
+            className={styles.bottomSection}
           >
             <div className={styles.voteButton}>
               <Button

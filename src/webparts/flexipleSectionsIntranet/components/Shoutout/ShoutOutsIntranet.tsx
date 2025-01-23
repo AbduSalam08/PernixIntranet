@@ -369,15 +369,17 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
         </div>
       </div>
 
-      <ViewAll
-        onClick={() => {
-          window.open(
-            props.context.pageContext.web.absoluteUrl +
-              CONFIG.NavigatePage.ShoutOutsPage,
-            "_self"
-          );
-        }}
-      />
+      <div className={styles.ViewAllUnique}>
+        <ViewAll
+          onClick={() => {
+            window.open(
+              props.context.pageContext.web.absoluteUrl +
+                CONFIG.NavigatePage.ShoutOutsPage,
+              "_self"
+            );
+          }}
+        />
+      </div>
 
       {/* Toast message section */}
       {/* <ToastContainer

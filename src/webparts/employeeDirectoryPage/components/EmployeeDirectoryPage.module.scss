@@ -445,6 +445,25 @@
   }
 }
 
+.tableCellSec {
+  width: 100%;
+  display: -webkit-box;
+  text-wrap: auto;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tableSkillsTag {
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: #00800021;
+  color: #008000;
+  font-weight: 600;
+  font-size: 12px;
+}
+
 .dbWrapper {
   background: #fff;
   border-radius: 10px;
@@ -505,8 +524,8 @@
 
     .jobTitleSec {
       font-size: 14px;
-      font-weight: 600;
-      color: #adadad;
+      // font-weight: 600;
+      color: #a1a1a1;
     }
   }
 }
@@ -561,6 +580,12 @@
       .rowValue {
         width: 60%;
         font-size: 14px;
+        line-height: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
         .rowTag {
           padding: 4px 12px;
@@ -577,4 +602,40 @@
       }
     }
   }
+}
+
+.avatarSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 120px;
+}
+
+.editIcon {
+  position: absolute;
+  bottom: 0;
+  right: 16px;
+  background-color: #0b4d53;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: 3px solid #fff;
+
+  svg {
+    font-size: 16px;
+    color: #fff;
+  }
+}
+
+.flexSection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  cursor: pointer;
 }
