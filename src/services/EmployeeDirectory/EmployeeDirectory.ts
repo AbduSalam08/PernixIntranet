@@ -29,18 +29,20 @@ export const fetchAzureUsers = async (
             .version("v1.0")
             .top(999)
             .select(
-              "department, skill, accountEnabled, Country, mail, id, displayName, Country, jobTitle, mobilePhone, manager, ext, givenName, surname, userPrincipalName, userType, businessPhones, officeLocation, identities"
+              "accountEnabled, department, skill, accountEnabled, Country, mail, id, displayName, Country, jobTitle, mobilePhone, manager, ext, givenName, surname, userPrincipalName, userType, businessPhones, officeLocation, identities"
             )
             .expand("manager, extensions")
+            .filter("accountEnabled eq true")
             .get()
         : await client
             .api("users/")
             .version("v1.0")
             .top(999)
             .select(
-              "department, skill, accountEnabled, Country, mail, id, displayName, Country, jobTitle, mobilePhone, manager, ext, givenName, surname, userPrincipalName, userType, businessPhones, officeLocation, identities"
+              "accountEnabled, department, skill, accountEnabled, Country, mail, id, displayName, Country, jobTitle, mobilePhone, manager, ext, givenName, surname, userPrincipalName, userType, businessPhones, officeLocation, identities"
             )
             .expand("manager, extensions")
+            .filter("accountEnabled eq true")
             .get();
 
       const data: any = response?.value;

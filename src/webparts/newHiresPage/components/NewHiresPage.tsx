@@ -428,7 +428,7 @@ const NewHiresPage = (props: any): JSX.Element => {
         </div>
 
         <div className={styles.thirdRow}>
-          <div>
+          <div className={styles.dateinput}>
             <CustomDateInput
               value={formData.StartDate.value}
               label="Start Date"
@@ -465,7 +465,7 @@ const NewHiresPage = (props: any): JSX.Element => {
               }}
             />
           </div>
-          <div>
+          <div className={styles.dateinput}>
             <CustomDateInput
               value={formData.EndDate.value}
               label="End Date"

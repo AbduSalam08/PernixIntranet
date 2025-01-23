@@ -26,7 +26,12 @@ import { CONFIG } from "../../../config/config";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
-import { FilterAltOutlined, OpenInNew, Visibility } from "@mui/icons-material";
+import {
+  FilterAltOutlined,
+  Info,
+  OpenInNew,
+  Visibility,
+} from "@mui/icons-material";
 import DataTable from "../../../components/common/DataTable/DataTable";
 import { Icon, Persona, PersonaSize } from "@fluentui/react";
 import { InputSwitch } from "primereact/inputswitch";
@@ -92,13 +97,14 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
   /* Data table columns creation */
   const columns: any[] = [
     {
-      sortable: true,
+      sortable: false,
       field: "Name",
       headerName: "Name",
-      width: 170,
+      width: 150,
       renderCell: (params: any) => {
         return (
           <div
+            title={params?.row?.Name}
             onClick={async () => {
               setPanelItem({ ...params?.row });
               togglePopupVisibility(
@@ -112,11 +118,10 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             className={styles.personabox}
           >
             <Persona
-              title={params?.row?.Name}
               imageUrl={`/_layouts/15/userphoto.aspx?username=${params?.row?.Email}`}
               size={PersonaSize.size24}
             />
-            {params?.row?.Name}
+            <span className={styles.tableCellSec}>{params?.row?.Name}</span>
           </div>
         );
       },
@@ -124,20 +129,72 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     {
       sortable: false,
       field: "MobilePhone",
-      headerName: "Phone number",
-      width: 170,
+      headerName: "Mobile phone",
+      width: 80,
       renderCell: (params: any) => {
         return (
           <div className={styles.detailphonebox}>
-            <Icon
-              iconName="Phone"
-              style={{
-                color: "orange",
-                fontSize: "20px",
-                fontWeight: "700",
-              }}
-            />
-            <label>{params?.row?.MobilePhone || "-"}</label>
+            {params?.row?.MobilePhone ? (
+              <>
+                <Icon
+                  iconName="Phone"
+                  style={{
+                    color: "#e0803d",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                  }}
+                />
+                <label className={styles.tableCellSec}>
+                  {params?.row?.MobilePhone}
+                </label>
+              </>
+            ) : (
+              "-"
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      sortable: false,
+      field: "BusinessPhones",
+      headerName: "Office phone",
+      width: 80,
+      renderCell: (params: any) => {
+        return (
+          <div className={styles.detailphonebox}>
+            {params?.row?.BusinessPhones ? (
+              <>
+                <Icon
+                  iconName="Phone"
+                  style={{
+                    color: "#e0803d",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                  }}
+                />
+                <label className={styles.tableCellSec}>
+                  {params?.row?.BusinessPhones}
+                </label>
+              </>
+            ) : (
+              "-"
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      sortable: false,
+      field: "Department",
+      headerName: "Department",
+      width: 120,
+      renderCell: (params: any) => {
+        return (
+          <div title={params?.row?.Department}>
+            <label className={styles.tableCellSec}>
+              {params?.row?.Department || "-"}
+            </label>
           </div>
         );
       },
@@ -145,12 +202,14 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     {
       sortable: false,
       field: "OfficeLocation",
-      headerName: "Location",
-      width: 150,
+      headerName: "Office location",
+      width: 120,
       renderCell: (params: any) => {
         return (
-          <div>
-            <label>{params?.row?.OfficeLocation || "-"}</label>
+          <div title={params?.row?.OfficeLocation}>
+            <label className={styles.tableCellSec}>
+              {params?.row?.OfficeLocation || "-"}
+            </label>
           </div>
         );
       },
@@ -159,11 +218,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       sortable: false,
       field: "JobTitle",
       headerName: "Job title",
-      width: 150,
+      width: 120,
       renderCell: (params: any) => {
         return (
-          <div>
-            <label>{params?.row?.JobTitle || "-"}</label>
+          <div title={params?.row?.JobTitle}>
+            <label className={styles.tableCellSec}>
+              {params?.row?.JobTitle || "-"}
+            </label>
           </div>
         );
       },
@@ -172,16 +233,17 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       sortable: false,
       field: "Manager",
       headerName: "Manager",
-      width: 200,
+      width: 150,
       renderCell: (params: any) => {
         return params?.row?.Manager?.Name ? (
-          <div className={styles.personabox}>
+          <div className={styles.personabox} title={params?.row?.Manager?.Name}>
             <Persona
-              title={params?.row?.Manager?.Name}
               imageUrl={`/_layouts/15/userphoto.aspx?username=${params?.row?.Manager?.Email}`}
               size={PersonaSize.size24}
             />
-            {params?.row?.Manager?.Name}
+            <span className={styles.tableCellSec}>
+              {params?.row?.Manager?.Name}
+            </span>
           </div>
         ) : (
           "-"
@@ -190,9 +252,34 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     },
     {
       sortable: false,
+      field: "Skills",
+      headerName: "Skills",
+      width: 150,
+      renderCell: (params: any) => {
+        return (
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+            }}
+            title={params?.row?.Skills.toString()}
+          >
+            {params?.row?.Skills?.map((val: string, idx: number) => {
+              return (
+                <span key={idx} className={styles.tableSkillsTag}>
+                  {val}
+                </span>
+              );
+            }) || "-"}
+          </div>
+        );
+      },
+    },
+    {
+      sortable: false,
       field: "Action",
       headerName: "Action",
-      width: 80,
+      width: 40,
       renderCell: (params: any) => {
         return (
           <div className={styles.twoiconbox}>
@@ -403,8 +490,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         "close"
       );
 
-      setIsLoading(true);
-
       const idx: number = Number(panelItem?.id);
       arrMasterUsers[idx].BusinessPhones = formData.BusinessPhones;
       arrMasterUsers[idx].Skills = formData.Skills.split(",");
@@ -414,7 +499,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       await serachFunction(false, [...arrMasterUsers]);
     } catch (err) {
       setIsSubmit(false);
-      console.log("err: ", err);
+      console.log("updateExtension err: ", err);
     }
   };
 
@@ -443,8 +528,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         "close"
       );
 
-      setIsLoading(true);
-
       const idx: number = Number(panelItem?.id);
       arrMasterUsers[idx].BusinessPhones = formData.BusinessPhones;
       arrMasterUsers[idx].Skills = formData.Skills.split(",");
@@ -454,39 +537,54 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       await serachFunction(false, [...arrMasterUsers]);
     } catch (err) {
       setIsSubmit(false);
-      console.log("err: ", err);
+      console.log("addExtension err: ", err);
     }
   };
 
-  const handleSubmit = async (): Promise<void> => {
-    setIsSubmit(true);
-
+  const updateSkills = async (): Promise<void> => {
     const client: MSGraphClient =
       await props.context.msGraphClientFactory.getClient();
+
+    const payload: any = {
+      skills: formData?.Skills?.split(",") || [],
+    };
 
     try {
       await client
         .api(`/users/${panelItem?.UserId}`)
         .version("v1.0")
         .header("Content-Type", "application/json")
-        .update({
-          businessPhones: formData.BusinessPhones
-            ? [formData.BusinessPhones]
-            : [],
-        });
-
-      await client
-        .api(`/users/${panelItem?.UserId}`)
-        .version("v1.0")
-        .header("Content-Type", "application/json")
-        .update({
-          skills: formData?.Skills?.split(",") || [],
-        });
+        .update({ ...payload });
 
       !panelItem.IsExtension ? await addExtension() : await updateExtension();
     } catch (err) {
       setIsSubmit(false);
-      console.log("err: ", err);
+      console.log("skills err: ", err);
+    }
+  };
+
+  const updateBusinessPhone = async (): Promise<void> => {
+    setIsLoading(true);
+    setIsSubmit(true);
+
+    const client: MSGraphClient =
+      await props.context.msGraphClientFactory.getClient();
+
+    const payload: any = {
+      businessPhones: formData.BusinessPhones ? [formData.BusinessPhones] : [],
+    };
+
+    try {
+      await client
+        .api(`/users/${panelItem?.UserId}`)
+        .version("v1.0")
+        .header("Content-Type", "application/json")
+        .update({ ...payload });
+
+      await updateSkills();
+    } catch (err) {
+      setIsSubmit(false);
+      console.log("businessPhones err: ", err);
     }
   };
 
@@ -514,35 +612,62 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               alignItems: "center",
             }}
           >
-            <Persona
-              title={panelItem?.Name || ""}
-              imageUrl={`/_layouts/15/userphoto.aspx?username=${
-                panelItem?.Email || ""
-              }`}
-              size={PersonaSize.size100}
-            />
+            <div className={styles.avatarSection}>
+              <Persona
+                styles={{
+                  root: {
+                    ".ms-Persona-coin": {
+                      boxShadow: `0px 0px 10px rgba(0,0,0,0.08)`,
+                      borderRadius: "50%",
+                    },
+                  },
+                }}
+                title={panelItem?.Name || ""}
+                imageUrl={`/_layouts/15/userphoto.aspx?username=${
+                  panelItem?.Email || ""
+                }`}
+                size={PersonaSize.size100}
+              />
+              <div
+                className={styles.editIcon}
+                style={{
+                  display: isEdit ? "flex" : "none",
+                }}
+                title="Go to My Microsoft 365 profile"
+                onClick={() => {
+                  window.open(
+                    "https://www.microsoft365.com/search/overview?origin=ProfileAboutMe",
+                    "_blank"
+                  );
+                }}
+              >
+                <Edit />
+              </div>
+            </div>
             <div className={styles.detailsSec}>
               <div className={styles.nameSec}>{panelItem?.Name || "-"}</div>
               <div className={styles.emailSec}>{panelItem?.Email || "-"}</div>
               <div className={styles.jobTitleSec}>
                 {panelItem?.JobTitle || "-"}
               </div>
-              <DefaultButton
-                btnType="primaryGreen"
-                title="Update profile"
-                text="Update profile"
-                startIcon={<Edit />}
-                style={{
-                  display:
-                    panelItem?.Email?.toLowerCase() ===
-                      curUserData?.Email?.toLowerCase() && !isEdit
-                      ? "flex"
-                      : "none",
-                }}
-                onClick={async () => {
-                  await handleEdit({ ...panelItem });
-                }}
-              />
+              <div>
+                <DefaultButton
+                  btnType="primaryGreen"
+                  title="Update profile"
+                  text="Update profile"
+                  startIcon={<Edit />}
+                  style={{
+                    display:
+                      panelItem?.Email?.toLowerCase() ===
+                        curUserData?.Email?.toLowerCase() && !isEdit
+                        ? "flex"
+                        : "none",
+                  }}
+                  onClick={async () => {
+                    await handleEdit({ ...panelItem });
+                  }}
+                />
+              </div>
             </div>
           </div>
 
@@ -597,7 +722,22 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               <p>{panelItem?.MobilePhone || "-"}</p>
             </div>
             <div>
-              <label>Birthday</label>
+              <label className={styles.flexSection}>
+                Birthday
+                <div
+                  style={{
+                    display: isEdit ? "flex" : "none",
+                  }}
+                  title="Please update your birthday details in Microsoft 365 profile"
+                >
+                  <Info
+                    style={{
+                      color: "#555",
+                      fontSize: "22px",
+                    }}
+                  />
+                </div>
+              </label>
               <p
                 style={{
                   display: "flex",
@@ -708,7 +848,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             <div className={styles.rowData}>
               <label className={styles.rowHeading}>Qualifications</label>
               {!isEdit ? (
-                <p className={styles.rowValue}>
+                <p className={styles.rowValue} title={formData?.Qualifications}>
                   {panelItem?.Qualifications || "-"}
                 </p>
               ) : (
@@ -731,7 +871,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             <div className={styles.rowData}>
               <label className={styles.rowHeading}>Experience</label>
               {!isEdit ? (
-                <p className={styles.rowValue}>
+                <p className={styles.rowValue} title={formData?.Qualifications}>
                   {panelItem?.Experience || "-"}
                 </p>
               ) : (
@@ -779,7 +919,7 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             startIcon: false,
             size: "large",
             onClick: async () => {
-              await handleSubmit();
+              await updateBusinessPhone();
             },
           },
         ]
