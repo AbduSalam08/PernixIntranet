@@ -20,7 +20,7 @@ import { ToastContainer } from "react-toastify";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import SendIcon from "@mui/icons-material/Send";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
-import DragDropFile from "../DragAndDrop/DragDropFile";
+// import DragDropFile from "../DragAndDrop/DragDropFile";
 import QuillEditor from "../../../components/common/QuillEditor/QuillEditor";
 import { Avatar } from "primereact/avatar";
 import { InputSwitch } from "primereact/inputswitch";
@@ -55,6 +55,7 @@ import moment from "moment";
 import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import RichText from "../../../components/common/RichText/RichText";
 import { Chip } from "@mui/material";
+import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
 
 /* Interface creation */
 interface IBlogField {
@@ -347,6 +348,7 @@ const Blogs = (props: any): JSX.Element => {
     setCurAllBlogs([...tampTabData]);
     setSelTabBlogs([...tampTabData]);
     setComSearch({ ...CONFIG.PageSearchFields });
+    setArrTags([]);
     setCurBlogData(null);
     setSelectedTab(curTab);
     setIsLoading(false);
@@ -360,10 +362,11 @@ const Blogs = (props: any): JSX.Element => {
 
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
-      const { isValid, errorMsg } = validateField(
+      let { isValid, errorMsg } = validateField(
         key,
-        key === "Tag" && fieldData.value?.length <= 255
-          ? fieldData.value
+        // key === "Tag" && fieldData.value?.length <= 255
+        key === "Tag" && arrTags?.join(",")?.length <= 255
+          ? arrTags?.join(",")
           : key !== "Tag"
           ? fieldData.value
           : "",
@@ -374,8 +377,8 @@ const Blogs = (props: any): JSX.Element => {
         hasErrors = true;
       }
 
-      const errMessage: string =
-        key === "Tag" && fieldData.value?.length <= 255
+      errorMsg =
+        key === "Tag" && arrTags?.join(",")?.length <= 255
           ? errorMsg
           : key !== "Tag"
           ? errorMsg
@@ -386,13 +389,13 @@ const Blogs = (props: any): JSX.Element => {
         [key]: {
           ...fieldData,
           isValid,
-          errMessage,
+          errorMsg,
         },
       };
     }, {} as typeof formData);
-    2;
 
     setFormData(updatedFormData);
+    console.log("updatedFormData: ", updatedFormData);
     if (!hasErrors) {
       setIsLoading(true);
       const data: any = {};
@@ -402,7 +405,8 @@ const Blogs = (props: any): JSX.Element => {
 
       data[column.ID] = curBlogData?.ID || null;
       data[column.Heading] = formData?.Heading?.value || "";
-      data[column.Title] = formData?.Tag?.value || "";
+      data[column.Title] = arrTags?.join(",") || "";
+      // data[column.Title] = formData?.Tag?.value || "";
       data[column.Description] = formData?.Description?.value || "";
       data[column.Status] = Status;
 
@@ -446,7 +450,8 @@ const Blogs = (props: any): JSX.Element => {
         );
 
         masterBlog[Idx].Heading = formData?.Heading?.value || "";
-        masterBlog[Idx].Tag = formData?.Tag?.value || "";
+        masterBlog[Idx].Tag = arrTags?.join(",") || "";
+        // masterBlog[Idx].Tag = formData?.Tag?.value || "";
         masterBlog[Idx].Description = formData?.Description?.value || "";
         masterBlog[Idx].Status = Status;
 
@@ -489,6 +494,14 @@ const Blogs = (props: any): JSX.Element => {
     } else {
       console.log("Form contains errors");
     }
+  };
+
+  const handleRemoveTag = async (Idx: number): Promise<void> => {
+    const tempTags: string[] = await Promise.all(
+      arrTags?.filter((val: string, i: number) => i !== Idx) || []
+    );
+
+    setArrTags([...tempTags]);
   };
 
   const handleDelete = async (): Promise<void> => {
@@ -568,7 +581,8 @@ const Blogs = (props: any): JSX.Element => {
           },
           Tag: {
             ...prev["Tag"],
-            value: selObject.Tag,
+            value: "",
+            // value: selObject.Tag,
           },
           Description: {
             ...prev["Description"],
@@ -583,6 +597,7 @@ const Blogs = (props: any): JSX.Element => {
             value: arrDocuments,
           },
         }));
+        setArrTags(selObject?.Tag?.split(",") || []);
         setIsCreate(true);
       } else {
         await fecthBlogComments(Number(Id)).then(
@@ -1217,7 +1232,13 @@ const Blogs = (props: any): JSX.Element => {
                         alt="blog img"
                       />
                       <div className={styles.cardTag}>
-                        <span>{val?.Tag}</span>
+                        <span>
+                          {val?.Tag?.split(",")?.map(
+                            (val: string, ind: number) => {
+                              return <Chip key={ind} label={val} />;
+                            }
+                          ) || ""}
+                        </span>
                         <div
                           className={styles.icons}
                           // style={{
@@ -1254,6 +1275,7 @@ const Blogs = (props: any): JSX.Element => {
                             style={{
                               display:
                                 (val?.Status === CONFIG.blogStatus.Draft ||
+                                  val?.Status === CONFIG.blogStatus.Approved ||
                                   val?.Status === CONFIG.blogStatus.Rejected) &&
                                 selectedTab === CONFIG.BlogsTab[1]
                                   ? "flex"
@@ -1581,6 +1603,7 @@ const Blogs = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
+                  setArrTags([]);
                   resetFormData(initialFormData, setFormData);
                   filterTabDatas(selectedTab);
                 }}
@@ -1621,42 +1644,78 @@ const Blogs = (props: any): JSX.Element => {
                   />
                 </div>
                 <div className={styles.tagSec}>
+                  <div className={styles.tagInput}>
+                    <CustomInput
+                      value={formData?.Tag?.value}
+                      placeholder="Tag ( Separate the tags using commas )"
+                      maxLength={255}
+                      isValid={formData?.Tag?.isValid}
+                      errorMsg={formData?.Tag?.errorMsg}
+                      onChange={(e: any) => {
+                        const value = e.trimStart();
+                        const { isValid, errorMsg } = validateField(
+                          "Tag",
+                          value.length <= 255 ? value : "",
+                          formData?.Tag?.validationRule
+                        );
+                        handleInputChange(
+                          "Tag",
+                          value,
+                          isValid,
+                          value.length <= 255
+                            ? errorMsg
+                            : "Maximum 255 characters allowed."
+                        );
+                      }}
+                    />
+                  </div>
                   {arrTags?.length ? (
-                    <div>
+                    <div className={styles.tagChips}>
                       {arrTags?.map((tag: string, Idx: number) => {
-                        return <Chip key={Idx} label={tag} />;
+                        return (
+                          <Chip
+                            key={Idx}
+                            label={tag}
+                            onDelete={() => handleRemoveTag(Idx)}
+                          />
+                        );
                       })}
                     </div>
                   ) : (
                     ""
                   )}
-                  <CustomInput
-                    value={formData?.Tag?.value}
-                    placeholder="Tag"
-                    maxLength={255}
-                    isValid={formData?.Tag?.isValid}
-                    errorMsg={formData?.Tag?.errorMsg}
-                    onChange={(e: any) => {
-                      const value = e.trimStart();
-                      const { isValid, errorMsg } = validateField(
-                        "Tag",
-                        value.length <= 255 ? value : "",
-                        formData?.Tag?.validationRule
-                      );
-                      handleInputChange(
-                        "Tag",
-                        value,
-                        isValid,
-                        value.length <= 255
-                          ? errorMsg
-                          : "Maximum 255 characters allowed."
-                      );
-                    }}
-                  />
                 </div>
               </div>
               <div className={styles.ImageSec}>
-                <DragDropFile
+                <CustomFilePicker
+                  context={props.context}
+                  selectedFile={
+                    formData?.Attachments?.value?.name ||
+                    formData?.Attachments?.value
+                  }
+                  onSave={(fileData) => {
+                    const value: any = fileData?.file;
+                    const { isValid, errorMsg } = validateField(
+                      CONFIG.BlogColumn.Attachments,
+                      value ? value.name : "",
+                      formData.Attachments.validationRule
+                    );
+                    handleInputChange(
+                      CONFIG.BlogColumn.Attachments,
+                      value,
+                      isValid,
+                      errorMsg
+                    );
+                  }}
+                  onChange={(fileData) => {
+                    console.log("File changed:", fileData);
+                  }}
+                  isValid={formData?.Attachments.isValid}
+                  errorMsg={formData?.Attachments.errorMsg}
+                  // isValid={false}
+                  // errorMsg={"Mandatory*"}
+                />
+                {/* <DragDropFile
                   setNewVisitor={setFormData}
                   newVisitor={formData?.Attachments?.value}
                 />
@@ -1674,7 +1733,7 @@ const Blogs = (props: any): JSX.Element => {
                   <p className={styles.errorMsg}>
                     {formData?.Attachments?.errorMsg}
                   </p>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -1752,6 +1811,7 @@ const Blogs = (props: any): JSX.Element => {
               btnType="darkGreyVariant"
               text="Close"
               onClick={(_) => {
+                setArrTags([]);
                 resetFormData(initialFormData, setFormData);
                 filterTabDatas(selectedTab);
               }}

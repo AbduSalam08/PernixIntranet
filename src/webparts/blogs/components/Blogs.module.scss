@@ -137,6 +137,20 @@
       .tagSec {
         width: 100%;
         margin-bottom: 20px;
+
+        .tagInput {
+          width: 100%;
+          margin-bottom: 10px;
+        }
+
+        .tagChips {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          overflow: auto;
+          gap: 8px;
+          padding: 7px;
+        }
       }
     }
 
@@ -398,6 +412,24 @@
     font-family: "osRegular";
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
+
+    p {
+      margin: 0;
+    }
+
+    ul {
+      list-style-type: disc;
+      padding-left: 50px;
+    }
+
+    ol {
+      list-style-type: decimal;
+      padding-left: 50px;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
   }
 
   .VAvatar {
