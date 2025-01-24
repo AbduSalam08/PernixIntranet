@@ -483,3 +483,43 @@
 .hightlightDragging {
   border: dashed 2px solid #adadad;
 }
+
+// file picker styles
+.filePickerWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-radius: 6px;
+  background-color: #fff;
+  min-width: 190px;
+  padding: 4px 20px;
+  cursor: pointer;
+}
+
+.filePickerLabel {
+  font-family: "osRegular", sans-serif;
+  font-size: 15px;
+  color: #414141;
+  max-width: 85%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 20px;
+}
+
+.filePickerButton {
+  span {
+    i {
+      color: #555;
+      font-size: 18px;
+    }
+  }
+}
+.filePickerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
