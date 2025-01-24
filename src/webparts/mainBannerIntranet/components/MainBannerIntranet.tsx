@@ -34,7 +34,7 @@ const HelpDeskWhite = require("../../../assets/images/svg/quickLinks/helpdeskWhi
 // const PTOWhite = require("../../../assets/images/svg/quickLinks/ptoWhite.svg");
 const ApprovalsWhite = require("../../../assets/images/svg/quickLinks/approvalsWhite.svg");
 // const ProjectTemplateWhite = require("../../../assets/images/svg/quickLinks/projectTemplateWhite.svg");
-const PernixBannerImage = require("../assets/PernixBannerImage.svg");
+//const PernixBannerImage = require("../assets/PernixBannerImage.svg");
 
 let curUserName: string = "";
 
@@ -187,11 +187,12 @@ const MainBannerIntranet = (props: any): JSX.Element => {
       ) : (
         <img
           className={styles.imgWrapper}
-          src={QuotesData?.bannerImage || PernixBannerImage}
+          src={QuotesData?.bannerImage}
           alt="Banner"
           style={{
             objectFit: "cover",
             width: "100%",
+            display: QuotesData?.bannerImage ? "block" : "none",
           }}
         />
       )}

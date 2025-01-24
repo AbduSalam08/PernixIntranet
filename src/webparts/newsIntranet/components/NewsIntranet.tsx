@@ -11,7 +11,7 @@ import styles from "./NewsIntranet.module.scss";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
-import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
+// import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import {
@@ -27,16 +27,43 @@ import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import moment from "moment";
 import { ToastContainer } from "react-toastify";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import RichText from "../../../components/common/RichText/RichText";
+import "./Style.css";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 const NewsIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
+  const isMobile = useMediaQuery("(max-width:768px)"); // Detect screen size
+
   // popup properties
   const initialPopupController = [
     {
       open: false,
       popupTitle: "Add a news",
+      popupWidth: "900px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "News added successfully!",
+        error: "Something went wrong!",
+        successDescription: "The new news 'ABC' has been added successfully.",
+        errorDescription:
+          "An error occured while adding news, please try again later.",
+        inprogress: "Adding new news, please wait...",
+      },
+    },
+
+    {
+      open: false,
+      popupTitle: "",
       popupWidth: "900px",
       popupType: "custom",
       defaultCloseBtn: false,
@@ -251,7 +278,7 @@ const NewsIntranet = (props: any): JSX.Element => {
           <div style={{ width: "50%" }}>
             <CustomDropDown
               value={formData.Status.value}
-              options={["Active", "In Active"]}
+              options={["Active", "Inactive"]}
               placeholder="Status"
               isValid={formData.Status.isValid}
               errorMsg={formData.Status.errorMsg}
@@ -286,7 +313,7 @@ const NewsIntranet = (props: any): JSX.Element => {
           </div>
         </div>
 
-        <FloatingLabelTextarea
+        {/* <FloatingLabelTextarea
           value={formData.Description.value}
           placeholder="Description"
           rows={5}
@@ -301,7 +328,242 @@ const NewsIntranet = (props: any): JSX.Element => {
             );
             handleInputChange("Description", value, isValid, errorMsg);
           }}
+        /> */}
+
+        <RichText
+          className={`blog ${styles.richtextwrapper}`}
+          isValid={!formData?.Description?.isValid}
+          errorMsg={formData?.Description?.errorMsg}
+          value={formData?.Description?.value}
+          onChange={(res: any) => {
+            let value: string = "";
+
+            if (res === "<p><br></p>") {
+              value = "";
+            } else if (res?.replace(/<(.|\n)*?>/g, "").trim().length === 0) {
+              value = "";
+            } else {
+              value = res;
+            }
+
+            const { isValid, errorMsg } = validateField(
+              "Description",
+              value,
+              formData?.Description?.validationRule
+            );
+            handleInputChange("Description", value, isValid, errorMsg);
+          }}
+          placeholder="Type your content here..."
+          // className="myRichTextEditor"
         />
+      </div>,
+    ],
+
+    [
+      <div key={2}>
+        <div
+          style={{
+            width: "100%",
+            height: isMobile ? "auto" : "350px",
+            borderRadius: "10px",
+          }}
+        >
+          <img
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "10px",
+            }}
+            src={formData?.thumbnail?.value}
+            alt=""
+          />
+        </div>
+
+        {isMobile ? (
+          <div
+            style={
+              {
+                // display: "flex",
+                // justifyContent: "space-between",
+                // alignItems: "flex-start",
+                // margin: "20px 0px 10px 0px",
+              }
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                margin: "20px 0px 10px 0px",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "14px",
+                  // lineHeight: "px",
+                  fontFamily: "osSemibold",
+                  color: "#0b4d53",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: 2,
+
+                  // overflow: "hidden"
+                  // textOverflow: "ellipsis",
+                  // word-break: break-word,
+                  // display: -webkit-box,
+                  // -webkit-box-orient: vertical,
+                  // line-clamp: 5,
+                  // -webkit-line-clamp: 5,
+                  // white-space: normal
+                }}
+              >
+                {formData?.Title?.value}
+              </p>
+
+              <p
+                style={{
+                  background: "#daf0da",
+                  padding: "6px 15px",
+                  color: "green",
+                  borderRadius: "4px",
+                  fontSize: "12px",
+                  fontFamily: "osMedium",
+                }}
+              >
+                {formData?.Status?.value}
+              </p>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                alignItems: "flex-end",
+                marginBottom: "10px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginTop: "10px",
+                }}
+              >
+                <img
+                  style={{ width: "22px", height: "22px", borderRadius: "50%" }}
+                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                />
+                <span style={{ fontSize: "12px" }}>
+                  {formData?.Authorname?.value}
+                </span>
+              </div>
+
+              <span style={{ fontSize: "12px", color: "#adadad" }}>
+                {" "}
+                {`${moment(formData?.StartDate?.value).format(
+                  "MM/DD/YYYY"
+                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              margin: "20px 0px 10px 0px",
+            }}
+          >
+            <div
+              style={{
+                width: "80%",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "22px",
+                  lineHeight: "30px",
+                  fontFamily: "osSemibold",
+                  color: "#0b4d53",
+                }}
+              >
+                {formData?.Title?.value}
+              </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginTop: "10px",
+                }}
+              >
+                <img
+                  style={{ width: "26px", height: "26px", borderRadius: "50%" }}
+                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                />
+                <span>{formData?.Authorname?.value}</span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                alignItems: "flex-end",
+              }}
+            >
+              <p
+                style={{
+                  background: "#daf0da",
+                  padding: "6px 15px",
+                  color: "green",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  fontFamily: "osMedium",
+                }}
+              >
+                {formData?.Status?.value}
+              </p>
+
+              <span style={{ fontSize: "14px", color: "#adadad" }}>
+                {" "}
+                {`${moment(formData?.StartDate?.value).format(
+                  "MM/DD/YYYY"
+                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            lineHeight: "23px",
+            fontSize: "14px",
+            fontFamily: "osRegular",
+          }}
+          dangerouslySetInnerHTML={{
+            __html: formData?.Description?.value || "",
+          }}
+        >
+          {/* <p
+            style={{
+              lineHeight: "23px",
+              fontSize: "14px",
+              fontFamily: "osRegular",
+            }}
+          >
+            {formData?.Description?.value}
+          </p> */}
+        </div>
       </div>,
     ],
   ];
@@ -336,6 +598,36 @@ const NewsIntranet = (props: any): JSX.Element => {
         },
       },
     ],
+
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[1],
+            1,
+            "close"
+          );
+        },
+      },
+      // {
+      //   text: "Submit",
+      //   btnType: "primaryGreen",
+      //   endIcon: false,
+      //   startIcon: false,
+      //   disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+      //   size: "large",
+      //   onClick: async () => {
+      //     await handleSubmit();
+      //   },
+      // },
+    ],
   ];
 
   const handlenavigate = (): void => {
@@ -358,6 +650,58 @@ const NewsIntranet = (props: any): JSX.Element => {
     );
 
     setShownewsdata(filteredData);
+  };
+
+  const handleViewClick = (item: any): void => {
+    setFormData({
+      Title: {
+        ...formData.Title,
+        isValid: true,
+        value: item.title || "",
+      },
+      StartDate: {
+        ...formData.StartDate,
+        isValid: true,
+        value: new Date(item.StartDate) || null,
+      },
+      EndDate: {
+        ...formData.EndDate,
+        isValid: true,
+        value: new Date(item.EndDate) || null,
+      },
+      Status: {
+        ...formData.Status,
+        isValid: true,
+        value: item.Status || "",
+      },
+      thumbnail: {
+        ...formData.thumbnail,
+        isValid: true,
+        value: item.imageUrl || null,
+      },
+      Description: {
+        ...formData.Description,
+        isValid: true,
+        value: item.description || "",
+      },
+
+      Author: {
+        ...formData.Author,
+        isValid: true,
+        value: item?.Author || "",
+      },
+      Authorname: {
+        ...formData.Author,
+        isValid: true,
+        value: item?.AuthorName || "",
+      },
+    });
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[1],
+      1,
+      "open"
+    );
   };
 
   useEffect(() => {
@@ -417,6 +761,8 @@ const NewsIntranet = (props: any): JSX.Element => {
                   description={item?.description}
                   noActions={true}
                   noStatus={true}
+                  handleViewClick={handleViewClick}
+                  item={item}
                 />
               ))
           )}

@@ -62,7 +62,37 @@
     }
   }
 
-  span {
+  // span {
+  //   font-family: "osRegular", sans-serif !important;
+  //   color: #adadad;
+  //   line-height: 22px;
+  //   font-size: 14px;
+  //   height: 68px;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  //   word-break: break-word;
+  //   display: -webkit-box;
+  //   -webkit-box-orient: vertical;
+  //   line-clamp: 3;
+  //   -webkit-line-clamp: 3;
+  //   white-space: normal;
+
+  //   @media (max-width: 700px) {
+  //     font-size: 12px;
+  //     line-height: 20px;
+  //     height: auto; /* Adjust height to auto for better fit */
+
+  //     overflow: hidden;
+  //     text-overflow: ellipsis;
+  //     word-break: break-word;
+  //     display: -webkit-box;
+  //     -webkit-box-orient: vertical;
+  //     line-clamp: 5;
+  //     -webkit-line-clamp: 5;
+  //     white-space: normal;
+  //   }
+  // }
+  .description {
     font-family: "osRegular", sans-serif !important;
     color: #adadad;
     line-height: 22px;

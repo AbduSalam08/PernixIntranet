@@ -8,3 +8,12 @@
     width: 50% !important ;
   }
 } */
+.blog .ql-editor {
+  min-height: 250px !important;
+}
+.blog .ql-tooltip {
+  top: 28.4px;
+  z-index: 9999 !important;
+  /* width: 476px !important; */
+  left: 360px !important;
+}

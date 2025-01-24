@@ -172,6 +172,7 @@ const RichText = ({
     toolbar: [
       [{ header: [1, 2, 3, false] }],
       ["bold", "italic", "underline"],
+      [{ color: [] }],
       // [{ background: [] }],
       [
         { list: "ordered" },
@@ -194,6 +195,7 @@ const RichText = ({
     "bullet",
     "indent",
     "link",
+    "color",
 
     // "image",
     // "background",

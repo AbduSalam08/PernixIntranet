@@ -14,7 +14,7 @@ import styles from "./NewsPage.module.scss";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
-import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
+// import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import {
@@ -34,6 +34,7 @@ import moment from "moment";
 import { IPaginationData } from "../../../interface/interface";
 import { ToastContainer } from "react-toastify";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
+import RichText from "../../../components/common/RichText/RichText";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -394,7 +395,7 @@ const NewsPage = (props: any): JSX.Element => {
 
         <div className={styles.r4}>
           <div className={styles.item5}>
-            <FloatingLabelTextarea
+            {/* <FloatingLabelTextarea
               value={formData.Description.value}
               placeholder="Description"
               rows={5}
@@ -409,6 +410,35 @@ const NewsPage = (props: any): JSX.Element => {
                 );
                 handleInputChange("Description", value, isValid, errorMsg);
               }}
+            /> */}
+
+            <RichText
+              className={`blog ${styles.richtextwrapper}`}
+              isValid={!formData?.Description?.isValid}
+              errorMsg={formData?.Description?.errorMsg}
+              value={formData?.Description?.value}
+              onChange={(res: any) => {
+                let value: string = "";
+
+                if (res === "<p><br></p>") {
+                  value = "";
+                } else if (
+                  res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
+                ) {
+                  value = "";
+                } else {
+                  value = res;
+                }
+
+                const { isValid, errorMsg } = validateField(
+                  "Description",
+                  value,
+                  formData?.Description?.validationRule
+                );
+                handleInputChange("Description", value, isValid, errorMsg);
+              }}
+              placeholder="Type your content here..."
+              // className="myRichTextEditor"
             />
           </div>
         </div>
@@ -465,7 +495,7 @@ const NewsPage = (props: any): JSX.Element => {
           <div className={styles.item4}>
             <CustomDropDown
               value={formData.Status.value}
-              options={["Active", "In Active"]}
+              options={["Active", "Inactive"]}
               placeholder="Status"
               isValid={formData.Status.isValid}
               errorMsg={formData.Status.errorMsg}
@@ -524,7 +554,7 @@ const NewsPage = (props: any): JSX.Element => {
 
         <div className={styles.r4}>
           <div className={styles.item5}>
-            <FloatingLabelTextarea
+            {/* <FloatingLabelTextarea
               value={formData.Description.value}
               placeholder="Description"
               rows={5}
@@ -539,6 +569,35 @@ const NewsPage = (props: any): JSX.Element => {
                 );
                 handleInputChange("Description", value, isValid, errorMsg);
               }}
+            /> */}
+
+            <RichText
+              className={`blog ${styles.richtextwrapper}`}
+              isValid={!formData?.Description?.isValid}
+              errorMsg={formData?.Description?.errorMsg}
+              value={formData?.Description?.value}
+              onChange={(res: any) => {
+                let value: string = "";
+
+                if (res === "<p><br></p>") {
+                  value = "";
+                } else if (
+                  res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
+                ) {
+                  value = "";
+                } else {
+                  value = res;
+                }
+
+                const { isValid, errorMsg } = validateField(
+                  "Description",
+                  value,
+                  formData?.Description?.validationRule
+                );
+                handleInputChange("Description", value, isValid, errorMsg);
+              }}
+              placeholder="Type your content here..."
+              // className="myRichTextEditor"
             />
           </div>
         </div>
@@ -595,7 +654,7 @@ const NewsPage = (props: any): JSX.Element => {
           <div className={styles.item4}>
             <CustomDropDown
               value={formData.Status.value}
-              options={["Active", "In Active"]}
+              options={["Active", "Inactive"]}
               placeholder="Status"
               isValid={formData.Status.isValid}
               errorMsg={formData.Status.errorMsg}
@@ -826,8 +885,17 @@ const NewsPage = (props: any): JSX.Element => {
           </div>
         )}
 
-        <div>
-          <p
+        <div
+          style={{
+            lineHeight: "23px",
+            fontSize: "14px",
+            fontFamily: "osRegular",
+          }}
+          dangerouslySetInnerHTML={{
+            __html: formData?.Description?.value || "",
+          }}
+        >
+          {/* <p
             style={{
               lineHeight: "23px",
               fontSize: "14px",
@@ -835,7 +903,7 @@ const NewsPage = (props: any): JSX.Element => {
             }}
           >
             {formData?.Description?.value}
-          </p>
+          </p> */}
         </div>
       </div>,
     ],
@@ -854,7 +922,7 @@ const NewsPage = (props: any): JSX.Element => {
           noErrorMsg
           width={"200px"}
           floatingLabel={false}
-          options={["Active", "In Active"]}
+          options={["Active", "Inactive"]}
           placeholder="Status"
           onChange={(value) => {
             objFilter.Status = value;
@@ -1336,7 +1404,7 @@ const NewsPage = (props: any): JSX.Element => {
               noErrorMsg
               width={"200px"}
               floatingLabel={false}
-              options={["Active", "In Active"]}
+              options={["Active", "Inactive"]}
               placeholder="Status"
               onChange={(value) => {
                 objFilter.Status = value;
@@ -1581,7 +1649,7 @@ const NewsPage = (props: any): JSX.Element => {
               noErrorMsg
               width={"200px"}
               floatingLabel={false}
-              options={["Active", "In Active"]}
+              options={["Active", "Inactive"]}
               placeholder="Status"
               onChange={(value) => {
                 objFilter.Status = value;

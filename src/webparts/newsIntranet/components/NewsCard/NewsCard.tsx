@@ -10,7 +10,10 @@ interface NewsCardProps {
   onDelete?: () => void;
   noActions?: boolean;
   noStatus?: boolean;
+  item?: any;
+
   noActionsAndStatus?: boolean;
+  handleViewClick?: (item: any) => void; // Modify this to accept an item
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({
@@ -21,9 +24,17 @@ const NewsCard: React.FC<NewsCardProps> = ({
   onEdit,
   onDelete,
   noActions,
+  item,
   noStatus,
+  handleViewClick,
+
   noActionsAndStatus = false,
 }) => {
+  const handleView = (): any => {
+    if (handleViewClick) {
+      handleViewClick(item);
+    }
+  };
   return (
     <div className={styles.newsCard}>
       <img
@@ -32,8 +43,22 @@ const NewsCard: React.FC<NewsCardProps> = ({
         className={styles.newsThumbNail}
       />
       <div className={styles.rhsTexts}>
-        <h2>{title}</h2>
-        <span title={description}>{description}</span>
+        <h2 onClick={handleView}>{title}</h2>
+        <div
+          className={styles.description}
+          dangerouslySetInnerHTML={{
+            __html: description || "",
+          }}
+        ></div>
+        {/* <button
+          className={styles.cardBTNSec}
+          onClick={handleView}
+        
+        >
+          Read more
+        </button> */}
+
+        {/* <span title={description}>{description}</span> */}
       </div>
       {!noActionsAndStatus && (
         <div className={styles.rhsActions}>
