@@ -15,6 +15,8 @@ interface FilePickerProps {
   onSave?: (fileData: { filename: string; size: number; file: File }) => void;
   onChange?: (fileData: { filename: string; size: number; file: File }) => void;
   selectedFile?: string;
+  isValid?: boolean;
+  errorMsg?: string;
 }
 
 const CustomFilePicker: React.FC<FilePickerProps> = ({
@@ -36,6 +38,8 @@ const CustomFilePicker: React.FC<FilePickerProps> = ({
   onSave,
   onChange,
   selectedFile,
+  errorMsg,
+  isValid,
 }) => {
   const [fileName, setFileName] = useState<string | null>(null);
 
@@ -94,41 +98,44 @@ const CustomFilePicker: React.FC<FilePickerProps> = ({
   };
 
   return (
-    <div className={styles.filePickerWrapper} onClick={triggerFilePicker}>
-      <span className={styles.filePickerLabel}>
-        {fileName || selectedFile || "Browse file"}
-      </span>
-      <div className={styles.filePickerContainer}>
-        <FilePicker
-          accepts={accepts}
-          buttonIcon={buttonIcon}
-          context={context}
-          buttonClassName={styles.filePickerButton}
-          onSave={(filePickerResult) =>
-            handleFileProcessing(filePickerResult, onSave)
-          }
-          onChange={(filePickerResult) =>
-            handleFileProcessing(filePickerResult, onChange)
-          }
-        />
+    <div className={styles.filePickerContainerWrap}>
+      <div className={styles.filePickerWrapper} onClick={triggerFilePicker}>
+        <span className={styles.filePickerLabel}>
+          {fileName || selectedFile || "Browse file"}
+        </span>
+        <div className={styles.filePickerContainer}>
+          <FilePicker
+            accepts={accepts}
+            buttonIcon={buttonIcon}
+            context={context}
+            buttonClassName={styles.filePickerButton}
+            onSave={(filePickerResult) =>
+              handleFileProcessing(filePickerResult, onSave)
+            }
+            onChange={(filePickerResult) =>
+              handleFileProcessing(filePickerResult, onChange)
+            }
+          />
 
-        {(fileName || selectedFile) && (
-          <div
-            style={{
-              color: "red",
-              fontSize: "14px",
-              cursor: "pointer",
-              fontFamily: "osRegular",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              clearSelection();
-            }}
-          >
-            Clear
-          </div>
-        )}
+          {(fileName || selectedFile) && (
+            <div
+              style={{
+                color: "red",
+                fontSize: "14px",
+                cursor: "pointer",
+                fontFamily: "osRegular",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                clearSelection();
+              }}
+            >
+              Clear
+            </div>
+          )}
+        </div>
       </div>
+      {!isValid && <span className={styles.errorMsg}>{errorMsg}</span>}
     </div>
   );
 };

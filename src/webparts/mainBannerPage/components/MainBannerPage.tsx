@@ -359,7 +359,7 @@ const MainBannerPage = (props: any): JSX.Element => {
 
     if (type === "edit") {
       setIsFileEdit(true);
-
+      debugger;
       setFormData({
         StartDate: {
           ...initialFormData.StartDate,
@@ -674,10 +674,29 @@ const MainBannerPage = (props: any): JSX.Element => {
             // selectedFile={formData.Attachments.value}
             onSave={(fileData) => {
               console.log("fileData: ", fileData);
+
+              const value: any = fileData?.file;
+              debugger;
+
+              const { isValid, errorMsg } = validateField(
+                CONFIG.MotivateColumn.Attachments,
+                value?.name || null,
+                formData.Attachments.validationRule
+              );
+              handleInputChange(
+                CONFIG.MotivateColumn.Attachments,
+                value || null,
+                isValid,
+                errorMsg
+              );
             }}
             onChange={(fileData) => {
               console.log("File changed:", fileData);
             }}
+            isValid={formData.Attachments.isValid}
+            errorMsg={formData.Attachments.errorMsg}
+            // isValid={false}
+            // errorMsg={"Mandatory*"}
           />
         </div>
       </div>,
@@ -816,6 +835,43 @@ const MainBannerPage = (props: any): JSX.Element => {
               }}
             />
           </div>
+        </div>
+
+        <div>
+          <CustomFilePicker
+            context={props.context}
+            selectedFile={
+              isFileEdit
+                ? formData?.Attachments?.value || null
+                : formData?.Attachments?.value?.name || null
+            }
+            onSave={(fileData) => {
+              console.log("fileData: ", fileData);
+              setIsFileEdit(false);
+
+              const value: any = fileData?.file;
+              debugger;
+
+              const { isValid, errorMsg } = validateField(
+                CONFIG.MotivateColumn.Attachments,
+                value?.name || null,
+                formData.Attachments.validationRule
+              );
+              handleInputChange(
+                CONFIG.MotivateColumn.Attachments,
+                value || null,
+                isValid,
+                errorMsg
+              );
+            }}
+            onChange={(fileData) => {
+              console.log("File changed:", fileData);
+            }}
+            isValid={formData.Attachments.isValid}
+            errorMsg={formData.Attachments.errorMsg}
+            // isValid={false}
+            // errorMsg={"Mandatory*"}
+          />
         </div>
       </div>,
     ],
