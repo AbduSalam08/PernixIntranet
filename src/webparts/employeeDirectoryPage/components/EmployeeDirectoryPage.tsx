@@ -44,11 +44,11 @@ import resetPopupController, {
 import Edit from "@mui/icons-material/Edit";
 import moment from "moment";
 import { MSGraphClient } from "@microsoft/sp-http";
+import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 
 /* Interfaces creation */
 interface IEDFormFields {
   BusinessPhones: string;
-  Skills: string;
   Qualifications: string;
   Experience: string;
 }
@@ -64,7 +64,6 @@ const formFields: IEDFormFields = {
   BusinessPhones: "",
   Experience: "",
   Qualifications: "",
-  Skills: "",
 };
 
 const EmployeeDirectoryPage = (props: any): JSX.Element => {
@@ -373,6 +372,12 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             val?.MobilePhone.toLowerCase().includes(
               searchField?.CommonSearch.toLowerCase()
             ) ||
+            val?.BusinessPhones.toLowerCase().includes(
+              searchField?.CommonSearch.toLowerCase()
+            ) ||
+            val?.Department.toLowerCase().includes(
+              searchField?.CommonSearch.toLowerCase()
+            ) ||
             val?.OfficeLocation.toLowerCase().includes(
               searchField?.CommonSearch.toLowerCase()
             ) ||
@@ -381,6 +386,11 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             ) ||
             val?.Manager?.Name.toLowerCase().includes(
               searchField?.CommonSearch.toLowerCase()
+            ) ||
+            val?.Skills?.some((skill: string) =>
+              skill
+                .toLowerCase()
+                .includes(searchField?.CommonSearch.toLowerCase())
             )
         ) || [];
     }
@@ -390,18 +400,52 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
           val?.Name.toLowerCase().includes(searchField?.Name.toLowerCase())
         ) || [];
     }
-    if (searchField?.Phone) {
+    if (searchField?.MobilePhone) {
       temp =
         temp?.filter((val: IEmployeeDirectoryUsersData) =>
           val?.MobilePhone.toLowerCase().includes(
-            searchField?.Phone.toLowerCase()
+            searchField?.MobilePhone.toLowerCase()
           )
         ) || [];
     }
-    if (searchField?.Email) {
+    if (searchField?.OfficePhone) {
       temp =
         temp?.filter((val: IEmployeeDirectoryUsersData) =>
-          val?.Email.toLowerCase().includes(searchField?.Email.toLowerCase())
+          val?.BusinessPhones.toLowerCase().includes(
+            searchField?.OfficePhone.toLowerCase()
+          )
+        ) || [];
+    }
+    if (searchField?.Department) {
+      temp =
+        temp?.filter((val: IEmployeeDirectoryUsersData) =>
+          val?.Department.toLowerCase().includes(
+            searchField?.Department.toLowerCase()
+          )
+        ) || [];
+    }
+    if (searchField?.OfficeLocation) {
+      temp =
+        temp?.filter((val: IEmployeeDirectoryUsersData) =>
+          val?.OfficeLocation.toLowerCase().includes(
+            searchField?.OfficeLocation.toLowerCase()
+          )
+        ) || [];
+    }
+    if (searchField?.JobTitle) {
+      temp =
+        temp?.filter((val: IEmployeeDirectoryUsersData) =>
+          val?.JobTitle.toLowerCase().includes(
+            searchField?.JobTitle.toLowerCase()
+          )
+        ) || [];
+    }
+    if (searchField?.Skills) {
+      temp =
+        temp?.filter((val: IEmployeeDirectoryUsersData) =>
+          val?.Skills?.some((skill: string) =>
+            skill.toLowerCase().includes(searchField?.Skills.toLowerCase())
+          )
         ) || [];
     }
 
@@ -490,11 +534,12 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         "close"
       );
 
-      const idx: number = Number(panelItem?.id);
-      arrMasterUsers[idx].BusinessPhones = formData.BusinessPhones;
-      arrMasterUsers[idx].Skills = formData.Skills.split(",");
-      arrMasterUsers[idx].Experience = formData.Experience;
-      arrMasterUsers[idx].Qualifications = formData.Qualifications;
+      const idx: number = arrMasterUsers?.findIndex(
+        (val: IEmployeeDirectoryUsersData) => val.id === Number(panelItem?.id)
+      );
+      arrMasterUsers[idx].BusinessPhones = formData?.BusinessPhones ?? "";
+      arrMasterUsers[idx].Experience = formData?.Experience ?? "";
+      arrMasterUsers[idx].Qualifications = formData?.Qualifications ?? "";
       setArrMasterUsers([...arrMasterUsers]);
       await serachFunction(false, [...arrMasterUsers]);
     } catch (err) {
@@ -528,11 +573,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         "close"
       );
 
-      const idx: number = Number(panelItem?.id);
-      arrMasterUsers[idx].BusinessPhones = formData.BusinessPhones;
-      arrMasterUsers[idx].Skills = formData.Skills.split(",");
-      arrMasterUsers[idx].Experience = formData.Experience;
-      arrMasterUsers[idx].Qualifications = formData.Qualifications;
+      const idx: number = arrMasterUsers?.findIndex(
+        (val: IEmployeeDirectoryUsersData) => val.id === Number(panelItem?.id)
+      );
+      arrMasterUsers[idx].IsExtension = true;
+      arrMasterUsers[idx].BusinessPhones = formData?.BusinessPhones ?? "";
+      arrMasterUsers[idx].Experience = formData?.Experience ?? "";
+      arrMasterUsers[idx].Qualifications = formData?.Qualifications ?? "";
       setArrMasterUsers([...arrMasterUsers]);
       await serachFunction(false, [...arrMasterUsers]);
     } catch (err) {
@@ -541,12 +588,17 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     }
   };
 
-  const updateSkills = async (): Promise<void> => {
+  const updateBusinessPhone = async (): Promise<void> => {
+    setIsLoading(true);
+    setIsSubmit(true);
+
     const client: MSGraphClient =
       await props.context.msGraphClientFactory.getClient();
 
     const payload: any = {
-      skills: formData?.Skills?.split(",") || [],
+      businessPhones: formData?.BusinessPhones.trim()
+        ? [formData.BusinessPhones]
+        : [],
     };
 
     try {
@@ -559,31 +611,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
       !panelItem.IsExtension ? await addExtension() : await updateExtension();
     } catch (err) {
       setIsSubmit(false);
-      console.log("skills err: ", err);
-    }
-  };
-
-  const updateBusinessPhone = async (): Promise<void> => {
-    setIsLoading(true);
-    setIsSubmit(true);
-
-    const client: MSGraphClient =
-      await props.context.msGraphClientFactory.getClient();
-
-    const payload: any = {
-      businessPhones: formData.BusinessPhones ? [formData.BusinessPhones] : [],
-    };
-
-    try {
-      await client
-        .api(`/users/${panelItem?.UserId}`)
-        .version("v1.0")
-        .header("Content-Type", "application/json")
-        .update({ ...payload });
-
-      await updateSkills();
-    } catch (err) {
-      setIsSubmit(false);
       console.log("businessPhones err: ", err);
     }
   };
@@ -594,7 +621,6 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
     setFormData((prev: IEDFormFields) => ({
       ...prev,
       BusinessPhones: val?.BusinessPhones ?? "",
-      Skills: val?.Skills.join(",") ?? "",
       Qualifications: val?.Qualifications ?? "",
       Experience: val?.Experience ?? "",
     }));
@@ -692,172 +718,186 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
         </div>
 
         <div className={styles.popSecondRow}>
-          <div className={styles.leftSec}>
-            <div>
-              <label>Department</label>
-              <p>{panelItem?.Department || "-"}</p>
-            </div>
-            <div>
-              <label>Office location</label>
-              <p>{panelItem?.OfficeLocation || "-"}</p>
-            </div>
-            <div>
-              <label>Managers name</label>
-              <p
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <Persona
-                  title={panelItem?.Manager?.Name}
-                  imageUrl={`/_layouts/15/userphoto.aspx?username=${panelItem?.Manager?.Email}`}
-                  size={PersonaSize.size24}
-                />
-                {panelItem?.Manager?.Name}
-              </p>
-            </div>
-            <div>
-              <label>Mobile phone number</label>
-              <p>{panelItem?.MobilePhone || "-"}</p>
-            </div>
-            <div>
-              <label className={styles.flexSection}>
-                Birthday
-                <div
+          <div className={styles.splitSection}>
+            <div className={styles.leftSec}>
+              <div>
+                <label>Department</label>
+                <p>{panelItem?.Department || "-"}</p>
+              </div>
+              <div>
+                <label>Office location</label>
+                <p>{panelItem?.OfficeLocation || "-"}</p>
+              </div>
+              <div>
+                <label>Managers name</label>
+                <p
                   style={{
-                    display: isEdit ? "flex" : "none",
+                    display: "flex",
+                    alignItems: "center",
                   }}
-                  title="Please update your birthday details in Microsoft 365 profile"
                 >
-                  <Info
-                    style={{
-                      color: "#555",
-                      fontSize: "22px",
-                    }}
+                  <Persona
+                    title={panelItem?.Manager?.Name}
+                    imageUrl={`/_layouts/15/userphoto.aspx?username=${panelItem?.Manager?.Email}`}
+                    size={PersonaSize.size24}
                   />
-                </div>
-              </label>
-              <p
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "20px",
-                }}
-              >
-                {panelItem?.Birthday
-                  ? moment(panelItem.Birthday).format("MMM Do")
-                  : "-"}
-
-                <div
-                  title="Go to My Microsoft 365 profile"
-                  style={{
-                    display: isEdit ? "flex" : "none",
-                    cursor: "pointer",
-                    color: "#2d4b51",
-                    fontSize: "22px",
-                  }}
-                  onClick={() => {
-                    window.open(
-                      "https://www.microsoft365.com/search/overview?origin=ProfileAboutMe",
-                      "_blank"
-                    );
-                  }}
-                >
-                  <Edit />
-                </div>
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.rightSec}>
-            <div className={styles.rowData}>
-              <label className={styles.rowHeading}>Office phone number</label>
-              {!isEdit ? (
-                <p className={styles.rowValue}>
-                  {panelItem?.BusinessPhones || "-"}
+                  {panelItem?.Manager?.Name}
                 </p>
-              ) : (
-                <div className={styles.inputFieldsSec}>
-                  <CustomInput
-                    disabled={isSubmit}
-                    noErrorMsg
-                    size="SM"
-                    value={formData?.BusinessPhones}
-                    onChange={(value: string) => {
-                      setFormData((prev: IEDFormFields) => ({
-                        ...prev,
-                        BusinessPhones: value.trimStart(),
-                      }));
-                    }}
-                  />
-                </div>
-              )}
+              </div>
             </div>
-            <div className={styles.rowData}>
-              <label className={styles.rowHeading}>
-                Skills{" "}
-                {isEdit && (
+
+            <div className={styles.rightSec}>
+              <div className={styles.rowData}>
+                <label className={styles.flexSection}>
+                  Birthday
                   <div
                     style={{
-                      fontSize: "12px",
-                      paddingTop: "10px",
-                      color: "#aeaeae",
+                      display: isEdit ? "flex" : "none",
                     }}
+                    title="Please update your birthday details in Microsoft 365 profile"
                   >
-                    {`( Enter your values using commas )`}
+                    <Info
+                      style={{
+                        color: "#555",
+                        fontSize: "22px",
+                      }}
+                    />
                   </div>
-                )}
-              </label>
-              {!isEdit ? (
+                </label>
                 <p
                   className={styles.rowValue}
                   style={{
                     display: "flex",
-                    gap: "10px",
-                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: "20px",
                   }}
                 >
-                  {panelItem?.Skills?.length
-                    ? panelItem?.Skills?.map((val: string, idx: number) => {
-                        return (
-                          <span key={idx} className={styles.rowTag}>
-                            {val}
-                          </span>
-                        );
-                      })
+                  {panelItem?.Birthday
+                    ? moment(panelItem.Birthday).format("MMM Do")
                     : "-"}
-                </p>
-              ) : (
-                <div className={styles.inputFieldsSec}>
-                  <CustomInput
-                    disabled={isSubmit}
-                    noErrorMsg
-                    size="SM"
-                    value={formData?.Skills}
-                    onChange={(value: string) => {
-                      setFormData((prev: IEDFormFields) => ({
-                        ...prev,
-                        Skills: value.trimStart(),
-                      }));
+
+                  <div
+                    title="Go to My Microsoft 365 profile"
+                    style={{
+                      display: isEdit ? "flex" : "none",
+                      cursor: "pointer",
+                      color: "#2d4b51",
                     }}
-                  />
-                </div>
-              )}
+                    onClick={() => {
+                      window.open(
+                        "https://www.microsoft365.com/search/overview?origin=ProfileAboutMe",
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <Edit
+                      style={{
+                        fontSize: "20px",
+                      }}
+                    />
+                  </div>
+                </p>
+              </div>
+              <div className={styles.rowData}>
+                <label className={styles.rowHeading}>Mobile phone number</label>
+                <p className={styles.rowValue}>
+                  {panelItem?.MobilePhone || "-"}
+                </p>
+              </div>
+              <div className={styles.rowData}>
+                <label className={styles.rowHeading}>Office phone number</label>
+                {!isEdit ? (
+                  <p className={styles.rowValue}>
+                    {panelItem?.BusinessPhones || "-"}
+                  </p>
+                ) : (
+                  <div className={styles.inputFieldsSec}>
+                    <CustomInput
+                      disabled={isSubmit}
+                      noErrorMsg
+                      size="SM"
+                      value={formData?.BusinessPhones}
+                      onChange={(value: string) => {
+                        setFormData((prev: IEDFormFields) => ({
+                          ...prev,
+                          BusinessPhones: value.trimStart(),
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-            <div className={styles.rowData}>
-              <label className={styles.rowHeading}>Qualifications</label>
+          </div>
+
+          <div className={styles.bottomSection}>
+            <div className={styles.rowSec}>
+              <div className={styles.skillSec}>
+                <div className={styles.skillHeader}>Skills</div>
+                <div
+                  style={{
+                    display: isEdit ? "flex" : "none",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <div
+                    className={styles.skillEditTitle}
+                  >{`( Enter your values using commas )`}</div>
+                  <div
+                    title="Go to My Microsoft 365 profile"
+                    style={{
+                      cursor: "pointer",
+                      color: "#2d4b51",
+                    }}
+                    onClick={() => {
+                      window.open(
+                        "https://www.microsoft365.com/search/overview?origin=ProfileAboutMe",
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <Edit
+                      style={{
+                        fontSize: "20px",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <p
+                className={styles.rowValue}
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
+                {panelItem?.Skills?.length
+                  ? panelItem?.Skills?.map((val: string, idx: number) => {
+                      return (
+                        <span key={idx} className={styles.rowTag}>
+                          {val}
+                        </span>
+                      );
+                    })
+                  : "-"}
+              </p>
+            </div>
+            <div className={styles.rowSec}>
+              <label className={styles.rowHeader}>Qualifications</label>
               {!isEdit ? (
                 <p className={styles.rowValue} title={formData?.Qualifications}>
                   {panelItem?.Qualifications || "-"}
                 </p>
               ) : (
                 <div className={styles.inputFieldsSec}>
-                  <CustomInput
+                  <FloatingLabelTextarea
                     disabled={isSubmit}
-                    noErrorMsg
-                    size="SM"
                     value={formData?.Qualifications}
+                    placeholder=""
+                    size="SM"
+                    rows={5}
                     onChange={(value: string) => {
                       setFormData((prev: IEDFormFields) => ({
                         ...prev,
@@ -868,19 +908,20 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 </div>
               )}
             </div>
-            <div className={styles.rowData}>
-              <label className={styles.rowHeading}>Experience</label>
+            <div className={styles.rowSec}>
+              <label className={styles.rowHeader}>Experience</label>
               {!isEdit ? (
                 <p className={styles.rowValue} title={formData?.Qualifications}>
                   {panelItem?.Experience || "-"}
                 </p>
               ) : (
                 <div className={styles.inputFieldsSec}>
-                  <CustomInput
+                  <FloatingLabelTextarea
                     disabled={isSubmit}
-                    noErrorMsg
-                    size="SM"
                     value={formData?.Experience}
+                    placeholder=""
+                    size="SM"
+                    rows={5}
                     onChange={(value: string) => {
                       setFormData((prev: IEDFormFields) => ({
                         ...prev,
@@ -1091,9 +1132,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                   startIcon={<FilterAltOutlined />}
                   onClick={(_) => {
                     searchField.CommonSearch = "";
-                    searchField.Email = "";
+                    searchField.Department = "";
                     searchField.Name = "";
-                    searchField.Phone = "";
+                    searchField.MobilePhone = "";
+                    searchField.OfficePhone = "";
+                    searchField.OfficeLocation = "";
+                    searchField.JobTitle = "";
+                    searchField.Skills = "";
                     searchField.Status = CONFIG.EDDrop[0];
                     setSearchData({ ...searchField });
                     serachFunction(true);
@@ -1131,13 +1176,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 noErrorMsg
                 secWidth="180px"
                 size="SM"
-                value={searchData?.Phone}
-                placeholder="Phone"
+                value={searchData?.MobilePhone}
+                placeholder="Mobile phone"
                 onChange={(e: any) => {
-                  searchField.Phone = e;
+                  searchField.MobilePhone = e;
                   setSearchData((prev: IEDSearch) => ({
                     ...prev,
-                    Phone: e,
+                    MobilePhone: e,
                   }));
                   serachFunction(true);
                 }}
@@ -1148,13 +1193,81 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
                 noErrorMsg
                 secWidth="180px"
                 size="SM"
-                value={searchData?.Email}
-                placeholder="Email"
+                value={searchData?.OfficePhone}
+                placeholder="Office phone"
                 onChange={(e: any) => {
-                  searchField.Email = e;
+                  searchField.OfficePhone = e;
                   setSearchData((prev: IEDSearch) => ({
                     ...prev,
-                    Email: e,
+                    OfficePhone: e,
+                  }));
+                  serachFunction(true);
+                }}
+              />
+            </div>
+            <div>
+              <CustomInput
+                noErrorMsg
+                secWidth="180px"
+                size="SM"
+                value={searchData?.Department}
+                placeholder="Department"
+                onChange={(e: any) => {
+                  searchField.Department = e;
+                  setSearchData((prev: IEDSearch) => ({
+                    ...prev,
+                    Department: e,
+                  }));
+                  serachFunction(true);
+                }}
+              />
+            </div>
+            <div>
+              <CustomInput
+                noErrorMsg
+                secWidth="180px"
+                size="SM"
+                value={searchData?.OfficeLocation}
+                placeholder="Office location"
+                onChange={(e: any) => {
+                  searchField.OfficeLocation = e;
+                  setSearchData((prev: IEDSearch) => ({
+                    ...prev,
+                    OfficeLocation: e,
+                  }));
+                  serachFunction(true);
+                }}
+              />
+            </div>
+            <div>
+              <CustomInput
+                noErrorMsg
+                secWidth="180px"
+                size="SM"
+                value={searchData?.JobTitle}
+                placeholder="Job title"
+                onChange={(e: any) => {
+                  searchField.JobTitle = e;
+                  setSearchData((prev: IEDSearch) => ({
+                    ...prev,
+                    JobTitle: e,
+                  }));
+                  serachFunction(true);
+                }}
+              />
+            </div>
+            <div>
+              <CustomInput
+                noErrorMsg
+                secWidth="180px"
+                size="SM"
+                value={searchData?.Skills}
+                placeholder="Skills"
+                onChange={(e: any) => {
+                  searchField.Skills = e;
+                  setSearchData((prev: IEDSearch) => ({
+                    ...prev,
+                    Skills: e,
                   }));
                   serachFunction(true);
                 }}
@@ -1164,9 +1277,13 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
               className={styles.refreshBTN}
               onClick={(_) => {
                 searchField.CommonSearch = "";
-                searchField.Email = "";
+                searchField.Department = "";
                 searchField.Name = "";
-                searchField.Phone = "";
+                searchField.MobilePhone = "";
+                searchField.OfficePhone = "";
+                searchField.OfficeLocation = "";
+                searchField.JobTitle = "";
+                searchField.Skills = "";
                 searchField.Status = CONFIG.EDDrop[0];
                 setSearchData({ ...searchField });
                 serachFunction(true);

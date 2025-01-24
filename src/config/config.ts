@@ -535,9 +535,13 @@ export namespace CONFIG {
 
   export const EDSearch: IEDSearch = {
     CommonSearch: "",
-    Email: "",
+    Department: "",
     Name: "",
-    Phone: "",
+    MobilePhone: "",
     Status: EDDrop[0],
+    JobTitle: "",
+    OfficeLocation: "",
+    Skills: "",
+    OfficePhone: "",
   };
 }

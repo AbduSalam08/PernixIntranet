@@ -54,6 +54,7 @@ import CustomDateInput from "../../../components/common/CustomInputFields/Custom
 import moment from "moment";
 import CustomMultipleFileUpload from "../../../components/common/CustomInputFields/CustomMultipleFileUpload";
 import RichText from "../../../components/common/RichText/RichText";
+import { Chip } from "@mui/material";
 
 /* Interface creation */
 interface IBlogField {
@@ -193,7 +194,6 @@ const Blogs = (props: any): JSX.Element => {
 
   /* State creation */
   const [isfilter, setIsfilter] = useState<boolean>(false);
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<string>(CONFIG.BlogsTab[0]);
   const [curAllBlogs, setCurAllBlogs] = useState<IBlogColumnType[]>([]);
@@ -220,6 +220,7 @@ const Blogs = (props: any): JSX.Element => {
     results: [],
   });
   const [curDocFiles, setCurDocFiles] = useState<any[]>([]);
+  const [arrTags, setArrTags] = useState<string[]>([]);
 
   /* Functions creation */
   const handleInputChange = async (
@@ -228,6 +229,19 @@ const Blogs = (props: any): JSX.Element => {
     isValid: boolean,
     errorMsg: string = ""
   ): Promise<void> => {
+    if (field === "Tag") {
+      if (value?.includes(",") && value.trim() && value.trim() !== ",") {
+        const masterTags: string[] = [
+          ...arrTags,
+          value?.split(",")?.[0]?.trim(),
+        ];
+        value = "";
+        setArrTags([...masterTags]);
+      } else if (value?.trim() === ",") {
+        value = "";
+      }
+    }
+
     setFormData((prevData: IBlogField | any) => ({
       ...prevData,
       [field]: {
@@ -1607,6 +1621,15 @@ const Blogs = (props: any): JSX.Element => {
                   />
                 </div>
                 <div className={styles.tagSec}>
+                  {arrTags?.length ? (
+                    <div>
+                      {arrTags?.map((tag: string, Idx: number) => {
+                        return <Chip key={Idx} label={tag} />;
+                      })}
+                    </div>
+                  ) : (
+                    ""
+                  )}
                   <CustomInput
                     value={formData?.Tag?.value}
                     placeholder="Tag"
