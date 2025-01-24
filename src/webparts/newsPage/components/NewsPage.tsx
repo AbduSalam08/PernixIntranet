@@ -16,7 +16,7 @@ import CustomInput from "../../../components/common/CustomInputFields/CustomInpu
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 // import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
-import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
+//import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import {
   addNews,
   deleteNews,
@@ -35,6 +35,7 @@ import { IPaginationData } from "../../../interface/interface";
 import { ToastContainer } from "react-toastify";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import RichText from "../../../components/common/RichText/RichText";
+import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -510,7 +511,31 @@ const NewsPage = (props: any): JSX.Element => {
             />
           </div>
           <div className={styles.item5}>
-            <CustomFileUpload
+            <CustomFilePicker
+              context={props.context}
+              // selectedFile={formData.Attachments.value}
+              onSave={(fileData) => {
+                console.log("fileData: ", fileData);
+
+                const value: any = fileData?.file;
+                debugger;
+
+                const { isValid, errorMsg } = validateField(
+                  "thumbnail",
+                  value ? value.name : "",
+                  formData.thumbnail.validationRule
+                );
+                handleInputChange("thumbnail", value, isValid, errorMsg);
+              }}
+              onChange={(fileData) => {
+                console.log("File changed:", fileData);
+              }}
+              isValid={formData.thumbnail.isValid}
+              errorMsg={formData.thumbnail.errorMsg}
+              // isValid={false}
+              // errorMsg={"Mandatory*"}
+            />
+            {/* <CustomFileUpload
               accept="image/png,image/svg"
               value={formData?.thumbnail.value?.name}
               onFileSelect={async (file) => {
@@ -525,7 +550,7 @@ const NewsPage = (props: any): JSX.Element => {
               placeholder="Thumbnail (1120 x 350)"
               isValid={formData.thumbnail.isValid}
               errMsg={formData.thumbnail.errorMsg}
-            />
+            /> */}
           </div>
         </div>
       </div>,
@@ -669,7 +694,38 @@ const NewsPage = (props: any): JSX.Element => {
             />
           </div>
           <div className={styles.item5}>
-            <CustomFileUpload
+            <CustomFilePicker
+              context={props.context}
+              selectedFile={
+                !isfile
+                  ? formData.thumbnail?.value?.FileName || null
+                  : formData.thumbnail.value?.name || null
+              }
+              // selectedFile={formData.Attachments.value}
+              onSave={(fileData) => {
+                setIsile(true);
+
+                console.log("fileData: ", fileData);
+
+                const value: any = fileData?.file;
+                debugger;
+
+                const { isValid, errorMsg } = validateField(
+                  "thumbnail",
+                  value ? value.name : "",
+                  formData.thumbnail.validationRule
+                );
+                handleInputChange("thumbnail", value, isValid, errorMsg);
+              }}
+              onChange={(fileData) => {
+                console.log("File changed:", fileData);
+              }}
+              isValid={formData.thumbnail.isValid}
+              errorMsg={formData.thumbnail.errorMsg}
+              // isValid={false}
+              // errorMsg={"Mandatory*"}
+            />
+            {/* <CustomFileUpload
               accept="image/png,image/svg"
               value={
                 !isfile
@@ -689,7 +745,7 @@ const NewsPage = (props: any): JSX.Element => {
               placeholder="Thumbnail (1120 x 350)"
               isValid={formData.thumbnail.isValid}
               errMsg={formData.thumbnail.errorMsg}
-            />
+            /> */}
           </div>
         </div>
       </div>,
@@ -765,18 +821,23 @@ const NewsPage = (props: any): JSX.Element => {
                 {formData?.Title?.value}
               </p>
 
-              <p
-                style={{
-                  background: "#daf0da",
-                  padding: "6px 15px",
-                  color: "green",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  fontFamily: "osMedium",
-                }}
+              <div
+                className={
+                  formData?.Status?.value === "Active"
+                    ? styles.activepill
+                    : styles.inactivepill
+                }
+                // style={{
+                //   background: "#daf0da",
+                //   padding: "6px 15px",
+                //   color: "green",
+                //   borderRadius: "4px",
+                //   fontSize: "12px",
+                //   fontFamily: "osMedium",
+                // }}
               >
                 {formData?.Status?.value}
-              </p>
+              </div>
             </div>
 
             <div
@@ -886,11 +947,12 @@ const NewsPage = (props: any): JSX.Element => {
         )}
 
         <div
-          style={{
-            lineHeight: "23px",
-            fontSize: "14px",
-            fontFamily: "osRegular",
-          }}
+          className={styles.description}
+          // style={{
+          //   lineHeight: "23px",
+          //   fontSize: "14px",
+          //   fontFamily: "osRegular",
+          // }}
           dangerouslySetInnerHTML={{
             __html: formData?.Description?.value || "",
           }}

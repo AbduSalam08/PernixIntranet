@@ -13,7 +13,7 @@ import CustomInput from "../../../components/common/CustomInputFields/CustomInpu
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 // import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
-import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
+//import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import {
   addNews,
   getAllNewsData,
@@ -30,6 +30,7 @@ import { ToastContainer } from "react-toastify";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import RichText from "../../../components/common/RichText/RichText";
 import "./Style.css";
+import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
@@ -294,7 +295,31 @@ const NewsIntranet = (props: any): JSX.Element => {
           </div>
 
           <div style={{ width: "50%" }}>
-            <CustomFileUpload
+            <CustomFilePicker
+              context={props.context}
+              // selectedFile={formData.Attachments.value}
+              onSave={(fileData) => {
+                console.log("fileData: ", fileData);
+
+                const value: any = fileData?.file;
+                debugger;
+
+                const { isValid, errorMsg } = validateField(
+                  "thumbnail",
+                  value ? value.name : "",
+                  formData.thumbnail.validationRule
+                );
+                handleInputChange("thumbnail", value, isValid, errorMsg);
+              }}
+              onChange={(fileData) => {
+                console.log("File changed:", fileData);
+              }}
+              isValid={formData.thumbnail.isValid}
+              errorMsg={formData.thumbnail.errorMsg}
+              // isValid={false}
+              // errorMsg={"Mandatory*"}
+            />
+            {/* <CustomFileUpload
               accept="image/png,image/svg"
               value={formData.thumbnail.value?.name}
               onFileSelect={(file) => {
@@ -309,7 +334,7 @@ const NewsIntranet = (props: any): JSX.Element => {
               placeholder="Thumbnail (1120 x 350)"
               isValid={formData.thumbnail.isValid}
               errMsg={formData.thumbnail.errorMsg}
-            />
+            /> */}
           </div>
         </div>
 
