@@ -78,7 +78,13 @@ const NewsCard: React.FC<NewsCardProps> = ({
       />
       <div className={styles.rhsTexts}>
         <h2 title={title}>{title}</h2>
-        <span title={description}>{description}</span>
+        <div
+          className={styles.description}
+          dangerouslySetInnerHTML={{
+            __html: description || "",
+          }}
+        ></div>
+        {/* <span title={description}>{description}</span> */}
       </div>
       {!noActionsAndStatus && (
         <div className={styles.rhsActions}>

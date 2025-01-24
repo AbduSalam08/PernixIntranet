@@ -70,9 +70,50 @@
     @media (max-width: 700px) {
       font-size: 13px;
     }
+
+    &:hover {
+      text-decoration: underline;
+      text-decoration-color: #0b4d53;
+      cursor: pointer;
+    }
   }
 
-  span {
+  // span {
+  //   font-family: "osRegular", sans-serif !important;
+  //   color: #adadad;
+  //   line-height: 22px;
+  //   font-size: 13.5px;
+  //   height: 68px;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  //   word-break: break-word;
+  //   display: -webkit-box;
+  //   -webkit-box-orient: vertical;
+  //   line-clamp: 3;
+  //   -webkit-line-clamp: 3;
+  //   white-space: normal;
+
+  //   @media (max-width: 1024px) {
+  //     font-size: 13px;
+  //   }
+
+  //   @media (max-width: 700px) {
+  //     font-size: 12px;
+  //     line-height: 16px;
+  //     height: auto; /* Adjust height to auto for better fit */
+
+  //     overflow: hidden;
+  //     text-overflow: ellipsis;
+  //     word-break: break-word;
+  //     display: -webkit-box;
+  //     -webkit-box-orient: vertical;
+  //     line-clamp: 6;
+  //     -webkit-line-clamp: 6;
+  //     white-space: normal;
+  //   }
+  // }
+
+  .description {
     font-family: "osRegular", sans-serif !important;
     color: #adadad;
     line-height: 22px;
@@ -115,6 +156,33 @@
     width: 100%;
     max-width: unset;
   }
+}
+
+.cardBTNSec {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 5px 12px;
+  color: #fff;
+  background: #0b4d53;
+  border-radius: 5px;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  cursor: pointer;
+  font-family: "osMedium", sans-serif;
+  border: 0;
+  outline: 0;
+  // button {
+  //   border: none;
+  //   background-color: #0b4d53;
+  //   color: #fff;
+  //   padding: 6px 10px;
+  // }
+
+  // button:focus {
+  //   box-shadow: none;
+  // }
 }
 
 .rhsActions {
