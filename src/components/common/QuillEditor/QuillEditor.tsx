@@ -99,7 +99,6 @@ const QuillEditor = ({
 
   // Example usage:
   const [searchTerm, setSearchTerm] = useState("");
-  console.log("searchTerm: ", searchTerm);
   const mentionValues = getMentionValues("mention");
 
   const uniqueEmails = filterPeopleByMentions(

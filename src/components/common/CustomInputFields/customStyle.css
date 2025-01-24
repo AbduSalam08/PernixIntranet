@@ -176,3 +176,6 @@
 .MuiAutocomplete-option[aria-selected="true"] {
   background-color: #2d4b5120 !important;
 }
+.pnp__file-picker {
+  width: auto !important;
+}

@@ -40,6 +40,8 @@ import CustomDropDown from "../../../components/common/CustomInputFields/CustomD
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { ToastContainer } from "react-toastify";
 
+import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
+
 /* Local interfaces */
 interface IMotivateField {
   Quote: IFormFields;
@@ -61,7 +63,7 @@ const MainBannerPage = (props: any): JSX.Element => {
   /* Local variable creation */
   const dispatch = useDispatch();
 
-  let searchField: IPageSearchFields = CONFIG.PageSearchFields;
+  const searchField: IPageSearchFields = CONFIG.PageSearchFields;
   const currentUserDetails: IUserDetails = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
@@ -417,10 +419,10 @@ const MainBannerPage = (props: any): JSX.Element => {
       "close"
     );
 
-    let isDeleted: boolean = await deleteMotivated(data);
+    const isDeleted: boolean = await deleteMotivated(data);
 
     if (isDeleted) {
-      let curIndex: number = masterQuotes?.findIndex(
+      const curIndex: number = masterQuotes?.findIndex(
         (val: IQuoteDatas) => val.ID === data?.ID
       );
 
@@ -444,14 +446,14 @@ const MainBannerPage = (props: any): JSX.Element => {
       "close"
     );
 
-    let updatedJSON: any = await updateMotivated(
+    const updatedJSON: any = await updateMotivated(
       data,
       fileData,
       isFileEdit,
       curObject
     );
 
-    let curIndex: number = masterQuotes?.findIndex(
+    const curIndex: number = masterQuotes?.findIndex(
       (val: IQuoteDatas) => val.ID === updatedJSON?.ID
     );
 
@@ -511,8 +513,8 @@ const MainBannerPage = (props: any): JSX.Element => {
     setFormData(updatedFormData);
 
     if (!hasErrors) {
-      let data: any = {};
-      let fileData: any = {};
+      const data: any = {};
+      const fileData: any = {};
       const column: IMotivateColumn = CONFIG.MotivateColumn;
 
       data[column.ID] = curObject?.ID || null;
@@ -525,9 +527,11 @@ const MainBannerPage = (props: any): JSX.Element => {
       // Attachments json prepared.
       fileData[column.Attachments] = formData?.Attachments?.value || null;
 
-      curObject?.ID
-        ? await handleUpdate({ ...data }, { ...fileData }, tab)
-        : await handleSubmit({ ...data }, { ...fileData }, tab);
+      if (curObject?.ID) {
+        await handleUpdate({ ...data }, { ...fileData }, tab);
+      } else {
+        await handleSubmit({ ...data }, { ...fileData }, tab);
+      }
     } else {
       console.log("Form contains errors");
     }
@@ -663,6 +667,18 @@ const MainBannerPage = (props: any): JSX.Element => {
               }}
             />
           </div>
+        </div>
+        <div>
+          <CustomFilePicker
+            context={props.context}
+            // selectedFile={formData.Attachments.value}
+            onSave={(fileData) => {
+              console.log("fileData: ", fileData);
+            }}
+            onChange={(fileData) => {
+              console.log("File changed:", fileData);
+            }}
+          />
         </div>
       </div>,
     ],
@@ -978,17 +994,19 @@ const MainBannerPage = (props: any): JSX.Element => {
                   cursor: "pointer",
                 }}
                 onClick={(_) => {
-                  isActivityPage
-                    ? window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.ApprovalsPage,
-                        "_self"
-                      )
-                    : window.open(
-                        props.context.pageContext.web.absoluteUrl +
-                          CONFIG.NavigatePage.PernixIntranet,
-                        "_self"
-                      );
+                  if (isActivityPage) {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.ApprovalsPage,
+                      "_self"
+                    );
+                  } else {
+                    window.open(
+                      props.context.pageContext.web.absoluteUrl +
+                        CONFIG.NavigatePage.PernixIntranet,
+                      "_self"
+                    );
+                  }
                 }}
               >
                 <i
@@ -1205,10 +1223,7 @@ const MainBannerPage = (props: any): JSX.Element => {
                           </div>
                           <div
                             style={{
-                              display:
-                                isAdmin && selectedTab !== "Previous"
-                                  ? "flex"
-                                  : "none",
+                              display: isAdmin ? "flex" : "none",
                             }}
                             onClick={(_) => {
                               handleSelect({ ...val }, "edit");
@@ -1266,7 +1281,6 @@ const MainBannerPage = (props: any): JSX.Element => {
             className={`${styles.filter_container} ${
               isfilter ? styles.active_filter_container : ""
             }`}
-
             // className={`filter_container ${
             //   isfilter ? "active_filter_container" : ""
             // }`}
