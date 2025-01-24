@@ -850,7 +850,11 @@ const Blogs = (props: any): JSX.Element => {
           {/* View blog content section */}
           <div className={styles.viewBlogContainer}>
             <div className={styles.VHeading}>{curBlogData?.Heading}</div>
-            <div className={styles.VTag}>{curBlogData?.Tag}</div>
+            <div className={styles.VTag}>
+              {curBlogData?.Tag?.split(",")?.map((val: string, ind: number) => {
+                return <Chip key={ind} label={val} />;
+              }) || ""}
+            </div>
             <img
               src={curBlogData?.Attachments?.[0]?.serverRelativeUrl}
               alt="blog img"
