@@ -479,6 +479,10 @@ export interface IEDSearch {
   Status: string;
   CommonSearch: string;
   Name: string;
-  Phone: string;
-  Email: string;
+  MobilePhone: string;
+  OfficePhone: string;
+  Department: string;
+  OfficeLocation: string;
+  JobTitle: string;
+  Skills: string;
 }
