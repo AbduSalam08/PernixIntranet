@@ -355,6 +355,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  height: 100%;
 
   .inputWrapper {
     display: flex;
@@ -428,10 +429,13 @@
     color: #999;
     margin-top: 4px;
     font-size: 13px;
+    margin-left: 15px;
     font-family: "osMedium", sans-serif !important;
   }
 }
+
 // file align styles
+
 .fileNameAlign {
   display: flex;
   justify-content: flex-start;
@@ -529,4 +533,17 @@
   align-items: stretch;
   justify-content: flex-start;
   gap: 10px;
+}
+.emptyFileMsg {
+  width: 100%;
+  height: 100%;
+  color: #adadad;
+  font-size: 13px;
+  font-family: "osSemiBold", sans-serif !important;
+  margin-top: 4px;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

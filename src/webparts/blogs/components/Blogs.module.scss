@@ -118,16 +118,17 @@
   width: 100%;
   height: calc(100vh - 254px);
   overflow: auto;
+  padding: 0 40px;
 
   .firstRow {
     display: flex;
     width: 100%;
     justify-content: space-between;
     gap: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 
     .headingAndTagSec {
-      width: 50%;
+      width: 60%;
 
       .headingSec {
         width: 100%;
@@ -149,13 +150,21 @@
           width: 100%;
           overflow: auto;
           gap: 8px;
-          padding: 7px;
+          padding: 0px;
+          .mainChip {
+            color: #555;
+            // max-width: 50%;
+            background-color: #fff;
+            // text-overflow: ellipsis;
+            // white-space: nowrap;
+            // overflow: hidden;
+          }
         }
       }
     }
 
     .ImageSec {
-      width: 50%;
+      width: 100%;
     }
   }
 
@@ -166,6 +175,9 @@
     width: 100%;
     overflow: auto;
     margin-bottom: 20px;
+    // .item {
+    //   width: 50%;
+    // }
     .richtextwrapper {
       width: 100%;
     }
@@ -175,8 +187,8 @@
     background: #fff;
     border-radius: 10px;
     padding: 6px;
-    width: 100%;
-    margin-bottom: 20px;
+    width: 40%;
+    // margin-bottom: 20px;
   }
 }
 
@@ -215,19 +227,42 @@
       align-items: center;
       gap: 10px;
     }
+    .tagsWrap {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 5px;
+    }
+    .mainChip {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background-color: #c1c1c120;
+      height: 24px;
+      // max-width: 60%;
+
+      // span {
+      //   display: inline-block;
+      //   max-width: 100%;
+      //   text-overflow: ellipsis;
+      //   white-space: nowrap;
+      //   overflow: hidden;
+      // }
+    }
+
     span {
-      font-size: 13px;
-      color: #e0803d;
+      color: #7e7e7e;
+      font-family: "osSemiBold", sans-serif;
+      font-size: 12px;
       line-height: 17px;
       display: -webkit-box;
-      padding-right: 5px;
+      // padding-right: 5px;
       // margin-left: 5px;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
+      line-clamp: 2;
       font-family: "osMedium", sans-serif;
       overflow: hidden;
       text-overflow: ellipsis;
-      min-height: 19px;
       overflow-wrap: break-word;
     }
 
@@ -389,6 +424,11 @@
     font-family: "osMedium", sans-serif;
     font-size: 14px;
     color: #e0803d;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 5px;
+    flex-wrap: wrap;
   }
 
   .VImg {
@@ -831,6 +871,7 @@
     width: 100%;
     height: calc(100vh - 254px);
     overflow: auto;
+    padding: 0 20px;
 
     .firstRow {
       display: flex;
@@ -1164,7 +1205,7 @@
     width: 100%;
     height: calc(100vh - 254px);
     overflow: auto;
-
+    padding: 0 10px;
     .firstRow {
       display: flex;
       flex-wrap: wrap;

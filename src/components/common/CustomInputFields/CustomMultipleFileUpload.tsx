@@ -667,6 +667,9 @@ type FileUploadProps = {
   errMsg?: string | null;
   multiple: boolean;
   customFileNameWidth?: string | any;
+  selectedFilesMaxHeight?: string;
+  selectedFilesMinHeight?: string;
+  emptyFileMessage?: string;
 };
 
 const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
@@ -678,6 +681,9 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
   isValid,
   multiple = false,
   customFileNameWidth,
+  selectedFilesMaxHeight,
+  selectedFilesMinHeight,
+  emptyFileMessage,
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
   const [fileNames, setFileNames] = useState<string[]>(value);
@@ -878,7 +884,13 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
       )}
 
       {fileNames.length > 0 && (
-        <div className={styles.fileNameAlign}>
+        <div
+          className={styles.fileNameAlign}
+          style={{
+            minHeight: selectedFilesMinHeight ?? selectedFilesMinHeight,
+            maxHeight: selectedFilesMaxHeight ?? selectedFilesMaxHeight,
+          }}
+        >
           {fileNames?.map((fileName: any, idx: number) => (
             <div key={idx}>
               <span
@@ -899,6 +911,10 @@ const CustomMultipleFileUpload: React.FC<FileUploadProps> = ({
             </div>
           ))}
         </div>
+      )}
+
+      {fileNames.length === 0 && emptyFileMessage && (
+        <span className={styles.emptyFileMsg}>{emptyFileMessage}</span>
       )}
 
       {fileNames.length > 0 && (
