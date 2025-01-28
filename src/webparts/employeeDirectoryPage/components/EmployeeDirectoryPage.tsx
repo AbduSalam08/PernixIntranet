@@ -264,12 +264,24 @@ const EmployeeDirectoryPage = (props: any): JSX.Element => {
             title={params?.row?.Skills.toString()}
           >
             {params?.row?.Skills?.map((val: string, idx: number) => {
-              return (
-                <span key={idx} className={styles.tableSkillsTag}>
-                  {val}
-                </span>
-              );
-            }) || "-"}
+              if (idx < 1) {
+                return (
+                  <span key={idx} className={styles.tableSkillsTag}>
+                    {val}
+                  </span>
+                );
+              }
+              return null;
+            })}
+            {params?.row?.Skills?.length > 1 && (
+              <span
+                className={styles.emptyPill}
+                // className={styles.tableSkillsTag}
+                title={params?.row?.Skills.toString()}
+              >
+                +{params?.row?.Skills?.length - 1}
+              </span>
+            )}
           </div>
         );
       },

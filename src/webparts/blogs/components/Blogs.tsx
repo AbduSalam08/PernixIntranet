@@ -852,7 +852,7 @@ const Blogs = (props: any): JSX.Element => {
             <div className={styles.VHeading}>{curBlogData?.Heading}</div>
             <div className={styles.VTag}>
               {curBlogData?.Tag?.split(",")?.map((val: string, ind: number) => {
-                return <Chip key={ind} label={val} />;
+                return <Chip key={ind} label={`#${val}`} />;
               }) || ""}
             </div>
             <img
@@ -1236,12 +1236,45 @@ const Blogs = (props: any): JSX.Element => {
                         alt="blog img"
                       />
                       <div className={styles.cardTag}>
-                        <span>
+                        {/* <span>
                           {val?.Tag?.split(",")?.map(
                             (val: string, ind: number) => {
-                              return <Chip key={ind} label={val} />;
+                              return (
+                                <Chip
+                                  className={styles.mainChip}
+                                  key={ind}
+                                  label={val}
+                                />
+                              );
                             }
                           ) || ""}
+                        </span> */}
+                        <span className={styles.tagsWrap}>
+                          {val?.Tag?.split(",")?.map(
+                            (tag: string, Idx: number) => {
+                              if (Idx <= 1) {
+                                return (
+                                  <Chip
+                                    key={Idx}
+                                    className={styles.mainChip}
+                                    label={`#${tag}`}
+                                  />
+                                );
+                              }
+                            }
+                          ) || ""}
+                          {val?.Tag?.split(",")?.length > 2 && (
+                            <div title={val?.Tag?.split(",")?.join(", ")}>
+                              <Chip
+                                key={"missing units"}
+                                className={styles.mainChip}
+                                label={`+${
+                                  val?.Tag?.split(",").length - 2
+                                } more`}
+                                clickable={false}
+                              />
+                            </div>
+                          )}
                         </span>
                         <div
                           className={styles.icons}
@@ -1278,10 +1311,9 @@ const Blogs = (props: any): JSX.Element => {
                           <i
                             style={{
                               display:
-                                (val?.Status === CONFIG.blogStatus.Draft ||
-                                  val?.Status === CONFIG.blogStatus.Approved ||
-                                  val?.Status === CONFIG.blogStatus.Rejected) &&
-                                selectedTab === CONFIG.BlogsTab[1]
+                                (val?.Status !== CONFIG.blogStatus.Pending &&
+                                  selectedTab === CONFIG.BlogsTab[1]) ||
+                                isAdmin
                                   ? "flex"
                                   : "none",
                             }}
@@ -1679,7 +1711,8 @@ const Blogs = (props: any): JSX.Element => {
                         return (
                           <Chip
                             key={Idx}
-                            label={tag}
+                            className={styles.mainChip}
+                            label={`#${tag}`}
                             onDelete={() => handleRemoveTag(Idx)}
                           />
                         );
@@ -1689,37 +1722,36 @@ const Blogs = (props: any): JSX.Element => {
                     ""
                   )}
                 </div>
-              </div>
-              <div className={styles.ImageSec}>
-                <CustomFilePicker
-                  context={props.context}
-                  selectedFile={
-                    formData?.Attachments?.value?.name ||
-                    formData?.Attachments?.value
-                  }
-                  onSave={(fileData) => {
-                    const value: any = fileData?.file;
-                    const { isValid, errorMsg } = validateField(
-                      CONFIG.BlogColumn.Attachments,
-                      value ? value.name : "",
-                      formData.Attachments.validationRule
-                    );
-                    handleInputChange(
-                      CONFIG.BlogColumn.Attachments,
-                      value,
-                      isValid,
-                      errorMsg
-                    );
-                  }}
-                  onChange={(fileData) => {
-                    console.log("File changed:", fileData);
-                  }}
-                  isValid={formData?.Attachments.isValid}
-                  errorMsg={formData?.Attachments.errorMsg}
-                  // isValid={false}
-                  // errorMsg={"Mandatory*"}
-                />
-                {/* <DragDropFile
+                <div className={styles.ImageSec}>
+                  <CustomFilePicker
+                    context={props.context}
+                    selectedFile={
+                      formData?.Attachments?.value?.name ||
+                      formData?.Attachments?.value
+                    }
+                    onSave={(fileData) => {
+                      const value: any = fileData?.file;
+                      const { isValid, errorMsg } = validateField(
+                        CONFIG.BlogColumn.Attachments,
+                        value ? value.name : "",
+                        formData.Attachments.validationRule
+                      );
+                      handleInputChange(
+                        CONFIG.BlogColumn.Attachments,
+                        value,
+                        isValid,
+                        errorMsg
+                      );
+                    }}
+                    onChange={(fileData) => {
+                      console.log("File changed:", fileData);
+                    }}
+                    isValid={formData?.Attachments.isValid}
+                    errorMsg={formData?.Attachments.errorMsg}
+                    // isValid={false}
+                    // errorMsg={"Mandatory*"}
+                  />
+                  {/* <DragDropFile
                   setNewVisitor={setFormData}
                   newVisitor={formData?.Attachments?.value}
                 />
@@ -1738,45 +1770,54 @@ const Blogs = (props: any): JSX.Element => {
                     {formData?.Attachments?.errorMsg}
                   </p>
                 )} */}
+                </div>
+              </div>
+              <div className={styles.thirdRow}>
+                <CustomMultipleFileUpload
+                  placeholder="Click to upload attachments"
+                  accept="application/*"
+                  selectedFilesMaxHeight={"60px"}
+                  selectedFilesMinHeight={"50px"}
+                  emptyFileMessage="No files selected"
+                  multiple
+                  value={formData?.Content?.value || []}
+                  onFileSelect={(e: any) => {
+                    const value: any = e;
+                    let temp: any[] = value || [];
+
+                    if (curBlogData?.ID) {
+                      const arrNewFiles: any[] =
+                        value?.filter((val: any) => val?.type) || [];
+                      const arrRemFiles: any[] =
+                        value?.filter((val: any) => !val?.type) || [];
+                      const filArrayFile: any[] =
+                        arrRemFiles.filter(
+                          (obj1: any) =>
+                            !arrNewFiles.some(
+                              (obj2: any) => obj1.name === obj2.name
+                            )
+                        ) || [];
+                      temp = [...filArrayFile, ...arrNewFiles];
+                    }
+
+                    const { isValid, errorMsg } = validateField(
+                      "Content",
+                      temp?.[0]?.name || null,
+                      formData.Content.validationRule
+                    );
+                    handleInputChange(
+                      "Content",
+                      temp || null,
+                      isValid,
+                      errorMsg
+                    );
+                  }}
+                  isValid={formData.Content.isValid}
+                  errMsg={formData.Content.errorMsg}
+                />
               </div>
             </div>
 
-            <div className={styles.thirdRow}>
-              <CustomMultipleFileUpload
-                placeholder="Click to upload a file"
-                accept="application/*"
-                multiple
-                value={formData?.Content?.value || []}
-                onFileSelect={(e: any) => {
-                  const value: any = e;
-                  let temp: any[] = value || [];
-
-                  if (curBlogData?.ID) {
-                    const arrNewFiles: any[] =
-                      value?.filter((val: any) => val?.type) || [];
-                    const arrRemFiles: any[] =
-                      value?.filter((val: any) => !val?.type) || [];
-                    const filArrayFile: any[] =
-                      arrRemFiles.filter(
-                        (obj1: any) =>
-                          !arrNewFiles.some(
-                            (obj2: any) => obj1.name === obj2.name
-                          )
-                      ) || [];
-                    temp = [...filArrayFile, ...arrNewFiles];
-                  }
-
-                  const { isValid, errorMsg } = validateField(
-                    "Content",
-                    temp?.[0]?.name || null,
-                    formData.Content.validationRule
-                  );
-                  handleInputChange("Content", temp || null, isValid, errorMsg);
-                }}
-                isValid={formData.Content.isValid}
-                errMsg={formData.Content.errorMsg}
-              />
-            </div>
             <div className={styles.secondRow}>
               <RichText
                 className={`blog ${styles.richtextwrapper}`}

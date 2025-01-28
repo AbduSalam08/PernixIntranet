@@ -33,7 +33,7 @@ import resetPopupController, {
   togglePopupVisibility,
 } from "../../../utils/popupUtils";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
-import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
+// import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import Popup from "../../../components/common/Popups/Popup";
 import { RoleAuth } from "../../../services/CommonServices";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
@@ -564,7 +564,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           />
         </div>
         <div className={styles.secondRow}>
-          <div>
+          {/* <div>
             <CustomFileUpload
               accept="image/png,image/svg"
               placeholder="Select Image - 1440 x 640 ( Optional )"
@@ -586,8 +586,43 @@ const MainBannerPage = (props: any): JSX.Element => {
               isValid={formData.Attachments.isValid}
               errMsg={formData.Attachments.errorMsg}
             />
+          </div> */}{" "}
+          <div className={styles.item}>
+            <CustomFilePicker
+              context={props.context}
+              selectedFile={
+                isFileEdit
+                  ? formData?.Attachments?.value || null
+                  : formData?.Attachments?.value?.name || null
+              }
+              onSave={(fileData) => {
+                console.log("fileData: ", fileData);
+                setIsFileEdit(false);
+
+                const value: any = fileData?.file;
+
+                const { isValid, errorMsg } = validateField(
+                  CONFIG.MotivateColumn.Attachments,
+                  value?.name || null,
+                  formData.Attachments.validationRule
+                );
+                handleInputChange(
+                  CONFIG.MotivateColumn.Attachments,
+                  value || null,
+                  isValid,
+                  errorMsg
+                );
+              }}
+              onChange={(fileData) => {
+                console.log("File changed:", fileData);
+              }}
+              isValid={formData.Attachments.isValid}
+              errorMsg={formData.Attachments.errorMsg}
+              // isValid={false}
+              // errorMsg={"Mandatory*"}
+            />
           </div>
-          <div>
+          <div className={styles.item}>
             <CustomDropDown
               value={formData.Status.value}
               options={statusDrop || []}
@@ -667,37 +702,6 @@ const MainBannerPage = (props: any): JSX.Element => {
               }}
             />
           </div>
-        </div>
-        <div>
-          <CustomFilePicker
-            context={props.context}
-            // selectedFile={formData.Attachments.value}
-            onSave={(fileData) => {
-              console.log("fileData: ", fileData);
-
-              const value: any = fileData?.file;
-              debugger;
-
-              const { isValid, errorMsg } = validateField(
-                CONFIG.MotivateColumn.Attachments,
-                value?.name || null,
-                formData.Attachments.validationRule
-              );
-              handleInputChange(
-                CONFIG.MotivateColumn.Attachments,
-                value || null,
-                isValid,
-                errorMsg
-              );
-            }}
-            onChange={(fileData) => {
-              console.log("File changed:", fileData);
-            }}
-            isValid={formData.Attachments.isValid}
-            errorMsg={formData.Attachments.errorMsg}
-            // isValid={false}
-            // errorMsg={"Mandatory*"}
-          />
         </div>
       </div>,
     ],
@@ -727,7 +731,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           />
         </div>
         <div className={styles.secondRow}>
-          <div>
+          {/* <div>
             <CustomFileUpload
               accept="image/png,image/svg"
               placeholder="Select Image - 1440 x 640 ( Optional )"
@@ -754,8 +758,43 @@ const MainBannerPage = (props: any): JSX.Element => {
               isValid={formData.Attachments.isValid}
               errMsg={formData.Attachments.errorMsg}
             />
+          </div> */}
+          <div className={styles.item}>
+            <CustomFilePicker
+              context={props.context}
+              selectedFile={
+                isFileEdit
+                  ? formData?.Attachments?.value || null
+                  : formData?.Attachments?.value?.name || null
+              }
+              onSave={(fileData) => {
+                console.log("fileData: ", fileData);
+                setIsFileEdit(false);
+
+                const value: any = fileData?.file;
+
+                const { isValid, errorMsg } = validateField(
+                  CONFIG.MotivateColumn.Attachments,
+                  value?.name || null,
+                  formData.Attachments.validationRule
+                );
+                handleInputChange(
+                  CONFIG.MotivateColumn.Attachments,
+                  value || null,
+                  isValid,
+                  errorMsg
+                );
+              }}
+              onChange={(fileData) => {
+                console.log("File changed:", fileData);
+              }}
+              isValid={formData.Attachments.isValid}
+              errorMsg={formData.Attachments.errorMsg}
+              // isValid={false}
+              // errorMsg={"Mandatory*"}
+            />
           </div>
-          <div>
+          <div className={styles.item}>
             <CustomDropDown
               value={formData.Status.value}
               options={statusDrop || []}
@@ -835,43 +874,6 @@ const MainBannerPage = (props: any): JSX.Element => {
               }}
             />
           </div>
-        </div>
-
-        <div>
-          <CustomFilePicker
-            context={props.context}
-            selectedFile={
-              isFileEdit
-                ? formData?.Attachments?.value || null
-                : formData?.Attachments?.value?.name || null
-            }
-            onSave={(fileData) => {
-              console.log("fileData: ", fileData);
-              setIsFileEdit(false);
-
-              const value: any = fileData?.file;
-              debugger;
-
-              const { isValid, errorMsg } = validateField(
-                CONFIG.MotivateColumn.Attachments,
-                value?.name || null,
-                formData.Attachments.validationRule
-              );
-              handleInputChange(
-                CONFIG.MotivateColumn.Attachments,
-                value || null,
-                isValid,
-                errorMsg
-              );
-            }}
-            onChange={(fileData) => {
-              console.log("File changed:", fileData);
-            }}
-            isValid={formData.Attachments.isValid}
-            errorMsg={formData.Attachments.errorMsg}
-            // isValid={false}
-            // errorMsg={"Mandatory*"}
-          />
         </div>
       </div>,
     ],

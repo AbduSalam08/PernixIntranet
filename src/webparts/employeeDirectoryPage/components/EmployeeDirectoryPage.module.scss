@@ -326,3 +326,18 @@
     color: #fff;
   }
 }
+.emptyPill {
+  border: 0;
+  outline: 0;
+  background-color: #c1c1c130;
+  color: #555;
+  font-size: 13px;
+  font-family: "osSemiBold", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  // width: 25px;
+  // height: 25px;
+  padding: 5px 8px;
+}

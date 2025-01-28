@@ -12,8 +12,16 @@ interface FilePickerProps {
   accepts?: string[];
   buttonIcon?: string;
   context: any; // Adjust the type based on your SPFx context
-  onSave?: (fileData: { filename: string; size: number; file: File }) => void;
-  onChange?: (fileData: { filename: string; size: number; file: File }) => void;
+  onSave?: (fileData: {
+    filename: string;
+    size: number;
+    file: File | any;
+  }) => void;
+  onChange?: (fileData: {
+    filename: string;
+    size: number;
+    file: File | any;
+  }) => void;
   selectedFile?: string;
   isValid?: boolean;
   errorMsg?: string;
@@ -93,15 +101,15 @@ const CustomFilePicker: React.FC<FilePickerProps> = ({
 
   const clearSelection = (): void => {
     setFileName(null);
-    onSave?.({ filename: "", size: 0, file: new File([], "") });
-    onChange?.({ filename: "", size: 0, file: new File([], "") });
+    onSave?.({ filename: "", size: 0, file: null });
+    onChange?.({ filename: "", size: 0, file: null });
   };
 
   return (
     <div className={styles.filePickerContainerWrap}>
       <div className={styles.filePickerWrapper} onClick={triggerFilePicker}>
         <span className={styles.filePickerLabel}>
-          {fileName || selectedFile || "Browse file"}
+          {fileName || selectedFile || "Browse images"}
         </span>
         <div className={styles.filePickerContainer}>
           <FilePicker
