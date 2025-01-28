@@ -189,7 +189,7 @@ const Checkpoints = ({ value }: any) => {
           <CustomDropDown
             width={"100%"}
             value={formData.Status.value}
-            options={["Active", "In Active"]}
+            options={["Active", "Inactive"]}
             placeholder="Status"
             isValid={formData.Status.isValid}
             errorMsg={formData.Status.errorMsg}

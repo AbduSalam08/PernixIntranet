@@ -3,13 +3,17 @@
 
 import React from "react";
 import styles from "./NewsCard.module.scss";
+import "./Style.css";
 import { CONFIG } from "../../../../config/config";
+import { InputSwitch } from "primereact/inputswitch";
+import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
 
 interface NewsCardProps {
   Id?: number;
   idx?: number;
   imageUrl: string;
   title: string;
+  isActive: boolean;
   description: string;
   status?: string;
   onEdit?: () => void;
@@ -19,12 +23,15 @@ interface NewsCardProps {
   currentUserDetails: any;
   item?: any;
   setisDelete?: (isDelete: boolean) => void;
+  prepareNewsData?: (item: any) => any;
+  handleActive?: (item: any, value: any) => any;
   // setIsview?: (isview: boolean) => void;
   handleDeleteClick: (id: any) => void;
   setIsEdit?: (isEdit: boolean) => void; // Add setIsEdit prop
   noActionsAndStatus?: boolean;
   handleEditClick?: (item: any) => void; // Modify this to accept an item
   handleViewClick?: (item: any) => void; // Modify this to accept an item
+  handleApproveClick?: (item: any) => void;
   selectedTab?: string;
 }
 
@@ -34,6 +41,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   title,
   description,
   status,
+  isActive,
   onEdit,
   onDelete,
   noActions,
@@ -44,7 +52,10 @@ const NewsCard: React.FC<NewsCardProps> = ({
   setisDelete,
   // setIsview,
   handleViewClick,
+  prepareNewsData,
+  handleApproveClick,
   currentUserDetails,
+  handleActive,
   item,
   noActionsAndStatus = false,
   selectedTab,
@@ -68,6 +79,19 @@ const NewsCard: React.FC<NewsCardProps> = ({
       handleViewClick(item);
     }
   };
+  const handleApprove = (): any => {
+    debugger;
+    if (handleApproveClick) {
+      handleApproveClick(item);
+    }
+  };
+
+  const handleInput = (value: any): any => {
+    debugger;
+    if (handleActive) {
+      handleActive(item, value);
+    }
+  };
 
   return (
     <div className={styles.newsCard} key={idx}>
@@ -77,7 +101,46 @@ const NewsCard: React.FC<NewsCardProps> = ({
         className={styles.newsThumbNail}
       />
       <div className={styles.rhsTexts}>
-        <h2 title={title}>{title}</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2 title={title}>{title}</h2>
+
+          <div
+            style={{
+              display:
+                currentUserDetails.role === CONFIG.RoleDetails.user
+                  ? "none"
+                  : "flex",
+            }}
+          >
+            <InputSwitch
+              className="sectionToggler"
+              checked={isActive}
+              onChange={async (data: any) => {
+                handleInput(data?.value);
+                // const curIndex: number = newsIntranetData?.data?.findIndex(
+                //   (res: any) => res?.ID === item?.ID
+                // );
+
+                // newsIntranetData.data[curIndex].isActive = data?.value;
+
+                // await inActive(
+                //   Number(item?.ID),
+
+                //   data?.value
+                // );
+                // if (prepareNewsData) {
+                //   await prepareNewsData(selectedTab);
+                // }
+              }}
+            />
+          </div>
+        </div>
         <div
           className={styles.description}
           dangerouslySetInnerHTML={{
@@ -85,6 +148,38 @@ const NewsCard: React.FC<NewsCardProps> = ({
           }}
         ></div>
         {/* <span title={description}>{description}</span> */}
+      </div>
+
+      <div
+        style={{
+          display:
+            //   currentUserDetails.role === CONFIG.RoleDetails.user &&
+            selectedTab === CONFIG.NewsTab[3] ? "flex" : "none",
+        }}
+        className={styles.cardApproveSec}
+      >
+        <DefaultButton
+          btnType="secondaryGreen"
+          text="Approve"
+          size="small"
+          onClick={
+            handleApprove
+            // const curIndex: number = masterBlog?.findIndex(
+            //   (res: IBlogColumnType) => res?.ID === val?.ID
+            // );
+            // setSelData((prev: IBlogDetails) => ({
+            //   ...prev,
+            //   ID: val?.ID,
+            //   Idx: curIndex,
+            // }));
+            // togglePopupVisibility(
+            //   setPopupController,
+            //   initialPopupController[1],
+            //   1,
+            //   "open"
+            // );
+          }
+        />
       </div>
       {!noActionsAndStatus && (
         <div className={styles.rhsActions}>
@@ -104,27 +199,41 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 className="pi pi-eye"
                 style={{ color: "#adadad", fontSize: "1.2rem" }}
               />
-              {currentUserDetails.role === CONFIG.RoleDetails.user ? (
+              {/* {currentUserDetails.role === CONFIG.RoleDetails.user ? (
                 ""
-              ) : (
-                <>
-                  <i
-                    onClick={handleEdit}
-                    style={{
-                      color: "#adadad",
-                      fontSize: "1.2rem",
-                      display:
-                        selectedTab === CONFIG.TabsName[2] ? "none" : "flex",
-                    }}
-                    className="pi pi-pen-to-square"
-                  />
-                  <i
-                    onClick={handleDelete}
-                    style={{ color: "red", fontSize: "1.2rem" }}
-                    className="pi pi-trash"
-                  />
-                </>
-              )}
+              ) : ( */}
+              <>
+                <i
+                  onClick={handleEdit}
+                  style={{
+                    color: "#adadad",
+                    fontSize: "1.2rem",
+                    display:
+                      status !== CONFIG.blogStatus.Pending &&
+                      (selectedTab === CONFIG.NewsTab[1] ||
+                        currentUserDetails.role !== CONFIG.RoleDetails.user)
+                        ? "flex"
+                        : "none",
+                  }}
+                  className="pi pi-pen-to-square"
+                />
+                <i
+                  onClick={handleDelete}
+                  style={{
+                    color: "red",
+                    fontSize: "1.2rem",
+
+                    display:
+                      status !== CONFIG.blogStatus.Approved &&
+                      (selectedTab === CONFIG.NewsTab[1] ||
+                        currentUserDetails.role !== CONFIG.RoleDetails.user)
+                        ? "flex"
+                        : "none",
+                  }}
+                  className="pi pi-trash"
+                />
+              </>
+              {/* )} */}
             </div>
           )}
         </div>

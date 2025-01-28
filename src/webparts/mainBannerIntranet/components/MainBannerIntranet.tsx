@@ -231,7 +231,7 @@ const MainBannerIntranet = (props: any): JSX.Element => {
 
       <div className={loading ? styles.quickLinksLoading : styles.quickLinks}>
         {loading
-          ? Array(4)
+          ? Array(quickLinks?.length)
               .fill(null)
               .map((_, idx) => (
                 <Skeleton

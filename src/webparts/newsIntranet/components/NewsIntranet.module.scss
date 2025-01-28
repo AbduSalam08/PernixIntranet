@@ -99,3 +99,36 @@
     margin-bottom: 5px;
   }
 }
+
+.activepill {
+  padding: 6px;
+  border-radius: 4px;
+  // background-color: #e4fae8;
+  background-color: #e8ffe8;
+
+  font-size: 12px;
+  color: #1eb949;
+  // color: #e8ffe8;
+  width: 85px;
+  text-align: center;
+  font-family: "osMedium", sans-serif;
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
+}
+.inactivepill {
+  padding: 6px;
+  border-radius: 4px;
+  background-color: #ffefef;
+  font-size: 12px;
+  color: #fd3737;
+  // color: #dfffdf;
+
+  width: 85px;
+  text-align: center;
+  font-family: "osMedium", sans-serif;
+
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
+}

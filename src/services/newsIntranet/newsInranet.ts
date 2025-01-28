@@ -1,6 +1,6 @@
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { setNewsIntranetData } from "../../redux/features/NewsIntranetSlice";
@@ -17,7 +17,7 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
     // Fetch news data
     const response = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_News,
-      Select: "*, Author/EMail, Author/Title",
+      Select: "*, Author/EMail, Author/Title,Author/ID",
       Expand: "Author",
       Filter: [
         {
@@ -49,6 +49,8 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
       const ID = item.Id || item.ID;
       const Author = item?.Author?.EMail || "";
       const AuthorName = item?.Author?.Title || "";
+      const AuthorId = item?.Author?.ID || null;
+      const isActive = item?.isActive || false;
 
       return {
         imageUrl,
@@ -61,6 +63,8 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
         Author,
         AuthorName,
         ID,
+        AuthorId,
+        isActive,
       };
     });
 
@@ -87,17 +91,21 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
   }
 };
 
-export const addNews = async (formData: any): Promise<any> => {
+export const addNews = async (formData: any, status?: string): Promise<any> => {
   const toastId = toast.loading("Creating news...");
 
   try {
     // Prepare payload by omitting thumbnail
     const payload = Object.keys(formData).reduce((acc: any, key: string) => {
-      if (key.toLowerCase() !== "thumbnail") {
+      if (
+        key.toLowerCase() !== "thumbnail" &&
+        !(key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate")
+      ) {
         acc[key] =
-          key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
-            ? dayjs(formData[key].value).toDate() // Convert directly to Date
-            : formData[key].value;
+          // key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
+          //   ? null
+          //   :  ? dayjs(formData[key].value).toDate()
+          key == "Status" ? status : formData[key].value;
       }
       return acc;
     }, {});
@@ -141,7 +149,8 @@ export const addNews = async (formData: any): Promise<any> => {
 export const editNews = async (
   formData: any,
   itemId: number,
-  isfile: boolean
+  isfile: boolean,
+  status?: string
 ): Promise<any> => {
   const toastId = toast.loading("Updating the news in progress...");
 
@@ -151,7 +160,10 @@ export const editNews = async (
       if (key.toLowerCase() !== "thumbnail") {
         acc[key] =
           key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
-            ? dayjs(formData[key].value).toDate()
+            ? null
+            : // ? dayjs(formData[key].value).toDate()
+            key == "Status"
+            ? status
             : formData[key].value;
       }
       return acc;
@@ -237,5 +249,122 @@ export const deleteNews = async (newsID: number): Promise<any> => {
       autoClose: 5000,
       hideProgressBar: false,
     });
+  }
+};
+
+export const inActive = async (
+  newsID: number,
+  status: string
+): Promise<any> => {
+  try {
+    // Delete item from the SharePoint list
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.Intranet_News,
+      ID: newsID,
+      RequestJSON: {
+        isActive: status,
+      },
+    });
+
+    // toast.update(toastId, {
+    //   render: "News deleted successfully!",
+    //   type: "success",
+    //   isLoading: false,
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    // });
+  } catch (error) {
+    console.error("Error while deleting news:", error);
+
+    // toast.update(toastId, {
+    //   render: "An error occurred while deleting this news. Please try again.",
+    //   type: "error",
+    //   isLoading: false,
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    // });
+  }
+};
+export const handleApprove = async (
+  newsID: number,
+  status?: any,
+  formdata?: any,
+  approveorReject?: any
+): Promise<any> => {
+  if (approveorReject == "Reject") {
+    try {
+      // Delete item from the SharePoint list
+      await SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.Intranet_News,
+        ID: newsID,
+        RequestJSON: {
+          Status: "Rejected",
+          // StartDate: new Date(formdata.StartDate.value),
+          // EndDate: new Date(formdata.EndDate.value),
+        },
+      });
+
+      // toast.update(toastId, {
+      //   render: "News deleted successfully!",
+      //   type: "success",
+      //   isLoading: false,
+      //   autoClose: 5000,
+      //   hideProgressBar: false,
+      // });
+    } catch (error) {
+      console.error("Error while deleting news:", error);
+
+      // toast.update(toastId, {
+      //   render: "An error occurred while deleting this news. Please try again.",
+      //   type: "error",
+      //   isLoading: false,
+      //   autoClose: 5000,
+      //   hideProgressBar: false,
+      // });
+    }
+  } else if (approveorReject == "Save as Draft") {
+    try {
+      // Delete item from the SharePoint list
+      await SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.Intranet_News,
+        ID: newsID,
+        RequestJSON: {
+          Status: "Draft",
+        },
+      });
+    } catch (error) {}
+  } else {
+    const toastId = toast.loading("Deleting the news in progress...");
+
+    try {
+      // Delete item from the SharePoint list
+      await SpServices.SPUpdateItem({
+        Listname: CONFIG.ListNames.Intranet_News,
+        ID: newsID,
+        RequestJSON: {
+          Status: status ? "Approved" : "",
+          StartDate: new Date(formdata.StartDate.value),
+          EndDate: new Date(formdata.EndDate.value),
+        },
+      });
+
+      toast.update(toastId, {
+        render: "News deleted successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    } catch (error) {
+      console.error("Error while deleting news:", error);
+
+      toast.update(toastId, {
+        render: "An error occurred while deleting this news. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    }
   }
 };

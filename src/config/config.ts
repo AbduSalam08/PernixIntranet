@@ -118,6 +118,12 @@ export namespace CONFIG {
   };
 
   export const TabsName: string[] = ["Current", "Upcoming", "Previous"];
+  export const NewsTab: string[] = [
+    "All News",
+    "My News",
+    "Previous News",
+    "Pending Approvals",
+  ];
 
   export const NewHiresPageTabsName: string[] = [
     "Current",

@@ -1250,7 +1250,7 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                           val.isActive ? styles.activepill : styles.inactivepill
                         }
                       >
-                        {val.isActive ? "Active" : "In Active"}
+                        {val.isActive ? "Active" : "Inactive"}
                       </div>
                       <div
                         className={styles.footerDateSec}

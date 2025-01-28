@@ -449,18 +449,23 @@ const NewsIntranet = (props: any): JSX.Element => {
                 {formData?.Title?.value}
               </p>
 
-              <p
-                style={{
-                  background: "#daf0da",
-                  padding: "6px 15px",
-                  color: "green",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  fontFamily: "osMedium",
-                }}
+              <div
+                className={
+                  formData?.Status?.value == "Active"
+                    ? styles.activepill
+                    : styles.inactivepill
+                }
+                // style={{
+                //   background: "#daf0da",
+                //   padding: "6px 15px",
+                //   color: "green",
+                //   borderRadius: "4px",
+                //   fontSize: "12px",
+                //   fontFamily: "osMedium",
+                // }}
               >
                 {formData?.Status?.value}
-              </p>
+              </div>
             </div>
 
             <div
@@ -546,18 +551,15 @@ const NewsIntranet = (props: any): JSX.Element => {
                 alignItems: "flex-end",
               }}
             >
-              <p
-                style={{
-                  background: "#daf0da",
-                  padding: "6px 15px",
-                  color: "green",
-                  borderRadius: "4px",
-                  fontSize: "14px",
-                  fontFamily: "osMedium",
-                }}
+              <div
+                className={
+                  formData?.Status?.value == "Active"
+                    ? styles.activepill
+                    : styles.inactivepill
+                }
               >
                 {formData?.Status?.value}
-              </p>
+              </div>
 
               <span style={{ fontSize: "14px", color: "#adadad" }}>
                 {" "}
