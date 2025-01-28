@@ -3,7 +3,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable  @typescript-eslint/no-use-before-define */
-
+/* eslint-disable  @typescript-eslint/explicit-function-return-type */
 import { useEffect, useState } from "react";
 import "../../../assets/styles/Style.css";
 import styles from "./ApprovalsPage.module.scss";
@@ -11,12 +11,16 @@ import CircularSpinner from "../../../components/common/Loaders/CircularSpinner"
 import { IPageURL } from "../../../interface/interface";
 import { CONFIG } from "../../../config/config";
 import { sp } from "@pnp/sp/presets/all";
-// import { Badge } from "primereact/badge";
-// import SpServices from "../../../services/SPServices/SpServices";
+
+/* Interfaces creation */
+interface Count {
+  Blog: number | any;
+  QCeo: number | any;
+  News: number | any;
+}
 
 /* Global variable creation */
 const errorImg: string = require("../../../assets/images/svg/errorImg.svg");
-
 const arrLinksData: IPageURL[] = [
   {
     Name: CONFIG.CommonentsName.Birthdays,
@@ -96,10 +100,7 @@ const arrLinksData: IPageURL[] = [
     IsAdmin: false,
   },
 ];
-interface Count {
-  Blog: number | any;
-  QCeo: number | any;
-}
+
 const ApprovalsPage = (props: any): JSX.Element => {
   /* State creation */
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -107,6 +108,7 @@ const ApprovalsPage = (props: any): JSX.Element => {
   const [count, setCount] = useState<Count>({
     Blog: 0,
     QCeo: 0,
+    News: 0,
   });
 
   /* Functions creation */
@@ -174,8 +176,6 @@ const ApprovalsPage = (props: any): JSX.Element => {
       filters: "Status eq 'Pending'",
     });
 
-    console.log("blog: ", blog);
-
     const Questionceo = await fetchListData({
       listName: CONFIG.ListNames.Intranet_QuestionsToCEO,
       select: "*,AssignTo/ID,AssignTo/EMail",
@@ -183,11 +183,16 @@ const ApprovalsPage = (props: any): JSX.Element => {
       filters: "AssignToId eq null ",
     });
 
+    const NewsCount = await fetchListData({
+      listName: CONFIG.ListNames.Intranet_News,
+      filters: "Status eq 'Pending' ",
+    });
+
     setCount({
       Blog: blog,
       QCeo: Questionceo,
+      News: NewsCount,
     });
-    console.log("Questionceo: ", Questionceo);
   };
 
   const onLoadingFUN = async (): Promise<void> => {
@@ -352,6 +357,13 @@ const ApprovalsPage = (props: any): JSX.Element => {
                         count.QCeo > 0 ? (
                           <div className={styles.customBadge}>
                             {count?.QCeo > 99 ? count.QCeo + "+" : count.QCeo}
+                          </div>
+                        ) : null}
+
+                        {val.Name === CONFIG.CommonentsName.News &&
+                        count.News > 0 ? (
+                          <div className={styles.customBadge}>
+                            {count?.News > 99 ? count?.News + "+" : count?.News}
                           </div>
                         ) : null}
                       </div>
