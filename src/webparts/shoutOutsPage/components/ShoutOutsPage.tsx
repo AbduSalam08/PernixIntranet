@@ -710,7 +710,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                             : styles.rejectedPill
                         }
                       >
-                        {val.isActive ? "Active" : "In Active"}
+                        {val.isActive ? "Active" : "Inactive"}
                       </div>
                     ) : (
                       <div />

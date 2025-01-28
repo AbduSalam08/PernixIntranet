@@ -22,6 +22,8 @@ import {
   deleteNews,
   editNews,
   getAllNewsData,
+  handleApprove,
+  inActive,
 } from "../../../services/newsIntranet/newsInranet";
 import { Paginator } from "primereact/paginator"; // Import Paginator
 import { resetFormData, validateField } from "../../../utils/commonUtils";
@@ -31,13 +33,18 @@ import { CONFIG } from "../../../config/config";
 import { RoleAuth } from "../../../services/CommonServices";
 import dayjs from "dayjs";
 import moment from "moment";
-import { IPaginationData } from "../../../interface/interface";
+import { ICurUserData, IPaginationData } from "../../../interface/interface";
 import { ToastContainer } from "react-toastify";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
 import RichText from "../../../components/common/RichText/RichText";
 import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
+import { fetchCurUserData } from "../../../services/BlogsPage/BlogsPageServices";
+import { setNewsIntranetData } from "../../../redux/features/NewsIntranetSlice";
 
 const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+
+let curUserDetail: ICurUserData;
+let isAdmin: boolean = false;
 
 interface SearchField {
   selectedDate: Date | any;
@@ -61,12 +68,18 @@ interface FormData {
   thumbnail: FormField<File | any>;
   Description: FormField<string>;
 }
+
+interface DateInput {
+  StartDate: FormField<string>;
+  EndDate: FormField<string>;
+}
 interface PopupState {
   open: boolean;
   popupTitle: string;
   popupWidth: string;
   popupType: string;
   defaultCloseBtn: boolean;
+  centerActionBtn?: boolean;
   confirmationTitle?: string;
   popupData: string;
   isLoading: {
@@ -93,6 +106,10 @@ let isActivityPage: boolean = false;
 const NewsPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isApprove, setIsApprove] = useState<boolean>(false);
+  console.log("isApprove: ", isApprove);
+  const [selectID, setSelectID] = useState<any | number>(null);
+  console.log("selectID: ", selectID);
   const [isfilter, setIsfilter] = useState<boolean>(false);
   console.log("isMobile: ", isMobile);
 
@@ -102,6 +119,7 @@ const NewsPage = (props: any): JSX.Element => {
   const currentUserDetails: any = useSelector(
     (state: any) => state?.MainSPContext?.currentUserDetails
   );
+  isAdmin = currentUserDetails.role === CONFIG.RoleDetails.user ? false : true;
 
   // popup properties
   const initialPopupController: PopupState[] = [
@@ -211,6 +229,29 @@ const NewsPage = (props: any): JSX.Element => {
         inprogress: "Deleting news, please wait...",
       },
     },
+
+    {
+      open: false,
+      popupTitle: "Confirmation",
+      popupWidth: "450px",
+      popupType: "custom",
+      centerActionBtn: true,
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "Blog approved successfully!",
+        error: "Something went wrong!",
+        successDescription: "The blog 'ABC' has been approved successfully.",
+        errorDescription:
+          "An error occured while approve blog, please try again later.",
+        inprogress: "Approve blog, please wait...",
+      },
+    },
   ];
 
   const [popupController, setPopupController] = useState<PopupState[]>(
@@ -230,8 +271,24 @@ const NewsPage = (props: any): JSX.Element => {
     Status: "",
   });
   const [newsData, setNewsData] = useState<any[]>([]);
+  // const [newsData, setNewsData] = useState(newsIntranetData?.data || []);
+
   const [shownewsData, setShowNewsData] = useState<any[]>([]);
   console.log("shownewsData: ", shownewsData);
+  const [dateInput, setDateInput] = useState<any>({
+    StartDate: {
+      value: new Date(),
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "date" },
+    },
+    EndDate: {
+      value: "",
+      isValid: true,
+      errorMsg: "Invalid input",
+      validationRule: { required: true, type: "date" },
+    },
+  });
   const [formData, setFormData] = useState<any>({
     Title: {
       value: "",
@@ -311,7 +368,24 @@ const NewsPage = (props: any): JSX.Element => {
     }));
   };
 
-  const handleSubmit = async (): Promise<any> => {
+  const handledateInputChange = (
+    field: string,
+    value: any,
+    isValid: boolean,
+    errorMsg: string = ""
+  ): void => {
+    setDateInput((prevData: any) => ({
+      ...prevData,
+      [field]: {
+        ...prevData[field],
+        value: value,
+        isValid,
+        errorMsg: isValid ? "" : errorMsg,
+      },
+    }));
+  };
+
+  const handleSubmit = async (status?: string | any): Promise<any> => {
     let hasErrors = false;
 
     // Validate each field and update the state with error messages
@@ -349,7 +423,7 @@ const NewsPage = (props: any): JSX.Element => {
           1,
           "close"
         );
-        await editNews(formData, id, isfile);
+        await editNews(formData, id, isfile, status);
         setIsile(false);
         await getAllNewsData(dispatch);
       } else {
@@ -362,10 +436,52 @@ const NewsPage = (props: any): JSX.Element => {
           0,
           "close"
         );
-        await addNews(formData);
+        await addNews(formData, status);
         setIsile(false);
         await getAllNewsData(dispatch);
       }
+    } else {
+      console.log("Form contains errors");
+    }
+  };
+
+  const handleInputValidation = async (status?: string | any): Promise<any> => {
+    let hasErrors = false;
+
+    // Validate each field and update the state with error messages
+    const updatedFormData = Object.keys(dateInput).reduce((acc, key) => {
+      const fieldData = dateInput[key as keyof DateInput];
+      const { isValid, errorMsg } = validateField(
+        key,
+        fieldData.value,
+        fieldData?.validationRule
+      );
+
+      if (!isValid) {
+        hasErrors = true;
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          ...fieldData,
+          isValid,
+          errorMsg,
+        },
+      };
+    }, {} as typeof dateInput);
+
+    setDateInput(updatedFormData);
+    debugger;
+    if (!hasErrors) {
+      await handleApprove(selectID, isApprove, dateInput, "Approved");
+
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[5],
+        5,
+        "close"
+      );
     } else {
       console.log("Form contains errors");
     }
@@ -394,57 +510,7 @@ const NewsPage = (props: any): JSX.Element => {
           </div>
         </div>
 
-        <div className={styles.r4}>
-          <div className={styles.item5}>
-            {/* <FloatingLabelTextarea
-              value={formData.Description.value}
-              placeholder="Description"
-              rows={5}
-              isValid={formData.Description.isValid}
-              errorMsg={formData.Description.errorMsg}
-              onChange={(e: any) => {
-                const value = e.trimStart();
-                const { isValid, errorMsg } = validateField(
-                  "Description",
-                  value,
-                  formData.Description.validationRule
-                );
-                handleInputChange("Description", value, isValid, errorMsg);
-              }}
-            /> */}
-
-            <RichText
-              className={`blog ${styles.richtextwrapper}`}
-              isValid={!formData?.Description?.isValid}
-              errorMsg={formData?.Description?.errorMsg}
-              value={formData?.Description?.value}
-              onChange={(res: any) => {
-                let value: string = "";
-
-                if (res === "<p><br></p>") {
-                  value = "";
-                } else if (
-                  res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
-                ) {
-                  value = "";
-                } else {
-                  value = res;
-                }
-
-                const { isValid, errorMsg } = validateField(
-                  "Description",
-                  value,
-                  formData?.Description?.validationRule
-                );
-                handleInputChange("Description", value, isValid, errorMsg);
-              }}
-              placeholder="Type your content here..."
-              // className="myRichTextEditor"
-            />
-          </div>
-        </div>
-
-        <div className={styles.r2}>
+        {/* <div className={styles.r2}>
           <div className={styles.item2}>
             <CustomDateInput
               value={formData.StartDate.value}
@@ -490,10 +556,10 @@ const NewsPage = (props: any): JSX.Element => {
               }}
             />
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.r3}>
-          <div className={styles.item4}>
+          {/* <div className={styles.item4}>
             <CustomDropDown
               value={formData.Status.value}
               options={["Active", "Inactive"]}
@@ -509,7 +575,7 @@ const NewsPage = (props: any): JSX.Element => {
                 handleInputChange("Status", value, isValid, errorMsg);
               }}
             />
-          </div>
+          </div> */}
           <div className={styles.item5}>
             <CustomFilePicker
               context={props.context}
@@ -553,29 +619,6 @@ const NewsPage = (props: any): JSX.Element => {
             /> */}
           </div>
         </div>
-      </div>,
-    ],
-    [
-      <div className={styles.addNewsGrid} key={1}>
-        <div className={styles.r1}>
-          <div className={styles.item1}>
-            <CustomInput
-              value={formData.Title.value}
-              placeholder="Enter title"
-              isValid={formData.Title.isValid}
-              errorMsg={formData.Title.errorMsg}
-              onChange={(e) => {
-                const value = e.trimStart();
-                const { isValid, errorMsg } = validateField(
-                  "Title",
-                  value,
-                  formData.Title.validationRule
-                );
-                handleInputChange("Title", value, isValid, errorMsg);
-              }}
-            />
-          </div>
-        </div>
 
         <div className={styles.r4}>
           <div className={styles.item5}>
@@ -626,73 +669,104 @@ const NewsPage = (props: any): JSX.Element => {
             />
           </div>
         </div>
-
-        <div className={styles.r2}>
-          <div className={styles.item2}>
-            <CustomDateInput
-              value={formData.StartDate.value}
-              label="Start date"
-              error={!formData.StartDate.isValid}
-              errorMsg={formData.StartDate.errorMsg}
-              isDateController={true}
-              minimumDate={new Date()}
-              maximumDate={
-                formData?.EndDate?.value
-                  ? new Date(formData?.EndDate?.value)
-                  : null
-              }
-              onChange={(date: any) => {
+      </div>,
+    ],
+    [
+      <div className={styles.addNewsGrid} key={1}>
+        <div className={styles.r1}>
+          <div className={styles.item1}>
+            <CustomInput
+              value={formData.Title.value}
+              placeholder="Enter title"
+              isValid={formData.Title.isValid}
+              errorMsg={formData.Title.errorMsg}
+              onChange={(e) => {
+                const value = e.trimStart();
                 const { isValid, errorMsg } = validateField(
-                  "StartDate",
-                  date,
-                  formData.StartDate.validationRule
+                  "Title",
+                  value,
+                  formData.Title.validationRule
                 );
-                handleInputChange("StartDate", date, isValid, errorMsg);
-              }}
-            />
-          </div>
-          <div className={styles.item3}>
-            <CustomDateInput
-              value={formData.EndDate.value}
-              label="End date"
-              error={!formData.EndDate.isValid}
-              errorMsg={formData.EndDate.errorMsg}
-              isDateController={true}
-              minimumDate={
-                formData?.StartDate?.value
-                  ? new Date(formData?.StartDate?.value)
-                  : null
-              }
-              maximumDate={null}
-              onChange={(date: any) => {
-                const { isValid, errorMsg } = validateField("EndDate", date, {
-                  required: true,
-                  type: "date",
-                });
-                handleInputChange("EndDate", date, isValid, errorMsg);
+                handleInputChange("Title", value, isValid, errorMsg);
               }}
             />
           </div>
         </div>
+        {/* {!(currentUserDetails.role === CONFIG.RoleDetails.user) ? (
+          <div className={styles.r2}>
+            <div className={styles.item2}>
+              <CustomDateInput
+                value={formData.StartDate.value}
+                label="Start date"
+                error={!formData.StartDate.isValid}
+                errorMsg={formData.StartDate.errorMsg}
+                isDateController={true}
+                minimumDate={new Date()}
+                maximumDate={
+                  formData?.EndDate?.value
+                    ? new Date(formData?.EndDate?.value)
+                    : null
+                }
+                onChange={(date: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "StartDate",
+                    date,
+                    formData.StartDate.validationRule
+                  );
+                  handleInputChange("StartDate", date, isValid, errorMsg);
+                }}
+              />
+            </div>
+            <div className={styles.item3}>
+              <CustomDateInput
+                value={formData.EndDate.value}
+                label="End date"
+                error={!formData.EndDate.isValid}
+                errorMsg={formData.EndDate.errorMsg}
+                isDateController={true}
+                minimumDate={
+                  formData?.StartDate?.value
+                    ? new Date(formData?.StartDate?.value)
+                    : null
+                }
+                maximumDate={null}
+                onChange={(date: any) => {
+                  const { isValid, errorMsg } = validateField("EndDate", date, {
+                    required: true,
+                    type: "date",
+                  });
+                  handleInputChange("EndDate", date, isValid, errorMsg);
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          ""
+        )} */}
 
         <div className={styles.r3}>
-          <div className={styles.item4}>
-            <CustomDropDown
-              value={formData.Status.value}
-              options={["Active", "Inactive"]}
-              placeholder="Status"
-              isValid={formData.Status.isValid}
-              errorMsg={formData.Status.errorMsg}
-              onChange={(value) => {
-                const { isValid, errorMsg } = validateField(
-                  "Status",
-                  value,
-                  formData.Status.validationRule
-                );
-                handleInputChange("Status", value, isValid, errorMsg);
-              }}
-            />
-          </div>
+          {/* {currentUserDetails.role === CONFIG.RoleDetails.user ? (
+            <div className={styles.item4}>
+              <CustomDropDown
+                value={formData.Status.value}
+                options={["Active", "Inactive"]}
+                placeholder="Status"
+                isValid={formData.Status.isValid}
+                errorMsg={formData.Status.errorMsg}
+                onChange={(value) => {
+                  const { isValid, errorMsg } = validateField(
+                    "Status",
+                    value,
+                    formData.Status.validationRule
+                  );
+                  handleInputChange("Status", value, isValid, errorMsg);
+                }}
+              />
+            </div>
+          ) : (
+            ""
+          )} */}
+
           <div className={styles.item5}>
             <CustomFilePicker
               context={props.context}
@@ -746,6 +820,56 @@ const NewsPage = (props: any): JSX.Element => {
               isValid={formData.thumbnail.isValid}
               errMsg={formData.thumbnail.errorMsg}
             /> */}
+          </div>
+        </div>
+
+        <div className={styles.r4}>
+          <div className={styles.item5}>
+            {/* <FloatingLabelTextarea
+              value={formData.Description.value}
+              placeholder="Description"
+              rows={5}
+              isValid={formData.Description.isValid}
+              errorMsg={formData.Description.errorMsg}
+              onChange={(e: any) => {
+                const value = e.trimStart();
+                const { isValid, errorMsg } = validateField(
+                  "Description",
+                  value,
+                  formData.Description.validationRule
+                );
+                handleInputChange("Description", value, isValid, errorMsg);
+              }}
+            /> */}
+
+            <RichText
+              className={`blog ${styles.richtextwrapper}`}
+              isValid={!formData?.Description?.isValid}
+              errorMsg={formData?.Description?.errorMsg}
+              value={formData?.Description?.value}
+              onChange={(res: any) => {
+                let value: string = "";
+
+                if (res === "<p><br></p>") {
+                  value = "";
+                } else if (
+                  res?.replace(/<(.|\n)*?>/g, "").trim().length === 0
+                ) {
+                  value = "";
+                } else {
+                  value = res;
+                }
+
+                const { isValid, errorMsg } = validateField(
+                  "Description",
+                  value,
+                  formData?.Description?.validationRule
+                );
+                handleInputChange("Description", value, isValid, errorMsg);
+              }}
+              placeholder="Type your content here..."
+              // className="myRichTextEditor"
+            />
           </div>
         </div>
       </div>,
@@ -823,7 +947,7 @@ const NewsPage = (props: any): JSX.Element => {
 
               <div
                 className={
-                  formData?.Status?.value === "Active"
+                  formData?.Status?.value == "Active"
                     ? styles.activepill
                     : styles.inactivepill
                 }
@@ -923,18 +1047,15 @@ const NewsPage = (props: any): JSX.Element => {
                 alignItems: "flex-end",
               }}
             >
-              <p
-                style={{
-                  background: "#daf0da",
-                  padding: "6px 15px",
-                  color: "green",
-                  borderRadius: "4px",
-                  fontSize: "14px",
-                  fontFamily: "osMedium",
-                }}
+              <div
+                className={
+                  formData?.Status?.value === "Active"
+                    ? styles.activepill
+                    : styles.inactivepill
+                }
               >
                 {formData?.Status?.value}
-              </p>
+              </div>
 
               <span style={{ fontSize: "14px", color: "#adadad" }}>
                 {" "}
@@ -1027,6 +1148,80 @@ const NewsPage = (props: any): JSX.Element => {
         />
       </div>,
     ],
+    [
+      <div key={5}>
+        {!isApprove ? (
+          <>
+            <p className={styles.approvePopupContent}>
+              Are you sure want to Approved This News?
+            </p>
+
+            <div
+              className={styles.approvePopupClose}
+              title="Close"
+              onClick={() => {
+                togglePopupVisibility(
+                  setPopupController,
+                  initialPopupController[5],
+                  5,
+                  "close"
+                );
+              }}
+            >
+              <i className="pi pi-times" />
+            </div>
+          </>
+        ) : (
+          <div className={styles.r2}>
+            <div className={styles.item2}>
+              <CustomDateInput
+                value={dateInput.StartDate.value}
+                label="Start date"
+                error={!dateInput.StartDate.isValid}
+                errorMsg={dateInput.StartDate.errorMsg}
+                isDateController={true}
+                minimumDate={new Date()}
+                maximumDate={
+                  dateInput?.EndDate?.value
+                    ? new Date(dateInput?.EndDate?.value)
+                    : null
+                }
+                onChange={(date: any) => {
+                  const { isValid, errorMsg } = validateField(
+                    "StartDate",
+                    date,
+                    dateInput.StartDate.validationRule
+                  );
+                  handledateInputChange("StartDate", date, isValid, errorMsg);
+                }}
+              />
+            </div>
+            <div className={styles.item3}>
+              <CustomDateInput
+                value={dateInput.EndDate.value}
+                label="End date"
+                error={!dateInput.EndDate.isValid}
+                errorMsg={dateInput.EndDate.errorMsg}
+                isDateController={true}
+                minimumDate={
+                  dateInput?.StartDate?.value
+                    ? new Date(dateInput?.StartDate?.value)
+                    : null
+                }
+                maximumDate={null}
+                onChange={(date: any) => {
+                  const { isValid, errorMsg } = validateField("EndDate", date, {
+                    required: true,
+                    type: "date",
+                  });
+                  handledateInputChange("EndDate", date, isValid, errorMsg);
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>,
+    ],
   ];
 
   const popupActions: any[] = [
@@ -1050,6 +1245,21 @@ const NewsPage = (props: any): JSX.Element => {
           );
         },
       },
+
+      {
+        text: "Save as draft",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit("Draft");
+          setisDelete(false);
+          setIsEdit(false);
+          setID(null);
+        },
+      },
       {
         text: "Submit",
         btnType: "primaryGreen",
@@ -1058,7 +1268,7 @@ const NewsPage = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleSubmit();
+          await handleSubmit("Pending");
           setisDelete(false);
           setIsEdit(false);
           setID(null);
@@ -1085,15 +1295,30 @@ const NewsPage = (props: any): JSX.Element => {
           );
         },
       },
+
       {
-        text: "Update",
+        text: "Save as draft",
         btnType: "primaryGreen",
         endIcon: false,
         startIcon: false,
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleSubmit();
+          await handleSubmit("Draft");
+          setisDelete(false);
+          setIsEdit(false);
+          setID(null);
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit("Pending");
           setisDelete(false);
           setIsEdit(false);
           setID(null);
@@ -1197,6 +1422,49 @@ const NewsPage = (props: any): JSX.Element => {
         },
       },
     ],
+
+    [
+      {
+        text: isApprove ? "Cancel" : "Reject",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: (data: any) => {
+          if (data.target.innerText == "Reject") {
+            handleApprove(selectID, isApprove, formData, "Reject");
+          }
+          setIsApprove(false);
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[5],
+            5,
+            "close"
+          );
+          // handleRefresh();
+        },
+      },
+      {
+        text: isApprove ? "Submit" : "Approve",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async (data: any) => {
+          console.log("data: ", data);
+
+          setIsApprove(true);
+
+          if (isApprove && data?.target?.innerText == "Submit") {
+            await handleInputValidation("Approved");
+            // handleApprove(selectID, isApprove, formData, "Approved");
+          }
+
+          // handleSearch([...shownewsData]);
+        },
+      },
+    ],
   ];
 
   const handleViewClick = (item: any): void => {
@@ -1248,6 +1516,25 @@ const NewsPage = (props: any): JSX.Element => {
       setPopupController,
       initialPopupController[3],
       3,
+      "open"
+    );
+  };
+
+  const handleApproveClick = (item: any): void => {
+    setSelectID(item?.ID);
+
+    setDateInput((prevFormData: any) => ({
+      ...prevFormData,
+      StartDate: {
+        ...prevFormData.StartDate,
+        value: new Date(),
+      },
+    }));
+
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[5],
+      5,
       "open"
     );
   };
@@ -1356,34 +1643,67 @@ const NewsPage = (props: any): JSX.Element => {
     );
   };
 
+  const handleActive = async (item: any, status: any): Promise<void> => {
+    const curIndex: number = newsIntranetData?.data?.findIndex(
+      (res: any) => res?.ID === item?.ID
+    );
+
+    if (newsIntranetData?.data[curIndex]) {
+      const updatedData = [...newsIntranetData?.data];
+      updatedData[curIndex] = { ...updatedData[curIndex], isActive: status };
+
+      // setNewsData([...updatedData]);
+      dispatch?.(
+        setNewsIntranetData({
+          isLoading: false,
+          data: updatedData,
+          // error: "Error fetching news data",
+        })
+      );
+    }
+
+    await inActive(Number(item?.ID), status);
+
+    // await prepareNewsData(selectedTab);
+  };
+
   const prepareNewsData = async (curTab: string): Promise<void> => {
+    debugger;
     let filteredData: any[] = [];
 
-    if (curTab === CONFIG.TabsName[0] && newsIntranetData?.data?.length) {
+    if (curTab === CONFIG.NewsTab[0] && newsIntranetData?.data?.length) {
+      filteredData = isAdmin
+        ? newsIntranetData?.data?.filter(
+            (newsItem: any) =>
+              Number(moment().format("YYYYMMDD")) <=
+                Number(moment(newsItem.EndDate).format("YYYYMMDD")) &&
+              newsItem?.Status === "Approved"
+          )
+        : newsIntranetData?.data?.filter(
+            (newsItem: any) =>
+              Number(moment().format("YYYYMMDD")) <=
+                Number(moment(newsItem.EndDate).format("YYYYMMDD")) &&
+              newsItem?.Status === "Approved" &&
+              newsItem?.isActive
+          );
+    } else if (curTab === CONFIG.NewsTab[1] && newsIntranetData?.data?.length) {
       filteredData = newsIntranetData?.data?.filter(
-        (newsItem: any) =>
-          Number(moment().format("YYYYMMDD")) >=
-            Number(moment(newsItem.StartDate).format("YYYYMMDD")) &&
-          Number(moment().format("YYYYMMDD")) <=
-            Number(moment(newsItem.EndDate).format("YYYYMMDD"))
+        (newsItem: any) => newsItem?.AuthorId === Number(curUserDetail?.ID)
+
+        // Number(moment().format("YYYYMMDD")) <
+        // Number(moment(newsItem.StartDate).format("YYYYMMDD"))
       );
-    } else if (
-      curTab === CONFIG.TabsName[1] &&
-      newsIntranetData?.data?.length
-    ) {
-      filteredData = newsIntranetData?.data?.filter(
-        (newsItem: any) =>
-          Number(moment().format("YYYYMMDD")) <
-          Number(moment(newsItem.StartDate).format("YYYYMMDD"))
-      );
-    } else if (
-      curTab === CONFIG.TabsName[2] &&
-      newsIntranetData?.data?.length
-    ) {
+    } else if (curTab === CONFIG.NewsTab[2] && newsIntranetData?.data?.length) {
       filteredData = newsIntranetData?.data?.filter(
         (newsItem: any) =>
           Number(moment().format("YYYYMMDD")) >
           Number(moment(newsItem.EndDate).format("YYYYMMDD"))
+      );
+    } else if (curTab === CONFIG.NewsTab[3] && newsIntranetData?.data?.length) {
+      filteredData = newsIntranetData?.data?.filter(
+        (newsItem: any) => newsItem?.Status === "Pending"
+        // Number(moment().format("YYYYMMDD")) >
+        // Number(moment(newsItem.EndDate).format("YYYYMMDD"))
       );
     }
 
@@ -1404,18 +1724,24 @@ const NewsPage = (props: any): JSX.Element => {
   const handleResponsiveChange = (): void => {
     setIsMobile(window.innerWidth <= 768);
   };
+  const init = async (): Promise<void> => {
+    await RoleAuth(
+      CONFIG.SPGroupName.Pernix_Admin,
+      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
+      dispatch
+    );
+    await getAllNewsData(dispatch);
+    await fetchCurUserData().then((res: ICurUserData[]) => {
+      curUserDetail = res?.[0] || [];
+    });
+  };
 
   useEffect(() => {
     const urlObj = new URL(window.location.href);
     const params = new URLSearchParams(urlObj.search);
     isActivityPage = params?.get("Page") === "activity" ? true : false;
 
-    RoleAuth(
-      CONFIG.SPGroupName.Pernix_Admin,
-      { highPriorityGroups: [CONFIG.SPGroupName.News_Admin] },
-      dispatch
-    );
-    getAllNewsData(dispatch);
+    init();
     handleResponsiveChange();
 
     // Add event listener for resize
@@ -1428,13 +1754,13 @@ const NewsPage = (props: any): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    prepareNewsData(selectedTab ? selectedTab : CONFIG.TabsName[0]);
+    prepareNewsData(selectedTab ? selectedTab : CONFIG.NewsTab[0]);
   }, [newsIntranetData]);
 
-  const filteredNewsData =
-    currentUserDetails.role === CONFIG.RoleDetails.user
-      ? newsData?.filter((item) => item?.Status.toLowerCase() === "active")
-      : newsData;
+  // const filteredNewsData =
+  //   currentUserDetails.role === CONFIG.RoleDetails.user
+  //     ? newsData?.filter((item: any) => item?.Status.toLowerCase() === "active")
+  //     : newsData;
 
   return (
     <div className={styles.wrapper}>
@@ -1520,12 +1846,12 @@ const NewsPage = (props: any): JSX.Element => {
           )}
 
           <div
-            style={{
-              display:
-                currentUserDetails.role === CONFIG.RoleDetails.user
-                  ? "none"
-                  : "flex",
-            }}
+            // style={{
+            //   display:
+            //     currentUserDetails.role === CONFIG.RoleDetails.user
+            //       ? "none"
+            //       : "flex",
+            // }}
             className={styles.addNewbtn}
             onClick={() => {
               resetFormData(formData, setFormData);
@@ -1540,19 +1866,40 @@ const NewsPage = (props: any): JSX.Element => {
                   value: new Date(),
                   isValid: true,
                   errorMsg: "Invalid input",
-                  validationRule: { required: true, type: "date" },
+                  validationRule: {
+                    required:
+                      formData?.Status?.value == "Approved" &&
+                      currentUserDetails.role === CONFIG.RoleDetails.user
+                        ? true
+                        : false,
+                    type: "date",
+                  },
                 },
                 EndDate: {
                   value: "",
                   isValid: true,
                   errorMsg: "Invalid input",
-                  validationRule: { required: true, type: "date" },
+                  validationRule: {
+                    required:
+                      formData?.Status?.value == "Approved" &&
+                      currentUserDetails.role === CONFIG.RoleDetails.user
+                        ? true
+                        : false,
+                    type: "date",
+                  },
                 },
                 Status: {
                   value: "",
                   isValid: true,
                   errorMsg: "Status is required",
-                  validationRule: { required: true, type: "string" },
+                  validationRule: {
+                    required:
+                      formData?.Status?.value == "Approved" &&
+                      currentUserDetails.role === CONFIG.RoleDetails.user
+                        ? true
+                        : false,
+                    type: "string",
+                  },
                 },
                 thumbnail: {
                   value: null,
@@ -1589,7 +1936,7 @@ const NewsPage = (props: any): JSX.Element => {
       </div>
 
       {/* tabs */}
-      <div className={styles.tabsContainer}>
+      {/* <div className={styles.tabsContainer}>
         {CONFIG.TabsName.map((str: string, i: number) => {
           return currentUserDetails.role !== CONFIG.RoleDetails.user ? (
             <div
@@ -1623,6 +1970,25 @@ const NewsPage = (props: any): JSX.Element => {
             ""
           );
         })}
+      </div> */}
+
+      <div className={styles.tabsContainer}>
+        {CONFIG.NewsTab.filter((_, i) =>
+          currentUserDetails.role !== CONFIG.RoleDetails.user ? true : i < 2
+        ).map((str: string, i: number) => (
+          <div
+            key={i}
+            style={{
+              borderBottom: selectedTab === str ? "3px solid #e0803d" : "none",
+            }}
+            onClick={() => {
+              setSelectedTab(str);
+              prepareNewsData(str);
+            }}
+          >
+            {str}
+          </div>
+        ))}
       </div>
 
       <div className={styles.newsContainer}>
@@ -1634,19 +2000,20 @@ const NewsPage = (props: any): JSX.Element => {
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{newsIntranetData?.error}</span>
             </div>
-          ) : filteredNewsData?.length === 0 ? (
+          ) : newsData?.length === 0 ? (
             <div className="errorWrapper" style={{ height: "50vh" }}>
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{"No News found"}</span>
             </div>
           ) : (
-            filteredNewsData
+            newsData
               ?.slice(pagination.first, pagination.first + pagination.rows)
               ?.map((item: any, idx: number) => {
                 return (
                   <NewsCard
                     title={item?.title}
                     imageUrl={item?.imageUrl}
+                    isActive={item?.isActive}
                     key={idx}
                     idx={idx}
                     status={item?.Status}
@@ -1660,8 +2027,12 @@ const NewsPage = (props: any): JSX.Element => {
                     handleEditClick={handleEditClick}
                     handleViewClick={handleViewClick}
                     handleDeleteClick={handleDeleteClick}
+                    handleApproveClick={handleApproveClick}
                     item={item}
                     selectedTab={selectedTab}
+                    handleActive={handleActive}
+                    // prepareNewsData={prepareNewsData}
+                    // newsIntranetData={newsIntranetData}
                   />
                 );
               })
