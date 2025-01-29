@@ -94,7 +94,7 @@
   gap: 10px;
   .newsContainerWrapper {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 0px;
     width: 100%;
     // max-height: 350px;
@@ -147,6 +147,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    flex-direction: column;
     gap: 20px;
   }
   .r3 {
@@ -339,6 +340,20 @@
   color: #fd3737;
   // color: #dfffdf;
 
+  width: 85px;
+  text-align: center;
+  font-family: "osMedium", sans-serif;
+
+  @media (max-width: 630px) {
+    font-size: 10px;
+  }
+}
+
+.Statuspill {
+  margin: 10px 0px;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 12px;
   width: 85px;
   text-align: center;
   font-family: "osMedium", sans-serif;
