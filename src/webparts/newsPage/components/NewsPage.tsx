@@ -22,7 +22,8 @@ import {
   deleteNews,
   editNews,
   getAllNewsData,
-  handleApprove,
+  // getStatusStyles,
+  handleApproveReject,
   inActive,
 } from "../../../services/newsIntranet/newsInranet";
 import { Paginator } from "primereact/paginator"; // Import Paginator
@@ -107,6 +108,7 @@ const NewsPage = (props: any): JSX.Element => {
   const dispatch = useDispatch();
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isApprove, setIsApprove] = useState<boolean>(false);
+  const [isActive, setisActive] = useState<string>("");
   console.log("isApprove: ", isApprove);
   const [selectID, setSelectID] = useState<any | number>(null);
   console.log("selectID: ", selectID);
@@ -474,7 +476,22 @@ const NewsPage = (props: any): JSX.Element => {
     setDateInput(updatedFormData);
     debugger;
     if (!hasErrors) {
-      await handleApprove(selectID, isApprove, dateInput, "Approved");
+      await handleApproveReject(selectID, isApprove, dateInput, "Approved");
+      await getAllNewsData(dispatch);
+      setDateInput({
+        StartDate: {
+          value: new Date(),
+          isValid: true,
+          errorMsg: "Invalid input",
+          validationRule: { required: true, type: "date" },
+        },
+        EndDate: {
+          value: "",
+          isValid: true,
+          errorMsg: "Invalid input",
+          validationRule: { required: true, type: "date" },
+        },
+      });
 
       togglePopupVisibility(
         setPopupController,
@@ -947,7 +964,7 @@ const NewsPage = (props: any): JSX.Element => {
 
               <div
                 className={
-                  formData?.Status?.value == "Active"
+                  isActive === "Active"
                     ? styles.activepill
                     : styles.inactivepill
                 }
@@ -960,7 +977,7 @@ const NewsPage = (props: any): JSX.Element => {
                 //   fontFamily: "osMedium",
                 // }}
               >
-                {formData?.Status?.value}
+                {isActive}
               </div>
             </div>
 
@@ -983,7 +1000,7 @@ const NewsPage = (props: any): JSX.Element => {
               >
                 <img
                   style={{ width: "22px", height: "22px", borderRadius: "50%" }}
-                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                  src={`/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
                 />
                 <span style={{ fontSize: "12px" }}>
                   {formData?.Authorname?.value}
@@ -1033,7 +1050,7 @@ const NewsPage = (props: any): JSX.Element => {
               >
                 <img
                   style={{ width: "26px", height: "26px", borderRadius: "50%" }}
-                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                  src={`/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
                 />
                 <span>{formData?.Authorname?.value}</span>
               </div>
@@ -1049,12 +1066,12 @@ const NewsPage = (props: any): JSX.Element => {
             >
               <div
                 className={
-                  formData?.Status?.value === "Active"
+                  isActive === "Active"
                     ? styles.activepill
                     : styles.inactivepill
                 }
               >
-                {formData?.Status?.value}
+                {isActive}
               </div>
 
               <span style={{ fontSize: "14px", color: "#adadad" }}>
@@ -1088,6 +1105,14 @@ const NewsPage = (props: any): JSX.Element => {
             {formData?.Description?.value}
           </p> */}
         </div>
+
+        {/* <div
+          className={styles.Statuspill}
+          style={getStatusStyles(formData?.Status?.value || "default")}
+        
+        >
+          {formData?.Status?.value}
+        </div> */}
       </div>,
     ],
     [
@@ -1105,7 +1130,7 @@ const NewsPage = (props: any): JSX.Element => {
           noErrorMsg
           width={"200px"}
           floatingLabel={false}
-          options={["Active", "Inactive"]}
+          options={["Pending", "Approved", "Rejected", "Draft"]}
           placeholder="Status"
           onChange={(value) => {
             objFilter.Status = value;
@@ -1172,7 +1197,10 @@ const NewsPage = (props: any): JSX.Element => {
             </div>
           </>
         ) : (
-          <div className={styles.r2}>
+          <div
+            className={styles.r2}
+            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          >
             <div className={styles.item2}>
               <CustomDateInput
                 value={dateInput.StartDate.value}
@@ -1431,9 +1459,10 @@ const NewsPage = (props: any): JSX.Element => {
         endIcon: false,
         startIcon: false,
         size: "large",
-        onClick: (data: any) => {
-          if (data.target.innerText == "Reject") {
-            handleApprove(selectID, isApprove, formData, "Reject");
+        onClick: async (data: any) => {
+          if (data.target.innerText === "Reject") {
+            await handleApproveReject(selectID, isApprove, formData, "Reject");
+            await getAllNewsData(dispatch);
           }
           setIsApprove(false);
           togglePopupVisibility(
@@ -1442,6 +1471,21 @@ const NewsPage = (props: any): JSX.Element => {
             5,
             "close"
           );
+
+          setDateInput({
+            StartDate: {
+              value: new Date(),
+              isValid: true,
+              errorMsg: "Invalid input",
+              validationRule: { required: true, type: "date" },
+            },
+            EndDate: {
+              value: "",
+              isValid: true,
+              errorMsg: "Invalid input",
+              validationRule: { required: true, type: "date" },
+            },
+          });
           // handleRefresh();
         },
       },
@@ -1456,7 +1500,7 @@ const NewsPage = (props: any): JSX.Element => {
 
           setIsApprove(true);
 
-          if (isApprove && data?.target?.innerText == "Submit") {
+          if (isApprove && data?.target?.innerText === "Submit") {
             await handleInputValidation("Approved");
             // handleApprove(selectID, isApprove, formData, "Approved");
           }
@@ -1468,6 +1512,8 @@ const NewsPage = (props: any): JSX.Element => {
   ];
 
   const handleViewClick = (item: any): void => {
+    setisActive(item?.isActive === true ? "Active" : "Inactive");
+    debugger;
     setFormData({
       Title: {
         ...formData.Title,
@@ -1792,7 +1838,7 @@ const NewsPage = (props: any): JSX.Element => {
               noErrorMsg
               width={"200px"}
               floatingLabel={false}
-              options={["Active", "Inactive"]}
+              options={["Pending", "Approved", "Rejected", "Draft"]}
               placeholder="Status"
               onChange={(value) => {
                 objFilter.Status = value;
@@ -1868,7 +1914,7 @@ const NewsPage = (props: any): JSX.Element => {
                   errorMsg: "Invalid input",
                   validationRule: {
                     required:
-                      formData?.Status?.value == "Approved" &&
+                      formData?.Status?.value === "Approved" &&
                       currentUserDetails.role === CONFIG.RoleDetails.user
                         ? true
                         : false,
@@ -1881,7 +1927,7 @@ const NewsPage = (props: any): JSX.Element => {
                   errorMsg: "Invalid input",
                   validationRule: {
                     required:
-                      formData?.Status?.value == "Approved" &&
+                      formData?.Status?.value === "Approved" &&
                       currentUserDetails.role === CONFIG.RoleDetails.user
                         ? true
                         : false,
@@ -1894,7 +1940,7 @@ const NewsPage = (props: any): JSX.Element => {
                   errorMsg: "Status is required",
                   validationRule: {
                     required:
-                      formData?.Status?.value == "Approved" &&
+                      formData?.Status?.value === "Approved" &&
                       currentUserDetails.role === CONFIG.RoleDetails.user
                         ? true
                         : false,
@@ -1992,52 +2038,47 @@ const NewsPage = (props: any): JSX.Element => {
       </div>
 
       <div className={styles.newsContainer}>
-        <div className={styles.newsContainerWrapper}>
-          {newsIntranetData?.isLoading ? (
-            <CircularSpinner />
-          ) : newsIntranetData?.error ? (
-            <div className="errorWrapper">
-              <img src={errorGrey} alt="Error" />
-              <span className="disabledText">{newsIntranetData?.error}</span>
-            </div>
-          ) : newsData?.length === 0 ? (
-            <div className="errorWrapper" style={{ height: "50vh" }}>
-              <img src={errorGrey} alt="Error" />
-              <span className="disabledText">{"No News found"}</span>
-            </div>
-          ) : (
-            newsData
+        {newsIntranetData?.isLoading ? (
+          <CircularSpinner />
+        ) : newsIntranetData?.error ? (
+          <div className="errorWrapper">
+            <img src={errorGrey} alt="Error" />
+            <span className="disabledText">{newsIntranetData?.error}</span>
+          </div>
+        ) : newsData?.length === 0 ? (
+          <div className="errorWrapper" style={{ height: "50vh" }}>
+            <img src={errorGrey} alt="Error" />
+            <span className="disabledText">{"No News found"}</span>
+          </div>
+        ) : (
+          <div className={styles.newsContainerWrapper}>
+            {newsData
               ?.slice(pagination.first, pagination.first + pagination.rows)
-              ?.map((item: any, idx: number) => {
-                return (
-                  <NewsCard
-                    title={item?.title}
-                    imageUrl={item?.imageUrl}
-                    isActive={item?.isActive}
-                    key={idx}
-                    idx={idx}
-                    status={item?.Status}
-                    currentUserDetails={currentUserDetails}
-                    description={item?.description}
-                    noActions={false}
-                    noStatus={false}
-                    setIsEdit={setIsEdit}
-                    // setIsview={setIsview}
-                    setisDelete={setisDelete}
-                    handleEditClick={handleEditClick}
-                    handleViewClick={handleViewClick}
-                    handleDeleteClick={handleDeleteClick}
-                    handleApproveClick={handleApproveClick}
-                    item={item}
-                    selectedTab={selectedTab}
-                    handleActive={handleActive}
-                    // prepareNewsData={prepareNewsData}
-                    // newsIntranetData={newsIntranetData}
-                  />
-                );
-              })
-          )}
-        </div>
+              ?.map((item: any, idx: number) => (
+                <NewsCard
+                  key={idx}
+                  idx={idx}
+                  title={item?.title}
+                  imageUrl={item?.imageUrl}
+                  isActive={item?.isActive}
+                  status={item?.Status}
+                  currentUserDetails={currentUserDetails}
+                  description={item?.description}
+                  noActions={false}
+                  noStatus={false}
+                  setIsEdit={setIsEdit}
+                  setisDelete={setisDelete}
+                  handleEditClick={handleEditClick}
+                  handleViewClick={handleViewClick}
+                  handleDeleteClick={handleDeleteClick}
+                  handleApproveClick={handleApproveClick}
+                  item={item}
+                  selectedTab={selectedTab}
+                  handleActive={handleActive}
+                />
+              ))}
+          </div>
+        )}
 
         {isMobile && (
           <div className={styles.filtericon}>

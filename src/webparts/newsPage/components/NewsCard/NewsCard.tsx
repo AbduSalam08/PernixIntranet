@@ -7,6 +7,7 @@ import "./Style.css";
 import { CONFIG } from "../../../../config/config";
 import { InputSwitch } from "primereact/inputswitch";
 import DefaultButton from "../../../../components/common/Buttons/DefaultButton";
+import { getStatusStyles } from "../../../../services/newsIntranet/newsInranet";
 
 interface NewsCardProps {
   Id?: number;
@@ -30,7 +31,7 @@ interface NewsCardProps {
   setIsEdit?: (isEdit: boolean) => void; // Add setIsEdit prop
   noActionsAndStatus?: boolean;
   handleEditClick?: (item: any) => void; // Modify this to accept an item
-  handleViewClick?: (item: any) => void; // Modify this to accept an item
+  handleViewClick?: (item: any, isActive: string) => void; // Modify this to accept an item
   handleApproveClick?: (item: any) => void;
   selectedTab?: string;
 }
@@ -76,7 +77,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
   const handleView = (): any => {
     if (handleViewClick) {
-      handleViewClick(item);
+      handleViewClick(item, item.isActive);
     }
   };
   const handleApprove = (): any => {
@@ -113,9 +114,10 @@ const NewsCard: React.FC<NewsCardProps> = ({
           <div
             style={{
               display:
-                currentUserDetails.role === CONFIG.RoleDetails.user
-                  ? "none"
-                  : "flex",
+                currentUserDetails.role !== CONFIG.RoleDetails.user &&
+                status === "Approved"
+                  ? "flex"
+                  : "none",
             }}
           >
             <InputSwitch
@@ -185,9 +187,11 @@ const NewsCard: React.FC<NewsCardProps> = ({
         <div className={styles.rhsActions}>
           {!noActions && (
             <div
-              className={
-                status === "Active" ? styles.activepill : styles.inactivepill
-              }
+              className={styles.Statuspill}
+              style={getStatusStyles(status || "default")}
+              // className={
+              //   status === "Active" ? styles.activepill : styles.inactivepill
+              // }
             >
               {status}
             </div>

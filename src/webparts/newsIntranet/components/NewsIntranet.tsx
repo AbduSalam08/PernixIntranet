@@ -10,13 +10,14 @@ import NewsCard from "./NewsCard/NewsCard";
 import styles from "./NewsIntranet.module.scss";
 import Popup from "../../../components/common/Popups/Popup";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
-import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
+//import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 // import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
-import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
+//import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 //import CustomFileUpload from "../../../components/common/CustomInputFields/CustomFileUpload";
 import {
   addNews,
   getAllNewsData,
+  // getStatusStyles,
 } from "../../../services/newsIntranet/newsInranet";
 import "./Style.css";
 import { resetFormData, validateField } from "../../../utils/commonUtils";
@@ -36,7 +37,7 @@ const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
 
 const NewsIntranet = (props: any): JSX.Element => {
   const dispatch = useDispatch();
-  const isMobile = useMediaQuery("(max-width:768px)"); // Detect screen size
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   // popup properties
   const initialPopupController = [
@@ -99,19 +100,19 @@ const NewsIntranet = (props: any): JSX.Element => {
       value: "",
       isValid: true,
       errorMsg: "Invalid input",
-      validationRule: { required: true, type: "date" },
+      validationRule: { required: false, type: "date" },
     },
     EndDate: {
       value: "",
       isValid: true,
       errorMsg: "Invalid input",
-      validationRule: { required: true, type: "date" },
+      validationRule: { required: false, type: "date" },
     },
     Status: {
       value: "",
       isValid: true,
       errorMsg: "Status is required",
-      validationRule: { required: true, type: "string" },
+      validationRule: { required: false, type: "string" },
     },
     thumbnail: {
       value: null,
@@ -127,6 +128,7 @@ const NewsIntranet = (props: any): JSX.Element => {
     },
   });
   const [shownewsdata, setShownewsdata] = useState<any>([]);
+  const [isActive, setisActive] = useState<string>("");
 
   const newsIntranetData: any = useSelector((state: any) => {
     return state.NewsIntranetData.value;
@@ -152,7 +154,7 @@ const NewsIntranet = (props: any): JSX.Element => {
     }));
   };
 
-  const handleSubmit = async (): Promise<any> => {
+  const handleSubmit = async (status: string): Promise<any> => {
     let hasErrors = false;
 
     // Validate each field and update the state with error messages
@@ -188,7 +190,7 @@ const NewsIntranet = (props: any): JSX.Element => {
         "close"
       );
 
-      await addNews(formData);
+      await addNews(formData, status);
       await getAllNewsData(dispatch);
     } else {
       console.log("Form contains errors");
@@ -214,7 +216,7 @@ const NewsIntranet = (props: any): JSX.Element => {
           }}
         />
 
-        <div
+        {/* <div
           style={{
             display: "flex",
             gap: "20px",
@@ -267,7 +269,7 @@ const NewsIntranet = (props: any): JSX.Element => {
               }}
             />
           </div>
-        </div>
+        </div> */}
         <div
           style={{
             display: "flex",
@@ -276,7 +278,7 @@ const NewsIntranet = (props: any): JSX.Element => {
             margin: "20px 0px",
           }}
         >
-          <div style={{ width: "50%" }}>
+          {/* <div style={{ width: "50%" }}>
             <CustomDropDown
               value={formData.Status.value}
               options={["Active", "Inactive"]}
@@ -292,9 +294,9 @@ const NewsIntranet = (props: any): JSX.Element => {
                 handleInputChange("Status", value, isValid, errorMsg);
               }}
             />
-          </div>
+          </div> */}
 
-          <div style={{ width: "50%" }}>
+          <div style={{ width: "100%" }}>
             <CustomFilePicker
               context={props.context}
               // selectedFile={formData.Attachments.value}
@@ -451,7 +453,7 @@ const NewsIntranet = (props: any): JSX.Element => {
 
               <div
                 className={
-                  formData?.Status?.value == "Active"
+                  isActive === "Active"
                     ? styles.activepill
                     : styles.inactivepill
                 }
@@ -464,7 +466,7 @@ const NewsIntranet = (props: any): JSX.Element => {
                 //   fontFamily: "osMedium",
                 // }}
               >
-                {formData?.Status?.value}
+                {isActive}
               </div>
             </div>
 
@@ -487,7 +489,7 @@ const NewsIntranet = (props: any): JSX.Element => {
               >
                 <img
                   style={{ width: "22px", height: "22px", borderRadius: "50%" }}
-                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                  src={`/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
                 />
                 <span style={{ fontSize: "12px" }}>
                   {formData?.Authorname?.value}
@@ -537,7 +539,7 @@ const NewsIntranet = (props: any): JSX.Element => {
               >
                 <img
                   style={{ width: "26px", height: "26px", borderRadius: "50%" }}
-                  src={`https://technorucs365.sharepoint.com/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
+                  src={`/_layouts/15/userphoto.aspx?size=L&accountname=${formData?.Author?.value}`}
                 />
                 <span>{formData?.Authorname?.value}</span>
               </div>
@@ -553,12 +555,12 @@ const NewsIntranet = (props: any): JSX.Element => {
             >
               <div
                 className={
-                  formData?.Status?.value == "Active"
+                  isActive === "Active"
                     ? styles.activepill
                     : styles.inactivepill
                 }
               >
-                {formData?.Status?.value}
+                {isActive}
               </div>
 
               <span style={{ fontSize: "14px", color: "#adadad" }}>
@@ -591,6 +593,14 @@ const NewsIntranet = (props: any): JSX.Element => {
             {formData?.Description?.value}
           </p> */}
         </div>
+
+        {/* <div
+          className={styles.Statuspill}
+          style={getStatusStyles(formData?.Status?.value || "default")}
+         
+        >
+          {formData?.Status?.value}
+        </div> */}
       </div>,
     ],
   ];
@@ -613,6 +623,21 @@ const NewsIntranet = (props: any): JSX.Element => {
           );
         },
       },
+
+      {
+        text: "Save as draft",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        disabled: !Object.keys(formData).every((key) => formData[key].isValid),
+        size: "large",
+        onClick: async () => {
+          await handleSubmit("Draft");
+          // setisDelete(false);
+          // setIsEdit(false);
+          // setID(null);
+        },
+      },
       {
         text: "Submit",
         btnType: "primaryGreen",
@@ -621,7 +646,7 @@ const NewsIntranet = (props: any): JSX.Element => {
         disabled: !Object.keys(formData).every((key) => formData[key].isValid),
         size: "large",
         onClick: async () => {
-          await handleSubmit();
+          await handleSubmit("Pending");
         },
       },
     ],
@@ -673,13 +698,15 @@ const NewsIntranet = (props: any): JSX.Element => {
           Number(moment(newsItem.StartDate).format("YYYYMMDD")) &&
         Number(moment().format("YYYYMMDD")) <=
           Number(moment(newsItem.EndDate).format("YYYYMMDD")) &&
-        newsItem.Status === "Active"
+        newsItem?.Status === "Approved" &&
+        newsItem?.isActive
     );
 
     setShownewsdata(filteredData);
   };
 
   const handleViewClick = (item: any): void => {
+    setisActive(item?.isActive === true ? "Active" : "Inactive");
     setFormData({
       Title: {
         ...formData.Title,
@@ -760,6 +787,7 @@ const NewsIntranet = (props: any): JSX.Element => {
               0,
               "open"
             );
+
             resetFormData(formData, setFormData);
           }}
         />
