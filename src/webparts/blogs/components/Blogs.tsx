@@ -5,6 +5,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable require-atomic-updates */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable prefer-const */
+/* eslint-disable dot-notation */
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable max-lines */
 import "../../../assets/styles/Style.css";
 import "./Blogs.css";
 import { useEffect, useState } from "react";
@@ -15,7 +20,7 @@ import { RoleAuth } from "../../../services/CommonServices";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import DefaultButton from "../../../components/common/Buttons/DefaultButton";
-import { Add } from "@mui/icons-material";
+import { Add, Delete, Edit } from "@mui/icons-material";
 import { ToastContainer } from "react-toastify";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import SendIcon from "@mui/icons-material/Send";
@@ -34,6 +39,8 @@ import {
   IBlogCommentsColumnType,
   ICurUserData,
   IFormFields,
+  IHyperLinkColumn,
+  IHyperLinkData,
   IPageSearchFields,
   IPaginationData,
   IUserDetails,
@@ -41,13 +48,17 @@ import {
 import {
   addBlogCommentsData,
   addBlogData,
+  addHyperLinkData,
   deleteBlogData,
+  deleteHyperLinkData,
   fecthBlogComments,
   fecthBlogDocumentUsingPath,
   fetchBlogDatas,
   fetchCurUserData,
+  fetchHyperlinkDatas,
   getAllUsersList,
   updateBlogData,
+  updateHyperLinkData,
 } from "../../../services/BlogsPage/BlogsPageServices";
 import CustomDropDown from "../../../components/common/CustomInputFields/CustomDropDown";
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
@@ -56,6 +67,7 @@ import CustomMultipleFileUpload from "../../../components/common/CustomInputFiel
 import RichText from "../../../components/common/RichText/RichText";
 import { Chip } from "@mui/material";
 import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
+import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 
 /* Interface creation */
 interface IBlogField {
@@ -66,6 +78,11 @@ interface IBlogField {
   Content: IFormFields;
 }
 
+interface IHyperLinkField {
+  Title: IFormFields;
+  Links: IFormFields;
+}
+
 interface IBlogDetails {
   ID: number | null;
   Like: string[];
@@ -73,6 +90,8 @@ interface IBlogDetails {
 }
 
 /* Global variable creation */
+const errorGrey = require("../../../assets/images/svg/errorGrey.svg");
+
 const blogDetail: IBlogDetails = {
   ID: null,
   Like: [],
@@ -81,6 +100,8 @@ const blogDetail: IBlogDetails = {
 
 let isAdmin: boolean = false;
 let isActivityPage: boolean = false;
+let typeOfPage: string = "";
+let masterHyperLink: IHyperLinkData[] = [];
 let masterBlog: IBlogColumnType[] = [];
 let curUserDetail: ICurUserData;
 
@@ -143,6 +164,49 @@ const Blogs = (props: any): JSX.Element => {
         inprogress: "Approve blog, please wait...",
       },
     },
+    {
+      open: false,
+      popupTitle: "Add",
+      popupWidth: "800px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "Hyperlink added successfully!",
+        error: "Something went wrong!",
+        successDescription: "The hyperlink 'ABC' has been added successfully.",
+        errorDescription:
+          "An error occured while add hyperlink, please try again later.",
+        inprogress: "Add hyperlink, please wait...",
+      },
+    },
+    {
+      open: false,
+      popupTitle: "Update",
+      popupWidth: "800px",
+      popupType: "custom",
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "Hyperlink updated successfully!",
+        error: "Something went wrong!",
+        successDescription:
+          "The hyperlink 'ABC' has been updated successfully.",
+        errorDescription:
+          "An error occured while update hyperlink, please try again later.",
+        inprogress: "Update hyperlink, please wait...",
+      },
+    },
   ];
 
   const initialFormData: IBlogField = {
@@ -193,6 +257,27 @@ const Blogs = (props: any): JSX.Element => {
     },
   };
 
+  const initialHyperFormData: IHyperLinkField = {
+    Title: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required.",
+      validationRule: {
+        required: true,
+        type: "string",
+      },
+    },
+    Links: {
+      value: "",
+      isValid: true,
+      errorMsg: "This field is required.",
+      validationRule: {
+        required: true,
+        type: "string",
+      },
+    },
+  };
+
   /* State creation */
   const [isfilter, setIsfilter] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -222,8 +307,37 @@ const Blogs = (props: any): JSX.Element => {
   });
   const [curDocFiles, setCurDocFiles] = useState<any[]>([]);
   const [arrTags, setArrTags] = useState<string[]>([]);
+  const [masterTabs, setMasterTabs] = useState<string[]>([]);
+  const [curMasterTab, setCurMasterTab] = useState<string>("");
+  const [arrHyperLinkData, setArrHyperLinkData] = useState<IHyperLinkData[]>(
+    []
+  );
+  const [hyperForm, setHyperForm] = useState<IHyperLinkField | any>({
+    ...initialHyperFormData,
+  });
+  const [curObject, setCurObject] = useState<IHyperLinkData>({
+    ...CONFIG.HyperLinkData,
+  });
+  const [linkSearch, setLinkSearch] = useState<string>("");
 
   /* Functions creation */
+  const handleHyperLinkInputChange = async (
+    field: string,
+    value: any,
+    isValid: boolean,
+    errorMsg: string = ""
+  ): Promise<void> => {
+    setHyperForm((prevData: IHyperLinkField | any) => ({
+      ...prevData,
+      [field]: {
+        ...prevData[field],
+        value: value,
+        isValid,
+        errorMsg: isValid ? "" : errorMsg,
+      },
+    }));
+  };
+
   const handleInputChange = async (
     field: string,
     value: any,
@@ -262,6 +376,20 @@ const Blogs = (props: any): JSX.Element => {
       rows: event?.rows || CONFIG.PaginationData.rows,
     });
     setIsLoading(false);
+  };
+
+  const searchForLink = async (value: string): Promise<void> => {
+    setLinkSearch(value);
+    if (value) {
+      let temp: IHyperLinkData[] = await Promise.all(
+        masterHyperLink?.filter((val: IHyperLinkData) =>
+          val?.Title?.toLowerCase().includes(value?.toLowerCase())
+        ) || []
+      );
+      setArrHyperLinkData([...temp]);
+    } else {
+      setArrHyperLinkData([...masterHyperLink]);
+    }
   };
 
   const handleSearch = async (): Promise<void> => {
@@ -353,8 +481,76 @@ const Blogs = (props: any): JSX.Element => {
     setSelectedTab(curTab);
     setIsLoading(false);
     setSelData({ ...blogDetail });
+    setArrHyperLinkData([...masterHyperLink]);
     setIsView(false);
     setIsCreate(false);
+  };
+
+  const handleLinkSubmit = async (i: number): Promise<void> => {
+    let hasErrors: boolean = false;
+
+    const updatedFormData = Object.keys(hyperForm).reduce((acc, key) => {
+      const fieldData = hyperForm[key];
+      let { isValid, errorMsg } = validateField(
+        key,
+        fieldData.value,
+        fieldData?.validationRule
+      );
+
+      if (!isValid) {
+        hasErrors = true;
+      }
+
+      errorMsg = key === "Title" ? "Name is required" : "Invalid url";
+
+      return {
+        ...acc,
+        [key]: {
+          ...fieldData,
+          isValid,
+          errorMsg,
+        },
+      };
+    }, {} as typeof hyperForm);
+
+    setHyperForm(updatedFormData);
+    if (!hasErrors) {
+      let data: any = {};
+      const columns: IHyperLinkColumn = CONFIG.HyperLinkColumn;
+
+      data[columns.Title] = hyperForm?.Title?.value ?? "";
+      data[columns.Links] = hyperForm?.Links?.value ?? "";
+      data[columns.ID] = curObject?.id || null;
+      data[columns.Result] = typeOfPage;
+
+      togglePopupVisibility(
+        setPopupController,
+        initialPopupController[i],
+        i,
+        "close"
+      );
+      resetFormData(initialHyperFormData, setHyperForm);
+      if (data.ID) {
+        await updateHyperLinkData({ ...data }).then(() => {
+          const Idx: number = masterHyperLink?.findIndex(
+            (res: IHyperLinkData) => res?.id === curObject?.id
+          );
+
+          masterHyperLink[Idx].Title = data?.Title ?? "";
+          masterHyperLink[Idx].Links = data?.Links ?? "";
+          setLinkSearch("");
+          setArrHyperLinkData([...masterHyperLink]);
+        });
+      } else {
+        await addHyperLinkData({ ...data }).then((res: IHyperLinkData[]) => {
+          masterHyperLink = [...res, ...masterHyperLink];
+          setLinkSearch("");
+          setArrHyperLinkData([...masterHyperLink]);
+        });
+      }
+    } else {
+      console.log("Form contains errors");
+    }
   };
 
   const handleSubmit = async (Status: string = ""): Promise<void> => {
@@ -395,7 +591,6 @@ const Blogs = (props: any): JSX.Element => {
     }, {} as typeof formData);
 
     setFormData(updatedFormData);
-    console.log("updatedFormData: ", updatedFormData);
     if (!hasErrors) {
       setIsLoading(true);
       const data: any = {};
@@ -409,6 +604,7 @@ const Blogs = (props: any): JSX.Element => {
       // data[column.Title] = formData?.Tag?.value || "";
       data[column.Description] = formData?.Description?.value || "";
       data[column.Status] = Status;
+      data[column.Result] = typeOfPage;
 
       resetFormData(initialFormData, setFormData);
       if (curBlogData?.ID) {
@@ -661,6 +857,26 @@ const Blogs = (props: any): JSX.Element => {
     );
   };
 
+  const handleSelect = async (data: IHyperLinkData): Promise<void> => {
+    setCurObject({ ...data });
+    setHyperForm({
+      Title: {
+        ...initialHyperFormData.Title,
+        value: data?.Title ?? "",
+      },
+      Links: {
+        ...initialHyperFormData.Links,
+        value: data?.Links ?? "",
+      },
+    });
+    togglePopupVisibility(
+      setPopupController,
+      initialPopupController[3],
+      3,
+      "open"
+    );
+  };
+
   const popupInputs: any[] = [
     [
       <div key={0}>
@@ -669,14 +885,14 @@ const Blogs = (props: any): JSX.Element => {
             textAlign: "center",
           }}
         >
-          Are you sure you want to delete this blog?
+          Are you sure you want to delete this memo?
         </p>
       </div>,
     ],
     [
       <div key={1}>
         <p className={styles.approvePopupContent}>
-          Are you sure want to Approved This Blog?
+          Are you sure want to approve this memo?
         </p>
 
         <div
@@ -692,6 +908,118 @@ const Blogs = (props: any): JSX.Element => {
           }}
         >
           <i className="pi pi-times" />
+        </div>
+      </div>,
+    ],
+    [
+      <div key={2}>
+        <div
+          style={{
+            marginBottom: "20px",
+          }}
+        >
+          <CustomInput
+            value={hyperForm.Title.value}
+            placeholder="Display name"
+            isValid={hyperForm.Title.isValid}
+            errorMsg={hyperForm.Title.errorMsg}
+            onChange={(e: any) => {
+              const value = e.trimStart();
+              const { isValid, errorMsg } = validateField(
+                "Name",
+                value,
+                hyperForm.Title.validationRule
+              );
+              handleHyperLinkInputChange(
+                CONFIG.HyperLinkColumn.Title,
+                value,
+                isValid,
+                errorMsg
+              );
+            }}
+          />
+        </div>
+        <div>
+          <FloatingLabelTextarea
+            value={hyperForm.Links.value}
+            placeholder="URL"
+            size="XL"
+            isValid={hyperForm.Links.isValid}
+            errorMsg={hyperForm.Links.errorMsg}
+            onChange={(e: any) => {
+              const value = e.trimStart();
+              const urlRegex =
+                /^(https?:\/\/)?((([a-z0-9][-a-z0-9]{0,62}\.)+[a-z]{2,63})|localhost|((\d{1,3}\.){3}\d{1,3}))(:\d{1,5})?(\/[^\s]*)?$/i;
+              const isCheck: boolean = urlRegex.test(value);
+              const { isValid, errorMsg } = validateField(
+                "Link",
+                isCheck ? value : "",
+                hyperForm.Links.validationRule
+              );
+              handleHyperLinkInputChange(
+                CONFIG.HyperLinkColumn.Links,
+                value,
+                isValid,
+                errorMsg ? "Invalid url" : ""
+              );
+            }}
+          />
+        </div>
+      </div>,
+    ],
+    [
+      <div key={3}>
+        <div
+          style={{
+            marginBottom: "20px",
+          }}
+        >
+          <CustomInput
+            value={hyperForm.Title.value}
+            placeholder="Display name"
+            isValid={hyperForm.Title.isValid}
+            errorMsg={hyperForm.Title.errorMsg}
+            onChange={(e: any) => {
+              const value = e.trimStart();
+              const { isValid, errorMsg } = validateField(
+                "Name",
+                value,
+                hyperForm.Title.validationRule
+              );
+              handleHyperLinkInputChange(
+                CONFIG.HyperLinkColumn.Title,
+                value,
+                isValid,
+                errorMsg
+              );
+            }}
+          />
+        </div>
+        <div>
+          <FloatingLabelTextarea
+            value={hyperForm.Links.value}
+            placeholder="URL"
+            size="XL"
+            isValid={hyperForm.Links.isValid}
+            errorMsg={hyperForm.Links.errorMsg}
+            onChange={(e: any) => {
+              const value = e.trimStart();
+              const urlRegex =
+                /^(https?:\/\/)?((([a-z0-9][-a-z0-9]{0,62}\.)+[a-z]{2,63})|localhost|((\d{1,3}\.){3}\d{1,3}))(:\d{1,5})?(\/[^\s]*)?$/i;
+              const isCheck: boolean = urlRegex.test(value);
+              const { isValid, errorMsg } = validateField(
+                "Link",
+                isCheck ? value : "",
+                hyperForm.Links.validationRule
+              );
+              handleHyperLinkInputChange(
+                CONFIG.HyperLinkColumn.Links,
+                value,
+                isValid,
+                errorMsg ? "Invalid url" : ""
+              );
+            }}
+          />
         </div>
       </div>,
     ],
@@ -782,6 +1110,62 @@ const Blogs = (props: any): JSX.Element => {
         },
       },
     ],
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[2],
+            2,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Submit",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async () => {
+          await handleLinkSubmit(2);
+        },
+      },
+    ],
+    [
+      {
+        text: "Cancel",
+        btnType: "darkGreyVariant",
+        disabled: false,
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async () => {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[3],
+            3,
+            "close"
+          );
+        },
+      },
+      {
+        text: "Update",
+        btnType: "primaryGreen",
+        endIcon: false,
+        startIcon: false,
+        size: "large",
+        onClick: async () => {
+          await handleLinkSubmit(3);
+        },
+      },
+    ],
   ];
 
   const initialFetchData = async (): Promise<void> => {
@@ -790,7 +1174,11 @@ const Blogs = (props: any): JSX.Element => {
     await RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
       {
-        highPriorityGroups: [CONFIG.SPGroupName.Blogs_Admin],
+        highPriorityGroups: [
+          typeOfPage === CONFIG.blogType.Lesson
+            ? CONFIG.SPGroupName.LessonsLearned_Admin
+            : CONFIG.SPGroupName.PoliciesAndProcedures_Admin,
+        ],
       },
       dispatch
     );
@@ -798,7 +1186,10 @@ const Blogs = (props: any): JSX.Element => {
     await fetchCurUserData().then((res: ICurUserData[]) => {
       curUserDetail = res?.[0] || [];
     });
-    await fetchBlogDatas().then((res: IBlogColumnType[]) => {
+    await fetchHyperlinkDatas(typeOfPage).then((res: IHyperLinkData[]) => {
+      masterHyperLink = res;
+    });
+    await fetchBlogDatas(typeOfPage).then((res: IBlogColumnType[]) => {
       masterBlog = res;
     });
 
@@ -810,7 +1201,24 @@ const Blogs = (props: any): JSX.Element => {
   useEffect(() => {
     const urlObj = new URL(window.location.href);
     const params = new URLSearchParams(urlObj.search);
-    isActivityPage = params?.get("Page") === "activity" ? true : false;
+    isActivityPage =
+      params?.get("Page")?.toLowerCase() === "activity" ? true : false;
+    typeOfPage =
+      params?.get("Type")?.toLowerCase() === "lesson"
+        ? CONFIG.blogType.Lesson
+        : CONFIG.blogType.Policy;
+
+    if (typeOfPage === CONFIG.blogType.Lesson) {
+      setMasterTabs(CONFIG.LessonTabs);
+      setCurMasterTab(
+        isActivityPage ? CONFIG.LessonTabs[1] : CONFIG.LessonTabs[0]
+      );
+    } else {
+      setMasterTabs(CONFIG.PoliciesTabs);
+      setCurMasterTab(
+        isActivityPage ? CONFIG.PoliciesTabs[1] : CONFIG.PoliciesTabs[0]
+      );
+    }
 
     initialFetchData();
   }, []);
@@ -843,7 +1251,7 @@ const Blogs = (props: any): JSX.Element => {
                   }}
                 />
               </div>
-              <div className={styles.backHeader}>View Pernix wiki</div>
+              <div className={styles.backHeader}>View a Memo</div>
             </div>
           </div>
 
@@ -852,7 +1260,7 @@ const Blogs = (props: any): JSX.Element => {
             <div className={styles.VHeading}>{curBlogData?.Heading}</div>
             <div className={styles.VTag}>
               {curBlogData?.Tag?.split(",")?.map((val: string, ind: number) => {
-                return <Chip key={ind} label={`#${val}`} />;
+                return <Chip key={ind} label={`${val}`} />;
               }) || ""}
             </div>
             <img
@@ -1040,594 +1448,769 @@ const Blogs = (props: any): JSX.Element => {
       ) : !isCreate ? (
         <>
           {/* Header section */}
-          <div className={styles.headerContainer}>
-            <div className={styles.backContainer}>
-              <div
+          <div className={styles.masterHeaderContainer}>
+            <div
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={(_) => {
+                if (isActivityPage) {
+                  window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.ApprovalsPage,
+                    "_self"
+                  );
+                } else {
+                  window.open(
+                    props.context.pageContext.web.absoluteUrl +
+                      CONFIG.NavigatePage.PernixIntranet,
+                    "_self"
+                  );
+                }
+              }}
+            >
+              <i
+                className="pi pi-arrow-circle-left"
                 style={{
-                  cursor: "pointer",
-                }}
-                onClick={(_) => {
-                  if (isActivityPage) {
-                    window.open(
-                      props.context.pageContext.web.absoluteUrl +
-                        CONFIG.NavigatePage.ApprovalsPage,
-                      "_self"
-                    );
-                  } else {
-                    window.open(
-                      props.context.pageContext.web.absoluteUrl +
-                        CONFIG.NavigatePage.PernixIntranet,
-                      "_self"
-                    );
-                  }
-                }}
-              >
-                <i
-                  className="pi pi-arrow-circle-left"
-                  style={{
-                    fontSize: "26px",
-                    color: "#e0803d",
-                  }}
-                />
-              </div>
-              <div className={styles.backHeader}>Pernix wiki</div>
-            </div>
-
-            <div className={styles.searchContainer}>
-              <div
-                style={{
-                  display: isAdmin ? "flex" : "none",
-                }}
-              >
-                <CustomDropDown
-                  noErrorMsg
-                  width="180px"
-                  floatingLabel={false}
-                  size="SM"
-                  options={[...CONFIG.blogDrop]}
-                  value={comSearch.Status}
-                  placeholder="Select Status"
-                  onChange={(e: any) => {
-                    const value: any = e;
-                    searchField.Status = value;
-                    setComSearch((prev: IPageSearchFields) => ({
-                      ...prev,
-                      Status: value,
-                    }));
-                    handleSearch();
-                  }}
-                />
-              </div>
-              <div>
-                <CustomInput
-                  noErrorMsg
-                  secWidth="180px"
-                  size="SM"
-                  value={comSearch.Search}
-                  placeholder="Search"
-                  onChange={(e: any) => {
-                    const value: string = e.trimStart();
-                    searchField.Search = value;
-                    setComSearch((prev: IPageSearchFields) => ({
-                      ...prev,
-                      Search: value,
-                    }));
-                    handleSearch();
-                  }}
-                />
-              </div>
-              <div>
-                <CustomDateInput
-                  label="Select Date"
-                  minWidth="180px"
-                  maxWidth="180px"
-                  size="SM"
-                  value={comSearch?.Date}
-                  onChange={(e: any) => {
-                    const value: any = e;
-                    searchField.Date = value;
-                    setComSearch((prev: IPageSearchFields) => ({
-                      ...prev,
-                      Date: value,
-                    }));
-                    handleSearch();
-                  }}
-                />
-              </div>
-              <div
-                className={styles.refreshBTN}
-                onClick={(_) => {
-                  searchField.Search = "";
-                  searchField.Status = "";
-                  searchField.Date = null;
-                  setComSearch({ ...searchField });
-                  handleSearch();
-                }}
-              >
-                <i className="pi pi-refresh" />
-              </div>
-              <div>
-                <DefaultButton
-                  text="Add a blog"
-                  btnType="primaryGreen"
-                  startIcon={<Add />}
-                  onClick={(_) => {
-                    setIsCreate(true);
-                  }}
-                />
-              </div>
-            </div>
-            <div className={styles.ismobile}>
-              <DefaultButton
-                onlyIcon
-                btnType="primaryGreen"
-                startIcon={<Add />}
-                onClick={(_) => {
-                  setIsCreate(true);
+                  fontSize: "26px",
+                  color: "#e0803d",
                 }}
               />
             </div>
+            <div className={styles.backHeader}>{typeOfPage}</div>
           </div>
 
-          {/* Tab section */}
-          <div className={styles.tabsContainer}>
-            {CONFIG.BlogsTab.map((str: string, i: number) => {
-              return isAdmin ? (
-                <div
-                  key={i}
-                  style={{
-                    borderBottom:
-                      selectedTab === str ? "3px solid #e0803d" : "none",
-                  }}
-                  onClick={(_) => {
-                    setIsLoading(true);
-                    setPagination({ ...CONFIG.PaginationData });
-                    filterTabDatas(str);
-                  }}
-                >
-                  {str}
-                </div>
-              ) : (
-                i !== 2 && (
-                  <div
+          {/* Header section */}
+          <div className={styles.headerContainer}>
+            <div className={styles.masterTabsContainer}>
+              {masterTabs?.map((str: string, i: number) => {
+                return (
+                  <span
                     key={i}
                     style={{
-                      borderBottom:
-                        selectedTab === str ? "3px solid #e0803d" : "none",
+                      color: curMasterTab === str ? "#fff" : "#0b4d53",
+                      backgroundColor:
+                        curMasterTab === str ? "#0b4d53" : "transparent",
                     }}
                     onClick={(_) => {
-                      setIsLoading(true);
-                      setPagination({ ...CONFIG.PaginationData });
-                      filterTabDatas(str);
+                      searchField.Search = "";
+                      searchField.Status = "";
+                      searchField.Date = null;
+                      setComSearch({ ...searchField });
+                      filterTabDatas();
+                      searchForLink("");
+                      setCurMasterTab(str);
                     }}
                   >
                     {str}
+                  </span>
+                );
+              })}
+            </div>
+
+            {/* Search section */}
+            {curMasterTab === CONFIG.LessonTabs[0] ||
+            curMasterTab === CONFIG.PoliciesTabs[0] ? (
+              <>
+                <div className={styles.searchContainer}>
+                  <div>
+                    <CustomInput
+                      noErrorMsg
+                      secWidth="180px"
+                      size="SM"
+                      value={linkSearch}
+                      placeholder="Search"
+                      onChange={(e: any) => {
+                        const value: string = e.trimStart();
+                        searchForLink(value);
+                      }}
+                    />
                   </div>
-                )
-              );
-            })}
+                  <div
+                    className={styles.refreshBTN}
+                    onClick={(_) => {
+                      searchForLink("");
+                    }}
+                  >
+                    <i className="pi pi-refresh" />
+                  </div>
+                  <div
+                    style={{
+                      display: isAdmin ? "flex" : "none",
+                    }}
+                  >
+                    <DefaultButton
+                      text="Add"
+                      btnType="primaryGreen"
+                      startIcon={<Add />}
+                      onClick={(_) => {
+                        resetFormData(hyperForm, setHyperForm);
+                        setHyperForm({ ...initialHyperFormData });
+                        togglePopupVisibility(
+                          setPopupController,
+                          initialPopupController[2],
+                          2,
+                          "open"
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.searchContainer}>
+                  <div
+                    style={{
+                      display: isAdmin ? "flex" : "none",
+                    }}
+                  >
+                    <CustomDropDown
+                      noErrorMsg
+                      width="180px"
+                      floatingLabel={false}
+                      size="SM"
+                      options={[...CONFIG.blogDrop]}
+                      value={comSearch.Status}
+                      placeholder="Select Status"
+                      onChange={(e: any) => {
+                        const value: any = e;
+                        searchField.Status = value;
+                        setComSearch((prev: IPageSearchFields) => ({
+                          ...prev,
+                          Status: value,
+                        }));
+                        handleSearch();
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <CustomInput
+                      noErrorMsg
+                      secWidth="180px"
+                      size="SM"
+                      value={comSearch.Search}
+                      placeholder="Search"
+                      onChange={(e: any) => {
+                        const value: string = e.trimStart();
+                        searchField.Search = value;
+                        setComSearch((prev: IPageSearchFields) => ({
+                          ...prev,
+                          Search: value,
+                        }));
+                        handleSearch();
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <CustomDateInput
+                      label="Select Date"
+                      minWidth="180px"
+                      maxWidth="180px"
+                      size="SM"
+                      value={comSearch?.Date}
+                      onChange={(e: any) => {
+                        const value: any = e;
+                        searchField.Date = value;
+                        setComSearch((prev: IPageSearchFields) => ({
+                          ...prev,
+                          Date: value,
+                        }));
+                        handleSearch();
+                      }}
+                    />
+                  </div>
+                  <div
+                    className={styles.refreshBTN}
+                    onClick={(_) => {
+                      searchField.Search = "";
+                      searchField.Status = "";
+                      searchField.Date = null;
+                      setComSearch({ ...searchField });
+                      handleSearch();
+                    }}
+                  >
+                    <i className="pi pi-refresh" />
+                  </div>
+                  <div>
+                    <DefaultButton
+                      text="Add"
+                      btnType="primaryGreen"
+                      startIcon={<Add />}
+                      onClick={(_) => {
+                        setIsCreate(true);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className={styles.ismobile}>
+                  <DefaultButton
+                    onlyIcon
+                    btnType="primaryGreen"
+                    startIcon={<Add />}
+                    onClick={(_) => {
+                      setIsCreate(true);
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Body section */}
-          {selTabBlogs.length ? (
-            <div className={styles.bodyContainer}>
-              {selTabBlogs
-                ?.slice(pagination.first, pagination.first + pagination.rows)
-                ?.map((val: IBlogColumnType, idx: number) => {
-                  return (
+          {/* Master body section */}
+          {curMasterTab === CONFIG.LessonTabs[0] ||
+          curMasterTab === CONFIG.PoliciesTabs[0] ? (
+            <>
+              <div className={styles.detailsListContainer}>
+                <div className={styles.lableSec}>Name</div>
+                {arrHyperLinkData?.length ? (
+                  <div className={styles.bodySec}>
+                    {arrHyperLinkData?.map(
+                      (val: IHyperLinkData, Idx: number) => {
+                        return (
+                          <div key={Idx} className={styles.rowSec}>
+                            <div
+                              title={val?.Title}
+                              className={styles.titleSec}
+                              onClick={(_) => {
+                                window.open(val?.Links, "_blank");
+                              }}
+                            >
+                              {val?.Title}
+                            </div>
+                            <div
+                              className={styles.iconSec}
+                              style={{
+                                display: isAdmin ? "flex" : "none",
+                              }}
+                            >
+                              <Edit
+                                style={{
+                                  color: "#adadad",
+                                  cursor: "pointer",
+                                  fontSize: "22px",
+                                }}
+                                onClick={() => handleSelect({ ...val })}
+                              />
+                              <Delete
+                                style={{
+                                  color: "#ff0000",
+                                  cursor: "pointer",
+                                  fontSize: "22px",
+                                }}
+                                onClick={async () => {
+                                  await deleteHyperLinkData(
+                                    Number(val?.id)
+                                  ).then(() => {
+                                    masterHyperLink =
+                                      masterHyperLink?.filter(
+                                        (val: IHyperLinkData) =>
+                                          val?.id !== Number(val?.id)
+                                      ) || [];
+                                    setLinkSearch("");
+                                    setArrHyperLinkData([...masterHyperLink]);
+                                  });
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className="errorWrapper"
+                    style={{ height: "calc(100vh - 291px)" }}
+                  >
+                    <img src={errorGrey} alt="Error" />
+                    <span className="disabledText">{"No links found!"}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Tab section */}
+              <div className={styles.tabsContainer}>
+                {CONFIG.BlogsTab.map((str: string, i: number) => {
+                  return isAdmin ? (
                     <div
-                      key={idx}
-                      className={`${styles.cardSec} ${
-                        selectedTab === CONFIG.BlogsTab[2]
-                          ? styles.pendingApproval
-                          : styles.allblog
-                      }`}
-                      // className={styles.cardSec}
-                      // style={{
-                      //   height:
-                      //     selectedTab === CONFIG.BlogsTab[2]
-                      //       ? "494px"
-                      //       : "440px",
-                      // }}
+                      key={i}
+                      style={{
+                        borderBottom:
+                          selectedTab === str ? "3px solid #e0803d" : "none",
+                      }}
+                      onClick={(_) => {
+                        setIsLoading(true);
+                        setPagination({ ...CONFIG.PaginationData });
+                        filterTabDatas(str);
+                      }}
                     >
-                      <img
-                        className={styles.imgSec}
-                        src={val?.Attachments?.[0]?.serverRelativeUrl}
-                        alt="blog img"
-                      />
-                      <div className={styles.cardTag}>
-                        {/* <span>
-                          {val?.Tag?.split(",")?.map(
-                            (val: string, ind: number) => {
-                              return (
-                                <Chip
-                                  className={styles.mainChip}
-                                  key={ind}
-                                  label={val}
-                                />
-                              );
-                            }
-                          ) || ""}
-                        </span> */}
-                        <span className={styles.tagsWrap}>
-                          {val?.Tag?.split(",")?.map(
-                            (tag: string, Idx: number) => {
-                              if (Idx <= 1) {
+                      {str}
+                    </div>
+                  ) : (
+                    i !== 2 && (
+                      <div
+                        key={i}
+                        style={{
+                          borderBottom:
+                            selectedTab === str ? "3px solid #e0803d" : "none",
+                        }}
+                        onClick={(_) => {
+                          setIsLoading(true);
+                          setPagination({ ...CONFIG.PaginationData });
+                          filterTabDatas(str);
+                        }}
+                      >
+                        {str}
+                      </div>
+                    )
+                  );
+                })}
+              </div>
+
+              {/* Body section */}
+              {selTabBlogs.length ? (
+                <div className={styles.bodyContainer}>
+                  {selTabBlogs
+                    ?.slice(
+                      pagination.first,
+                      pagination.first + pagination.rows
+                    )
+                    ?.map((val: IBlogColumnType, idx: number) => {
+                      return (
+                        <div
+                          key={idx}
+                          className={`${styles.cardSec} ${
+                            selectedTab === CONFIG.BlogsTab[2]
+                              ? styles.pendingApproval
+                              : styles.allblog
+                          }`}
+                          // className={styles.cardSec}
+                          // style={{
+                          //   height:
+                          //     selectedTab === CONFIG.BlogsTab[2]
+                          //       ? "494px"
+                          //       : "440px",
+                          // }}
+                        >
+                          <img
+                            className={styles.imgSec}
+                            src={val?.Attachments?.[0]?.serverRelativeUrl}
+                            alt="blog img"
+                          />
+                          <div className={styles.cardTag}>
+                            {/* <span>
+                            {val?.Tag?.split(",")?.map(
+                              (val: string, ind: number) => {
                                 return (
                                   <Chip
-                                    key={Idx}
                                     className={styles.mainChip}
-                                    label={`#${tag}`}
+                                    key={ind}
+                                    label={val}
                                   />
                                 );
                               }
-                            }
-                          ) || ""}
-                          {val?.Tag?.split(",")?.length > 2 && (
-                            <div title={val?.Tag?.split(",")?.join(", ")}>
-                              <Chip
-                                key={"missing units"}
-                                className={styles.mainChip}
-                                label={`+${
-                                  val?.Tag?.split(",").length - 2
-                                } more`}
-                                clickable={false}
+                            ) || ""}
+                          </span> */}
+                            <span className={styles.tagsWrap}>
+                              {val?.Tag?.split(",")?.map(
+                                (tag: string, Idx: number) => {
+                                  if (Idx <= 1) {
+                                    return (
+                                      <Chip
+                                        key={Idx}
+                                        className={styles.mainChip}
+                                        label={`${tag}`}
+                                      />
+                                    );
+                                  }
+                                }
+                              ) || ""}
+                              {val?.Tag?.split(",")?.length > 2 && (
+                                <div title={val?.Tag?.split(",")?.join(", ")}>
+                                  <Chip
+                                    key={"missing units"}
+                                    className={styles.mainChip}
+                                    label={`+${
+                                      val?.Tag?.split(",").length - 2
+                                    } more`}
+                                    clickable={false}
+                                  />
+                                </div>
+                              )}
+                            </span>
+                            <div
+                              className={styles.icons}
+                              // style={{
+                              //   display: "flex",
+                              //   alignItems: "center",
+                              //   gap: "10px",
+                              // }}
+                            >
+                              <div
+                                style={{
+                                  display:
+                                    val?.Status ===
+                                      CONFIG.blogStatus.Approved && isAdmin
+                                      ? "flex"
+                                      : "none",
+                                }}
+                              >
+                                <InputSwitch
+                                  className="sectionToggler"
+                                  checked={val?.IsActive}
+                                  onChange={async (data: any) => {
+                                    const curIndex: number =
+                                      masterBlog?.findIndex(
+                                        (res: IBlogColumnType) =>
+                                          res?.ID === val?.ID
+                                      );
+                                    await updateBlogData(
+                                      Number(val?.ID),
+                                      {
+                                        IsActive: data?.value,
+                                      },
+                                      false
+                                    );
+                                    masterBlog[curIndex].IsActive = data?.value;
+                                    await filterTabDatas(selectedTab);
+                                  }}
+                                />
+                              </div>
+                              <i
+                                style={{
+                                  display:
+                                    (val?.Status !==
+                                      CONFIG.blogStatus.Pending &&
+                                      selectedTab === CONFIG.BlogsTab[1]) ||
+                                    (val?.Status !==
+                                      CONFIG.blogStatus.Pending &&
+                                      isAdmin)
+                                      ? "flex"
+                                      : "none",
+                                }}
+                                className="pi pi-pen-to-square"
+                                onClick={() => {
+                                  handleEdit(val, null, "edit");
+                                }}
+                              />
+                              <i
+                                style={{
+                                  display:
+                                    val?.Status !==
+                                      CONFIG.blogStatus.Approved &&
+                                    (selectedTab === CONFIG.BlogsTab[1] ||
+                                      isAdmin)
+                                      ? "flex"
+                                      : "none",
+                                }}
+                                className="pi pi-trash"
+                                onClick={() => {
+                                  const curIndex: number =
+                                    masterBlog?.findIndex(
+                                      (res: IBlogColumnType) =>
+                                        res?.ID === val?.ID
+                                    );
+                                  setSelData((prev: IBlogDetails) => ({
+                                    ...prev,
+                                    ID: val?.ID,
+                                    Idx: curIndex,
+                                  }));
+                                  togglePopupVisibility(
+                                    setPopupController,
+                                    initialPopupController[0],
+                                    0,
+                                    "open"
+                                  );
+                                }}
                               />
                             </div>
-                          )}
-                        </span>
-                        <div
-                          className={styles.icons}
-                          // style={{
-                          //   display: "flex",
-                          //   alignItems: "center",
-                          //   gap: "10px",
-                          // }}
-                        >
+                          </div>
+                          <div className={styles.cardHeading}>
+                            <span>{val?.Heading}</span>
+                            <div>
+                              <div
+                                style={{
+                                  display:
+                                    selectedTab === CONFIG.BlogsTab[0]
+                                      ? "none"
+                                      : "flex",
+                                  background:
+                                    val?.Status === CONFIG.blogStatus.Draft
+                                      ? "#51515136"
+                                      : val?.Status ===
+                                        CONFIG.blogStatus.Pending
+                                      ? "#cec41936"
+                                      : val?.Status ===
+                                        CONFIG.blogStatus.Approved
+                                      ? "#00bb0436"
+                                      : "#bb000036",
+                                  color:
+                                    val?.Status === CONFIG.blogStatus.Draft
+                                      ? "#515151"
+                                      : val?.Status ===
+                                        CONFIG.blogStatus.Pending
+                                      ? "#484502"
+                                      : val?.Status ===
+                                        CONFIG.blogStatus.Approved
+                                      ? "#00bb04"
+                                      : "#bb0000",
+                                }}
+                              >
+                                {val?.Status}
+                              </div>
+                              <i
+                                className="pi pi-arrow-up-right"
+                                onClick={() => {
+                                  const curIndex: number =
+                                    masterBlog?.findIndex(
+                                      (res: IBlogColumnType) =>
+                                        res?.ID === val?.ID
+                                    );
+                                  handleView(Number(val?.ID), curIndex);
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className={styles.cardBody}
+                            dangerouslySetInnerHTML={{
+                              __html: val?.Description,
+                            }}
+                          />
                           <div
                             style={{
-                              display: isAdmin ? "flex" : "none",
+                              display:
+                                isAdmin && selectedTab === CONFIG.BlogsTab[2]
+                                  ? "flex"
+                                  : "none",
                             }}
+                            className={styles.cardApproveSec}
                           >
-                            <InputSwitch
-                              className="sectionToggler"
-                              checked={val?.IsActive}
-                              onChange={async (data: any) => {
+                            <DefaultButton
+                              btnType="secondaryGreen"
+                              text="Approve"
+                              size="small"
+                              onClick={(_) => {
                                 const curIndex: number = masterBlog?.findIndex(
                                   (res: IBlogColumnType) => res?.ID === val?.ID
                                 );
-                                await updateBlogData(
-                                  Number(val?.ID),
-                                  {
-                                    IsActive: data?.value,
-                                  },
-                                  false
+                                setSelData((prev: IBlogDetails) => ({
+                                  ...prev,
+                                  ID: val?.ID,
+                                  Idx: curIndex,
+                                }));
+                                togglePopupVisibility(
+                                  setPopupController,
+                                  initialPopupController[1],
+                                  1,
+                                  "open"
                                 );
-                                masterBlog[curIndex].IsActive = data?.value;
-                                await filterTabDatas(selectedTab);
                               }}
                             />
                           </div>
-                          <i
-                            style={{
-                              display:
-                                (val?.Status !== CONFIG.blogStatus.Pending &&
-                                  selectedTab === CONFIG.BlogsTab[1]) ||
-                                isAdmin
-                                  ? "flex"
-                                  : "none",
-                            }}
-                            className="pi pi-pen-to-square"
-                            onClick={() => {
-                              handleEdit(val, null, "edit");
-                            }}
-                          />
-                          <i
-                            style={{
-                              display:
-                                val?.Status !== CONFIG.blogStatus.Approved &&
-                                (selectedTab === CONFIG.BlogsTab[1] || isAdmin)
-                                  ? "flex"
-                                  : "none",
-                            }}
-                            className="pi pi-trash"
-                            onClick={() => {
-                              const curIndex: number = masterBlog?.findIndex(
-                                (res: IBlogColumnType) => res?.ID === val?.ID
-                              );
-                              setSelData((prev: IBlogDetails) => ({
-                                ...prev,
-                                ID: val?.ID,
-                                Idx: curIndex,
-                              }));
-                              togglePopupVisibility(
-                                setPopupController,
-                                initialPopupController[0],
-                                0,
-                                "open"
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className={styles.cardHeading}>
-                        <span>{val?.Heading}</span>
-                        <div>
-                          <div
-                            style={{
-                              display:
-                                selectedTab === CONFIG.BlogsTab[0]
-                                  ? "none"
-                                  : "flex",
-                              background:
-                                val?.Status === CONFIG.blogStatus.Draft
-                                  ? "#51515136"
-                                  : val?.Status === CONFIG.blogStatus.Pending
-                                  ? "#cec41936"
-                                  : val?.Status === CONFIG.blogStatus.Approved
-                                  ? "#00bb0436"
-                                  : "#bb000036",
-                              color:
-                                val?.Status === CONFIG.blogStatus.Draft
-                                  ? "#515151"
-                                  : val?.Status === CONFIG.blogStatus.Pending
-                                  ? "#484502"
-                                  : val?.Status === CONFIG.blogStatus.Approved
-                                  ? "#00bb04"
-                                  : "#bb0000",
-                            }}
-                          >
-                            {val?.Status}
-                          </div>
-                          <i
-                            className="pi pi-arrow-up-right"
-                            onClick={() => {
-                              const curIndex: number = masterBlog?.findIndex(
-                                (res: IBlogColumnType) => res?.ID === val?.ID
-                              );
-                              handleView(Number(val?.ID), curIndex);
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div
-                        className={styles.cardBody}
-                        dangerouslySetInnerHTML={{
-                          __html: val?.Description,
-                        }}
-                      />
-                      <div
-                        style={{
-                          display:
-                            isAdmin && selectedTab === CONFIG.BlogsTab[2]
-                              ? "flex"
-                              : "none",
-                        }}
-                        className={styles.cardApproveSec}
-                      >
-                        <DefaultButton
-                          btnType="secondaryGreen"
-                          text="Approve"
-                          size="small"
-                          onClick={(_) => {
-                            const curIndex: number = masterBlog?.findIndex(
-                              (res: IBlogColumnType) => res?.ID === val?.ID
-                            );
-                            setSelData((prev: IBlogDetails) => ({
-                              ...prev,
-                              ID: val?.ID,
-                              Idx: curIndex,
-                            }));
-                            togglePopupVisibility(
-                              setPopupController,
-                              initialPopupController[1],
-                              1,
-                              "open"
-                            );
-                          }}
-                        />
-                      </div>
-                      <div className={styles.cardFooter}>
-                        <div className={styles.cardAvaSec}>
-                          <Avatar
-                            shape="circle"
-                            style={{
-                              width: "25px !important",
-                              height: "25px !important",
-                            }}
-                            image={`${CONFIG.userImageURL}${val?.AuthorEmail}`}
-                          />
-                          <div className={styles.userTexts}>
-                            <span className={styles.authorName}>
-                              {val?.AuthorName}
-                            </span>
-                            <span>{val?.Date}</span>
+                          <div className={styles.cardFooter}>
+                            <div className={styles.cardAvaSec}>
+                              <Avatar
+                                shape="circle"
+                                style={{
+                                  width: "25px !important",
+                                  height: "25px !important",
+                                }}
+                                image={`${CONFIG.userImageURL}${val?.AuthorEmail}`}
+                              />
+                              <div className={styles.userTexts}>
+                                <span className={styles.authorName}>
+                                  {val?.AuthorName}
+                                </span>
+                                <span>{val?.Date}</span>
+                              </div>
+                            </div>
+                            <div className={styles.cardAction}>
+                              <div
+                                className={styles.actions}
+                                onClick={async () => {
+                                  const curIndex: number =
+                                    masterBlog?.findIndex(
+                                      (res: IBlogColumnType) =>
+                                        res?.ID === val?.ID
+                                    );
+                                  await handleLike(Number(val?.ID), curIndex);
+                                }}
+                              >
+                                <i
+                                  className={
+                                    val?.LikedUsers?.some(
+                                      (id: string) => id === curUserDetail?.ID
+                                    )
+                                      ? "pi pi-thumbs-up-fill"
+                                      : "pi pi-thumbs-up"
+                                  }
+                                />
+                                <span>{val?.LikedUsers?.length}</span>
+                              </div>
+                              <div className={styles.actions}>
+                                <i className="pi pi-eye" />
+                                <span>{val?.ViewedUsers?.length}</span>
+                              </div>
+                              <div className={styles.actions}>
+                                <i className="pi pi-comment" />
+                                <span>{val?.CommentedUsers?.length}</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className={styles.cardAction}>
-                          <div
-                            className={styles.actions}
-                            onClick={async () => {
-                              const curIndex: number = masterBlog?.findIndex(
-                                (res: IBlogColumnType) => res?.ID === val?.ID
-                              );
-                              await handleLike(Number(val?.ID), curIndex);
-                            }}
-                          >
-                            <i
-                              className={
-                                val?.LikedUsers?.some(
-                                  (id: string) => id === curUserDetail?.ID
-                                )
-                                  ? "pi pi-thumbs-up-fill"
-                                  : "pi pi-thumbs-up"
-                              }
-                            />
-                            <span>{val?.LikedUsers?.length}</span>
-                          </div>
-                          <div className={styles.actions}>
-                            <i className="pi pi-eye" />
-                            <span>{val?.ViewedUsers?.length}</span>
-                          </div>
-                          <div className={styles.actions}>
-                            <i className="pi pi-comment" />
-                            <span>{val?.CommentedUsers?.length}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          ) : (
-            <div className={styles.bodyNoDataFound}>
-              There are no blogs available!
-            </div>
-          )}
+                      );
+                    })}
+                </div>
+              ) : (
+                <div className={styles.bodyNoDataFound}>
+                  There are no blogs available!
+                </div>
+              )}
 
-          {/* mobilefilter */}
+              {/* mobilefilter */}
+              <div className={styles.filtericon}>
+                <i
+                  className="pi pi-filter"
+                  onClick={() => {
+                    setIsfilter(!isfilter);
+                  }}
+                />
+              </div>
 
-          <div className={styles.filtericon}>
-            <i
-              className="pi pi-filter"
-              onClick={() => {
-                setIsfilter(!isfilter);
-              }}
-            />
-          </div>
-
-          <div
-            className={`${styles.filter_container} ${
-              isfilter ? styles.active_filter_container : ""
-            }`}
-
-            // className={`filter_container ${
-            //   isfilter ? "active_filter_container" : ""
-            // }`}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-                margin: "10px",
-              }}
-            >
               <div
-                style={{
-                  display: isAdmin ? "flex" : "none",
-                }}
+                className={`${styles.filter_container} ${
+                  isfilter ? styles.active_filter_container : ""
+                }`}
               >
-                <CustomDropDown
-                  noErrorMsg
-                  floatingLabel={false}
-                  width="180px"
-                  size="SM"
-                  options={[...CONFIG.blogDrop]}
-                  value={comSearch.Status}
-                  placeholder="All"
-                  onChange={(e: any) => {
-                    const value: any = e;
-                    searchField.Status = value;
-                    setComSearch((prev: IPageSearchFields) => ({
-                      ...prev,
-                      Status: value,
-                    }));
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    margin: "10px",
                   }}
-                />
-              </div>
-              <div>
-                <CustomInput
-                  noErrorMsg
-                  secWidth="180px"
-                  size="SM"
-                  value={comSearch.Search}
-                  placeholder="Search"
-                  onChange={(e: any) => {
-                    const value: string = e.trimStart();
-                    searchField.Search = value;
-                    setComSearch((prev: IPageSearchFields) => ({
-                      ...prev,
-                      Search: value,
-                    }));
-                    // handleSearch();
-                  }}
-                />
-              </div>
-              <div>
-                <CustomDateInput
-                  label="Select Date"
-                  size="SM"
-                  minWidth="180px"
-                  maxWidth="180px"
-                  value={comSearch?.Date}
-                  onChange={(e: any) => {
-                    const value: any = e;
-                    searchField.Date = value;
-                    setComSearch((prev: IPageSearchFields) => ({
-                      ...prev,
-                      Date: value,
-                    }));
-                    // handleSearch();
-                  }}
-                />
+                >
+                  <div
+                    style={{
+                      display: isAdmin ? "flex" : "none",
+                    }}
+                  >
+                    <CustomDropDown
+                      noErrorMsg
+                      floatingLabel={false}
+                      width="180px"
+                      size="SM"
+                      options={[...CONFIG.blogDrop]}
+                      value={comSearch.Status}
+                      placeholder="All"
+                      onChange={(e: any) => {
+                        const value: any = e;
+                        searchField.Status = value;
+                        setComSearch((prev: IPageSearchFields) => ({
+                          ...prev,
+                          Status: value,
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <CustomInput
+                      noErrorMsg
+                      secWidth="180px"
+                      size="SM"
+                      value={comSearch.Search}
+                      placeholder="Search"
+                      onChange={(e: any) => {
+                        const value: string = e.trimStart();
+                        searchField.Search = value;
+                        setComSearch((prev: IPageSearchFields) => ({
+                          ...prev,
+                          Search: value,
+                        }));
+                        // handleSearch();
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <CustomDateInput
+                      label="Select Date"
+                      size="SM"
+                      minWidth="180px"
+                      maxWidth="180px"
+                      value={comSearch?.Date}
+                      onChange={(e: any) => {
+                        const value: any = e;
+                        searchField.Date = value;
+                        setComSearch((prev: IPageSearchFields) => ({
+                          ...prev,
+                          Date: value,
+                        }));
+                        // handleSearch();
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <DefaultButton
+                      text="Apply"
+                      size="small"
+                      fullWidth
+                      btnType="primaryGreen"
+                      onClick={(_) => {
+                        // handleSearch([...shownewsData]);
+
+                        // handleSearch(strSearch, [...filDocDatas]);
+                        handleSearch();
+
+                        setIsfilter(!isfilter);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <DefaultButton
+                      text="Clear"
+                      size="small"
+                      fullWidth
+                      btnType="darkGreyVariant"
+                      onClick={(_) => {
+                        setIsfilter(!isfilter);
+                        searchField.Search = "";
+                        searchField.Status = "";
+                        searchField.Date = null;
+                        setComSearch({ ...searchField });
+                        handleSearch();
+
+                        // setStrSearch("");
+                        // handleSearch("", [...filDocDatas]);
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <DefaultButton
-                  text="Apply"
-                  size="small"
-                  fullWidth
-                  btnType="primaryGreen"
-                  onClick={(_) => {
-                    // handleSearch([...shownewsData]);
-
-                    // handleSearch(strSearch, [...filDocDatas]);
-                    handleSearch();
-
-                    setIsfilter(!isfilter);
+              {/* Pagination section */}
+              {selTabBlogs.length ? (
+                <div
+                  className="card"
+                  style={{
+                    padding: "4px 0px",
                   }}
-                />
-              </div>
-              <div>
-                <DefaultButton
-                  text="Clear"
-                  size="small"
-                  fullWidth
-                  btnType="darkGreyVariant"
-                  onClick={(_) => {
-                    setIsfilter(!isfilter);
-                    searchField.Search = "";
-                    searchField.Status = "";
-                    searchField.Date = null;
-                    setComSearch({ ...searchField });
-                    handleSearch();
-
-                    // setStrSearch("");
-                    // handleSearch("", [...filDocDatas]);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Pagination section */}
-          {selTabBlogs.length ? (
-            <div
-              className="card"
-              style={{
-                padding: "4px 0px",
-              }}
-            >
-              <Paginator
-                first={pagination.first}
-                rows={pagination.rows}
-                totalRecords={selTabBlogs.length}
-                onPageChange={onPageChange}
-                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-              />
-            </div>
-          ) : null}
+                >
+                  <Paginator
+                    first={pagination.first}
+                    rows={pagination.rows}
+                    totalRecords={selTabBlogs.length}
+                    onPageChange={onPageChange}
+                    template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+                  />
+                </div>
+              ) : null}
+            </>
+          )}
         </>
       ) : (
         <>
@@ -1653,7 +2236,7 @@ const Blogs = (props: any): JSX.Element => {
                 />
               </div>
               <div className={styles.backHeader}>
-                {curBlogData?.ID ? "Edit a Pernix wiki" : "Add a Pernix wiki"}
+                {curBlogData?.ID ? "Edit a Memo" : "Add a Memo"}
               </div>
             </div>
           </div>
@@ -1712,7 +2295,7 @@ const Blogs = (props: any): JSX.Element => {
                           <Chip
                             key={Idx}
                             className={styles.mainChip}
-                            label={`#${tag}`}
+                            label={`${tag}`}
                             onDelete={() => handleRemoveTag(Idx)}
                           />
                         );

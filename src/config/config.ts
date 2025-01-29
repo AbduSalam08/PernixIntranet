@@ -26,6 +26,9 @@ import {
   IProjectDocNames,
   IEDSearch,
   IEmployeeDirectoryUsersData,
+  IBlogType,
+  IHyperLinkColumn,
+  IHyperLinkData,
 } from "../interface/interface";
 
 export namespace CONFIG {
@@ -72,6 +75,7 @@ export namespace CONFIG {
     Intranet_PernixWiki: "Intranet_PernixWiki",
     HelpDesk_TicketLocationConfig: "HelpDesk_TicketLocationConfig",
     ProjectTemplate: "ProjectTemplate",
+    Intranet_Hyperlink: "Intranet_Hyperlink",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -91,6 +95,8 @@ export namespace CONFIG {
     Feedback_Admin: "Feedback_Admin",
     Blogs_Admin: "Blogs_Admin",
     EmployeeDirectory_Admin: "EmployeeDirectory_Admin",
+    LessonsLearned_Admin: "LessonsLearned_Admin",
+    PoliciesAndProcedures_Admin: "PoliciesAndProcedures_Admin",
   };
 
   export const UserMailPath: IUserMailPath = {
@@ -240,7 +246,8 @@ export namespace CONFIG {
 
   export const CommonentsName: ICommonentsName = {
     Birthdays: "Birthdays",
-    Blogs: "Blogs",
+    LessonsBlogs: "Lessons Learned",
+    PoliciesBlogs: "Policies and Procedures",
     Calendar: "Calendar",
     DocumentRepository: "Document Repository",
     Feedback: "Feedback",
@@ -268,8 +275,8 @@ export namespace CONFIG {
   };
 
   export const BlogsTab: string[] = [
-    "All blogs",
-    "My blogs",
+    "All",
+    "Created by me",
     "Pending approval",
   ];
 
@@ -281,6 +288,29 @@ export namespace CONFIG {
     Approved: "Approved",
     Rejected: "Rejected",
   };
+
+  export const blogType: IBlogType = {
+    Lesson: "Lessons Learned",
+    Policy: "Policies and Procedures",
+  };
+
+  export const HyperLinkData: IHyperLinkData = {
+    id: null,
+    Title: "",
+    Links: "",
+    Result: "",
+  };
+
+  export const HyperLinkColumn: IHyperLinkColumn = {
+    ID: "ID",
+    Title: "Title",
+    Links: "Links",
+    Result: "Result",
+  };
+
+  export const LessonTabs: string[] = ["Lessons", "Memo"];
+
+  export const PoliciesTabs: string[] = ["Policies", "Memo"];
 
   export const BlogColumn: IBlogColumn = {
     ID: "ID",
@@ -295,6 +325,7 @@ export namespace CONFIG {
     Attachments: "Attachments",
     Content: "Content",
     ApprovalOn: "ApprovalOn",
+    Result: "Result",
   };
 
   export const BlogColumnType: IBlogColumnType = {

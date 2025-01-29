@@ -66,9 +66,6 @@ const TicketForm: React.FC<TicketFormProps> = ({
 }) => {
   const [allTicketLocation, setAllTicketLocation] = useState<any[]>([]);
 
-  console.log("allTicketLocation: ", allTicketLocation);
-  console.log("formData: ", formData);
-
   useEffect(() => {
     const fetchTicketLocations = async (): Promise<any> => {
       try {
@@ -175,6 +172,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
                 value={formData?.Category?.value}
                 options={TicketCategories}
                 placeholder="Category"
+                size="MD"
                 isValid={formData?.Category?.isValid}
                 errorMsg={formData?.Category?.errorMsg}
                 onChange={(value) => {
