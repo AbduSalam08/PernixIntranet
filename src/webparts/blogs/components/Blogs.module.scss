@@ -20,6 +20,20 @@
   height: calc(100vh - 144px);
 }
 
+.masterHeaderContainer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+
+  .backHeader {
+    font-size: 22px;
+    font-weight: 600;
+    color: #0b4d53;
+    font-family: "osSemibold", sans-serif;
+  }
+}
+
 .headerContainer {
   display: flex;
   justify-content: space-between;
@@ -35,6 +49,21 @@
       font-size: 22px;
       font-weight: 600;
       color: #0b4d53;
+      font-family: "osSemibold", sans-serif;
+    }
+  }
+
+  .masterTabsContainer {
+    border: 1px solid #0b4d53;
+    display: inline-flex;
+    border-radius: 8px;
+    overflow: hidden;
+
+    span {
+      padding: 8px 40px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
       font-family: "osSemibold", sans-serif;
     }
   }
@@ -60,6 +89,53 @@
 
   .ismobile {
     display: none;
+  }
+}
+
+.detailsListContainer {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+
+  .lableSec {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 500;
+    color: #0b4d53;
+    border-bottom: 2px solid #0b4d53;
+    font-family: "osSemibold", sans-serif;
+  }
+
+  .bodySec {
+    height: calc(100vh - 291px);
+    overflow: auto;
+
+    .rowSec {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      align-items: center;
+      border-bottom: 1px solid #ececec;
+      padding: 4px 0px;
+
+      .titleSec {
+        line-height: 1.2;
+        font-size: 16px;
+        width: 90%;
+        cursor: pointer;
+        font-family: "osSemibold", sans-serif;
+      }
+
+      .iconSec {
+        width: 10%;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: end;
+      }
+    }
   }
 }
 

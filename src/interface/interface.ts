@@ -33,6 +33,7 @@ export interface IListName {
   Intranet_PernixWiki: string;
   HelpDesk_TicketLocationConfig: string;
   ProjectTemplate: string;
+  Intranet_Hyperlink: string;
 }
 
 export interface ISPGroupName {
@@ -52,6 +53,8 @@ export interface ISPGroupName {
   Feedback_Admin: string;
   Blogs_Admin: string;
   EmployeeDirectory_Admin: string;
+  LessonsLearned_Admin: string;
+  PoliciesAndProcedures_Admin: string;
 }
 
 export interface IUserMailPath {
@@ -242,7 +245,8 @@ export interface ICommonentsName {
   Feedback: string;
   NewHires: string;
   Birthdays: string;
-  Blogs: string;
+  LessonsBlogs: string;
+  PoliciesBlogs: string;
 }
 
 export interface IPageURL {
@@ -294,11 +298,30 @@ export interface ICurUserData {
   Title: string;
 }
 
+export interface IHyperLinkColumn {
+  ID: string;
+  Title: string;
+  Links: string;
+  Result: string;
+}
+
+export interface IHyperLinkData {
+  id: number | null;
+  Title: string;
+  Links: string;
+  Result: string;
+}
+
 export interface IBlogStatus {
   Draft: string;
   Pending: string;
   Approved: string;
   Rejected: string;
+}
+
+export interface IBlogType {
+  Lesson: string;
+  Policy: string;
 }
 
 export interface IBlogColumn {
@@ -314,6 +337,7 @@ export interface IBlogColumn {
   ApprovalOn: string;
   Attachments: string;
   Content: string;
+  Result: string;
 }
 
 export interface IBlogCommentsColumn {

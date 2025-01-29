@@ -14,7 +14,8 @@ import { sp } from "@pnp/sp/presets/all";
 
 /* Interfaces creation */
 interface Count {
-  Blog: number | any;
+  LBlog: number | any;
+  PBlog: number | any;
   QCeo: number | any;
   News: number | any;
 }
@@ -27,13 +28,6 @@ const arrLinksData: IPageURL[] = [
     GroupName: CONFIG.SPGroupName.Birthdays_Admin,
     URL: CONFIG.NavigatePage.BirthdayPage + "?Page=activity",
     Image: require("../assets/Birthday.png"),
-    IsAdmin: false,
-  },
-  {
-    Name: CONFIG.CommonentsName.Blogs,
-    GroupName: CONFIG.SPGroupName.Blogs_Admin,
-    URL: CONFIG.NavigatePage.BlogsPage + "?Page=activity",
-    Image: require("../assets/Blogs.png"),
     IsAdmin: false,
   },
   {
@@ -58,6 +52,13 @@ const arrLinksData: IPageURL[] = [
     IsAdmin: false,
   },
   {
+    Name: CONFIG.CommonentsName.LessonsBlogs,
+    GroupName: CONFIG.SPGroupName.LessonsLearned_Admin,
+    URL: CONFIG.NavigatePage.BlogsPage + "?Page=activity&Type=lesson",
+    Image: require("../assets/book.png"),
+    IsAdmin: false,
+  },
+  {
     Name: CONFIG.CommonentsName.MotivationBanner,
     GroupName: CONFIG.SPGroupName.Mainbanner_Admin,
     URL: CONFIG.NavigatePage.MotivationPage + "?Page=activity",
@@ -76,6 +77,13 @@ const arrLinksData: IPageURL[] = [
     GroupName: CONFIG.SPGroupName.News_Admin,
     URL: CONFIG.NavigatePage.NewsPage + "?Page=activity",
     Image: require("../assets/News.png"),
+    IsAdmin: false,
+  },
+  {
+    Name: CONFIG.CommonentsName.PoliciesBlogs,
+    GroupName: CONFIG.SPGroupName.PoliciesAndProcedures_Admin,
+    URL: CONFIG.NavigatePage.BlogsPage + "?Page=activity&Type=policy",
+    Image: require("../assets/bank.png"),
     IsAdmin: false,
   },
   {
@@ -106,7 +114,8 @@ const ApprovalsPage = (props: any): JSX.Element => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [arrMasterData, setArrMasterData] = useState<IPageURL[]>([]);
   const [count, setCount] = useState<Count>({
-    Blog: 0,
+    LBlog: 0,
+    PBlog: 0,
     QCeo: 0,
     News: 0,
   });
@@ -171,9 +180,14 @@ const ApprovalsPage = (props: any): JSX.Element => {
     const currentUser: any = await sp.web.currentUser.get();
     await getSuperAdminFun(currentUser?.Id ?? null);
 
-    const blog = await fetchListData({
+    const lessonBlog = await fetchListData({
       listName: CONFIG.ListNames.Intranet_Blogs,
-      filters: "Status eq 'Pending'",
+      filters: `Status eq 'Pending' and Result eq '${CONFIG.blogType.Lesson}'`,
+    });
+
+    const policyBlog = await fetchListData({
+      listName: CONFIG.ListNames.Intranet_Blogs,
+      filters: `Status eq 'Pending' and Result eq '${CONFIG.blogType.Policy}'`,
     });
 
     const Questionceo = await fetchListData({
@@ -189,7 +203,8 @@ const ApprovalsPage = (props: any): JSX.Element => {
     });
 
     setCount({
-      Blog: blog,
+      LBlog: lessonBlog,
+      PBlog: policyBlog,
       QCeo: Questionceo,
       News: NewsCount,
     });
@@ -346,10 +361,21 @@ const ApprovalsPage = (props: any): JSX.Element => {
 
                       <div>
                         {/* Conditional rendering of the badge */}
-                        {val.Name === CONFIG.CommonentsName.Blogs &&
-                        count.Blog > 0 ? (
+                        {val.Name === CONFIG.CommonentsName.LessonsBlogs &&
+                        count.LBlog > 0 ? (
                           <div className={styles.customBadge}>
-                            {count?.Blog > 99 ? count.Blog + "+" : count.Blog}
+                            {count?.LBlog > 99
+                              ? count.LBlog + "+"
+                              : count.LBlog}
+                          </div>
+                        ) : null}
+
+                        {val.Name === CONFIG.CommonentsName.PoliciesBlogs &&
+                        count.PBlog > 0 ? (
+                          <div className={styles.customBadge}>
+                            {count?.PBlog > 99
+                              ? count.PBlog + "+"
+                              : count.PBlog}
                           </div>
                         ) : null}
 

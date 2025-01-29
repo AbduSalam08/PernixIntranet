@@ -10,6 +10,7 @@ import {
   IBlogColumnType,
   IBlogCommentsColumnType,
   ICurUserData,
+  IHyperLinkData,
 } from "../../interface/interface";
 import moment from "moment";
 import { ReactText } from "react";
@@ -432,12 +433,57 @@ export const fetchCurUserData = async (): Promise<ICurUserData[]> => {
   }
 };
 
-export const fetchBlogDatas = async (): Promise<IBlogColumnType[]> => {
+export const fetchHyperlinkDatas = async (
+  result: string
+): Promise<IHyperLinkData[]> => {
+  try {
+    const res: any[] = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_Hyperlink,
+      Filter: [
+        {
+          FilterKey: "Result",
+          Operator: "eq",
+          FilterValue: result,
+        },
+      ],
+      Topcount: 5000,
+      Orderby: "Created",
+      Orderbydecorasc: false,
+    });
+
+    console.log("res: ", res);
+    const resData: IHyperLinkData[] = await Promise.all(
+      res?.map((val: any) => {
+        return {
+          id: val?.ID || null,
+          Title: val?.Title || "",
+          Links: val?.Links || "",
+          Result: val?.Result || "",
+        };
+      }) || []
+    );
+
+    return [...resData];
+  } catch (err) {
+    return [];
+  }
+};
+
+export const fetchBlogDatas = async (
+  result: string
+): Promise<IBlogColumnType[]> => {
   try {
     const res: any[] = await SpServices.SPReadItems({
       Listname: CONFIG.ListNames.Intranet_Blogs,
       Select: "*, AttachmentFiles, Author/ID, Author/Title, Author/EMail",
       Expand: "AttachmentFiles, Author",
+      Filter: [
+        {
+          FilterKey: "Result",
+          Operator: "eq",
+          FilterValue: result,
+        },
+      ],
       Topcount: 5000,
       Orderby: "Created",
       Orderbydecorasc: false,
@@ -838,5 +884,108 @@ export const addBlogCommentsData = async (
     });
 
     return [];
+  }
+};
+
+export const addHyperLinkData = async (
+  data: any
+): Promise<IHyperLinkData[]> => {
+  const toastId = toast.loading("Creating a new hyperlink...");
+
+  try {
+    const res: any = await SpServices.SPAddItem({
+      Listname: CONFIG.ListNames.Intranet_Hyperlink,
+      RequestJSON: { ...data },
+    });
+
+    const resData: IHyperLinkData[] = [
+      {
+        id: res?.data?.Id || null,
+        Title: data?.Title || "",
+        Links: data?.Links || "",
+        Result: data?.Result || "",
+      },
+    ];
+
+    toast.update(toastId, {
+      render: "Hyperlink added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+
+    return [...resData];
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error adding the new hyperlink. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+
+    return [];
+  }
+};
+
+export const updateHyperLinkData = async (data: any): Promise<void> => {
+  const toastId = toast.loading("Updating a hyperlink...");
+
+  try {
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.Intranet_Hyperlink,
+      ID: data?.ID,
+      RequestJSON: { ...data },
+    });
+
+    toast.update(toastId, {
+      render: "Hyperlink updated successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error updating the hyperlink. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+export const deleteHyperLinkData = async (ID: number): Promise<void> => {
+  const toastId = toast.loading("Hyperlink deletion in progress...");
+
+  try {
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.Intranet_Hyperlink,
+      ID: ID,
+    });
+
+    toast.update(toastId, {
+      render: "Hyperlink deleted successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (err) {
+    console.log("err: ", err);
+
+    toast.update(toastId, {
+      render: "Error deleting the hyperlink. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
   }
 };
