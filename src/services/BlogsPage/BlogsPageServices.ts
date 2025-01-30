@@ -285,7 +285,6 @@ export const addComments = async (
   comment: string,
   id: number,
   TaggedPerson: any,
-
   setAllComment: any,
   allComment: any,
   curuser: any
@@ -615,7 +614,7 @@ export const addBlogData = async (
   arrMasterFiles: any,
   curUser: ICurUserData
 ): Promise<IBlogColumnType[]> => {
-  const toastId = toast.loading("Creating a new blog...");
+  const toastId = toast.loading("Creating a new memo...");
 
   try {
     let fileRes: any;
@@ -690,7 +689,7 @@ export const addBlogData = async (
     ];
 
     toast.update(toastId, {
-      render: "Blog added successfully!",
+      render: "Memo added successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -702,7 +701,7 @@ export const addBlogData = async (
     console.log("err: ", err);
 
     toast.update(toastId, {
-      render: "Error adding the new blog. Please try again.",
+      render: "Error adding the new memo. Please try again.",
       type: "error",
       isLoading: false,
       autoClose: 5000,
@@ -725,7 +724,7 @@ export const updateBlogData = async (
   let toastId: ReactText = "";
 
   if (isToast) {
-    toastId = toast.loading("Blog update in progress...");
+    toastId = toast.loading("Memo update in progress...");
   }
 
   try {
@@ -780,10 +779,10 @@ export const updateBlogData = async (
       toast.update(toastId, {
         render:
           data?.Status === CONFIG.blogStatus.Approved
-            ? "Blog approved successfully!"
+            ? "Memo approved successfully!"
             : data?.Status === CONFIG.blogStatus.Rejected
-            ? "Blog rejected successfully!"
-            : "Blog updated successfully!",
+            ? "Memo rejected successfully!"
+            : "Memo updated successfully!",
         type: "success",
         isLoading: false,
         autoClose: 5000,
@@ -794,7 +793,7 @@ export const updateBlogData = async (
 
     isToast &&
       toast.update(toastId, {
-        render: "Error updating the blog. Please try again.",
+        render: "Error updating the memo. Please try again.",
         type: "error",
         isLoading: false,
         autoClose: 5000,
@@ -804,7 +803,7 @@ export const updateBlogData = async (
 };
 
 export const deleteBlogData = async (ID: number): Promise<void> => {
-  const toastId = toast.loading("Blog deletion in progress...");
+  const toastId = toast.loading("Memo deletion in progress...");
 
   try {
     await SpServices.SPDeleteItem({
@@ -813,7 +812,7 @@ export const deleteBlogData = async (ID: number): Promise<void> => {
     });
 
     toast.update(toastId, {
-      render: "Blog deleted successfully!",
+      render: "Memo deleted successfully!",
       type: "success",
       isLoading: false,
       autoClose: 5000,
@@ -823,7 +822,7 @@ export const deleteBlogData = async (ID: number): Promise<void> => {
     console.log("err: ", err);
 
     toast.update(toastId, {
-      render: "Error deleting the blog. Please try again.",
+      render: "Error deleting the memo. Please try again.",
       type: "error",
       isLoading: false,
       autoClose: 5000,
