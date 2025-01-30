@@ -340,9 +340,10 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
         }}
       />
 
-      <div className={styles.carouselWrapper}>
+      {/* <div className={styles.carouselWrapper}> */}
+      <div>
         <div className={styles.contentSection}>
-          {CEOQuestions?.length == 0 ? (
+          {CEOQuestions?.length === 0 ? (
             <div className="errorWrapper" style={{ height: "50vh" }}>
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{"No questions found!"}</span>
@@ -355,7 +356,7 @@ const QuestionsCeoIntranet = ({ props }: any): JSX.Element => {
               showIndicators={true}
               showNavigators={false}
               circular
-              autoplayInterval={CEOQuestions?.length > 1 ? 8.64e7 : 8.64e7}
+              autoplayInterval={CEOQuestions?.length > 1 ? 6000 : 8.64e7}
               // responsiveOptions={responsiveOptions}
               itemTemplate={productTemplate}
             />

@@ -150,17 +150,19 @@
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-
-  .carouselWrapper {
-    height: 390px;
-  }
+  gap: 10px;
+  // .carouselWrapper {
+  //   height: 0;
+  // }
 
   .carousel {
-    padding: 15px 0px 15px 20px;
+    padding: 15px 20px;
+    // padding: 15px 0px 15px 20px;
     box-shadow: 0px -1px 4px 0px #b6b6b640;
     border-radius: 10px;
-    margin-top: 20px;
-    height: 100%;
+    // margin-top: 20px;
+    height: 400px;
+    // height: 100%;
     // min-height: 100px;
     // max-height: 350px;
     // overflow: auto;
@@ -170,7 +172,7 @@
       padding: 10px 0px 10px 10px;
 
       // overflow: auto;
-      margin-bottom: 10px;
+      // margin-bottom: 10px;
 
       &::-webkit-scrollbar {
         width: 2px !important;
@@ -267,7 +269,7 @@
       padding: 14px 0px 14px 14px;
       box-shadow: 0px -1px 4px 0px #b6b6b640;
       border-radius: 10px;
-      margin-top: 20px;
+      // margin-top: 20px;
       // min-height: 100px;
       // max-height: 350px;
       // overflow: auto;
@@ -275,9 +277,9 @@
       .Container {
         background-color: #fff;
         padding: 10px 0px 10px 10px;
-        height: 350px;
+        // height: 350px;
         // overflow: auto;
-        margin-bottom: 10px;
+        // margin-bottom: 10px;
 
         &::-webkit-scrollbar {
           width: 2px !important;
@@ -428,5 +430,5 @@
   }
 }
 .ViewAllUnique {
-  margin-top: 30px;
+  margin-top: 0px;
 }

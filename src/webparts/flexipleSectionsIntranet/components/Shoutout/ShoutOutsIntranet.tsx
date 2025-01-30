@@ -339,7 +339,8 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
         }}
       />
 
-      <div className={styles.carouselWrapper}>
+      {/* <div className={styles.carouselWrapper}> */}
+      <div>
         <div className={styles.carousel}>
           {shoutOutData?.isLoading ? (
             <CircularSpinner />
@@ -348,7 +349,7 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{shoutOutData?.error}</span>
             </div>
-          ) : shoutOutsData?.length == 0 ? (
+          ) : shoutOutsData?.length === 0 ? (
             <div className="errorWrapper" style={{ height: "50vh" }}>
               <img src={errorGrey} alt="Error" />
               <span className="disabledText">{"No shout outs found"}</span>
