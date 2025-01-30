@@ -308,9 +308,9 @@ export namespace CONFIG {
     Result: "Result",
   };
 
-  export const LessonTabs: string[] = ["Lessons", "Memo"];
+  export const LessonTabs: string[] = ["Lessons", "Memos"];
 
-  export const PoliciesTabs: string[] = ["Policies", "Memo"];
+  export const PoliciesTabs: string[] = ["Policies", "Memos"];
 
   export const BlogColumn: IBlogColumn = {
     ID: "ID",

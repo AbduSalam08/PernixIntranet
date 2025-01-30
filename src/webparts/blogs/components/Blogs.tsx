@@ -1662,7 +1662,11 @@ const Blogs = (props: any): JSX.Element => {
           curMasterTab === CONFIG.PoliciesTabs[0] ? (
             <>
               <div className={styles.detailsListContainer}>
-                <div className={styles.lableSec}>Name</div>
+                <div className={styles.lableSec}>
+                  {curMasterTab === CONFIG.LessonTabs[0]
+                    ? CONFIG.LessonTabs[0]
+                    : CONFIG.PoliciesTabs[0]}
+                </div>
                 {arrHyperLinkData?.length ? (
                   <div className={styles.bodySec}>
                     {arrHyperLinkData?.map(
@@ -1704,8 +1708,8 @@ const Blogs = (props: any): JSX.Element => {
                                   ).then(() => {
                                     masterHyperLink =
                                       masterHyperLink?.filter(
-                                        (val: IHyperLinkData) =>
-                                          val?.id !== Number(val?.id)
+                                        (link: IHyperLinkData) =>
+                                          link?.id !== Number(val?.id)
                                       ) || [];
                                     setLinkSearch("");
                                     setArrHyperLinkData([...masterHyperLink]);
@@ -2067,7 +2071,7 @@ const Blogs = (props: any): JSX.Element => {
                 </div>
               ) : (
                 <div className={styles.bodyNoDataFound}>
-                  There are no blogs available!
+                  There are no memos available!
                 </div>
               )}
 
@@ -2359,7 +2363,7 @@ const Blogs = (props: any): JSX.Element => {
                 <CustomMultipleFileUpload
                   placeholder="Click to upload attachments"
                   accept="application/*"
-                  selectedFilesMaxHeight={"60px"}
+                  selectedFilesMaxHeight={"90px"}
                   selectedFilesMinHeight={"50px"}
                   emptyFileMessage="No files selected"
                   multiple
