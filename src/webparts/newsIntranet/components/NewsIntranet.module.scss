@@ -146,3 +146,28 @@
     font-size: 10px;
   }
 }
+
+.description {
+  line-height: 23px;
+  font-size: 14px;
+  font-family: "osRegular" sans-serif;
+
+  p {
+    margin: 0;
+    // padding-left: 20px; /* Aligns text with bullet points */
+  }
+
+  ul {
+    list-style-type: disc;
+    padding-left: 40px;
+  }
+
+  ol {
+    list-style-type: decimal;
+    padding-left: 40px;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+}

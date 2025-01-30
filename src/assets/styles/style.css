@@ -420,6 +420,7 @@ body {
 }
 .p-carousel-indicators {
   gap: 5px !important;
+  z-index: 999;
 }
 
 /* .qustionceo .p-avatar {
