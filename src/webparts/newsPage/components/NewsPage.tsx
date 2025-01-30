@@ -474,10 +474,10 @@ const NewsPage = (props: any): JSX.Element => {
     }, {} as typeof dateInput);
 
     setDateInput(updatedFormData);
-    debugger;
     if (!hasErrors) {
       await handleApproveReject(selectID, isApprove, dateInput, "Approved");
       await getAllNewsData(dispatch);
+      setIsApprove(false);
       setDateInput({
         StartDate: {
           value: new Date(),
@@ -1006,13 +1006,15 @@ const NewsPage = (props: any): JSX.Element => {
                   {formData?.Authorname?.value}
                 </span>
               </div>
-
-              <span style={{ fontSize: "12px", color: "#adadad" }}>
-                {" "}
-                {`${moment(formData?.StartDate?.value).format(
-                  "MM/DD/YYYY"
-                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
-              </span>
+              {formData?.StartDate?.value && formData?.EndDate?.value && (
+                <span style={{ fontSize: "12px", color: "#adadad" }}>
+                  {`${moment(formData?.StartDate?.value).format(
+                    "MM/DD/YYYY"
+                  )} - ${moment(formData?.EndDate?.value).format(
+                    "MM/DD/YYYY"
+                  )}`}
+                </span>
+              )}
             </div>
           </div>
         ) : (
@@ -1073,13 +1075,16 @@ const NewsPage = (props: any): JSX.Element => {
               >
                 {isActive}
               </div>
-
-              <span style={{ fontSize: "14px", color: "#adadad" }}>
-                {" "}
-                {`${moment(formData?.StartDate?.value).format(
-                  "MM/DD/YYYY"
-                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
-              </span>
+              {formData?.StartDate?.value && formData?.EndDate?.value && (
+                <span style={{ fontSize: "14px", color: "#adadad" }}>
+                  {" "}
+                  {`${moment(formData?.StartDate?.value).format(
+                    "MM/DD/YYYY"
+                  )} - ${moment(formData?.EndDate?.value).format(
+                    "MM/DD/YYYY"
+                  )}`}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -1523,12 +1528,12 @@ const NewsPage = (props: any): JSX.Element => {
       StartDate: {
         ...formData.StartDate,
         isValid: true,
-        value: new Date(item.StartDate) || null,
+        value: item?.StartDate ? new Date(item.StartDate) : null,
       },
       EndDate: {
         ...formData.EndDate,
         isValid: true,
-        value: new Date(item.EndDate) || null,
+        value: item.EndDate ? new Date(item.EndDate) : null,
       },
       Status: {
         ...formData.Status,
@@ -1545,7 +1550,6 @@ const NewsPage = (props: any): JSX.Element => {
         isValid: true,
         value: item.description || "",
       },
-
       Author: {
         ...formData.Author,
         isValid: true,
@@ -1695,7 +1699,7 @@ const NewsPage = (props: any): JSX.Element => {
     );
 
     if (newsIntranetData?.data[curIndex]) {
-      const updatedData = [...newsIntranetData?.data];
+      const updatedData = newsIntranetData?.data || [];
       updatedData[curIndex] = { ...updatedData[curIndex], isActive: status };
 
       // setNewsData([...updatedData]);

@@ -336,8 +336,8 @@ const CustomDropDown: React.FC<Props> = ({
         width: width,
         // border: highlightDropdown ? "1px solid #eeeeee" : "none",
         borderRadius: "6px",
-        height: "100%",
-        overflow: "hidden",
+        height: "auto",
+        // overflow: "hidden",
       }}
     >
       <ThemeProvider theme={customTheme(outerTheme)}>

@@ -171,7 +171,8 @@ const CustomAutocomplete: React.FC<AutocompleteProps> = ({
       const isOptionExist = dynamicOptions.some(
         (option: any) =>
           option === newValue ||
-          (option.inputValue && option.inputValue === newValue)
+          (option.inputValue &&
+            option.inputValue?.toLowerCase() === newValue?.toLowerCase())
       );
 
       const newSelectedValue =
@@ -207,8 +208,10 @@ const CustomAutocomplete: React.FC<AutocompleteProps> = ({
           const { inputValue } = params;
 
           // Suggest the creation of a new value if it doesn't exist
-          const isExisting = options.some((option) => inputValue === option);
-          if (inputValue !== "" && !isExisting) {
+          const isExisting = options.some(
+            (option) => inputValue?.toLowerCase() === option?.toLowerCase()
+          );
+          if (inputValue?.trim() !== "" && !isExisting) {
             filtered.push({
               inputValue,
               title: `Add "${inputValue}"`,

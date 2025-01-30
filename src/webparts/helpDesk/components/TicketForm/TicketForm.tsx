@@ -64,6 +64,7 @@ const TicketForm: React.FC<TicketFormProps> = ({
   isTicketManager,
   isITOwner,
 }) => {
+  console.log("formData: ", formData);
   const [allTicketLocation, setAllTicketLocation] = useState<any[]>([]);
 
   useEffect(() => {
@@ -203,14 +204,15 @@ const TicketForm: React.FC<TicketFormProps> = ({
                       handleInputChange("Priority", value, isValid, errorMsg);
                     }}
                   />
-                  {priorityLevelIntimations[formData?.Priority?.value] && (
+                  {priorityLevelIntimations?.[formData?.Priority?.value] && (
                     <img src={infoRed} />
                   )}
                 </div>
-                {priorityLevelIntimations[formData?.Priority?.value] ? (
+                {priorityLevelIntimations?.[formData?.Priority?.value] ? (
                   <span className={styles.priorityIntimation}>
                     Note:{" "}
-                    {priorityLevelIntimations[formData?.Priority?.value] ?? ""}
+                    {priorityLevelIntimations?.[formData?.Priority?.value] ??
+                      ""}
                   </span>
                 ) : (
                   ""

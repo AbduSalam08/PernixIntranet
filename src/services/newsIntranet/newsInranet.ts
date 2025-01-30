@@ -63,8 +63,8 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
       const title = item.Title;
       const description = item.Description;
       const Status = item.Status;
-      const StartDate = item.StartDate;
-      const EndDate = item.EndDate;
+      const StartDate = item.StartDate ? item?.StartDate : null;
+      const EndDate = item.EndDate ? item?.EndDate : null;
       const ID = item.Id || item.ID;
       const Author = item?.Author?.EMail || "";
       const AuthorName = item?.Author?.Title || "";
