@@ -1137,11 +1137,12 @@ const MyTickets = (): JSX.Element => {
                     HelpDeskTicktesData?.AllData?.filter(
                       (item: any) => item?.TicketNumber === ticketNumber
                     )?.[0];
+                  console.log("currentRowData: ", currentRowData);
 
                   const currentAttachment = await getAttachmentofTicket(
                     currentRowData?.ID
                   );
-                  const currentGraphUser = await getUserProfileById();
+                  // const currentGraphUser = await getUserProfileById();
 
                   setLoadingSubmit(false);
                   setSubmitClicked(false);
@@ -1176,9 +1177,10 @@ const MyTickets = (): JSX.Element => {
                     },
                     TicketLocation: {
                       ...prev?.TicketLocation,
-                      value:
-                        currentGraphUser?.officeLocation ??
-                        prev?.TicketLocation?.value,
+                      value: prev?.TicketLocation?.value,
+                      // ? prev?.TicketLocation?.value
+                      // : currentGraphUser?.officeLocation ??
+                      //   prev?.TicketLocation?.value,
                     },
                   }));
 

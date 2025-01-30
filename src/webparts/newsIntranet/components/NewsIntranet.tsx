@@ -133,9 +133,9 @@ const NewsIntranet = (props: any): JSX.Element => {
   const newsIntranetData: any = useSelector((state: any) => {
     return state.NewsIntranetData.value;
   });
-  const currentUserDetails: any = useSelector(
-    (state: any) => state?.MainSPContext?.currentUserDetails
-  );
+  // const currentUserDetails: any = useSelector(
+  //   (state: any) => state?.MainSPContext?.currentUserDetails
+  // );
 
   const handleInputChange = (
     field: string,
@@ -495,13 +495,16 @@ const NewsIntranet = (props: any): JSX.Element => {
                   {formData?.Authorname?.value}
                 </span>
               </div>
-
-              <span style={{ fontSize: "12px", color: "#adadad" }}>
-                {" "}
-                {`${moment(formData?.StartDate?.value).format(
-                  "MM/DD/YYYY"
-                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
-              </span>
+              {formData?.StartDate?.value && formData?.EndDate?.value && (
+                <span style={{ fontSize: "12px", color: "#adadad" }}>
+                  {" "}
+                  {`${moment(formData?.StartDate?.value).format(
+                    "MM/DD/YYYY"
+                  )} - ${moment(formData?.EndDate?.value).format(
+                    "MM/DD/YYYY"
+                  )}`}
+                </span>
+              )}
             </div>
           </div>
         ) : (
@@ -562,23 +565,25 @@ const NewsIntranet = (props: any): JSX.Element => {
               >
                 {isActive}
               </div>
-
-              <span style={{ fontSize: "14px", color: "#adadad" }}>
-                {" "}
-                {`${moment(formData?.StartDate?.value).format(
-                  "MM/DD/YYYY"
-                )} - ${moment(formData?.EndDate?.value).format("MM/DD/YYYY")}`}
-              </span>
+              {formData?.StartDate?.value && formData?.EndDate?.value && (
+                <span style={{ fontSize: "14px", color: "#adadad" }}>
+                  {`${moment(formData?.StartDate?.value).format(
+                    "MM/DD/YYYY"
+                  )} - ${moment(formData?.EndDate?.value).format(
+                    "MM/DD/YYYY"
+                  )}`}
+                </span>
+              )}
             </div>
           </div>
         )}
 
         <div
-          style={{
-            lineHeight: "23px",
-            fontSize: "14px",
-            fontFamily: "osRegular",
-          }}
+          className={styles.description} // style={{
+          //   lineHeight: "23px",
+          //   fontSize: "14px",
+          //   fontFamily: "osRegular",
+          // }}
           dangerouslySetInnerHTML={{
             __html: formData?.Description?.value || "",
           }}
@@ -716,12 +721,12 @@ const NewsIntranet = (props: any): JSX.Element => {
       StartDate: {
         ...formData.StartDate,
         isValid: true,
-        value: new Date(item.StartDate) || null,
+        value: item.StartDate ? new Date(item.StartDate) : null,
       },
       EndDate: {
         ...formData.EndDate,
         isValid: true,
-        value: new Date(item.EndDate) || null,
+        value: item.EndDate ? new Date(item.EndDate) : null,
       },
       Status: {
         ...formData.Status,
@@ -777,9 +782,9 @@ const NewsIntranet = (props: any): JSX.Element => {
         <SectionHeaderIntranet
           label={"News"}
           title="Add a new news"
-          removeAdd={
-            currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
-          }
+          // removeAdd={
+          //   currentUserDetails.role === CONFIG.RoleDetails.user ? true : false
+          // }
           headerAction={() => {
             togglePopupVisibility(
               setPopupController,

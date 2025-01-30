@@ -366,8 +366,9 @@
 .description {
   line-height: 23px;
   font-size: 14px;
-  font-family: "osRegular" sans-serif;
-
+  * {
+    font-family: "osRegular", sans-serif !important;
+  }
   p {
     margin: 0;
     // padding-left: 20px; /* Aligns text with bullet points */
@@ -385,6 +386,9 @@
 
   li {
     margin-bottom: 5px;
+  }
+  strong {
+    font-family: "osSemiBold", sans-serif !important;
   }
 }
 .approvePopupContent {

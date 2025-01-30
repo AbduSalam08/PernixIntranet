@@ -10,23 +10,23 @@
   background-color: #d9d9d940;
   height: 42px;
   border: 0 !important;
-  font-family: "interRegular", sans-serif;
+  font-family: "osRegular", sans-serif;
 }
 .customeRichText .ql-container {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   border: 1px solid #eee !important;
-  font-family: "interRegular", sans-serif;
+  font-family: "osRegular", sans-serif;
   /* height: 363px !important; */
   height: calc(100% - 55px) !important;
 }
 strong {
-  font-family: "interSemiBold", sans-serif !important;
+  font-family: "osSemiBold", sans-serif !important;
 }
 em {
   font-style: italic !important;
 }
-.ql-snow .ql-editor img { 
+.ql-snow .ql-editor img {
   max-width: 400px;
 }
 .ql-editor img {
@@ -43,13 +43,13 @@ em {
   margin-right: 8px;
   vertical-align: middle !important;
 }
-.ql-editor a{
+.ql-editor a {
   vertical-align: middle !important;
   margin-right: 10px;
 }
-.ql-action{
+.ql-action {
   display: none !important;
 }
-.ql-remove{
+.ql-remove {
   display: none !important;
 }
