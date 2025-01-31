@@ -1699,7 +1699,9 @@ const NewsPage = (props: any): JSX.Element => {
     );
 
     if (newsIntranetData?.data[curIndex]) {
-      const updatedData = newsIntranetData?.data || [];
+      const updatedData = newsIntranetData?.data
+        ? [...newsIntranetData.data]
+        : [];
       updatedData[curIndex] = { ...updatedData[curIndex], isActive: status };
 
       // setNewsData([...updatedData]);
