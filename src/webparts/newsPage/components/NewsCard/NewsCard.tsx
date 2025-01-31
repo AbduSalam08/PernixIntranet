@@ -61,6 +61,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   noActionsAndStatus = false,
   selectedTab,
 }) => {
+  console.log("description: ", description);
   const handleEdit = (): void => {
     if (handleEditClick) {
       setisDelete?.(false);
@@ -146,9 +147,9 @@ const NewsCard: React.FC<NewsCardProps> = ({
         <div
           className={styles.description}
           dangerouslySetInnerHTML={{
-            __html: description || "",
+            __html: typeof description === "string" ? description : "",
           }}
-        ></div>
+        />
         {/* <span title={description}>{description}</span> */}
       </div>
 
