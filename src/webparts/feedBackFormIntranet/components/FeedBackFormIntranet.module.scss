@@ -135,6 +135,7 @@
     .footerBTNSec {
       margin-top: 16px;
       flex-direction: column;
+      align-items: flex-end;
       gap: 10px;
 
       .sendBTN {

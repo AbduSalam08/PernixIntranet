@@ -3,6 +3,9 @@
   height: calc(100vh - 128px);
   background-color: #f0f0f0;
   padding: 16px 30px;
+  @media(max-width:500px){
+    padding: 0;
+  }
 }
 
 .allblog {
@@ -31,6 +34,12 @@
     font-weight: 600;
     color: #0b4d53;
     font-family: "osSemibold", sans-serif;
+
+    @media(max-width:400px){
+      font-size: 18px;
+
+    }   
+
   }
 }
 
@@ -65,6 +74,17 @@
       font-size: 16px;
       font-weight: 500;
       font-family: "osSemibold", sans-serif;
+      @media(max-width:450px){  
+        padding: 6px 20px;
+        font-size: 14px;
+      }
+
+   
+        @media(max-width:400px){  
+          padding: 6px 15px;
+          font-size: 12px;
+        }
+      
     }
   }
 
@@ -106,6 +126,12 @@
     color: #0b4d53;
     border-bottom: 2px solid #0b4d53;
     font-family: "osSemibold", sans-serif;
+
+    @media (max-width:400px){
+      font-size: 14px;
+
+
+    }
   }
 
   .bodySec {
@@ -126,6 +152,9 @@
         width: 90%;
         cursor: pointer;
         font-family: "osSemibold", sans-serif;
+        @media(max-width:400px){
+          font-size: 13px;
+        }
       }
 
       .iconSec {
@@ -134,6 +163,16 @@
         flex-direction: row;
         gap: 8px;
         justify-content: end;
+        .btn{
+          font-size: 22px;
+          @media (max-width:400px) {
+       
+            font-size: 18px !important;
+          
+            
+          }
+        }
+       
       }
     }
   }
@@ -898,6 +937,7 @@
   }
   .headerContainer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
@@ -982,9 +1022,9 @@
       padding: 6px;
       width: 100%;
       margin-bottom: 20px;
-      .richtextwrapper {
-        width: 1000px;
-      }
+      // .richtextwrapper {
+      //   width: 1000px;
+      // }
     }
 
     .thirdRow {
@@ -1233,6 +1273,7 @@
   }
   .headerContainer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
@@ -1248,6 +1289,7 @@
         font-family: "osSemibold", sans-serif;
       }
     }
+  
 
     .searchContainer {
       display: none;
@@ -1275,6 +1317,7 @@
   .bodyContainer {
     grid-template-columns: 1fr !important;
     height: auto;
+    padding: 0;
   }
 
   .formBodySec {
@@ -1315,9 +1358,9 @@
       padding: 6px;
       width: 100%;
       margin-bottom: 20px;
-      .richtextwrapper {
-        width: 1000px;
-      }
+      // .richtextwrapper {
+      //   width: 1000px;
+      // }
     }
 
     .thirdRow {

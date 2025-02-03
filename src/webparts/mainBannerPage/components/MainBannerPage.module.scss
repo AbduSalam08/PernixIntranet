@@ -219,12 +219,17 @@
     margin-bottom: 20px;
     .item {
       width: 50%;
+      @media (max-width: 600px) {
+        width: 100%;
+        
+      }
     }
     // div {
     //   width: 100%;
     // }
     @media (max-width: 600px) {
       flex-direction: column;
+
     }
   }
 

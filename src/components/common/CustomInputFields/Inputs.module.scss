@@ -80,6 +80,9 @@
   background-color: #fff;
   min-width: 265px;
   width: 100%;
+  @media(max-width:400px){
+    min-width: unset;
+  }
 
   input {
     font-size: 14px;
