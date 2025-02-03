@@ -1,5 +1,8 @@
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // import dayjs from "dayjs";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
@@ -110,8 +113,31 @@ export const getAllNewsData = async (dispatch: any): Promise<any> => {
   }
 };
 
-export const addNews = async (formData: any, status?: string): Promise<any> => {
-  const toastId = toast.loading("Creating news...");
+export const addNews = async (
+  formData: any,
+  setLoaderState: any,
+  index: number,
+  status?: string
+): Promise<any> => {
+  let toastId: any;
+
+  if (status !== "Pending") {
+    toastId = toast.loading("Creating news...");
+  } else {
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: true,
+          error: false,
+          success: false,
+        },
+      };
+      return updatedState;
+    });
+  }
 
   try {
     // Prepare payload by omitting thumbnail
@@ -124,7 +150,7 @@ export const addNews = async (formData: any, status?: string): Promise<any> => {
           // key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
           //   ? null
           //   :  ? dayjs(formData[key].value).toDate()
-          key == "Status" ? status : formData[key].value;
+          key === "Status" ? status : formData[key].value;
       }
       return acc;
     }, {});
@@ -145,23 +171,65 @@ export const addNews = async (formData: any, status?: string): Promise<any> => {
       });
     }
 
-    toast.update(toastId, {
-      render: "News added successfully!",
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    if (status !== "Pending") {
+      toast.update(toastId, {
+        render: "News added successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    } else {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: true,
+            error: false,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            successDescription:
+              "Thank you for contributing. Your post will be reviewed by an administrator shortly. Once approved, it will be live on the intranet.",
+          },
+        };
+        return updatedState;
+      });
+    }
   } catch (error) {
     console.error("Error while adding news:", error);
 
-    toast.update(toastId, {
-      render: "Error adding new news. Please try again.",
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    if (status !== "Pending") {
+      toast.update(toastId, {
+        render: "Error adding new news. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    } else {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: false,
+            error: true,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            errorDescription:
+              "An error occurred while assigning the leader. Please try again.",
+          },
+        };
+        return updatedState;
+      });
+    }
   }
 };
 
@@ -169,9 +237,29 @@ export const editNews = async (
   formData: any,
   itemId: number,
   isfile: boolean,
+  setLoaderState: any,
+  index: number,
   status?: string
 ): Promise<any> => {
-  const toastId = toast.loading("Updating the news in progress...");
+  let toastId: any;
+
+  if (status !== "Pending") {
+    toastId = toast.loading("Updating the news in progress...");
+  } else {
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: true,
+          error: false,
+          success: false,
+        },
+      };
+      return updatedState;
+    });
+  }
 
   try {
     // Prepare payload by omitting thumbnail
@@ -181,7 +269,7 @@ export const editNews = async (
           key.toLowerCase() === "startdate" || key.toLowerCase() === "enddate"
             ? null
             : // ? dayjs(formData[key].value).toDate()
-            key == "Status"
+            key === "Status"
             ? status
             : formData[key].value;
       }
@@ -218,23 +306,65 @@ export const editNews = async (
       }
     }
 
-    toast.update(toastId, {
-      render: "News updated successfully!",
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    if (status !== "Pending") {
+      toast.update(toastId, {
+        render: "News updated successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    } else {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: true,
+            error: false,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            successDescription:
+              "Thank you for contributing. Your post will be reviewed by an administrator shortly. Once approved, it will be live on the intranet.",
+          },
+        };
+        return updatedState;
+      });
+    }
   } catch (error) {
     console.error("Error while editing news:", error);
 
-    toast.update(toastId, {
-      render: "An error occurred while updating this news. Please try again.",
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    if (status !== "Pending") {
+      toast.update(toastId, {
+        render: "An error occurred while updating this news. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
+    } else {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: false,
+            error: true,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            errorDescription:
+              "An error occurred while assigning the leader. Please try again.",
+          },
+        };
+        return updatedState;
+      });
+    }
   }
 };
 

@@ -1,4 +1,5 @@
 /* eslint-disable no-debugger */
+/* eslint-disable max-lines */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -419,26 +420,30 @@ const NewsPage = (props: any): JSX.Element => {
         setIsEdit(false);
         setisDelete(false);
         resetFormData(formData, setFormData);
-        togglePopupVisibility(
-          setPopupController,
-          initialPopupController[1],
-          1,
-          "close"
-        );
-        await editNews(formData, id, isfile, status);
+        if (status !== "Pending") {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[1],
+            1,
+            "close"
+          );
+        }
+        await editNews(formData, id, isfile, setPopupController, 1, status);
         setIsile(false);
         await getAllNewsData(dispatch);
       } else {
         setIsEdit(false);
         setisDelete(false);
         resetFormData(formData, setFormData);
-        togglePopupVisibility(
-          setPopupController,
-          initialPopupController[0],
-          0,
-          "close"
-        );
-        await addNews(formData, status);
+        if (status !== "Pending") {
+          togglePopupVisibility(
+            setPopupController,
+            initialPopupController[0],
+            0,
+            "close"
+          );
+        }
+        await addNews(formData, setPopupController, 0, status);
         setIsile(false);
         await getAllNewsData(dispatch);
       }
@@ -1774,7 +1779,7 @@ const NewsPage = (props: any): JSX.Element => {
     handleSearch([...filteredData]);
   };
   const handleResponsiveChange = (): void => {
-    setIsMobile(window.innerWidth <= 768);
+    setIsMobile(window.innerWidth <= 900);
   };
   const init = async (): Promise<void> => {
     await RoleAuth(
@@ -2129,7 +2134,7 @@ const NewsPage = (props: any): JSX.Element => {
               noErrorMsg
               width={"200px"}
               floatingLabel={false}
-              options={["Active", "Inactive"]}
+              options={["Pending", "Approved", "Rejected", "Draft"]}
               placeholder="Status"
               onChange={(value) => {
                 objFilter.Status = value;

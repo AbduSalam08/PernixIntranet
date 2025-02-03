@@ -68,6 +68,7 @@ import RichText from "../../../components/common/RichText/RichText";
 import { Chip } from "@mui/material";
 import CustomFilePicker from "../../../components/common/CustomInputFields/CustomFilePicker";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 /* Interface creation */
 interface IBlogField {
@@ -134,7 +135,7 @@ const Blogs = (props: any): JSX.Element => {
         success: false,
       },
       messages: {
-        success: "Blog deleted successfully!",
+        success: "Memo deleted successfully!",
         error: "Something went wrong!",
         successDescription: "The blog 'ABC' has been deleted successfully.",
         errorDescription:
@@ -156,7 +157,7 @@ const Blogs = (props: any): JSX.Element => {
         success: false,
       },
       messages: {
-        success: "Blog approved successfully!",
+        success: "Memo approved successfully!",
         error: "Something went wrong!",
         successDescription: "The blog 'ABC' has been approved successfully.",
         errorDescription:
@@ -205,6 +206,28 @@ const Blogs = (props: any): JSX.Element => {
         errorDescription:
           "An error occured while update hyperlink, please try again later.",
         inprogress: "Update hyperlink, please wait...",
+      },
+    },
+    {
+      open: false,
+      popupTitle: "Confirmation",
+      popupWidth: "450px",
+      popupType: "custom",
+      centerActionBtn: true,
+      defaultCloseBtn: false,
+      popupData: "",
+      isLoading: {
+        inprogress: false,
+        error: false,
+        success: false,
+      },
+      messages: {
+        success: "Memo added successfully!",
+        error: "Something went wrong!",
+        successDescription: "The blog 'ABC' has been approved successfully.",
+        errorDescription:
+          "An error occured while approve blog, please try again later.",
+        inprogress: "Approve blog, please wait...",
       },
     },
   ];
@@ -279,6 +302,7 @@ const Blogs = (props: any): JSX.Element => {
   };
 
   /* State creation */
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [isfilter, setIsfilter] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<string>(CONFIG.BlogsTab[0]);
@@ -479,11 +503,11 @@ const Blogs = (props: any): JSX.Element => {
     setArrTags([]);
     setCurBlogData(null);
     setSelectedTab(curTab);
-    setIsLoading(false);
     setSelData({ ...blogDetail });
     setArrHyperLinkData([...masterHyperLink]);
     setIsView(false);
     setIsCreate(false);
+    setIsLoading(false);
   };
 
   const handleLinkSubmit = async (i: number): Promise<void> => {
@@ -592,7 +616,12 @@ const Blogs = (props: any): JSX.Element => {
 
     setFormData(updatedFormData);
     if (!hasErrors) {
-      setIsLoading(true);
+      if (Status !== CONFIG.blogStatus.Pending) {
+        setIsView(false);
+        setIsCreate(false);
+      } else {
+        setIsLoading(true);
+      }
       const data: any = {};
       const fileData: any = {};
       const docFileData: any = {};
@@ -635,6 +664,9 @@ const Blogs = (props: any): JSX.Element => {
           Number(curBlogData?.ID),
           { ...data },
           true,
+          Status,
+          setPopupController,
+          4,
           fileData,
           addingFiles,
           removedFiles,
@@ -669,7 +701,9 @@ const Blogs = (props: any): JSX.Element => {
           ];
         }
 
-        await filterTabDatas(selectedTab);
+        if (Status !== CONFIG.blogStatus.Pending) {
+          await filterTabDatas(selectedTab);
+        }
       } else {
         // Attachments json prepared
         fileData[column.Attachments] = formData?.Attachments?.value || null;
@@ -681,10 +715,15 @@ const Blogs = (props: any): JSX.Element => {
           data,
           fileData,
           docFileData.Content,
-          curUserDetail
+          curUserDetail,
+          Status,
+          setPopupController,
+          4
         ).then(async (res: IBlogColumnType[]) => {
           masterBlog = [...res, ...masterBlog];
-          await filterTabDatas(selectedTab);
+          if (Status !== CONFIG.blogStatus.Pending) {
+            await filterTabDatas(selectedTab);
+          }
         });
       }
     } else {
@@ -738,7 +777,10 @@ const Blogs = (props: any): JSX.Element => {
       {
         LikedUsers: JSON.stringify(tempLikeUser),
       },
-      false
+      false,
+      "",
+      setPopupController,
+      4
     );
     masterBlog[Idx].LikedUsers = [...tempLikeUser];
 
@@ -817,7 +859,10 @@ const Blogs = (props: any): JSX.Element => {
       {
         ViewedUsers: JSON.stringify(tempView),
       },
-      false
+      false,
+      "",
+      setPopupController,
+      4
     );
 
     await handleEdit({ ...masterBlog[Idx] }, Id, "view");
@@ -842,7 +887,10 @@ const Blogs = (props: any): JSX.Element => {
       {
         CommentedUsers: JSON.stringify(tempComment),
       },
-      false
+      false,
+      "",
+      setPopupController,
+      4
     );
 
     setCurBlogData({ ...masterBlog[Idx] });
@@ -1075,7 +1123,10 @@ const Blogs = (props: any): JSX.Element => {
             {
               Status: CONFIG.blogStatus.Rejected,
             },
-            true
+            true,
+            "",
+            setPopupController,
+            4
           );
           masterBlog[Number(selData?.Idx)].Status = CONFIG.blogStatus.Rejected;
           await filterTabDatas(selectedTab);
@@ -1100,7 +1151,10 @@ const Blogs = (props: any): JSX.Element => {
               Status: CONFIG.blogStatus.Approved,
               ApprovalOn: new Date(),
             },
-            true
+            true,
+            "",
+            setPopupController,
+            4
           );
           masterBlog[Number(selData?.Idx)].Status = CONFIG.blogStatus.Approved;
           masterBlog[Number(selData?.Idx)].ApprovalOn = Number(
@@ -1556,6 +1610,24 @@ const Blogs = (props: any): JSX.Element => {
                     />
                   </div>
                 </div>
+
+                <div className={styles.ismobile}>
+                  <DefaultButton
+                    onlyIcon
+                    btnType="primaryGreen"
+                    text={<Add />}
+                    onClick={(_) => {
+                      resetFormData(hyperForm, setHyperForm);
+                      setHyperForm({ ...initialHyperFormData });
+                      togglePopupVisibility(
+                        setPopupController,
+                        initialPopupController[2],
+                        2,
+                        "open"
+                      );
+                    }}
+                  />
+                </div>
               </>
             ) : (
               <>
@@ -1647,7 +1719,7 @@ const Blogs = (props: any): JSX.Element => {
                   <DefaultButton
                     onlyIcon
                     btnType="primaryGreen"
-                    startIcon={<Add />}
+                    text={<Add />}
                     onClick={(_) => {
                       setIsCreate(true);
                     }}
@@ -1689,18 +1761,18 @@ const Blogs = (props: any): JSX.Element => {
                               }}
                             >
                               <Edit
+                                className={styles.btn}
                                 style={{
                                   color: "#adadad",
                                   cursor: "pointer",
-                                  fontSize: "22px",
                                 }}
                                 onClick={() => handleSelect({ ...val })}
                               />
                               <Delete
+                                className={styles.btn}
                                 style={{
                                   color: "#ff0000",
                                   cursor: "pointer",
-                                  fontSize: "22px",
                                 }}
                                 onClick={async () => {
                                   await deleteHyperLinkData(
@@ -1821,7 +1893,10 @@ const Blogs = (props: any): JSX.Element => {
                             <span className={styles.tagsWrap}>
                               {val?.Tag?.split(",")?.map(
                                 (tag: string, Idx: number) => {
-                                  if (Idx <= 1) {
+                                  if (
+                                    (isMobile && Idx === 0) ||
+                                    (!isMobile && Idx <= 1)
+                                  ) {
                                     return (
                                       <Chip
                                         key={Idx}
@@ -1832,18 +1907,32 @@ const Blogs = (props: any): JSX.Element => {
                                   }
                                 }
                               ) || ""}
-                              {val?.Tag?.split(",")?.length > 2 && (
+
+                              {val?.Tag?.split(",")?.length > 1 && isMobile && (
                                 <div title={val?.Tag?.split(",")?.join(", ")}>
                                   <Chip
                                     key={"missing units"}
                                     className={styles.mainChip}
                                     label={`+${
-                                      val?.Tag?.split(",").length - 2
-                                    } more`}
+                                      val?.Tag?.split(",").length - 1
+                                    } `}
                                     clickable={false}
                                   />
                                 </div>
                               )}
+                              {val?.Tag?.split(",")?.length > 2 &&
+                                !isMobile && (
+                                  <div title={val?.Tag?.split(",")?.join(", ")}>
+                                    <Chip
+                                      key={"missing units"}
+                                      className={styles.mainChip}
+                                      label={`+${
+                                        val?.Tag?.split(",").length - 2
+                                      } more`}
+                                      clickable={false}
+                                    />
+                                  </div>
+                                )}
                             </span>
                             <div
                               className={styles.icons}
@@ -1876,7 +1965,10 @@ const Blogs = (props: any): JSX.Element => {
                                       {
                                         IsActive: data?.value,
                                       },
-                                      false
+                                      false,
+                                      "",
+                                      setPopupController,
+                                      4
                                     );
                                     masterBlog[curIndex].IsActive = data?.value;
                                     await filterTabDatas(selectedTab);
@@ -2076,7 +2168,7 @@ const Blogs = (props: any): JSX.Element => {
               )}
 
               {/* mobilefilter */}
-              <div className={styles.filtericon}>
+              {/* <div className={styles.filtericon}>
                 <i
                   className="pi pi-filter"
                   onClick={() => {
@@ -2194,7 +2286,7 @@ const Blogs = (props: any): JSX.Element => {
                     />
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Pagination section */}
               {selTabBlogs.length ? (
@@ -2466,6 +2558,181 @@ const Blogs = (props: any): JSX.Element => {
         </>
       )}
 
+      <div className={styles.filtericon}>
+        <i
+          className="pi pi-filter"
+          onClick={() => {
+            setIsfilter(!isfilter);
+          }}
+        />
+      </div>
+
+      <div
+        className={`${styles.filter_container} ${
+          isfilter ? styles.active_filter_container : ""
+        }`}
+      >
+        {curMasterTab === CONFIG.LessonTabs[0] ||
+        curMasterTab === CONFIG.PoliciesTabs[0] ? (
+          <div
+            style={{
+              display: "flex ",
+              flexDirection: "column",
+              gap: "10px",
+              margin: "10px",
+            }}
+          >
+            <div>
+              <CustomInput
+                noErrorMsg
+                secWidth="180px"
+                size="SM"
+                value={linkSearch}
+                placeholder="Search"
+                onChange={(e: any) => {
+                  const value: string = e.trimStart();
+                  setLinkSearch(value);
+                  // searchForLink(value);
+                }}
+              />
+            </div>
+
+            <div>
+              <DefaultButton
+                text="Apply"
+                size="small"
+                fullWidth
+                btnType="primaryGreen"
+                onClick={(_) => {
+                  searchForLink(linkSearch);
+
+                  setIsfilter(!isfilter);
+                }}
+              />
+            </div>
+            <div>
+              <DefaultButton
+                text="Clear"
+                size="small"
+                fullWidth
+                btnType="darkGreyVariant"
+                onClick={(_) => {
+                  setIsfilter(!isfilter);
+                  setLinkSearch("");
+
+                  searchForLink("");
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              margin: "10px",
+            }}
+          >
+            <div
+              style={{
+                display: isAdmin ? "flex" : "none",
+              }}
+            >
+              <CustomDropDown
+                noErrorMsg
+                floatingLabel={false}
+                width="180px"
+                size="SM"
+                options={[...CONFIG.blogDrop]}
+                value={comSearch.Status}
+                placeholder="All"
+                onChange={(e: any) => {
+                  const value: any = e;
+                  searchField.Status = value;
+                  setComSearch((prev: IPageSearchFields) => ({
+                    ...prev,
+                    Status: value,
+                  }));
+                }}
+              />
+            </div>
+            <div>
+              <CustomInput
+                noErrorMsg
+                secWidth="180px"
+                size="SM"
+                value={comSearch.Search}
+                placeholder="Search"
+                onChange={(e: any) => {
+                  const value: string = e.trimStart();
+                  searchField.Search = value;
+                  setComSearch((prev: IPageSearchFields) => ({
+                    ...prev,
+                    Search: value,
+                  }));
+                  // handleSearch();
+                }}
+              />
+            </div>
+            <div>
+              <CustomDateInput
+                label="Select Date"
+                size="SM"
+                minWidth="180px"
+                maxWidth="180px"
+                value={comSearch?.Date}
+                onChange={(e: any) => {
+                  const value: any = e;
+                  searchField.Date = value;
+                  setComSearch((prev: IPageSearchFields) => ({
+                    ...prev,
+                    Date: value,
+                  }));
+                  // handleSearch();
+                }}
+              />
+            </div>
+
+            <div>
+              <DefaultButton
+                text="Apply"
+                size="small"
+                fullWidth
+                btnType="primaryGreen"
+                onClick={(_) => {
+                  // handleSearch([...shownewsData]);
+
+                  // handleSearch(strSearch, [...filDocDatas]);
+                  handleSearch();
+
+                  setIsfilter(!isfilter);
+                }}
+              />
+            </div>
+            <div>
+              <DefaultButton
+                text="Clear"
+                size="small"
+                fullWidth
+                btnType="darkGreyVariant"
+                onClick={(_) => {
+                  setIsfilter(!isfilter);
+                  searchField.Search = "";
+                  searchField.Status = "";
+                  searchField.Date = null;
+                  setComSearch({ ...searchField });
+                  handleSearch();
+
+                  // setStrSearch("");
+                  // handleSearch("", [...filDocDatas]);
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Toast message section */}
       <ToastContainer
         position="top-center"
@@ -2495,11 +2762,12 @@ const Blogs = (props: any): JSX.Element => {
             resetFormData(initialFormData, setFormData);
             togglePopupVisibility(
               setPopupController,
-              initialPopupController[0],
+              initialPopupController[index],
               index,
               "close"
             );
             if (popupData?.isLoading?.success) {
+              setIsLoading(true);
               filterTabDatas(selectedTab);
             }
           }}
