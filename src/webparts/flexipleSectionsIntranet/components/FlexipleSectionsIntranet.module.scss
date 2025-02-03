@@ -1,6 +1,9 @@
 .flexibleSection {
-  width: 100%;
+  // width: 100%;
   margin: 20px;
+  @media(max-width:400px){
+    margin: 0;
+  }
 
   .icon {
     display: flex;

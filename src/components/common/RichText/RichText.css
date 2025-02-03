@@ -53,3 +53,15 @@ em {
 .ql-remove {
   display: none !important;
 }
+ @media(max-width:600px){
+
+  .ql-toolbar.ql-snow{
+    overflow-x: auto;
+overflow-y: hidden ;
+  }
+  .ql-toolbar.ql-snow .ql-formats{
+    display: flex;
+align-items:center;
+
+  }
+ }
