@@ -1,4 +1,6 @@
 /* eslint-disable no-debugger */
+/* eslint-disable prefer-const */
+/* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { CONFIG } from "../../config/config";
@@ -612,9 +614,31 @@ export const addBlogData = async (
   data: any,
   fileData: any,
   arrMasterFiles: any,
-  curUser: ICurUserData
+  curUser: ICurUserData,
+  Status: string,
+  setLoaderState: any,
+  index: number
 ): Promise<IBlogColumnType[]> => {
-  const toastId = toast.loading("Creating a new memo...");
+  let toastId: any;
+
+  if (Status !== CONFIG.blogStatus.Pending) {
+    toastId = toast.loading("Creating a new memo...");
+  } else {
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        open: true,
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: true,
+          error: false,
+          success: false,
+        },
+      };
+      return updatedState;
+    });
+  }
 
   try {
     let fileRes: any;
@@ -688,27 +712,73 @@ export const addBlogData = async (
       },
     ];
 
-    toast.update(toastId, {
-      render: "Memo added successfully!",
-      type: "success",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    if (Status !== CONFIG.blogStatus.Pending) {
+      toast.update(toastId, {
+        render: "Memo added successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
 
-    return [...resData];
+      return [...resData];
+    } else {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: true,
+            error: false,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            successDescription:
+              "Thank you for contributing. Your post will be reviewed by an administrator shortly. Once approved, it will be live on the intranet.",
+          },
+        };
+        return updatedState;
+      });
+
+      return [...resData];
+    }
   } catch (err) {
     console.log("err: ", err);
 
-    toast.update(toastId, {
-      render: "Error adding the new memo. Please try again.",
-      type: "error",
-      isLoading: false,
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
+    if (Status !== CONFIG.blogStatus.Pending) {
+      toast.update(toastId, {
+        render: "Error adding the new memo. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        hideProgressBar: false,
+      });
 
-    return [];
+      return [];
+    } else {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: false,
+            error: true,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            errorDescription:
+              "An error occurred while assigning the leader. Please try again.",
+          },
+        };
+        return updatedState;
+      });
+
+      return [];
+    }
   }
 };
 
@@ -716,6 +786,9 @@ export const updateBlogData = async (
   Id: number,
   data: any,
   isToast: boolean,
+  Status: string,
+  setLoaderState: any,
+  index: number,
   fileData?: any,
   docFileAddData?: any[],
   docFileRemoveData?: any[],
@@ -723,8 +796,23 @@ export const updateBlogData = async (
 ): Promise<void> => {
   let toastId: ReactText = "";
 
-  if (isToast) {
+  if (isToast && Status !== CONFIG.blogStatus.Pending) {
     toastId = toast.loading("Memo update in progress...");
+  } else if (isToast) {
+    setLoaderState((prevState: any) => {
+      const updatedState = [...prevState];
+      updatedState[index] = {
+        ...updatedState[index],
+        open: true,
+        popupWidth: "450px",
+        isLoading: {
+          inprogress: true,
+          error: false,
+          success: false,
+        },
+      };
+      return updatedState;
+    });
   }
 
   try {
@@ -775,7 +863,7 @@ export const updateBlogData = async (
       }
     }
 
-    isToast &&
+    if (isToast && Status !== CONFIG.blogStatus.Pending) {
       toast.update(toastId, {
         render:
           data?.Status === CONFIG.blogStatus.Approved
@@ -788,10 +876,30 @@ export const updateBlogData = async (
         autoClose: 5000,
         hideProgressBar: false,
       });
+    } else if (isToast) {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: true,
+            error: false,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            successDescription:
+              "Thank you for contributing. Your post will be reviewed by an administrator shortly. Once approved, it will be live on the intranet.",
+          },
+        };
+        return updatedState;
+      });
+    }
   } catch (err) {
     console.log("err: ", err);
 
-    isToast &&
+    if (isToast && Status !== CONFIG.blogStatus.Pending) {
       toast.update(toastId, {
         render: "Error updating the memo. Please try again.",
         type: "error",
@@ -799,6 +907,26 @@ export const updateBlogData = async (
         autoClose: 5000,
         hideProgressBar: false,
       });
+    } else if (isToast) {
+      setLoaderState((prevState: any) => {
+        const updatedState = [...prevState];
+        updatedState[index] = {
+          ...updatedState[index],
+          popupWidth: "450px",
+          isLoading: {
+            inprogress: false,
+            success: false,
+            error: true,
+          },
+          messages: {
+            ...updatedState[index].messages,
+            errorDescription:
+              "An error occurred while assigning the leader. Please try again.",
+          },
+        };
+        return updatedState;
+      });
+    }
   }
 };
 

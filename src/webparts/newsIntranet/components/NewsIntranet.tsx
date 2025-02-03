@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-debugger */
 import { useEffect, useState } from "react";
 import SectionHeaderIntranet from "../../../components/common/SectionHeaderIntranet/SectionHeaderIntranet";
 import resetPopupController, {
@@ -86,7 +87,7 @@ const NewsIntranet = (props: any): JSX.Element => {
     },
   ];
 
-  const [popupController, setPopupController] = useState(
+  const [popupController, setPopupController] = useState<any[]>(
     initialPopupController
   );
   const [formData, setFormData] = useState<any>({
@@ -183,14 +184,16 @@ const NewsIntranet = (props: any): JSX.Element => {
     setFormData(updatedFormData);
     if (!hasErrors) {
       resetFormData(formData, setFormData);
-      togglePopupVisibility(
-        setPopupController,
-        initialPopupController[0],
-        0,
-        "close"
-      );
+      if (status !== "Pending") {
+        togglePopupVisibility(
+          setPopupController,
+          initialPopupController[0],
+          0,
+          "close"
+        );
+      }
 
-      await addNews(formData, status);
+      await addNews(formData, setPopupController, 0, status);
       await getAllNewsData(dispatch);
     } else {
       console.log("Form contains errors");
@@ -301,10 +304,7 @@ const NewsIntranet = (props: any): JSX.Element => {
               context={props.context}
               // selectedFile={formData.Attachments.value}
               onSave={(fileData) => {
-                console.log("fileData: ", fileData);
-
                 const value: any = fileData?.file;
-                debugger;
 
                 const { isValid, errorMsg } = validateField(
                   "thumbnail",
