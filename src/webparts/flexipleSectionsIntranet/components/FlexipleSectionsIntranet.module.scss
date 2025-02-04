@@ -1,9 +1,9 @@
 .flexibleSection {
-  // width: 100%;
+  width: 100%;
   margin: 20px;
-  @media(max-width:400px){
-    margin: 0;
-  }
+  // @media(max-width:400px){
+  //   margin: 0;
+  // }
 
   .icon {
     display: flex;
@@ -48,6 +48,13 @@
     gap: 40px;
     > div {
       width: calc(50% - 40px);
+
+      @media(max-width:768px){
+        width: 100%;
+      }
+    }
+    @media(max-width:768px){
+      gap: 20px;
     }
   }
 
@@ -85,6 +92,7 @@
 
 @media (max-width: 768px) {
   .flexibleSection {
+    width: unset ;
     .icon {
       width: 100% !important;
 
@@ -99,7 +107,7 @@
       gap: 10px;
 
       > div {
-        width: 100% !important; // Set to full width for proper alignment
+        width: 100% !important; 
       }
     }
   }
