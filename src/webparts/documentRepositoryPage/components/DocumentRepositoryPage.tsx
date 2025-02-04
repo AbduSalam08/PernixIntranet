@@ -936,7 +936,7 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                     btnType="primaryGreen"
                     onlyIcon
                     title="File upload"
-                    startIcon={<Upload />}
+                    text={<Upload />}
                     onClick={(_) => {
                       resetFormData({ ...initialFileData }, setFormData);
                       togglePopupVisibility(
@@ -959,7 +959,7 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                   title="Create a folder"
                   btnType="primaryGreen"
                   onlyIcon
-                  startIcon={<Add />}
+                  text={<Add />}
                   onClick={(_) => {
                     resetFormData({ ...initialFormData }, setFormData);
                     togglePopupVisibility(
@@ -1154,6 +1154,7 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                             {isAdmin && (
                               <>
                                 <IconButton
+                                style={{display:(!val?.Content?.isSubFiles || val?.Content?.fileType === "master_folder") && isAdmin? "flex":"none"}}
                                   aria-label="more options"
                                   aria-controls={
                                     open ? "folder-action-menu" : undefined
@@ -1279,8 +1280,8 @@ const DocumentRepositoryPage = (props: any): JSX.Element => {
                                       <DeleteIcon
                                         className={styles.deleteIcon}
                                         sx={{
-                                          fontSize: "24px", // Change font size
-                                          color: "red", // Change color
+                                          fontSize: "24px", 
+                                          color: "red", 
                                         }}
                                       />
                                     </MenuItem>

@@ -299,6 +299,11 @@ const NewHiresPage = (props: any): JSX.Element => {
       });
     }
     setTypeNewHires([...filteredData]);
+    searchField.Search = "";
+    searchField.Status = "";
+    searchField.Date = null;
+    setCommonSearch({ ...searchField });
+    // handleSearch([...typeNewHires]);
     handleSearch([...filteredData]);
     setIsLoading(false);
     setSelectedTab(curTab);
