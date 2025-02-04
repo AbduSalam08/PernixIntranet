@@ -1,6 +1,6 @@
 .wrapper {
   background-color: #f0f0f0;
-  padding: 20px 0;
+  padding: 20px ;
 }
 .richtextwrapper {
   width: 100%;
@@ -15,7 +15,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px;
+  margin: 20px ;
   .leftSection {
     display: flex;
     align-items: center;
@@ -88,7 +88,7 @@
 }
 .newsContainer {
   height: calc(100vh - 300px);
-  margin: 20px 0px;
+  margin: 20px ;
   // padding: 20px;
   border-radius: 6px;
   // background-color: #fff;
@@ -121,6 +121,9 @@
   @media (max-width: 600px) { 
       grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+  }
+  @media(max-width:600px){
+    margin: 20px 0px;
   }
 }
 /* Define the grid container */
