@@ -294,7 +294,9 @@ const ShoutOutsIntranet = ({ props }: any): JSX.Element => {
           />
         </div>
 
-        <p className={styles.message}>{val.message}</p>
+        <p className={styles.message} title={val.message}>
+          {val.message}
+        </p>
       </div>
     );
   };
