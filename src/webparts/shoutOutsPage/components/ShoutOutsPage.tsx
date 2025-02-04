@@ -75,6 +75,7 @@ const ShoutOutsPage = (props: any): JSX.Element => {
 
   const [shoutOutsData, setShoutOutsData] = useState<any[]>([]);
   const [showShoutOutsData, setShowShoutOutsData] = useState<any[]>([]);
+  console.log("showShoutOutsData: ", showShoutOutsData);
   const [currentUserData, setCurrentUserData] = useState<any>({});
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -308,7 +309,10 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                 formData?.SendTowards?.value?.name
                   ? formData?.SendTowards?.value?.name
                   : formData?.SendTowards?.value
-                  ? formData?.SendTowards?.value
+                  ? showShoutOutsData?.filter(
+                      (val: any) =>
+                        val?.receiverImage === formData?.SendTowards?.value
+                    )?.[0]?.receiverName ?? ""
                   : ""
               }!`,
             },
@@ -319,7 +323,10 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                 formData?.SendTowards?.value?.name
                   ? formData?.SendTowards?.value?.name
                   : formData?.SendTowards?.value
-                  ? formData?.SendTowards?.value
+                  ? showShoutOutsData?.filter(
+                      (val: any) =>
+                        val?.receiverImage === formData?.SendTowards?.value
+                    )?.[0]?.receiverName ?? ""
                   : ""
               } for outstanding effort!`,
             },
@@ -329,7 +336,10 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                 formData?.SendTowards?.value?.name
                   ? formData?.SendTowards?.value?.name
                   : formData?.SendTowards?.value
-                  ? formData?.SendTowards?.value
+                  ? showShoutOutsData?.filter(
+                      (val: any) =>
+                        val?.receiverImage === formData?.SendTowards?.value
+                    )?.[0]?.receiverName ?? ""
                   : ""
               }!`,
             },
@@ -698,7 +708,9 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                         />
                       </div>
 
-                      <p className={styles.message}>{val.message}</p>
+                      <p className={styles.message} title={val?.message || ""}>
+                        {val.message}
+                      </p>
                     </div>
                   </div>
                   <div className={styles.cardFooter}>
@@ -726,7 +738,8 @@ const ShoutOutsPage = (props: any): JSX.Element => {
                                 SendTowards: {
                                   ...formData.SendTowards,
                                   isValid: true,
-                                  value: val.receiverName || {},
+                                  value: val?.receiverImage || {},
+                                  // value: val.receiverName || {},
                                 },
                                 Description: {
                                   ...formData.Description,
@@ -869,7 +882,6 @@ const ShoutOutsPage = (props: any): JSX.Element => {
               btnType="darkGreyVariant"
               onClick={(_) => {
                 setIsfilter(!isfilter);
-
                 searchField.Search = "";
                 searchField.Status = "";
                 searchField.Date = null;

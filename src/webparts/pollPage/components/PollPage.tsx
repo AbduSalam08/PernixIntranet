@@ -154,7 +154,7 @@ const PollPage = (props: any): JSX.Element => {
       value: "",
       Id: null,
       isValid: true,
-      errorMsg: "Invalid title",
+      errorMsg: "Invalid question",
       validationRule: { required: true, type: "string" },
     },
     StartDate: {
@@ -180,7 +180,7 @@ const PollPage = (props: any): JSX.Element => {
       value: "",
       Percentage: 0,
       isValid: true,
-      errorMsg: "Invalid title",
+      errorMsg: "Invalid option",
       validationRule: { required: true, type: "string" },
     },
   ]);
@@ -232,7 +232,7 @@ const PollPage = (props: any): JSX.Element => {
     const updatedFormData = Object.keys(formData).reduce((acc, key) => {
       const fieldData = formData[key];
       const { isValid, errorMsg } = validateField(
-        key,
+        key === "Title" ? "Question" : key === "EndDate" ? "End date" : key,
         fieldData.value,
         fieldData?.validationRule
       );
@@ -253,7 +253,7 @@ const PollPage = (props: any): JSX.Element => {
 
     const updatedOptions = options.map((option: any) => {
       const { isValid, errorMsg } = validateField(
-        "Title", // Assuming 'Title' is the field being validated for options
+        "Option", // Assuming 'Title' is the field being validated for options
         option.Title,
         option.validationRule
       );
@@ -375,7 +375,7 @@ const PollPage = (props: any): JSX.Element => {
             onChange={(e) => {
               const value = e.trimStart();
               const { isValid, errorMsg } = validateField(
-                "Title",
+                "Option",
                 value,
                 option.validationRule
               );
@@ -397,7 +397,7 @@ const PollPage = (props: any): JSX.Element => {
                 size="medium"
                 onClick={() => {
                   const { isValid, errorMsg } = validateField(
-                    "Title",
+                    "Option",
                     option.Title,
                     option.validationRule
                   );
@@ -472,7 +472,7 @@ const PollPage = (props: any): JSX.Element => {
           onChange={(e) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
-              "Title",
+              "Question",
               value,
               formData.Title.validationRule
             );
@@ -527,7 +527,7 @@ const PollPage = (props: any): JSX.Element => {
             error={!formData.EndDate.isValid}
             errorMsg={formData.EndDate.errorMsg}
             onChange={(date: any) => {
-              const { isValid, errorMsg } = validateField("EndDate", date, {
+              const { isValid, errorMsg } = validateField("End date", date, {
                 required: true,
                 type: "date",
               });
@@ -553,7 +553,7 @@ const PollPage = (props: any): JSX.Element => {
           onChange={(e) => {
             const value = e.trimStart();
             const { isValid, errorMsg } = validateField(
-              "Title",
+              "Question",
               value,
               formData.Title.validationRule
             );
@@ -607,7 +607,7 @@ const PollPage = (props: any): JSX.Element => {
             error={!formData.EndDate.isValid}
             errorMsg={formData.EndDate.errorMsg}
             onChange={(date: any) => {
-              const { isValid, errorMsg } = validateField("EndDate", date, {
+              const { isValid, errorMsg } = validateField("End date", date, {
                 required: true,
                 type: "date",
               });

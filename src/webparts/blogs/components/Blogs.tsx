@@ -553,7 +553,8 @@ const Blogs = (props: any): JSX.Element => {
         i,
         "close"
       );
-      resetFormData(initialHyperFormData, setHyperForm);
+      resetFormData(hyperForm, setHyperForm);
+      setHyperForm(initialHyperFormData);
       if (data.ID) {
         await updateHyperLinkData({ ...data }).then(() => {
           const Idx: number = masterHyperLink?.findIndex(
@@ -1173,6 +1174,9 @@ const Blogs = (props: any): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: async () => {
+          resetFormData(hyperForm, setHyperForm);
+          setHyperForm({ ...initialHyperFormData });
+          setCurObject({ ...CONFIG.HyperLinkData });
           togglePopupVisibility(
             setPopupController,
             initialPopupController[2],
@@ -1201,6 +1205,9 @@ const Blogs = (props: any): JSX.Element => {
         startIcon: false,
         size: "large",
         onClick: async () => {
+          resetFormData(hyperForm, setHyperForm);
+          setHyperForm({ ...initialHyperFormData });
+          setCurObject({ ...CONFIG.HyperLinkData });
           togglePopupVisibility(
             setPopupController,
             initialPopupController[3],
@@ -1600,6 +1607,7 @@ const Blogs = (props: any): JSX.Element => {
                       onClick={(_) => {
                         resetFormData(hyperForm, setHyperForm);
                         setHyperForm({ ...initialHyperFormData });
+                        setCurObject({ ...CONFIG.HyperLinkData });
                         togglePopupVisibility(
                           setPopupController,
                           initialPopupController[2],

@@ -845,15 +845,11 @@ const NewHiresPage = (props: any): JSX.Element => {
                       }}
                       className="pi pi-pen-to-square"
                       onClick={() => {
-                        setHandleForm({
-                          ID: val?.ID,
-                          type: "Update",
-                        });
-                        setAttachmentObject(val?.Attachment);
                         setFormData({
                           EmployeeName: {
                             ...initialFormData.EmployeeName,
-                            value: val?.EmployeeName?.name,
+                            value: val?.EmployeeName?.email,
+                            // value: val?.EmployeeName?.name,
                           },
                           StartDate: {
                             ...initialFormData.StartDate,
@@ -874,6 +870,11 @@ const NewHiresPage = (props: any): JSX.Element => {
                             },
                           },
                         });
+                        setHandleForm({
+                          ID: val?.ID,
+                          type: "Update",
+                        });
+                        setAttachmentObject(val?.Attachment);
                         togglePopupVisibility(
                           setPopupController,
                           initialPopupController[0],

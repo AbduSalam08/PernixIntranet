@@ -1317,7 +1317,8 @@ const QuestionsCeoPage = (props: any): JSX.Element => {
                               assignTo: {
                                 ...formData.assignTo,
                                 isValid: true,
-                                value: val?.assignTo?.name || "",
+                                value: val?.assignTo?.email || "",
+                                // value: val?.assignTo?.name || "",
                                 previousAssignTo: val?.assignTo,
                                 ID: val?.ID,
                               },
