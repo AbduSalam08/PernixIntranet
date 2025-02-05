@@ -624,6 +624,7 @@ const MainBannerPage = (props: any): JSX.Element => {
           </div>
           <div className={styles.item}>
             <CustomDropDown
+            width={"100%"}
               value={formData.Status.value}
               options={statusDrop || []}
               placeholder="Status"
@@ -796,6 +797,8 @@ const MainBannerPage = (props: any): JSX.Element => {
           </div>
           <div className={styles.item}>
             <CustomDropDown
+                        width={"100%"}
+
               value={formData.Status.value}
               options={statusDrop || []}
               placeholder="Status"
@@ -1086,6 +1089,8 @@ const MainBannerPage = (props: any): JSX.Element => {
               >
                 <CustomDropDown
                   noErrorMsg
+                  width={"100%"}
+
                   size="SM"
                   floatingLabel={false}
                   value={commonSearch?.Status}
