@@ -263,7 +263,7 @@ const NewsPage = (props: any): JSX.Element => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [pagination, setPagination] = useState<IPaginationData>(
-    CONFIG.PaginationData
+    CONFIG.BlogAndNewsPaginationData
   );
   const [isfile, setIsile] = useState<boolean>(false);
   const [isDelete, setisDelete] = useState<boolean>(false);
@@ -349,8 +349,8 @@ const NewsPage = (props: any): JSX.Element => {
   // pagination pange change
   const onPageChange = (event: any): void => {
     setPagination({
-      first: event?.first || CONFIG.PaginationData.first,
-      rows: event?.rows || CONFIG.PaginationData.rows,
+      first: event?.first || CONFIG.BlogAndNewsPaginationData.first,
+      rows: event?.rows || CONFIG.BlogAndNewsPaginationData.rows,
     });
   };
 

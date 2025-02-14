@@ -13,3 +13,19 @@
   .p-checkbox-box {
   box-shadow: none !important;
 }
+
+.Shoutout .p-carousel {
+  height: 100%;
+}
+
+.Shoutout .p-carousel-content {
+  height: 100%;
+}
+
+.Shoutout .p-carousel-container {
+  height: 100%;
+}
+
+.Shoutout .p-carousel-items-content {
+  padding: 0 !important;
+}

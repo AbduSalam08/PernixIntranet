@@ -149,6 +149,11 @@ export namespace CONFIG {
     rows: 8,
   };
 
+  export const BlogAndNewsPaginationData: IPaginationData = {
+    first: 0,
+    rows: 9,
+  };
+
   export const birthdayPaginationData: IPaginationData = {
     first: 0,
     rows: 16,
