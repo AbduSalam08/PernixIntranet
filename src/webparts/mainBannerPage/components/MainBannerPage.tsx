@@ -1089,8 +1089,7 @@ const MainBannerPage = (props: any): JSX.Element => {
               >
                 <CustomDropDown
                   noErrorMsg
-                  width={"100%"}
-
+                  // width={"100%"}
                   size="SM"
                   floatingLabel={false}
                   value={commonSearch?.Status}

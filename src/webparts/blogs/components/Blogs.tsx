@@ -313,7 +313,7 @@ const Blogs = (props: any): JSX.Element => {
   });
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [pagination, setPagination] = useState<IPaginationData>(
-    CONFIG.PaginationData
+    CONFIG.BlogAndNewsPaginationData
   );
   const [formData, setFormData] = useState<IBlogField | any>({
     ...initialFormData,
@@ -396,8 +396,8 @@ const Blogs = (props: any): JSX.Element => {
     event: PaginatorPageChangeEvent | any
   ): Promise<void> => {
     setPagination({
-      first: event?.first || CONFIG.PaginationData.first,
-      rows: event?.rows || CONFIG.PaginationData.rows,
+      first: event?.first || CONFIG.BlogAndNewsPaginationData.first,
+      rows: event?.rows || CONFIG.BlogAndNewsPaginationData.rows,
     });
     setIsLoading(false);
   };
@@ -1827,7 +1827,7 @@ const Blogs = (props: any): JSX.Element => {
                       }}
                       onClick={(_) => {
                         setIsLoading(true);
-                        setPagination({ ...CONFIG.PaginationData });
+                        setPagination({ ...CONFIG.BlogAndNewsPaginationData });
                         filterTabDatas(str);
                       }}
                     >
@@ -1843,7 +1843,7 @@ const Blogs = (props: any): JSX.Element => {
                         }}
                         onClick={(_) => {
                           setIsLoading(true);
-                          setPagination({ ...CONFIG.PaginationData });
+                          setPagination({ ...CONFIG.BlogAndNewsPaginationData });
                           filterTabDatas(str);
                         }}
                       >
