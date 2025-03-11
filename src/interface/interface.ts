@@ -34,6 +34,7 @@ export interface IListName {
   HelpDesk_TicketLocationConfig: string;
   ProjectTemplate: string;
   Intranet_Hyperlink: string;
+  Intranet_Calendar: string;
 }
 
 export interface ISPGroupName {
@@ -454,6 +455,25 @@ export interface ProjectDetails {
   description: string | null;
   summary: string | null;
 }
+
+/* Calendar interfaces start */
+export interface ICalendarListColumn {
+  ID: string;
+  Title: string;
+  Description: string;
+  Date: string;
+  StartTime: string;
+  EndTime: string;
+}
+
+export interface ICalendarObj {
+  id: number | null;
+  title: string;
+  description: string;
+  start: Date | null;
+  end: Date | null;
+}
+/* Calendar interfaces end */
 
 /* Project template interfaces */
 export interface IProjectDocNames {

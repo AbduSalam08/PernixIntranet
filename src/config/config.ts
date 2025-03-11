@@ -29,6 +29,8 @@ import {
   IBlogType,
   IHyperLinkColumn,
   IHyperLinkData,
+  ICalendarListColumn,
+  ICalendarObj,
 } from "../interface/interface";
 
 export namespace CONFIG {
@@ -76,6 +78,7 @@ export namespace CONFIG {
     HelpDesk_TicketLocationConfig: "HelpDesk_TicketLocationConfig",
     ProjectTemplate: "ProjectTemplate",
     Intranet_Hyperlink: "Intranet_Hyperlink",
+    Intranet_Calendar: "Intranet_Calendar",
   };
 
   export const SPGroupName: ISPGroupName = {
@@ -586,4 +589,23 @@ export namespace CONFIG {
     Skills: "",
     OfficePhone: "",
   };
+
+  /* Calendar config start */
+  export const CalendarListColumn: ICalendarListColumn = {
+    ID: "ID",
+    Title: "Title",
+    Description: "Description",
+    Date: "Date",
+    StartTime: "StartTime",
+    EndTime: "EndTime",
+  };
+
+  export const CalendarObj: ICalendarObj = {
+    id: null,
+    title: "",
+    description: "",
+    start: null,
+    end: null,
+  };
+  /* Calendar config end */
 }

@@ -202,7 +202,6 @@ export const addfilemsg = async (
         autoClose: 5000,
         hideProgressBar: false,
       });
-      debugger;
       setLoaderState((prevState: any) => {
         const updatedState = [...prevState];
         updatedState[index] = {
@@ -452,7 +451,6 @@ export const fetchHyperlinkDatas = async (
       Orderbydecorasc: false,
     });
 
-    console.log("res: ", res);
     const resData: IHyperLinkData[] = await Promise.all(
       res?.map((val: any) => {
         return {
