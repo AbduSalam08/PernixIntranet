@@ -14,10 +14,14 @@ import CustomDateInput from "../../../components/common/CustomInputFields/Custom
 import CustomInput from "../../../components/common/CustomInputFields/CustomInput";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  createOutlookEvent,
-  deleteOutlookEvent,
-  getEvents,
-  updateOutlookEvent,
+  createEvent,
+  deleteEvent,
+  // createOutlookEvent,
+  // deleteOutlookEvent,
+  fetchEvents,
+  updateEvent,
+  // getEvents,
+  // updateOutlookEvent,
 } from "../../../services/calenderIntranet/calenderIntranet";
 import moment from "moment";
 import resetPopupController, {
@@ -285,8 +289,9 @@ const CalendarPage = (props: any): JSX.Element => {
           1,
           "close"
         );
-        await updateOutlookEvent(selectvalue.id, formData);
-        await getEvents(dispatch);
+        await updateEvent(formData, parseInt(selectvalue.id));
+        // await updateOutlookEvent(selectvalue.id, formData);
+        await fetchEvents(dispatch);
       } else {
         resetFormData(formData, setFormData);
         togglePopupVisibility(
@@ -295,8 +300,9 @@ const CalendarPage = (props: any): JSX.Element => {
           0,
           "close"
         );
-        await createOutlookEvent(formData, dispatch);
-        await getEvents(dispatch);
+        await createEvent(formData);
+        // await createOutlookEvent(formData, dispatch);
+        await fetchEvents(dispatch);
       }
     } else {
       console.log("Form contains errors");
@@ -582,7 +588,9 @@ const CalendarPage = (props: any): JSX.Element => {
               2,
               "close"
             );
-            deleteOutlookEvent(selectvalue.id, setPopupController, 2);
+            await deleteEvent(parseInt(selectvalue.id));
+            await fetchEvents(dispatch);
+            // deleteOutlookEvent(selectvalue.id, setPopupController, 2);
           }
         },
       },
@@ -744,7 +752,8 @@ const CalendarPage = (props: any): JSX.Element => {
     const params = new URLSearchParams(urlObj.search);
     isActivityPage = params?.get("Page") === "activity" ? true : false;
 
-    getEvents(dispatch, "viewall");
+    fetchEvents(dispatch);
+    // getEvents(dispatch, "viewall");
     RoleAuth(
       CONFIG.SPGroupName.Pernix_Admin,
       { highPriorityGroups: [CONFIG.SPGroupName.Calendar_Admin] },
@@ -1182,7 +1191,7 @@ const CalendarPage = (props: any): JSX.Element => {
             );
 
             if (popupData?.isLoading?.success) {
-              getEvents(dispatch);
+              fetchEvents(dispatch);
             }
           }}
           popupTitle={

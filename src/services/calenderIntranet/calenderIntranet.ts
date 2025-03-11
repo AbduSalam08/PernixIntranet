@@ -5,6 +5,7 @@ import moment from "moment";
 import { CONFIG } from "../../config/config";
 import SpServices from "../SPServices/SpServices";
 import { toast } from "react-toastify";
+import { ICalendarListColumn, ICalendarObj } from "../../interface/interface";
 
 interface IEvent {
   id: number;
@@ -35,6 +36,7 @@ export const createOutlookEvent = async (
   dispatch: any
 ): Promise<any> => {
   const toastId = toast.loading("Creating a new event...");
+  console.log("formData: ", formData);
 
   try {
     // Combining date and time for start and end
@@ -141,6 +143,7 @@ export const getEvents = async (dispatch: any, isview?: any): Promise<void> => {
       .events.configure({ headers })
       .top(999)();
 
+    console.log("result: ", result);
     const arrDatas: IEvent[] = result.map((val: any) => ({
       id: val?.id || null,
       title: val.subject ? val.subject : "",
@@ -299,5 +302,180 @@ export const deleteOutlookEvent = async (
       status: "error",
       message: "Error while deleting event",
     };
+  }
+};
+
+/* List items add, update, delete and fetch overall functions */
+/* Create the Event function */
+export const createEvent = async (formData: any): Promise<void> => {
+  const toastId = toast.loading("Creating a new event...");
+  console.log("formData: ", formData);
+
+  try {
+    let data: any = {};
+    const column: ICalendarListColumn = CONFIG.CalendarListColumn;
+
+    data[column.Title] = formData?.Title?.value ?? "";
+    data[column.StartTime] = formData?.StartTime?.value ?? "";
+    data[column.EndTime] = formData?.EndTime?.value ?? "";
+    data[column.Description] = formData?.Description?.value ?? "";
+    data[column.Date] = formData?.StartDate?.value ?? null;
+
+    await SpServices.SPAddItem({
+      Listname: CONFIG.ListNames.Intranet_Calendar,
+      RequestJSON: {
+        ...data,
+      },
+    });
+
+    toast.update(toastId, {
+      render: "Event added successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (error) {
+    console.error("Error creating event: ", error);
+
+    toast.update(toastId, {
+      render: "Error event. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+/* Update the Event function */
+export const updateEvent = async (formData: any, id: number): Promise<void> => {
+  const toastId = toast.loading("Updating the event...");
+
+  try {
+    let data: any = {};
+    const column: ICalendarListColumn = CONFIG.CalendarListColumn;
+
+    data[column.Title] = formData?.Title?.value ?? "";
+    data[column.StartTime] = formData?.StartTime?.value ?? "";
+    data[column.EndTime] = formData?.EndTime?.value ?? "";
+    data[column.Description] = formData?.Description?.value ?? "";
+    data[column.Date] = formData?.StartDate?.value ?? null;
+
+    await SpServices.SPUpdateItem({
+      Listname: CONFIG.ListNames.Intranet_Calendar,
+      ID: id,
+      RequestJSON: {
+        ...data,
+      },
+    });
+
+    toast.update(toastId, {
+      render: "Event updated successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (error) {
+    console.error("Error updating event: ", error);
+
+    toast.update(toastId, {
+      render: "Error event. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+/* Delete the Event function */
+export const deleteEvent = async (id: number): Promise<void> => {
+  const toastId = toast.loading("Deleting the event...");
+
+  try {
+    await SpServices.SPDeleteItem({
+      Listname: CONFIG.ListNames.Intranet_Calendar,
+      ID: id,
+    });
+
+    toast.update(toastId, {
+      render: "Event deleted successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  } catch (error) {
+    console.error("Error deleting event: ", error);
+
+    toast.update(toastId, {
+      render: "Error event. Please try again.",
+      type: "error",
+      isLoading: false,
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+  }
+};
+
+/* Fetch the Events function */
+export const fetchEvents = async (dispatch: any): Promise<void> => {
+  try {
+    dispatch?.(
+      setCalenderIntranetData({
+        isLoading: true,
+      })
+    );
+
+    const res: any = await SpServices.SPReadItems({
+      Listname: CONFIG.ListNames.Intranet_Calendar,
+      Topcount: 5000,
+    });
+
+    console.log("res: ", res);
+    const arrDatas: ICalendarObj[] = await Promise.all(
+      res?.map((val: any) => ({
+        id: val?.ID || null,
+        title: val?.Title ?? "",
+        description: val?.Description ?? "",
+        start: val.StartTime
+          ? `${moment(val?.Date).format("YYYY-MM-DD")}T${
+              val.StartTime
+            }:00.0000000`
+          : null,
+        end: val.EndTime
+          ? `${moment(val?.Date).format("YYYY-MM-DD")}T${
+              val.EndTime
+            }:00.0000000`
+          : null,
+      })) || []
+    );
+
+    const filtervalue: ICalendarObj[] = await Promise.all(
+      arrDatas?.sort(
+        (a: ICalendarObj, b: ICalendarObj) =>
+          moment(a?.start).valueOf() - moment(b?.start).valueOf()
+      ) || []
+    );
+    console.log("filtervalue: ", filtervalue);
+
+    dispatch?.(
+      setCalenderIntranetData({
+        isLoading: false,
+        data: filtervalue,
+      })
+    );
+  } catch (err) {
+    console.error("Error fetching events:", err);
+
+    dispatch?.(
+      setCalenderIntranetData({
+        isLoading: false,
+        data: [],
+        error: err.message || "Error fetching events",
+      })
+    );
   }
 };

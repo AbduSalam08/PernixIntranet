@@ -24,8 +24,10 @@ import CustomInput from "../../../components/common/CustomInputFields/CustomInpu
 import CustomDateInput from "../../../components/common/CustomInputFields/CustomDateInput";
 import FloatingLabelTextarea from "../../../components/common/CustomInputFields/CustomTextArea";
 import {
-  createOutlookEvent,
-  getEvents,
+  createEvent,
+  // createOutlookEvent,
+  fetchEvents,
+  // getEvents,
 } from "../../../services/calenderIntranet/calenderIntranet";
 import { useDispatch, useSelector } from "react-redux";
 import CircularSpinner from "../../../components/common/Loaders/CircularSpinner";
@@ -223,8 +225,9 @@ const CalendarIntranet = (props: any): JSX.Element => {
         0,
         "close"
       );
-      await createOutlookEvent(formData, dispatch);
-      await getEvents(dispatch);
+      await createEvent(formData);
+      // await createOutlookEvent(formData, dispatch);
+      await fetchEvents(dispatch);
     } else {
       console.log("Form contains errors");
     }
@@ -455,7 +458,8 @@ const CalendarIntranet = (props: any): JSX.Element => {
 
       dispatch
     );
-    getEvents(dispatch, "");
+    fetchEvents(dispatch);
+    // getEvents(dispatch, "");
 
     // handleResponsiveChange();
 
@@ -658,7 +662,7 @@ const CalendarIntranet = (props: any): JSX.Element => {
               resetFormData(formData, setFormData);
 
               if (popupData?.isLoading?.success) {
-                getEvents(dispatch);
+                fetchEvents(dispatch);
               }
             }}
             popupTitle={
